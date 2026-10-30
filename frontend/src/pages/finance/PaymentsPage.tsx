@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import financeService from '@/services/financeService'
@@ -10,11 +11,11 @@ import { formatCurrency, formatDate } from '@/utils/helpers'
 
 export default function PaymentsPage() {
   const { t, i18n } = useTranslation()
-  const [typeFilter, setTypeFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
-  const [page, setPage] = useState(1)
+  const [typeFilter, setTypeFilter] = usePersistedState('payments:typeFilter', '')
+  const [statusFilter, setStatusFilter] = usePersistedState('payments:statusFilter', '')
+  const [dateFrom, setDateFrom] = usePersistedState('payments:dateFrom', '')
+  const [dateTo, setDateTo] = usePersistedState('payments:dateTo', '')
+  const [page, setPage] = usePersistedState('payments:page', 1)
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['payments', typeFilter, statusFilter, dateFrom, dateTo, page],

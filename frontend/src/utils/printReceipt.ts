@@ -56,6 +56,12 @@ function dt(s?: string | null) {
   try { return new Date(s).toLocaleString() } catch { return s }
 }
 
+function priorityLabel(priority: string | undefined, lang: string) {
+  if (!priority) return '-'
+  if (lang !== 'my') return priority.charAt(0) + priority.slice(1).toLowerCase()
+  return ({ NORMAL: 'ပုံမှန်', HIGH: 'အရေးကြီး', URGENT: 'အရေးပေါ်' } as Record<string, string>)[priority] ?? priority
+}
+
 export function printParcelReceipt(parcel: PrintableParcel, lang: string = 'en') {
   const L = labels(lang)
   const areaName = lang === 'my' && parcel.delivery_area?.name_mm
@@ -69,19 +75,9 @@ export function printParcelReceipt(parcel: PrintableParcel, lang: string = 'en')
     [L.address, parcel.delivery_address],
     [L.area, areaName],
   ]
-  if (parcel.sender_name) rows.push([L.sender, `${parcel.sender_name}${parcel.sender_phone ? ' (' + parcel.sender_phone + ')' : ''}`])
   if (parcel.description) rows.push([L.description, parcel.description])
-  rows.push([L.quantity, String(parcel.quantity ?? 1)])
-  if (parcel.weight) rows.push([L.weight, String(parcel.weight)])
-  if (parcel.condition) rows.push([L.condition, parcel.condition])
-  if (parcel.priority) rows.push([L.priority, parcel.priority])
   rows.push([L.deliveryFee, money(parcel.delivery_fee)])
   if (parcel.is_cod) rows.push([L.cod, money(parcel.cod_amount)])
-  rows.push([L.status, parcel.status])
-  if (parcel.received_at) rows.push([L.receivedAt, dt(parcel.received_at)])
-  if (parcel.received_by?.name) rows.push([L.receivedBy, parcel.received_by.name])
-  if (parcel.notes) rows.push([L.notes, parcel.notes])
-  if (parcel.damage_description) rows.push(['Damage', parcel.damage_description])
 
   const html = `<!DOCTYPE html>
 <html>

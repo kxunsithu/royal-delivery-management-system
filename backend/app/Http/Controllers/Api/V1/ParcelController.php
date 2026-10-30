@@ -22,7 +22,9 @@ class ParcelController extends Controller
 
         $user = $request->user();
 
-        $query = Parcel::with(['deliveryArea', 'receivedBy', 'activeAssignment.staff'])
+        $query = Parcel::with(['deliveryArea', 'receivedBy', 'activeAssignment.staff', 'images' => function ($q) {
+            $q->orderBy('sort_order')->limit(1);
+        }])
             ->when($request->search, fn($q) => $q->where(function ($sq) use ($request) {
                 $term = '%' . strtolower($request->search) . '%';
                 $sq->whereRaw('LOWER(tracking_number) LIKE ?', [$term])
@@ -87,7 +89,7 @@ class ParcelController extends Controller
             $parcel = Parcel::create([
                 ...$validated,
                 'tracking_number' => $validated['tracking_number'] ?? Parcel::generateTrackingNumber(),
-                'status' => 'RECEIVED_AT_MYAWADDY',
+                'status' => 'RECEIVED_AT_MAE_SOT',
                 'received_by_id' => $request->user()->id,
                 'received_at' => $validated['received_at'] ?? now(),
                 'quantity' => $validated['quantity'] ?? 1,
@@ -100,9 +102,9 @@ class ParcelController extends Controller
             ParcelStatusHistory::create([
                 'parcel_id' => $parcel->id,
                 'from_status' => null,
-                'to_status' => 'RECEIVED_AT_MYAWADDY',
+                'to_status' => 'RECEIVED_AT_MAE_SOT',
                 'changed_by_id' => $request->user()->id,
-                'reason' => 'Parcel arrived at Myawaddy office (pre-registered from Mae Sot)',
+                'reason' => 'Parcel registered at Mae Sot office',
             ]);
 
             ActivityLog::record('parcel.created', $parcel, [], $parcel->toArray());

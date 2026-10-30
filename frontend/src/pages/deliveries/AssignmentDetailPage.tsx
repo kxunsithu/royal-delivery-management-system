@@ -93,7 +93,7 @@ export default function AssignmentDetailPage() {
             {[
               ['Staff', a.staff?.name ?? '-'],
               ['Assigned by', a.assigned_by?.name ?? '-'],
-              ['Status', a.status],
+              ['Status', t(`deliveries.statuses.${a.status}`)],
               [t('deliveries.assignedAt'), formatDate(a.assigned_at, i18n.language)],
               [t('deliveries.completedAt'), a.completed_at ? formatDate(a.completed_at, i18n.language) : '-'],
             ].map(([k, v]) => (

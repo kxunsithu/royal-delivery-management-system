@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Package, User, DollarSign, ImagePlus, X, Images } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { CameraCapture } from '@/components/CameraCapture'
 import { getErrorMessage, getValidationErrors } from '@/utils/helpers'
 
 interface LocalImage {
@@ -353,6 +354,9 @@ export default function RegisterParcelPage() {
                   Add More
                 </Button>
               )}
+              {localImages.length < 10 && (
+                <CameraCapture onCapture={(file) => addFiles([file])} />
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -381,6 +385,7 @@ export default function RegisterParcelPage() {
               ref={imageInputRef}
               type="file"
               accept="image/jpeg,image/png,image/jpg,image/webp"
+              capture="environment"
               multiple
               className="hidden"
               onChange={e => { if (e.target.files) addFiles(e.target.files); e.target.value = '' }}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -7,7 +8,7 @@ import { useAuth } from '@/features/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Search, Edit, Eye, Power, RefreshCw, Users } from 'lucide-react'
+import { Plus, Search, Edit, Eye, Power, RefreshCw, Users, X } from 'lucide-react'
 import { formatDate, getRoleBadgeClass } from '@/utils/helpers'
 import { getErrorMessage, getValidationErrors } from '@/utils/helpers'
 import { toast } from '@/hooks/use-toast'
@@ -17,9 +18,9 @@ export default function UsersPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { user: currentUser, hasRole } = useAuth()
-  const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState('')
-  const [page, setPage] = useState(1)
+  const [search, setSearch] = usePersistedState('users:search', '')
+  const [roleFilter, setRoleFilter] = usePersistedState('users:roleFilter', '')
+  const [page, setPage] = usePersistedState('users:page', 1)
   const [viewUser, setViewUser] = useState<any>(null)
   const [editUser, setEditUser] = useState<any>(null)
   const [editForm, setEditForm] = useState({ name: '', email: '', phone: '', employee_id: '', role: '', password: '' })
@@ -116,8 +117,13 @@ export default function UsersPage() {
                 placeholder="Search by name, email or employee ID..."
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1) }}
-                className="pl-9"
+                className="pl-9 pr-9"
               />
+              {search && (
+                <button type="button" onClick={() => { setSearch(''); setPage(1) }} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-foreground" aria-label="Clear search">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
             <select
               value={roleFilter}

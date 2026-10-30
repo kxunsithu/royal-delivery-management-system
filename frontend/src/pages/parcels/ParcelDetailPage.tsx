@@ -20,10 +20,12 @@ import {
 import { useAuth } from '@/features/auth/AuthContext'
 import { printParcelReceipt } from '@/utils/printReceipt'
 import { toast } from '@/hooks/use-toast'
+import { CameraCapture } from '@/components/CameraCapture'
 import type { ParcelStatus } from '@/types'
 import { queryClient } from '@/lib/queryClient'
 
 const STATUS_TRANSITIONS: Record<ParcelStatus, ParcelStatus[]> = {
+  RECEIVED_AT_MAE_SOT: ['RECEIVED_AT_MYAWADDY', 'DAMAGED', 'MISSING'],
   RECEIVED_AT_MYAWADDY: ['VERIFIED', 'DAMAGED', 'MISSING'],
   VERIFIED: ['READY_FOR_DELIVERY', 'DAMAGED', 'MISSING'],
   READY_FOR_DELIVERY: ['ASSIGNED'],
@@ -277,6 +279,25 @@ export default function ParcelDetailPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+        {/* Sender info */}
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-4 h-4 text-primary" />{t('parcels.senderInfo')}</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-secondary" />
+              <span className="text-foreground">{p.sender_name ?? '-'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-secondary" />
+              {p.sender_phone ? (
+                <a href={`tel:${p.sender_phone}`} className="text-primary hover:underline">{p.sender_phone}</a>
+              ) : (
+                <span className="text-secondary">-</span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Recipient info */}
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-4 h-4 text-primary" />Recipient</CardTitle></CardHeader>
@@ -323,6 +344,10 @@ export default function ParcelDetailPage() {
               [t('parcels.condition'), t(`parcels.conditions.${p.condition}`)],
               [t('parcels.deliveryFee'), formatCurrency(p.delivery_fee, i18n.language)],
               [t('parcels.isCOD'), p.is_cod ? `Yes — ${formatCurrency(p.cod_amount, i18n.language)}` : 'No'],
+              [t('parcels.parcelNotes'), p.notes ?? '-'],
+              [t('parcels.damageDescription'), p.damage_description ?? '-'],
+              [t('parcels.createdAt'), formatDateTime(p.created_at, i18n.language)],
+              [t('parcels.updatedAt'), formatDateTime(p.updated_at, i18n.language)],
             ].map(([k, v]) => (
               <div key={k} className="flex items-center justify-between border-b border-border/40 pb-2 last:border-0">
                 <span className="text-secondary">{k}</span>
@@ -364,15 +389,18 @@ export default function ParcelDetailPage() {
               )}
             </CardTitle>
             {canManageImages && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => imageInputRef.current?.click()}
-                loading={uploadMutation.isPending}
-              >
-                <ImagePlus className="w-3.5 h-3.5" />
-                Add Images
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => imageInputRef.current?.click()}
+                  loading={uploadMutation.isPending}
+                >
+                  <ImagePlus className="w-3.5 h-3.5" />
+                  Add Images
+                </Button>
+                <CameraCapture onCapture={(file) => handleFiles([file])} />
+              </>
             )}
           </div>
         </CardHeader>
@@ -411,6 +439,7 @@ export default function ParcelDetailPage() {
             ref={imageInputRef}
             type="file"
             accept="image/jpeg,image/png,image/jpg,image/webp"
+            capture="environment"
             multiple
             className="hidden"
             onChange={e => {

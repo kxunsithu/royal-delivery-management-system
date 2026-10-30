@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import financeService from '@/services/financeService'
@@ -15,7 +16,7 @@ import { queryClient } from '@/lib/queryClient'
 export default function HandoversPage() {
   const { t, i18n } = useTranslation()
   const { hasRole } = useAuth()
-  const [page, setPage] = useState(1)
+  const [page, setPage] = usePersistedState('handovers:page', 1)
   const [showSubmitForm, setShowSubmitForm] = useState(false)
   const [verifyingId, setVerifyingId] = useState<number | null>(null)
   const [submitForm, setSubmitForm] = useState({ period_start: '', period_end: '', submitted_amount: '', submission_notes: '' })

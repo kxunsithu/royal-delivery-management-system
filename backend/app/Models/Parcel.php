@@ -112,6 +112,7 @@ class Parcel extends Model
     public function canTransitionTo(string $newStatus): bool
     {
         $transitions = [
+            'RECEIVED_AT_MAE_SOT' => ['RECEIVED_AT_MYAWADDY', 'DAMAGED', 'MISSING'],
             'RECEIVED_AT_MYAWADDY' => ['VERIFIED', 'DAMAGED', 'MISSING'],
             'VERIFIED' => ['READY_FOR_DELIVERY', 'DAMAGED', 'MISSING'],
             'READY_FOR_DELIVERY' => ['ASSIGNED'],

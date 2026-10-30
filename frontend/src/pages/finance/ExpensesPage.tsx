@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import financeService from '@/services/financeService'
@@ -13,7 +14,7 @@ import { queryClient } from '@/lib/queryClient'
 
 export default function ExpensesPage() {
   const { t, i18n } = useTranslation()
-  const [page, setPage] = useState(1)
+  const [page, setPage] = usePersistedState('expenses:page', 1)
   const [showAddForm, setShowAddForm] = useState(false)
   const [voidingId, setVoidingId] = useState<number | null>(null)
   const [voidReason, setVoidReason] = useState('')

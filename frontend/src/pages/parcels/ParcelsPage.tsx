@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -8,12 +9,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Search, Filter, Package, Eye, RefreshCw } from 'lucide-react'
+import { Plus, Search, Filter, Package, Eye, RefreshCw, X } from 'lucide-react'
 import { getParcelStatusClass, getPriorityClass, formatDate, formatCurrency } from '@/utils/helpers'
 import { useAuth } from '@/features/auth/AuthContext'
 
 const STATUSES: ParcelStatus[] = [
-  'RECEIVED_AT_MYAWADDY','VERIFIED','READY_FOR_DELIVERY','ASSIGNED',
+  'RECEIVED_AT_MAE_SOT','RECEIVED_AT_MYAWADDY','VERIFIED','READY_FOR_DELIVERY','ASSIGNED',
   'OUT_FOR_DELIVERY','DELIVERED','DELIVERY_FAILED','RETURN_TO_OFFICE',
   'RETURNED_TO_SENDER','DAMAGED','MISSING'
 ]
@@ -23,9 +24,9 @@ export default function ParcelsPage() {
   const navigate = useNavigate()
   const { hasRole } = useAuth()
 
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<ParcelStatus | ''>('')
-  const [page, setPage] = useState(1)
+  const [search, setSearch] = usePersistedState('parcels:search', '')
+  const [statusFilter, setStatusFilter] = usePersistedState<ParcelStatus | ''>('parcels:statusFilter', '')
+  const [page, setPage] = usePersistedState('parcels:page', 1)
   const [showFilters, setShowFilters] = useState(false)
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -80,8 +81,13 @@ export default function ParcelsPage() {
                 placeholder={t('parcels.searchPlaceholder')}
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1) }}
-                className="pl-9"
+                className="pl-9 pr-9"
               />
+              {search && (
+                <button type="button" onClick={() => { setSearch(''); setPage(1) }} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-foreground" aria-label="Clear search">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
             <Button
               variant="outline"
@@ -144,7 +150,7 @@ export default function ParcelsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    {['Tracking #', t('parcels.recipientName'), t('parcels.deliveryArea'), t('parcels.deliveryFee'), t('parcels.priority'), t('common.status'), t('parcels.receivedAt'), ''].map(h => (
+                    {['Image', 'Tracking #', t('parcels.recipientName'), t('parcels.deliveryFee'), t('parcels.priority'), t('common.status'), ''].map(h => (
                       <th key={h} className="text-left text-xs text-secondary font-medium px-5 py-3 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -153,18 +159,24 @@ export default function ParcelsPage() {
                   {parcels.map((p: any) => (
                     <tr key={p.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="px-5 py-3.5">
+                        {p.images?.[0]?.url ? (
+                          <img
+                            src={p.images[0].url}
+                            alt={p.images[0].original_name ?? p.tracking_number}
+                            className="w-12 h-12 object-cover rounded border border-border"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded border border-border bg-muted flex items-center justify-center">
+                            <Package className="w-5 h-5 text-secondary" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5">
                         <span className="text-primary font-mono text-sm font-medium">{p.tracking_number}</span>
                       </td>
                       <td className="px-5 py-3.5">
                         <p className="text-foreground text-sm">{p.recipient_name}</p>
                         <p className="text-secondary text-xs">{p.recipient_phone}</p>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <span className="text-secondary text-sm">
-                          {i18n.language === 'my' && p.delivery_area?.name_mm
-                            ? p.delivery_area.name_mm
-                            : p.delivery_area?.name ?? '-'}
-                        </span>
                       </td>
                       <td className="px-5 py-3.5">
                         <span className="text-foreground text-sm">{formatCurrency(p.delivery_fee, i18n.language)}</span>
@@ -180,11 +192,6 @@ export default function ParcelsPage() {
                       <td className="px-5 py-3.5">
                         <span className={`text-xs px-2 py-0.5 rounded ${getParcelStatusClass(p.status)}`}>
                           {t(`status.${p.status}`)}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <span className="text-secondary text-xs whitespace-nowrap">
-                          {formatDate(p.received_at, i18n.language)}
                         </span>
                       </td>
                       <td className="px-5 py-3.5">

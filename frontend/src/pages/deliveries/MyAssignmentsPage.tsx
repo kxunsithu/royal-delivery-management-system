@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -6,15 +7,15 @@ import deliveryService from '@/services/deliveryService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Eye, RefreshCw, MapPin, Phone, Package, CheckCircle2, XCircle } from 'lucide-react'
+import { Search, Eye, RefreshCw, MapPin, Phone, Package, CheckCircle2, XCircle, X } from 'lucide-react'
 import { getParcelStatusClass, formatDate, formatCurrency, buildGoogleMapsUrl } from '@/utils/helpers'
 import { toast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 
 export default function MyAssignmentsPage() {
   const { t, i18n } = useTranslation()
-  const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active')
+  const [search, setSearch] = usePersistedState('myAssignments:search', '')
+  const [activeTab, setActiveTab] = usePersistedState<'active' | 'completed'>('myAssignments:activeTab', 'active')
   const [showAttemptModal, setShowAttemptModal] = useState<number | null>(null)
   const [attemptForm, setAttemptForm] = useState({
     result: 'DELIVERED' as 'DELIVERED' | 'FAILED',
@@ -96,8 +97,13 @@ export default function MyAssignmentsPage() {
           placeholder={t('parcels.searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="pl-9"
+          className="pl-9 pr-9"
         />
+        {search && (
+          <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-foreground" aria-label="Clear search">
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Assignment cards */}

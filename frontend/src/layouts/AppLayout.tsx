@@ -207,8 +207,8 @@ export default function AppLayout() {
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-sm bg-background-surface border border-border rounded shadow-xl p-6 space-y-4">
-            <h2 className="text-foreground text-lg font-semibold">Confirm Logout</h2>
-            <p className="text-secondary text-sm">Are you sure you want to log out of your account?</p>
+            <h2 className="text-foreground text-lg font-semibold">{t('confirm.logoutTitle')}</h2>
+            <p className="text-secondary text-sm">{t('confirm.logoutMessage')}</p>
             <div className="flex gap-2 justify-end pt-2">
               <button
                 type="button"
@@ -216,7 +216,7 @@ export default function AppLayout() {
                 disabled={isLoggingOut}
                 className="px-4 py-2 rounded border border-border text-secondary hover:text-foreground hover:bg-muted transition-colors text-sm"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -224,7 +224,7 @@ export default function AppLayout() {
                 disabled={isLoggingOut}
                 className="px-4 py-2 rounded bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors text-sm font-medium disabled:opacity-50"
               >
-                {isLoggingOut ? 'Logging out...' : 'Logout'}
+                {isLoggingOut ? t('auth.loggingOut') : t('auth.logout')}
               </button>
             </div>
           </div>

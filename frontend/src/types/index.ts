@@ -30,6 +30,7 @@ export interface AuthResponse {
 // ─── Parcel Types ─────────────────────────────────────────────────────────────
 
 export type ParcelStatus =
+  | 'RECEIVED_AT_MAE_SOT'
   | 'RECEIVED_AT_MYAWADDY'
   | 'VERIFIED'
   | 'READY_FOR_DELIVERY'

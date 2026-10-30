@@ -79,7 +79,8 @@
     "sessionExpired": "Your session has expired. Please login again.",
     "unauthorized": "You are not authorized to access this page",
     "profile": "My Profile",
-    "profileUpdated": "Profile updated successfully"
+    "profileUpdated": "Profile updated successfully",
+    "loggingOut": "Logging out..."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -133,7 +134,7 @@
   },
   "parcels": {
     "title": "Parcels",
-    "register": "Register Parcel (Arrived from Mae Sot)",
+    "register": "Register Parcel",
     "registerSubtitle": "Enter details for parcel received from Mae Sot office",
     "parcelList": "Parcel List",
     "parcelDetails": "Parcel Details",
@@ -192,9 +193,12 @@
       "NORMAL": "Normal",
       "HIGH": "High",
       "URGENT": "Urgent"
-    }
+    },
+    "createdAt": "Created At",
+    "updatedAt": "Updated At"
   },
   "status": {
+    "RECEIVED_AT_MAE_SOT": "Received at Mae Sot",
     "RECEIVED_AT_MYAWADDY": "Received at Myawaddy",
     "VERIFIED": "Verified",
     "READY_FOR_DELIVERY": "Ready for Delivery",
@@ -243,6 +247,12 @@
       "REFUSED": "Recipient Refused",
       "RESCHEDULED": "Customer Rescheduled",
       "OTHER": "Other"
+    },
+    "statuses": {
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "REASSIGNED": "Reassigned",
+      "CANCELLED": "Cancelled"
     }
   },
   "finance": {

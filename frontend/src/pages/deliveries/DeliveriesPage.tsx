@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -7,15 +8,15 @@ import userService from '@/services/userService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Eye, RefreshCw, Users, Package } from 'lucide-react'
+import { Search, Eye, RefreshCw, Users, Package, X } from 'lucide-react'
 import { getParcelStatusClass, formatDate } from '@/utils/helpers'
 
 export default function DeliveriesPage() {
   const { t, i18n } = useTranslation()
-  const [search, setSearch] = useState('')
-  const [staffFilter, setStaffFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [page, setPage] = useState(1)
+  const [search, setSearch] = usePersistedState('deliveries:search', '')
+  const [staffFilter, setStaffFilter] = usePersistedState('deliveries:staffFilter', '')
+  const [statusFilter, setStatusFilter] = usePersistedState('deliveries:statusFilter', '')
+  const [page, setPage] = usePersistedState('deliveries:page', 1)
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['assignments', staffFilter, statusFilter, page],
@@ -96,8 +97,13 @@ export default function DeliveriesPage() {
                 placeholder="Search tracking #, recipient or staff name..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 pr-9"
               />
+              {search && (
+                <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-foreground" aria-label="Clear search">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
             <select
               value={staffFilter}
@@ -114,9 +120,9 @@ export default function DeliveriesPage() {
               onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
               className="h-9 rounded border border-border bg-muted px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="">All Status</option>
+              <option value="">{t('common.all')} {t('common.status')}</option>
               {['ACTIVE','COMPLETED','REASSIGNED','CANCELLED'].map(s => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>{t(`deliveries.statuses.${s}`)}</option>
               ))}
             </select>
           </div>
@@ -173,7 +179,7 @@ export default function DeliveriesPage() {
                           a.status === 'COMPLETED' ? 'bg-success/15 text-success border border-success/30' :
                           'bg-muted text-secondary border border-border'
                         }`}>
-                          {a.status}
+                          {t(`deliveries.statuses.${a.status}`)}
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
