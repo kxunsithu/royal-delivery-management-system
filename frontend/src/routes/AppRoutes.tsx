@@ -37,8 +37,7 @@ import SettingsPage from '@/pages/settings/SettingsPage'
 // Profile
 import ProfilePage from '@/pages/profile/ProfilePage'
 
-// Reports
-import ReportsPage from '@/pages/reports/ReportsPage'
+
 
 function ProtectedRoute({ children, roles }: {
   children: React.ReactNode
@@ -191,15 +190,6 @@ export default function AppRoutes() {
           }
         />
 
-        {/* Reports */}
-        <Route
-          path="reports"
-          element={
-            <ProtectedRoute roles={['admin', 'manager', 'accountant']}>
-              <ReportsPage />
-            </ProtectedRoute>
-          }
-        />
 
         {/* Settings */}
         <Route

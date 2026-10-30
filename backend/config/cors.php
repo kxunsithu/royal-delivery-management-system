@@ -19,13 +19,16 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
+    'allowed_origins' => array_filter([
         env('FRONTEND_URL', 'http://localhost:5173'),
         'http://localhost:5173',
         'http://127.0.0.1:5173',
-    ],
+    ]),
 
-    'allowed_origins_patterns' => [],
+    // Allows any *.onrender.com subdomain (for Render deployments)
+    'allowed_origins_patterns' => [
+        '#^https://[a-z0-9\-]+\.onrender\.com$#',
+    ],
 
     'allowed_headers' => ['*'],
 

@@ -1,0 +1,64 @@
+services:
+  # ─── Laravel API Backend ──────────────────────────────────────────────────────
+  - type: web
+    name: royal-delivery-backend
+    runtime: php
+    region: singapore   # closest to Myanmar
+    plan: free
+    rootDir: backend
+    buildCommand: "./render-build.sh"
+    startCommand: "php -S 0.0.0.0:$PORT -t public"
+    envVars:
+      - key: APP_NAME
+        value: "Royal Myawaddy Delivery"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://royal-delivery-backend.onrender.com   # update after creation
+      - key: APP_TIMEZONE
+        value: Asia/Yangon
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/data/database.sqlite
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: royal-delivery-frontend.onrender.com   # update after creation
+      - key: FRONTEND_URL
+        value: https://royal-delivery-frontend.onrender.com  # update after creation
+    disk:
+      name: sqlite-data
+      mountPath: /var/data
+      sizeGB: 1
+
+  # ─── React Frontend ───────────────────────────────────────────────────────────
+  - type: web
+    name: royal-delivery-frontend
+    runtime: static
+    region: singapore
+    plan: free
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://royal-delivery-backend.onrender.com/api/v1  # update after creation
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

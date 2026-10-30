@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth/AuthContext'
 import {
   LayoutDashboard, Package, Truck, DollarSign, Users,
-  BarChart3, Settings, LogOut, Menu, X, Globe,
+  Settings, LogOut, Menu, X, Globe,
   ClipboardList, ArrowDownToLine, User
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -27,7 +27,6 @@ const navItems: NavItem[] = [
   { key: 'handovers',  labelKey: 'nav.cashHandovers', href: '/finance/handovers',         icon: ArrowDownToLine, roles: ['delivery_staff','accountant','admin'] },
   { key: 'finance',    labelKey: 'nav.finance',       href: '/finance',                   icon: DollarSign,      roles: ['admin','accountant'], end: true },
   { key: 'users',      labelKey: 'nav.users',         href: '/users',                     icon: Users,           roles: ['admin'] },
-  { key: 'reports',    labelKey: 'nav.reports',       href: '/reports',                   icon: BarChart3,       roles: ['admin','manager','accountant'] },
   { key: 'settings',   labelKey: 'nav.settings',      href: '/settings',                  icon: Settings,        roles: ['admin'] },
   { key: 'profile',    labelKey: 'nav.profile',       href: '/profile',                   icon: User },
 ]
@@ -197,7 +196,9 @@ export default function AppLayout() {
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
           <div className="w-full p-4 lg:p-6 animate-fade-in">
-            <Outlet />
+            <div className="max-w-screen-xl mx-auto">
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>

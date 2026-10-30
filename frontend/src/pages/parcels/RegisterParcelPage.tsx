@@ -153,7 +153,7 @@ export default function RegisterParcelPage() {
         </Button>
         <div>
           <h1 className="text-foreground text-2xl font-bold">{t('parcels.register')}</h1>
-          <p className="text-secondary text-sm">{t('parcels.parcelList')}</p>
+          <p className="text-secondary text-sm">{t('parcels.registerSubtitle')}</p>
         </div>
       </div>
 
@@ -170,7 +170,7 @@ export default function RegisterParcelPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2 text-foreground/80">
                   <Package className="w-4 h-4 text-primary" />
-                  Sender Information
+                  {t('parcels.senderInfo')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3">
@@ -196,7 +196,7 @@ export default function RegisterParcelPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2 text-foreground/80">
                   <User className="w-4 h-4 text-primary" />
-                  Recipient Information
+                  {t('parcels.recipientInfo')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3">
@@ -247,7 +247,7 @@ export default function RegisterParcelPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2 text-foreground/80">
                   <Package className="w-4 h-4 text-primary" />
-                  Parcel Details
+                  {t('parcels.parcelDetailsSection')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3">
@@ -290,7 +290,7 @@ export default function RegisterParcelPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2 text-foreground/80">
                   <DollarSign className="w-4 h-4 text-primary" />
-                  Fee &amp; Payment
+                  {t('parcels.feePayment')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3">

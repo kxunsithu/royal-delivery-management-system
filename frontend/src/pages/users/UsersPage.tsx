@@ -162,8 +162,21 @@ export default function UsersPage() {
                     <tr key={u.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded bg-primary/15 border border-primary/30 flex items-center justify-center">
-                            <span className="text-primary text-xs font-bold">{u.name?.charAt(0).toUpperCase()}</span>
+                          <div className="w-8 h-8 rounded-full overflow-hidden border border-border flex-shrink-0 flex items-center justify-center bg-primary/15">
+                            {u.profile_image_url ? (
+                              <img
+                                src={u.profile_image_url}
+                                alt={u.name}
+                                className="w-full h-full object-cover"
+                                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.removeAttribute('style') }}
+                              />
+                            ) : null}
+                            <span
+                              className="text-primary text-xs font-bold"
+                              style={u.profile_image_url ? { display: 'none' } : {}}
+                            >
+                              {u.name?.charAt(0).toUpperCase()}
+                            </span>
                           </div>
                           <p className="text-foreground text-sm font-medium">{u.name}</p>
                         </div>
@@ -243,21 +256,37 @@ export default function UsersPage() {
               <h2 className="text-foreground text-lg font-semibold">{t('common.view')} {t('users.title')}</h2>
               <button onClick={() => setViewUser(null)} className="text-secondary hover:text-foreground">✕</button>
             </div>
-            <div className="space-y-2 text-sm">
-              {[
-                [t('common.name'), viewUser.name],
-                [t('auth.email'), viewUser.email],
-                [t('common.phone'), viewUser.phone ?? '-'],
-                [t('users.employeeId'), viewUser.employee_id ?? '-'],
-                [t('users.role'), t(`users.roles.${viewUser.role}`)],
-                [t('common.status'), viewUser.is_active ? t('common.active') : t('common.inactive')],
-                [t('users.lastLogin'), viewUser.last_login_at ? formatDate(viewUser.last_login_at, i18n.language) : 'Never'],
-              ].map(([k, v]) => (
-                <div key={k} className="flex justify-between border-b border-border/40 pb-2 last:border-0">
-                  <span className="text-secondary">{k}</span>
-                  <span className="text-foreground font-medium">{v}</span>
+            <div className="space-y-4">
+              {/* Profile image in modal */}
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border flex-shrink-0 flex items-center justify-center bg-primary/15">
+                  {viewUser.profile_image_url ? (
+                    <img src={viewUser.profile_image_url} alt={viewUser.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-primary text-2xl font-bold">{viewUser.name?.charAt(0).toUpperCase()}</span>
+                  )}
                 </div>
-              ))}
+                <div>
+                  <p className="text-foreground font-semibold">{viewUser.name}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded ${getRoleBadgeClass(viewUser.role)}`}>
+                    {t(`users.roles.${viewUser.role}`)}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                {[
+                  [t('auth.email'), viewUser.email],
+                  [t('common.phone'), viewUser.phone ?? '-'],
+                  [t('users.employeeId'), viewUser.employee_id ?? '-'],
+                  [t('common.status'), viewUser.is_active ? t('common.active') : t('common.inactive')],
+                  [t('users.lastLogin'), viewUser.last_login_at ? formatDate(viewUser.last_login_at, i18n.language) : 'Never'],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex justify-between border-b border-border/40 pb-2 last:border-0">
+                    <span className="text-secondary">{k}</span>
+                    <span className="text-foreground font-medium">{v}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="flex justify-end">
               <Button variant="outline" size="sm" onClick={() => setViewUser(null)}>{t('common.close') || 'Close'}</Button>

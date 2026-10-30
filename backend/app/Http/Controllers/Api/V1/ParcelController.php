@@ -102,7 +102,7 @@ class ParcelController extends Controller
                 'from_status' => null,
                 'to_status' => 'RECEIVED_AT_MYAWADDY',
                 'changed_by_id' => $request->user()->id,
-                'reason' => 'Parcel received at Myawaddy office',
+                'reason' => 'Parcel arrived at Myawaddy office (pre-registered from Mae Sot)',
             ]);
 
             ActivityLog::record('parcel.created', $parcel, [], $parcel->toArray());
