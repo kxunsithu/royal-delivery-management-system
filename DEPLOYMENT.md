@@ -32,6 +32,8 @@ Render's free plan cannot attach disks. For a zero-cost demo, edit `render.yaml`
 - Remove the `disk:` block
 - Set `DB_DATABASE: database/database.sqlite` (ephemeral — data resets on redeploy, re-seeded automatically)
 
+Note: the backend is deployed from `backend/Dockerfile` (`runtime: docker`) because Render has no native PHP runtime.
+
 ## Database
 
 - Default: SQLite on a persistent disk mounted at `/var/data` (requires a paid plan, e.g. `starter`).

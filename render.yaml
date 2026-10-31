@@ -1,17 +1,14 @@
 services:
-  # ─── Laravel API Backend ──────────────────────────────────────────────────────
+  # ─── Laravel API Backend (Docker) ────────────────────────────────────────────
   - type: web
     name: royal-delivery-backend
-    runtime: php
+    runtime: docker
     region: singapore   # closest to Myanmar
     plan: starter       # persistent disk requires a paid plan; use "free" + remove disk for ephemeral demo
-    rootDir: backend
-    buildCommand: "bash render-build.sh"
-    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
     healthCheckPath: /up
     envVars:
-      - key: PHP_VERSION
-        value: "8.3"
       - key: APP_NAME
         value: "Royal Myawaddy Delivery"
       - key: APP_ENV
@@ -53,7 +50,6 @@ services:
   - type: web
     name: royal-delivery-frontend
     runtime: static
-    region: singapore
     plan: free
     rootDir: frontend
     buildCommand: "npm install && npm run build"
