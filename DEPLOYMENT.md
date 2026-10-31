@@ -1,64 +1,82 @@
-# Deploying on Render
+# Deploying on Render (Free Plan)
 
-This project ships a `render.yaml` blueprint (backend = Laravel API, frontend = React/Vite static site).
+Render's Blueprint sync may not be available on every workspace/plan. This guide covers
+**manual deployment** on Render's free tier, plus notes for upgrading.
 
-## One-click deploy (Blueprint)
+The backend is deployed as a **Docker** service (`backend/Dockerfile`) because Render has no
+native PHP runtime. The frontend is a static site.
 
-1. Push this repository to GitHub/GitLab.
-2. In Render, click **New → Blueprint** and select the repo.
-3. Render reads `render.yaml` and creates both services.
-4. Wait for the first build to finish (backend runs `backend/render-build.sh`).
+## 1. Backend — Docker Web Service
 
-## After first deploy — update URLs
+Render Dashboard → **New → Web Service** → connect your repo.
 
-Render assigns URLs like `https://royal-delivery-backend.onrender.com`. If your service names differ, update these env vars to match the real URLs:
+Settings:
+- **Root Directory:** `backend`
+- **Runtime:** Docker
+- **Dockerfile Path:** `./Dockerfile`
+- **Plan:** Free
+- **Health Check Path:** `/up`
 
-**Backend service** (`royal-delivery-backend`):
-- `APP_URL` → `https://<backend>.onrender.com`
-- `SANCTUM_STATEFUL_DOMAINS` → `<frontend>.onrender.com`
-- `FRONTEND_URL` → `https://<frontend>.onrender.com`
+Environment variables:
 
-**Frontend service** (`royal-delivery-frontend`):
-- `VITE_API_BASE_URL` → `https://<backend>.onrender.com/api/v1`
+| Key | Value |
+|---|---|
+| `APP_NAME` | `Royal Myawaddy Delivery` |
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `APP_KEY` | generate with `php artisan key:generate --show` |
+| `APP_URL` | `https://<backend>.onrender.com` |
+| `APP_TIMEZONE` | `Asia/Yangon` |
+| `DB_CONNECTION` | `sqlite` |
+| `DB_DATABASE` | `database/database.sqlite` |
+| `SESSION_DRIVER` | `file` |
+| `CACHE_STORE` | `file` |
+| `QUEUE_CONNECTION` | `sync` |
+| `FILESYSTEM_DISK` | `local` |
+| `LOG_CHANNEL` | `stderr` |
+| `LOG_LEVEL` | `error` |
+| `SANCTUM_STATEFUL_DOMAINS` | `<frontend>.onrender.com` |
+| `FRONTEND_URL` | `https://<frontend>.onrender.com` |
 
-Then trigger a manual redeploy of both services so the new values take effect
-(`VITE_API_BASE_URL` is baked in at build time).
+The container entrypoint runs migrations + idempotent seeding on every start, so the
+demo data is restored automatically.
 
-## Free plan (default)
+## 2. Frontend — Static Site
 
-This Blueprint now targets Render's **free** plan:
+Render Dashboard → **New → Static Site** → connect your repo.
 
-- Backend: Docker web service (`backend/Dockerfile`), free plan, ephemeral filesystem.
-- Database: SQLite at `database/database.sqlite` (resets on redeploy; migrations + idempotent seeding run on every start).
-- Uploads (parcel images, avatars, proof of delivery) are also ephemeral.
+Settings:
+- **Root Directory:** `frontend`
+- **Build Command:** `npm install && npm run build`
+- **Publish Directory:** `dist`
 
-Render has no native PHP runtime, so the backend is deployed as a Docker service.
+Environment variable:
 
-### Upgrading to persistent storage (paid)
+| Key | Value |
+|---|---|
+| `VITE_API_BASE_URL` | `https://<backend>.onrender.com/api/v1` |
 
-To keep data across redeploys, change the backend service to `plan: starter` (or higher), re-add a `disk:` block mounted at `/var/data`, and set `DB_DATABASE: /var/data/database.sqlite`.
+Rewrite rule (for client-side routing): `/*` → `/index.html`.
 
-## Database
+## Free plan limitations
+- No persistent disk: SQLite data and uploads reset on redeploy/restart (re-seeded on start).
+- Services spin down after 15 minutes of inactivity (cold start on next request).
 
-- Default: SQLite on a persistent disk mounted at `/var/data` (requires a paid plan, e.g. `starter`).
-- Migrations + idempotent seeding run automatically during the build.
-- To use Postgres instead, change `DB_CONNECTION=pgsql` and add `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` env vars (Render managed Postgres works).
+## Optional: Blueprint (render.yaml)
+A `render.yaml` Blueprint is included for workspaces that support it. It defines the same
+two services. If Blueprint sync is unavailable on your plan, use the manual steps above.
 
-## File uploads
+## Upgrading to persistent storage (paid)
+1. Change backend plan to `starter` (or higher).
+2. Re-add a disk mounted at `/var/data`.
+3. Set `DB_DATABASE=/var/data/database.sqlite`.
 
-Public uploads (parcel images, avatars, proof of delivery) are stored on the
-`public` disk (`storage/app/public`) and served via the `storage:link` symlink
-created during build. On the free/ephemeral tier these are lost on redeploy —
-use S3-compatible storage for production durability.
-
-## Default credentials (from seeders)
-
+## Default credentials (seeded)
 - Admin: `admin@royal-myawaddy.local` / `Admin@123456`
 - Manager: `manager@royal-myawaddy.local` / `Manager@123456`
 - Staff: `staff1@royal-myawaddy.local` / `Staff@123456`
 
 ## Local development
-
 ```bash
 bash setup.sh   # install deps, migrate, seed
 bash dev.sh     # run backend + frontend
