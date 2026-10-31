@@ -19,6 +19,17 @@ interface LocalImage {
   id: string
 }
 
+// Reusable field wrapper (defined at module level to avoid remounting inputs on every keystroke)
+function Field({ label, error, children, className = '' }: { label: string; error?: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`space-y-1.5 ${className}`}>
+      <Label className="text-xs text-secondary">{label}</Label>
+      {children}
+      {error && <p className="text-destructive text-xs">{error}</p>}
+    </div>
+  )
+}
+
 export default function RegisterParcelPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -133,15 +144,6 @@ export default function RegisterParcelPage() {
   }
 
   const isBusy = mutation.isPending || uploadingImages
-
-  // Reusable field wrapper
-  const Field = ({ label, error, children, className = '' }: { label: string; error?: string; children: React.ReactNode; className?: string }) => (
-    <div className={`space-y-1.5 ${className}`}>
-      <Label className="text-xs text-secondary">{label}</Label>
-      {children}
-      {error && <p className="text-destructive text-xs">{error}</p>}
-    </div>
-  )
 
   const selectCls = 'flex h-9 w-full rounded border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring'
 

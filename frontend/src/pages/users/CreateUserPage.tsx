@@ -11,6 +11,18 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { getErrorMessage, getValidationErrors } from '@/utils/helpers'
 
+function Field({ k, label, type = 'text', placeholder = '', form, errors, set }: { k: string; label: string; type?: string; placeholder?: string; form: any; errors: Record<string, string>; set: (k: string, v: string) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      <Input type={type} value={form[k]} onChange={e => set(k, e.target.value)}
+        placeholder={placeholder}
+        className={errors[k] ? 'border-destructive' : ''} />
+      {errors[k] && <p className="text-destructive text-xs">{errors[k]}</p>}
+    </div>
+  )
+}
+
 export default function CreateUserPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -21,6 +33,7 @@ export default function CreateUserPage() {
     employee_id: '', role: 'delivery_staff',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+
 
   const set = (k: string, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -63,15 +76,6 @@ export default function CreateUserPage() {
     mutation.mutate()
   }
 
-  const Field = ({ k, label, type = 'text', placeholder = '' }: { k: string; label: string; type?: string; placeholder?: string }) => (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <Input type={type} value={(form as any)[k]} onChange={e => set(k, e.target.value)}
-        placeholder={placeholder}
-        className={errors[k] ? 'border-destructive' : ''} />
-      {errors[k] && <p className="text-destructive text-xs">{errors[k]}</p>}
-    </div>
-  )
 
   return (
     <div className="space-y-6">
@@ -87,10 +91,10 @@ export default function CreateUserPage() {
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-base">Account Information</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
-              <div className="col-span-2"><Field k="name" label="Full Name" /></div>
-              <Field k="email" label={t('auth.email')} type="email" />
-              <Field k="phone" label={t('common.phone')} />
-              <Field k="employee_id" label={t('users.employeeId')} placeholder="EMP001" />
+              <div className="col-span-2"><Field k="name" label="Full Name" form={form} errors={errors} set={set} /></div>
+              <Field k="email" label={t('auth.email')} type="email" form={form} errors={errors} set={set} />
+              <Field k="phone" label={t('common.phone')} form={form} errors={errors} set={set} />
+              <Field k="employee_id" label={t('users.employeeId')} placeholder="EMP001" form={form} errors={errors} set={set} />
               <div className="space-y-1.5">
                 <Label>{t('users.role')}</Label>
                 <select value={form.role} onChange={e => set('role', e.target.value)}
