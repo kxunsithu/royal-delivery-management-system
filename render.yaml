@@ -4,11 +4,14 @@ services:
     name: royal-delivery-backend
     runtime: php
     region: singapore   # closest to Myanmar
-    plan: free
+    plan: starter       # persistent disk requires a paid plan; use "free" + remove disk for ephemeral demo
     rootDir: backend
-    buildCommand: "./render-build.sh"
-    startCommand: "php -S 0.0.0.0:$PORT -t public"
+    buildCommand: "bash render-build.sh"
+    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
+    healthCheckPath: /up
     envVars:
+      - key: PHP_VERSION
+        value: "8.3"
       - key: APP_NAME
         value: "Royal Myawaddy Delivery"
       - key: APP_ENV
@@ -56,6 +59,8 @@ services:
     buildCommand: "npm install && npm run build"
     staticPublishPath: dist
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: VITE_API_BASE_URL
         value: https://royal-delivery-backend.onrender.com/api/v1  # update after creation
     routes:
