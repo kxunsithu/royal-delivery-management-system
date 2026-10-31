@@ -73,8 +73,8 @@ export default function LoginPage() {
 
           <div className="mt-auto pt-32">
             <h2 className="text-foreground text-4xl font-bold leading-tight mb-4">
-              Manage your<br />
-              <span className="text-primary">deliveries</span><br />
+              Manage your
+              <span className="text-primary">deliveries</span>
               efficiently.
             </h2>
             <p className="text-secondary text-base leading-relaxed">
@@ -175,25 +175,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Dev hint */}
-          <div className="mt-8 p-4 rounded border border-border bg-muted/50">
-            <p className="text-secondary text-xs font-medium mb-2">Development Accounts:</p>
-            <div className="space-y-1">
-              {[
-                ['admin@royal-myawaddy.local', 'Admin@123456'],
-                ['staff1@royal-myawaddy.local', 'Staff@123456'],
-              ].map(([e, p]) => (
-                <button
-                  key={e}
-                  type="button"
-                  onClick={() => { setEmail(e); setPassword(p) }}
-                  className="block w-full text-left text-xs text-secondary hover:text-primary transition-colors"
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
