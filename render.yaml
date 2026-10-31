@@ -4,7 +4,7 @@ services:
     name: royal-delivery-backend
     runtime: docker
     region: singapore   # closest to Myanmar
-    plan: starter       # persistent disk requires a paid plan; use "free" + remove disk for ephemeral demo
+    plan: free
     dockerfilePath: backend/Dockerfile
     dockerContext: backend
     healthCheckPath: /up
@@ -24,7 +24,7 @@ services:
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
-        value: /var/data/database.sqlite
+        value: database/database.sqlite
       - key: SESSION_DRIVER
         value: file
       - key: CACHE_STORE
@@ -41,10 +41,6 @@ services:
         value: royal-delivery-frontend.onrender.com   # update after creation
       - key: FRONTEND_URL
         value: https://royal-delivery-frontend.onrender.com  # update after creation
-    disk:
-      name: sqlite-data
-      mountPath: /var/data
-      sizeGB: 1
 
   # ─── React Frontend ───────────────────────────────────────────────────────────
   - type: web

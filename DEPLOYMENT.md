@@ -24,15 +24,19 @@ Render assigns URLs like `https://royal-delivery-backend.onrender.com`. If your 
 Then trigger a manual redeploy of both services so the new values take effect
 (`VITE_API_BASE_URL` is baked in at build time).
 
-## Free tier (no persistent disk)
+## Free plan (default)
 
-Render's free plan cannot attach disks. For a zero-cost demo, edit `render.yaml`:
+This Blueprint now targets Render's **free** plan:
 
-- Backend `plan: free`
-- Remove the `disk:` block
-- Set `DB_DATABASE: database/database.sqlite` (ephemeral — data resets on redeploy, re-seeded automatically)
+- Backend: Docker web service (`backend/Dockerfile`), free plan, ephemeral filesystem.
+- Database: SQLite at `database/database.sqlite` (resets on redeploy; migrations + idempotent seeding run on every start).
+- Uploads (parcel images, avatars, proof of delivery) are also ephemeral.
 
-Note: the backend is deployed from `backend/Dockerfile` (`runtime: docker`) because Render has no native PHP runtime.
+Render has no native PHP runtime, so the backend is deployed as a Docker service.
+
+### Upgrading to persistent storage (paid)
+
+To keep data across redeploys, change the backend service to `plan: starter` (or higher), re-add a `disk:` block mounted at `/var/data`, and set `DB_DATABASE: /var/data/database.sqlite`.
 
 ## Database
 
