@@ -74,7 +74,7 @@ export default function LoginPage() {
           <div className="mt-auto pt-32">
             <h2 className="text-foreground text-4xl font-bold leading-tight mb-4">
               Manage your
-              <span className="text-primary">deliveries</span>
+              <span className="text-primary"> deliveries </span>
               efficiently.
             </h2>
             <p className="text-secondary text-base leading-relaxed">
