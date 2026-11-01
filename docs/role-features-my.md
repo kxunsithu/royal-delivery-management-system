@@ -27,6 +27,7 @@
 ### လုပ်ဆောင်နိုင်သော အဓိကလုပ်ငန်းများ
 - Dashboard၊ parcel statistic၊ financial statistic နှင့် delivery trend ကြည့်ခြင်း
 - ပါဆယ်အသစ်ထည့်ခြင်း၊ ပြင်ခြင်းနှင့် စနစ်အတွင်းပါဆယ်အားလုံးကို ကြည့်ခြင်း
+- ပါဆယ် ဖျက်ခြင်း (အတည်ပြု dialog ဖြင့်)
 - ပါဆယ် status transition လုပ်ခြင်း
 - Delivery staff သို့ပါဆယ်တစ်ခုချင်းချိတ်ခြင်းနှင့် ပြန်လည်ချိတ်ခြင်း
 - Delivery assignment၊ မအောင်မြင်သော attempt နှင့် staff workload ကြည့်ခြင်း
@@ -53,6 +54,7 @@
 - Mae Sot နှင့် Myawaddy သို့ရောက်လာသော parcel များကို စစ်ဆေးခြင်း
 - Tracking number အလိုအလျောက် သို့မဟုတ် ကိုယ်တိုင်ထည့်ခြင်းနှင့် parcel အသစ်မှတ်ပုံတင်ခြင်း
 - Recipient၊ address၊ priority၊ area၊ fee နှင့် COD အချက်အလက် ပြင်ဆင်ခြင်း
+- ပါဆယ် ဖျက်ခြင်း (အတည်ပြု dialog ဖြင့်)
 - သတ်မှတ်ထားသော status transition ကို လုပ်ဆောင်ခြင်း
 - Parcel အသစ်ကို delivery staff ၏ assignment ထဲသို့ချိတ်ခြင်း၊ reassignment ပြုလုပ်ခြင်း
 - Delivery staff workload၊ active assignment နှင့် delivery attempt ကြည့်ခြင်း
@@ -60,7 +62,7 @@
 
 ### ကန့်သတ်ချက်များ
 - `OUT_FOR_DELIVERY` ၏ parcel ကို Manager က status မပြောင်းနိုင်ပါ။
-- Terminal status (`DELIVERED`, `RETURNED_TO_SENDER`, `DAMAGED`, `MISSING`) ပါဆယ်များကို edit မလုပ်နိုင်ပါ။
+- Terminal status (`DELIVERED`, `DAMAGED`) ပါဆယ်များကို edit မလုပ်နိုင်ပါ။
 - Users၊ Finance နှင့် Settings UI မရှိပါ။ Backend Users list policy ထဲက Manager ကို view policy သတ်မှတ်ထားသော်လည်း frontend route/admin menu သည် Manager ဝင်ရောက်ခွင့် မပေးထားပါ။
 - Delivery area API ကို Manager ကို backend အနေဖြင့် စီမံခန့်ခွဲခွင့်ပေးထားသော်လည်း Settings page/area management UI ကို admin-only route တွင်သာ ဖွင့်ထားပါသည်။
 - Expense၊ payment၊ finalized accounting transaction ကို တိုက်ရိုက်မပြင်နိုင်ပါ။

@@ -66,4 +66,9 @@ class ParcelPolicy
     {
         return $user->isAdmin() || $user->isManager();
     }
+
+    public function delete(User $user, Parcel $parcel): bool
+    {
+        return $user->isAdmin() || $user->isManager();
+    }
 }

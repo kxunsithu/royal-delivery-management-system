@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { usePersistedState } from '@/hooks/usePersistedState'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import parcelService from '@/services/parcelService'
@@ -9,18 +9,44 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Search, Filter, Package, Eye, RefreshCw, X } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Plus, Search, Filter, Package, Eye, RefreshCw, X, Trash2 } from 'lucide-react'
 import { getParcelStatusClass, getPriorityClass, formatDate, formatCurrency } from '@/utils/helpers'
 import { useAuth } from '@/features/auth/AuthContext'
+import { toast } from '@/hooks/use-toast'
 
 const STATUSES: ParcelStatus[] = [
-  'RECEIVED','IN_TRANSIT','DELIVERED','FAILED','DAMAGED'
+  'RECEIVED','VERIFIED','IN_TRANSIT','DELIVERED','FAILED','DAMAGED'
 ]
 
 export default function ParcelsPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { hasRole } = useAuth()
+  const queryClient = useQueryClient()
+  const verifyMutation = useMutation({
+    mutationFn: (id: number) => parcelService.statusTransition(id, 'VERIFIED'),
+    onSuccess: () => {
+      toast({ title: t('status.VERIFIED'), variant: 'success' as any })
+      setVerifyId(null)
+      queryClient.invalidateQueries({ queryKey: ['parcels'] })
+    },
+    onError: (err: any) => {
+      toast({ title: err?.response?.data?.message ?? 'Failed', variant: 'destructive' })
+    },
+  })
+
+  const deleteParcelMutation = useMutation({
+    mutationFn: (id: number) => parcelService.delete(id),
+    onSuccess: () => {
+      toast({ title: 'Parcel deleted', variant: 'success' as any })
+      setDeleteId(null)
+      queryClient.invalidateQueries({ queryKey: ['parcels'] })
+    },
+    onError: (err: any) => {
+      toast({ title: err?.response?.data?.message ?? 'Delete failed', variant: 'destructive' })
+    },
+  })
 
   const [search, setSearch] = usePersistedState('parcels:search', '')
   const [statusFilter, setStatusFilter] = usePersistedState<ParcelStatus | ''>('parcels:statusFilter', '')
@@ -28,6 +54,8 @@ export default function ParcelsPage() {
   const [dateTo, setDateTo] = usePersistedState('parcels:dateTo', '')
   const [page, setPage] = usePersistedState('parcels:page', 1)
   const [showFilters, setShowFilters] = useState(false)
+  const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [verifyId, setVerifyId] = useState<number | null>(null)
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['parcels', search, statusFilter, dateFrom, dateTo, page],
@@ -44,6 +72,7 @@ export default function ParcelsPage() {
 
   const parcels = (data as any)?.data ?? []
   const meta = (data as any)?.meta
+  const verifyParcel = parcels.find((p: any) => p.id === verifyId)
 
   return (
     <div className="space-y-6">
@@ -222,11 +251,34 @@ export default function ParcelsPage() {
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <Link to={`/parcels/${p.id}`}>
-                          <Button variant="ghost" size="icon-sm">
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                        </Link>
+                        <div className="flex items-center gap-1">
+                          {hasRole(['admin', 'manager']) && p.status === 'RECEIVED' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              loading={verifyMutation.isPending}
+                              onClick={() => setVerifyId(p.id)}
+                            >
+                              {t('parcels.verify')}
+                            </Button>
+                          )}
+                          <Link to={`/parcels/${p.id}`}>
+                            <Button variant="ghost" size="icon-sm">
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                          </Link>
+                          {hasRole(['admin', 'manager']) && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => setDeleteId(p.id)}
+                              title="Delete parcel"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -254,6 +306,29 @@ export default function ParcelsPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={verifyId !== null}
+        title={t('parcels.confirmVerifyTitle')}
+        message={t('parcels.confirmVerifyMessage', { tracking: verifyParcel?.tracking_number ?? '' })}
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.confirm')}
+        onCancel={() => setVerifyId(null)}
+        onConfirm={() => { if (verifyId !== null) verifyMutation.mutate(verifyId) }}
+        loading={verifyMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete parcel?"
+        message="This action cannot be undone. Are you sure you want to delete this parcel?"
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.delete')}
+        onCancel={() => setDeleteId(null)}
+        onConfirm={() => { if (deleteId !== null) deleteParcelMutation.mutate(deleteId) }}
+        loading={deleteParcelMutation.isPending}
+        variant="destructive"
+      />
     </div>
   )
 }

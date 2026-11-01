@@ -41,6 +41,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/parcels', [ParcelController::class, 'store']);
         Route::get('/parcels/{parcel}', [ParcelController::class, 'show']);
         Route::put('/parcels/{parcel}', [ParcelController::class, 'update']);
+        Route::delete('/parcels/{parcel}', [ParcelController::class, 'destroy']);
         Route::get('/parcels/{parcel}/tracking', [ParcelController::class, 'tracking']);
         Route::post('/parcels/{parcel}/status-transitions', [ParcelController::class, 'statusTransition']);
         Route::post('/parcels/{parcel}/assignments', [ParcelController::class, 'assign']);

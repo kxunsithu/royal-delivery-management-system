@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +9,7 @@ import userService from '@/services/userService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   ArrowLeft, Edit, MapPin, Phone, User, Package, Clock,
   ExternalLink, Truck, ImagePlus, Trash2, X, ZoomIn,
@@ -25,10 +27,11 @@ import type { ParcelStatus } from '@/types'
 import { queryClient } from '@/lib/queryClient'
 
 const STATUS_TRANSITIONS: Record<ParcelStatus, ParcelStatus[]> = {
-  RECEIVED: ['IN_TRANSIT', 'DAMAGED'],
+  RECEIVED: ['VERIFIED', 'DAMAGED'],
+  VERIFIED: ['IN_TRANSIT', 'DELIVERED', 'FAILED', 'DAMAGED'],
   IN_TRANSIT: ['DELIVERED', 'FAILED'],
   DELIVERED: [],
-  FAILED: ['IN_TRANSIT'],
+  FAILED: ['IN_TRANSIT', 'DELIVERED'],
   DAMAGED: [],
 }
 
@@ -47,6 +50,9 @@ export default function ParcelDetailPage() {
 
   const [showAssign, setShowAssign]         = useState(false)
   const [showStatus, setShowStatus]         = useState(false)
+  const [showDelete, setShowDelete]         = useState(false)
+  const [showAssignConfirm, setShowAssignConfirm] = useState(false)
+  const [showStatusConfirm, setShowStatusConfirm] = useState(false)
   const [selectedStaff, setSelectedStaff]   = useState('')
   const [assignNotes, setAssignNotes]       = useState('')
   const [selectedStatus, setSelectedStatus] = useState<ParcelStatus | ''>('')
@@ -75,6 +81,7 @@ export default function ParcelDetailPage() {
       toast({ title: t('parcels.assignedSuccess'), variant: 'success' as any })
       queryClient.invalidateQueries({ queryKey: ['parcel', id] })
       setShowAssign(false)
+      setShowAssignConfirm(false)
     },
     onError: (err: any) => toast({ title: err?.response?.data?.message ?? 'Failed', variant: 'destructive' }),
   })
@@ -85,6 +92,7 @@ export default function ParcelDetailPage() {
       toast({ title: 'Status updated', variant: 'success' as any })
       queryClient.invalidateQueries({ queryKey: ['parcel', id] })
       setShowStatus(false)
+      setShowStatusConfirm(false)
     },
     onError: (err: any) => toast({ title: err?.response?.data?.message ?? 'Failed', variant: 'destructive' }),
   })
@@ -111,6 +119,16 @@ export default function ParcelDetailPage() {
       toast({ title: err?.response?.data?.message ?? 'Delete failed', variant: 'destructive' })
       setDeletingId(null)
     },
+  })
+
+  const deleteParcelMutation = useMutation({
+    mutationFn: () => parcelService.delete(Number(id)),
+    onSuccess: () => {
+      toast({ title: 'Parcel deleted', variant: 'success' as any })
+      queryClient.invalidateQueries({ queryKey: ['parcels'] })
+      navigate(hasRole('delivery_staff') ? '/deliveries/my-assignments' : '/parcels')
+    },
+    onError: (err: any) => toast({ title: err?.response?.data?.message ?? 'Delete failed', variant: 'destructive' }),
   })
 
   const handleFiles = useCallback((files: FileList | File[]) => {
@@ -142,9 +160,9 @@ export default function ParcelDetailPage() {
 
   const p = parcelData
   const images: ParcelImageData[] = (p as any).images ?? []
-  const isTerminal = ['DELIVERED', 'RETURNED_TO_SENDER', 'DAMAGED', 'MISSING'].includes(p.status)
-  const canAssign = hasRole(['admin', 'manager']) && ['RECEIVED', 'IN_TRANSIT', 'FAILED'].includes(p.status)
-  const possibleTransitions = STATUS_TRANSITIONS[p.status as ParcelStatus] ?? []
+  const isTerminal = ['DELIVERED', 'FAILED', 'DAMAGED'].includes(p.status)
+  const canAssign = hasRole(['admin', 'manager']) && ['VERIFIED', 'IN_TRANSIT', 'FAILED'].includes(p.status)
+  const possibleTransitions = (STATUS_TRANSITIONS[p.status as ParcelStatus] ?? []).filter(s => hasRole('delivery_staff') || s !== 'IN_TRANSIT')
   const canChangeStatus = hasRole('admin')
     ? possibleTransitions.length > 0
     : hasRole('manager')
@@ -154,6 +172,7 @@ export default function ParcelDetailPage() {
   const canEdit = hasRole('admin') || (hasRole('manager') && !isTerminal)
 
   const lightboxImage = lightboxIdx !== null ? images[lightboxIdx] : null
+  const selectedStaffName = (staffData as any[])?.find((s: any) => String(s.id) === selectedStaff)?.name ?? ''
 
   return (
     <div className="space-y-6">
@@ -197,6 +216,12 @@ export default function ParcelDetailPage() {
               </Button>
             </Link>
           )}
+          {(hasRole('admin') || hasRole('manager')) && (
+            <Button variant="destructive" size="sm" onClick={() => setShowDelete(true)}>
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => printParcelReceipt(p, i18n.language)}>
             <Printer className="w-3.5 h-3.5" />
             {t('common.print')}
@@ -233,7 +258,7 @@ export default function ParcelDetailPage() {
             )}
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setShowStatus(false)}>{t('common.cancel')}</Button>
-              <Button size="sm" disabled={!selectedStatus} loading={statusMutation.isPending} onClick={() => statusMutation.mutate()}>
+              <Button size="sm" disabled={!selectedStatus} loading={statusMutation.isPending} onClick={() => setShowStatusConfirm(true)}>
                 {t('common.confirm')}
               </Button>
             </div>
@@ -263,7 +288,7 @@ export default function ParcelDetailPage() {
             />
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setShowAssign(false)}>{t('common.cancel')}</Button>
-              <Button size="sm" disabled={!selectedStaff} loading={assignMutation.isPending} onClick={() => assignMutation.mutate()}>
+              <Button size="sm" disabled={!selectedStaff} loading={assignMutation.isPending} onClick={() => setShowAssignConfirm(true)}>
                 {t('parcels.assign')}
               </Button>
             </div>
@@ -523,9 +548,9 @@ export default function ParcelDetailPage() {
       )}
 
       {/* ── Lightbox ──────────────────────────────────────────────────────────── */}
-      {lightboxImage !== null && lightboxIdx !== null && (
+      {lightboxImage !== null && lightboxIdx !== null && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+          className="fixed inset-0 z-50 flex flex-col bg-black"
           onClick={() => setLightboxIdx(null)}
         >
           {/* Top bar */}
@@ -572,32 +597,30 @@ export default function ParcelDetailPage() {
           </div>
 
           {/* Image area */}
-          <div className="flex-1 flex items-center justify-center px-16 min-h-0">
+          <div className="relative flex-1 min-h-0" onClick={() => setLightboxIdx(null)}>
             <img
               src={lightboxImage.url}
               alt={lightboxImage.original_name ?? `Image ${lightboxIdx + 1}`}
-              className="max-w-full max-h-full object-contain rounded shadow-2xl"
+              className="absolute inset-0 w-full h-full object-contain"
               onClick={e => e.stopPropagation()}
             />
+            {images.length > 1 && (
+              <>
+                <button
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors"
+                  onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx - 1 + images.length) % images.length) }}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors"
+                  onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx + 1) % images.length) }}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
           </div>
-
-          {/* Navigation arrows */}
-          {images.length > 1 && (
-            <>
-              <button
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors"
-                onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx - 1 + images.length) % images.length) }}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors"
-                onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx + 1) % images.length) }}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </>
-          )}
 
           {/* Thumbnail strip */}
           {images.length > 1 && (
@@ -620,8 +643,61 @@ export default function ParcelDetailPage() {
               ))}
             </div>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
+
+      <ConfirmDialog
+        open={showStatusConfirm && selectedStatus !== ''}
+        title={t('parcels.confirmStatusTitle')}
+        message={
+          <>
+            <p>
+              {t('parcels.confirmStatusMessage', {
+                tracking: p.tracking_number,
+                from: t(`status.${p.status}`),
+                to: selectedStatus ? t(`status.${selectedStatus}`) : '',
+              })}
+            </p>
+            {statusReason && (
+              <p className="mt-2 text-xs">
+                {t('parcels.reason')}: {statusReason}
+              </p>
+            )}
+          </>
+        }
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.confirm')}
+        onCancel={() => setShowStatusConfirm(false)}
+        onConfirm={() => statusMutation.mutate()}
+        loading={statusMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={showAssignConfirm}
+        title={t('parcels.confirmAssignTitle')}
+        message={t('parcels.confirmAssignMessage', {
+          tracking: p.tracking_number,
+          staff: selectedStaffName,
+        })}
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.confirm')}
+        onCancel={() => setShowAssignConfirm(false)}
+        onConfirm={() => assignMutation.mutate()}
+        loading={assignMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={showDelete}
+        title="Delete parcel?"
+        message="This action cannot be undone. Are you sure you want to delete this parcel?"
+        cancelLabel={t('common.cancel')}
+        confirmLabel={t('common.delete')}
+        onCancel={() => setShowDelete(false)}
+        onConfirm={() => deleteParcelMutation.mutate()}
+        loading={deleteParcelMutation.isPending}
+        variant="destructive"
+      />
     </div>
   )
 }

@@ -184,6 +184,17 @@ class ParcelController extends Controller
         ]);
     }
 
+    public function destroy(Parcel $parcel): JsonResponse
+    {
+        $this->authorize('delete', $parcel);
+
+        $parcel->delete();
+
+        ActivityLog::record('parcel.deleted', $parcel, $parcel->toArray(), []);
+
+        return response()->json(['message' => 'Parcel deleted successfully']);
+    }
+
     public function tracking(Parcel $parcel): JsonResponse
     {
         $this->authorize('view', $parcel);
@@ -223,6 +234,11 @@ class ParcelController extends Controller
             'reason' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        // Only delivery staff can mark a parcel as in transit
+        if ($validated['status'] === 'IN_TRANSIT' && !$request->user()->isDeliveryStaff()) {
+            return response()->json(['message' => 'Only delivery staff can mark a parcel as in transit.'], 403);
+        }
 
         if (!$parcel->canTransitionTo($validated['status'])) {
             return response()->json([
@@ -271,7 +287,7 @@ class ParcelController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        if (!in_array($parcel->status, ['RECEIVED', 'IN_TRANSIT', 'FAILED'])) {
+        if (!in_array($parcel->status, ['RECEIVED', 'VERIFIED', 'IN_TRANSIT', 'FAILED'])) {
             return response()->json([
                 'message' => 'Parcel cannot be assigned in its current status.',
             ], 422);

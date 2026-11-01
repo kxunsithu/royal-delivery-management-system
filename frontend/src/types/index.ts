@@ -31,6 +31,7 @@ export interface AuthResponse {
 
 export type ParcelStatus =
   | 'RECEIVED'
+  | 'VERIFIED'
   | 'IN_TRANSIT'
   | 'DELIVERED'
   | 'FAILED'

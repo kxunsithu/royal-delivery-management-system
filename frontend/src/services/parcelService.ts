@@ -58,6 +58,9 @@ const parcelService = {
   update: (id: number, data: Partial<CreateParcelData>) =>
     apiClient.put<ApiResponse<Parcel>>(`/parcels/${id}`, data),
 
+  delete: (id: number) =>
+    apiClient.delete(`/parcels/${id}`),
+
   tracking: (id: number) =>
     apiClient.get(`/parcels/${id}/tracking`),
 

@@ -314,7 +314,7 @@ export default function MyAssignmentsPage() {
       {/* Delivery Detail Modal */}
       {detailAssignment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-lg border-border max-h-[90vh] overflow-y-auto">
+          <Card className="w-full h-full max-w-none max-h-none border-border overflow-y-auto rounded-none">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">

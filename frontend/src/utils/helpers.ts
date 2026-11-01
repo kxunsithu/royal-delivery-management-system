@@ -5,6 +5,7 @@ import type { ParcelStatus, ParcelPriority, PaymentType, HandoverStatus, Assignm
 export function getParcelStatusClass(status: ParcelStatus): string {
   const map: Record<ParcelStatus, string> = {
     RECEIVED:     'status-received',
+    VERIFIED:     'status-verified',
     IN_TRANSIT:   'status-assigned',
     DELIVERED:    'status-delivered',
     FAILED:       'status-failed',
