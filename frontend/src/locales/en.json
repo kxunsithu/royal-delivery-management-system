@@ -156,7 +156,7 @@
     "isCOD": "Cash on Delivery (COD)",
     "condition": "Parcel Condition",
     "priority": "Priority",
-    "receivedAt": "Received at Mae Sot (Date/Time)",
+    "receivedAt": "Received (Date/Time)",
     "receivedBy": "Confirmed by (Myawaddy staff)",
     "senderInfo": "Sender Info (Mae Sot)",
     "recipientInfo": "Recipient Info (Myawaddy)",
