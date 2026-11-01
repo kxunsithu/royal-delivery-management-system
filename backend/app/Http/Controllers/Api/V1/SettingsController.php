@@ -71,7 +71,7 @@ class SettingsController extends Controller
 
     public function deliveryAreas(): JsonResponse
     {
-        $areas = DeliveryArea::orderBy('name')->get();
+        $areas = DeliveryArea::where('is_active', true)->orderBy('name')->get();
 
         return response()->json([
             'data' => $areas->map(fn($a) => [

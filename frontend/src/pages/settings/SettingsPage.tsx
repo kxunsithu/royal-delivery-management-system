@@ -226,7 +226,7 @@ export default function SettingsPage() {
                         size="icon-sm"
                         onClick={() => deleteAreaMutation.mutate(area.id)}
                         disabled={deleteAreaMutation.isPending}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10"
+                        className="hover:bg-destructive/10"
                       >
                         <Trash2 className="w-3.5 h-3.5 text-destructive" />
                       </Button>
