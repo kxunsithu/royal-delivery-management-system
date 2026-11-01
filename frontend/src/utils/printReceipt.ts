@@ -24,7 +24,7 @@ export interface PrintableParcel {
 const labels = (lang: string) => {
   const my = lang === 'my'
   return {
-    title: my ? 'ပါဆယ် ငွေလျော်မှတ်တမ်း' : 'Parcel Receipt',
+    title: my ? 'ပါဆယ် လက်ခံဘောက်ချာ' : 'Parcel Receipt',
     tracking: my ? 'Tracking နံပါတ်' : 'Tracking Number',
     recipient: my ? 'လက်ခံသူ' : 'Recipient',
     phone: my ? 'ဖုန်းနံပါတ်' : 'Phone',

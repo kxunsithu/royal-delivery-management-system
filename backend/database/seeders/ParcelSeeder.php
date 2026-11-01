@@ -51,11 +51,11 @@ class ParcelSeeder extends Seeder
         ];
         $priorities = ['NORMAL', 'NORMAL', 'NORMAL', 'HIGH', 'URGENT'];
         $senders = [
-            ['မဲဆောက် ဆိုင် A', '+66-55-000-001'],
-            ['မဲဆောက် ဖက်ရှင်ဆိုင်', '+66-55-000-002'],
-            ['Mae Sot Electronics Shop', '+66-55-000-010'],
-            ['Mae Sot Fashion Store', '+66-55-000-011'],
-            ['Mae Sot Pharmacy', '+66-55-000-013'],
+            ['မဲဆောက် ဆိုင် A', '09944074981'],
+            ['မဲဆောက် ဖက်ရှင်ဆိုင်', '09944074981'],
+            ['Mae Sot Electronics Shop', '09944074981'],
+            ['Mae Sot Fashion Store', '09944074981'],
+            ['Mae Sot Pharmacy', '09944074981'],
         ];
 
         for ($i = 1; $i <= 30; $i++) {
@@ -76,9 +76,9 @@ class ParcelSeeder extends Seeder
             $parcel = [
                 'tracking_number' => sprintf('RMD-202411%02d-%05d', ($i % 28) + 1, $i),
                 'sender_name'     => $sender[0],
-                'sender_phone'    => $sender[1],
+                'sender_phone'    => sprintf('09%09d', 944074981 + $i + 1000),
                 'recipient_name'  => $recipientName,
-                'recipient_phone' => sprintf('+95-9-%03d-%06d', 500 + ($i % 200), 100000 + $i),
+                'recipient_phone' => sprintf('09%09d', 944074981 + $i),
                 'delivery_address'=> $deliveryAddress,
                 'delivery_area_id'=> $areaId,
                 'description'     => $description,
@@ -88,7 +88,7 @@ class ParcelSeeder extends Seeder
                 'is_cod'          => $isCod,
                 'status'          => 'RECEIVED_AT_MAE_SOT',
                 'priority'        => $priority,
-                'received_at'     => now()->subMinutes($i * 30),
+                'received_at'     => now()->subDays(($i - 1) % 30)->subHours($i % 24),
                 'received_by_id'  => $admin->id,
             ];
 
