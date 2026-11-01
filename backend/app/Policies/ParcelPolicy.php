@@ -19,11 +19,10 @@ class ParcelPolicy
             return true;
         }
 
-        // Delivery staff can only view their assigned parcels
+        // Delivery staff can view parcels assigned to them (including completed assignments)
         if ($user->isDeliveryStaff()) {
             return $parcel->deliveryAssignments()
                 ->where('staff_id', $user->id)
-                ->where('status', 'ACTIVE')
                 ->exists();
         }
 
