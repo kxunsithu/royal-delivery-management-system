@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import deliveryService from '@/services/deliveryService'
@@ -54,6 +54,9 @@ export default function AssignmentDetailPage() {
                 <span className={`text-xs px-2 py-0.5 rounded ${getParcelStatusClass(p.status)}`}>{t(`status.${p.status}`)}</span>
                 <span className="text-secondary">{p.tracking_number}</span>
               </div>
+              <Link to={`/parcels/${p.id}`} className="text-primary text-xs hover:underline">
+                {'View full parcel details'}
+              </Link>
               <div className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-secondary" />
                 <a href={`tel:${p.recipient_phone}`} className="text-primary">{p.recipient_phone}</a>
