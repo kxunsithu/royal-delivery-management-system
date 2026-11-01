@@ -35,10 +35,10 @@ class DashboardController extends Controller
         $parcelStats = Parcel::selectRaw("
             COUNT(*) as total,
             SUM(CASE WHEN DATE(received_at) = ? THEN 1 ELSE 0 END) as today,
-            SUM(CASE WHEN status IN ('ASSIGNED','OUT_FOR_DELIVERY','READY_FOR_DELIVERY','RECEIVED_AT_MYAWADDY','RECEIVED_AT_MAE_SOT','VERIFIED') THEN 1 ELSE 0 END) as in_progress,
+            SUM(CASE WHEN status IN ('RECEIVED','IN_TRANSIT') THEN 1 ELSE 0 END) as in_progress,
             SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered,
-            SUM(CASE WHEN status = 'DELIVERY_FAILED' THEN 1 ELSE 0 END) as failed,
-            SUM(CASE WHEN status IN ('RETURNED_TO_SENDER','RETURN_TO_OFFICE') THEN 1 ELSE 0 END) as returned
+            SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed,
+            SUM(CASE WHEN status IN ('FAILED','FAILED') THEN 1 ELSE 0 END) as returned
         ", [$today->toDateString()])->first();
 
         $deliveryRate = $parcelStats->delivered > 0 && ($parcelStats->delivered + $parcelStats->failed) > 0
@@ -60,7 +60,7 @@ class DashboardController extends Controller
                 'date' => $date->toDateString(),
                 'received' => Parcel::whereDate('received_at', $date)->count(),
                 'delivered' => Parcel::where('status', 'DELIVERED')->whereDate('updated_at', $date)->count(),
-                'failed' => Parcel::where('status', 'DELIVERY_FAILED')->whereDate('updated_at', $date)->count(),
+                'failed' => Parcel::where('status', 'FAILED')->whereDate('updated_at', $date)->count(),
             ];
         }
 
@@ -88,13 +88,13 @@ class DashboardController extends Controller
         $today = today();
 
         $statuses = Parcel::selectRaw("
-            SUM(CASE WHEN status = 'RECEIVED_AT_MYAWADDY' THEN 1 ELSE 0 END) as received,
-            SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified,
-            SUM(CASE WHEN status = 'READY_FOR_DELIVERY' THEN 1 ELSE 0 END) as ready,
-            SUM(CASE WHEN status = 'ASSIGNED' THEN 1 ELSE 0 END) as assigned,
-            SUM(CASE WHEN status = 'OUT_FOR_DELIVERY' THEN 1 ELSE 0 END) as out_for_delivery,
-            SUM(CASE WHEN status = 'DELIVERY_FAILED' THEN 1 ELSE 0 END) as failed,
-            SUM(CASE WHEN status = 'RETURN_TO_OFFICE' THEN 1 ELSE 0 END) as return_to_office
+            SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received,
+            SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as verified,
+            SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as ready,
+            SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as assigned,
+            SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as out_for_delivery,
+            SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed,
+            SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as return_to_office
         ")->first();
 
         $staffWorkload = DeliveryAssignment::selectRaw("

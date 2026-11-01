@@ -4,18 +4,11 @@ import type { ParcelStatus, ParcelPriority, PaymentType, HandoverStatus, Assignm
 
 export function getParcelStatusClass(status: ParcelStatus): string {
   const map: Record<ParcelStatus, string> = {
-    RECEIVED_AT_MAE_SOT: 'status-received',
-    RECEIVED_AT_MYAWADDY: 'status-received',
-    VERIFIED:            'status-verified',
-    READY_FOR_DELIVERY:  'status-ready',
-    ASSIGNED:            'status-assigned',
-    OUT_FOR_DELIVERY:    'status-out',
-    DELIVERED:           'status-delivered',
-    DELIVERY_FAILED:     'status-failed',
-    RETURN_TO_OFFICE:    'status-return',
-    RETURNED_TO_SENDER:  'status-returned',
-    DAMAGED:             'status-damaged',
-    MISSING:             'status-missing',
+    RECEIVED:     'status-received',
+    IN_TRANSIT:   'status-assigned',
+    DELIVERED:    'status-delivered',
+    FAILED:       'status-failed',
+    DAMAGED:      'status-damaged',
   };
   return map[status] || 'bg-gray-500/15 text-gray-400';
 }

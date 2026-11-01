@@ -52,12 +52,12 @@ class ParcelPolicy
 
         if ($user->isManager()) {
             // Manager can transition to most statuses except delivery-related
-            return !in_array($parcel->status, ['OUT_FOR_DELIVERY']);
+            return !in_array($parcel->status, ['IN_TRANSIT']);
         }
 
         if ($user->isDeliveryStaff()) {
             // Staff can mark as out for delivery and delivery-related transitions
-            return in_array($parcel->status, ['ASSIGNED', 'OUT_FOR_DELIVERY']);
+            return in_array($parcel->status, ['IN_TRANSIT']);
         }
 
         return false;

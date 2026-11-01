@@ -198,18 +198,11 @@
     "updatedAt": "Updated At"
   },
   "status": {
-    "RECEIVED_AT_MAE_SOT": "Received at Mae Sot",
-    "RECEIVED_AT_MYAWADDY": "Received at Myawaddy",
-    "VERIFIED": "Verified",
-    "READY_FOR_DELIVERY": "Ready for Delivery",
-    "ASSIGNED": "Assigned",
-    "OUT_FOR_DELIVERY": "Out for Delivery",
+    "RECEIVED": "Received",
+    "IN_TRANSIT": "In Transit",
     "DELIVERED": "Delivered",
-    "DELIVERY_FAILED": "Delivery Failed",
-    "RETURN_TO_OFFICE": "Return to Office",
-    "RETURNED_TO_SENDER": "Returned to Sender",
-    "DAMAGED": "Damaged",
-    "MISSING": "Missing"
+    "FAILED": "Failed",
+    "DAMAGED": "Damaged"
   },
   "deliveries": {
     "title": "Deliveries",

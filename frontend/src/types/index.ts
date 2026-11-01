@@ -30,18 +30,11 @@ export interface AuthResponse {
 // ─── Parcel Types ─────────────────────────────────────────────────────────────
 
 export type ParcelStatus =
-  | 'RECEIVED_AT_MAE_SOT'
-  | 'RECEIVED_AT_MYAWADDY'
-  | 'VERIFIED'
-  | 'READY_FOR_DELIVERY'
-  | 'ASSIGNED'
-  | 'OUT_FOR_DELIVERY'
+  | 'RECEIVED'
+  | 'IN_TRANSIT'
   | 'DELIVERED'
-  | 'DELIVERY_FAILED'
-  | 'RETURN_TO_OFFICE'
-  | 'RETURNED_TO_SENDER'
-  | 'DAMAGED'
-  | 'MISSING';
+  | 'FAILED'
+  | 'DAMAGED';
 
 export type ParcelCondition = 'GOOD' | 'DAMAGED' | 'MISSING';
 export type ParcelPriority = 'NORMAL' | 'HIGH' | 'URGENT';

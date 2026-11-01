@@ -14,9 +14,7 @@ import { getParcelStatusClass, getPriorityClass, formatDate, formatCurrency } fr
 import { useAuth } from '@/features/auth/AuthContext'
 
 const STATUSES: ParcelStatus[] = [
-  'RECEIVED_AT_MAE_SOT','RECEIVED_AT_MYAWADDY','VERIFIED','READY_FOR_DELIVERY','ASSIGNED',
-  'OUT_FOR_DELIVERY','DELIVERED','DELIVERY_FAILED','RETURN_TO_OFFICE',
-  'RETURNED_TO_SENDER','DAMAGED','MISSING'
+  'RECEIVED','IN_TRANSIT','DELIVERED','FAILED','DAMAGED'
 ]
 
 export default function ParcelsPage() {

@@ -86,7 +86,7 @@ class ParcelSeeder extends Seeder
                 'delivery_fee'    => $deliveryFee,
                 'cod_amount'      => $codAmount,
                 'is_cod'          => $isCod,
-                'status'          => 'RECEIVED_AT_MAE_SOT',
+                'status'          => 'RECEIVED',
                 'priority'        => $priority,
                 'received_at'     => now()->subDays(($i - 1) % 30)->subHours($i % 24),
                 'received_by_id'  => $admin->id,

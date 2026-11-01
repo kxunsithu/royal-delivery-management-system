@@ -25,18 +25,11 @@ import type { ParcelStatus } from '@/types'
 import { queryClient } from '@/lib/queryClient'
 
 const STATUS_TRANSITIONS: Record<ParcelStatus, ParcelStatus[]> = {
-  RECEIVED_AT_MAE_SOT: ['RECEIVED_AT_MYAWADDY', 'DAMAGED', 'MISSING'],
-  RECEIVED_AT_MYAWADDY: ['VERIFIED', 'DAMAGED', 'MISSING'],
-  VERIFIED: ['READY_FOR_DELIVERY', 'DAMAGED', 'MISSING'],
-  READY_FOR_DELIVERY: ['ASSIGNED'],
-  ASSIGNED: ['OUT_FOR_DELIVERY', 'READY_FOR_DELIVERY'],
-  OUT_FOR_DELIVERY: ['DELIVERED', 'DELIVERY_FAILED'],
+  RECEIVED: ['IN_TRANSIT', 'DAMAGED'],
+  IN_TRANSIT: ['DELIVERED', 'FAILED'],
   DELIVERED: [],
-  DELIVERY_FAILED: ['RETURN_TO_OFFICE', 'ASSIGNED', 'RETURNED_TO_SENDER'],
-  RETURN_TO_OFFICE: ['ASSIGNED', 'RETURNED_TO_SENDER', 'READY_FOR_DELIVERY'],
-  RETURNED_TO_SENDER: [],
+  FAILED: ['IN_TRANSIT'],
   DAMAGED: [],
-  MISSING: [],
 }
 
 function formatBytes(bytes: number | null): string {
@@ -150,12 +143,12 @@ export default function ParcelDetailPage() {
   const p = parcelData
   const images: ParcelImageData[] = (p as any).images ?? []
   const isTerminal = ['DELIVERED', 'RETURNED_TO_SENDER', 'DAMAGED', 'MISSING'].includes(p.status)
-  const canAssign = hasRole(['admin', 'manager']) && ['READY_FOR_DELIVERY', 'ASSIGNED', 'DELIVERY_FAILED', 'RETURN_TO_OFFICE'].includes(p.status)
+  const canAssign = hasRole(['admin', 'manager']) && ['RECEIVED', 'IN_TRANSIT', 'FAILED'].includes(p.status)
   const possibleTransitions = STATUS_TRANSITIONS[p.status as ParcelStatus] ?? []
   const canChangeStatus = hasRole('admin')
     ? possibleTransitions.length > 0
     : hasRole('manager')
-      ? possibleTransitions.length > 0 && p.status !== 'OUT_FOR_DELIVERY'
+      ? possibleTransitions.length > 0 && p.status !== 'IN_TRANSIT'
       : false
   const canManageImages = (hasRole('admin') || (hasRole('manager') && !isTerminal))
   const canEdit = hasRole('admin') || (hasRole('manager') && !isTerminal)

@@ -24,8 +24,8 @@ return new class extends Migration
             $table->decimal('delivery_fee', 15, 2)->default(0);
             $table->decimal('cod_amount', 15, 2)->default(0);
             $table->boolean('is_cod')->default(false);
-            $table->string('status', 50)->default('RECEIVED_AT_MYAWADDY')->index();
-            $table->string('condition', 50)->default('GOOD')->comment('GOOD, DAMAGED, MISSING');
+            $table->string('status', 50)->default('RECEIVED')->index();
+            $table->string('condition', 50)->default('GOOD')->comment('GOOD, DAMAGED, DAMAGED');
             $table->string('priority', 20)->default('NORMAL')->comment('NORMAL, HIGH, URGENT');
             $table->timestamp('received_at')->useCurrent();
             $table->foreignId('received_by_id')->nullable()->constrained('users')->nullOnDelete();

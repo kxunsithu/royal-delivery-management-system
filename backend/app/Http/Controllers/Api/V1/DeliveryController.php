@@ -152,7 +152,7 @@ class DeliveryController extends Controller
 
             // Update parcel status
             $oldStatus = $parcel->status;
-            $newStatus = $validated['result'] === 'DELIVERED' ? 'DELIVERED' : 'DELIVERY_FAILED';
+            $newStatus = $validated['result'] === 'DELIVERED' ? 'DELIVERED' : 'FAILED';
             $parcel->update(['status' => $newStatus]);
 
             ParcelStatusHistory::create([

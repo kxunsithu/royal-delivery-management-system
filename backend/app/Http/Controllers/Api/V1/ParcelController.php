@@ -91,7 +91,7 @@ class ParcelController extends Controller
             $parcel = Parcel::create([
                 ...$validated,
                 'tracking_number' => $validated['tracking_number'] ?? Parcel::generateTrackingNumber(),
-                'status' => 'RECEIVED_AT_MAE_SOT',
+                'status' => 'RECEIVED',
                 'received_by_id' => $request->user()->id,
                 'received_at' => $validated['received_at'] ?? now(),
                 'quantity' => $validated['quantity'] ?? 1,
@@ -104,7 +104,7 @@ class ParcelController extends Controller
             ParcelStatusHistory::create([
                 'parcel_id' => $parcel->id,
                 'from_status' => null,
-                'to_status' => 'RECEIVED_AT_MAE_SOT',
+                'to_status' => 'RECEIVED',
                 'changed_by_id' => $request->user()->id,
                 'reason' => 'Parcel registered at Mae Sot office',
             ]);
@@ -271,7 +271,7 @@ class ParcelController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        if (!in_array($parcel->status, ['READY_FOR_DELIVERY', 'ASSIGNED', 'RETURN_TO_OFFICE', 'DELIVERY_FAILED'])) {
+        if (!in_array($parcel->status, ['RECEIVED', 'IN_TRANSIT', 'FAILED'])) {
             return response()->json([
                 'message' => 'Parcel cannot be assigned in its current status.',
             ], 422);
@@ -304,12 +304,12 @@ class ParcelController extends Controller
 
             // Update parcel status
             $oldStatus = $parcel->status;
-            $parcel->update(['status' => 'ASSIGNED']);
+            $parcel->update(['status' => 'IN_TRANSIT']);
 
             ParcelStatusHistory::create([
                 'parcel_id' => $parcel->id,
                 'from_status' => $oldStatus,
-                'to_status' => 'ASSIGNED',
+                'to_status' => 'IN_TRANSIT',
                 'changed_by_id' => $request->user()->id,
                 'reason' => "Assigned to staff: {$staff->name}",
                 'notes' => $validated['notes'] ?? null,

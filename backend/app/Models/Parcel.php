@@ -103,27 +103,19 @@ class Parcel extends Model
     {
         return in_array($this->status, [
             'DELIVERED',
-            'RETURNED_TO_SENDER',
+            'FAILED',
             'DAMAGED',
-            'MISSING',
         ]);
     }
 
     public function canTransitionTo(string $newStatus): bool
     {
         $transitions = [
-            'RECEIVED_AT_MAE_SOT' => ['RECEIVED_AT_MYAWADDY', 'DAMAGED', 'MISSING'],
-            'RECEIVED_AT_MYAWADDY' => ['VERIFIED', 'DAMAGED', 'MISSING'],
-            'VERIFIED' => ['READY_FOR_DELIVERY', 'DAMAGED', 'MISSING'],
-            'READY_FOR_DELIVERY' => ['ASSIGNED'],
-            'ASSIGNED' => ['OUT_FOR_DELIVERY', 'READY_FOR_DELIVERY'],
-            'OUT_FOR_DELIVERY' => ['DELIVERED', 'DELIVERY_FAILED'],
-            'DELIVERY_FAILED' => ['RETURN_TO_OFFICE', 'ASSIGNED', 'RETURNED_TO_SENDER'],
-            'RETURN_TO_OFFICE' => ['ASSIGNED', 'RETURNED_TO_SENDER', 'READY_FOR_DELIVERY'],
-            'RETURNED_TO_SENDER' => [],
+            'RECEIVED' => ['IN_TRANSIT', 'DAMAGED'],
+            'IN_TRANSIT' => ['DELIVERED', 'FAILED'],
+            'FAILED' => ['IN_TRANSIT'],
             'DELIVERED' => [],
             'DAMAGED' => [],
-            'MISSING' => [],
         ];
 
         return in_array($newStatus, $transitions[$this->status] ?? []);
