@@ -22,7 +22,7 @@ echo "=== Running database migrations ==="
 php artisan migrate --force
 
 echo "=== Seeding database (idempotent) ==="
-php artisan db:seed --force 2>/dev/null || true
+php artisan db:seed --force || echo "Seeding skipped or already applied"
 
 echo "=== Setting storage permissions ==="
 chmod -R 775 storage bootstrap/cache

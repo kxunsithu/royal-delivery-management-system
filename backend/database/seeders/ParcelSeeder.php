@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\DeliveryArea;
 use App\Models\Parcel;
+use App\Models\ParcelImage;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -11,7 +12,7 @@ class ParcelSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('email', 'admin@royal-myawaddy.local')->firstOrFail();
+        $admin = User::where('email', 'admin@gmail.com')->firstOrFail();
         $areas = DeliveryArea::pluck('id')->toArray();
 
         $burmeseNames = [
@@ -91,10 +92,27 @@ class ParcelSeeder extends Seeder
                 'received_by_id'  => $admin->id,
             ];
 
-            Parcel::firstOrCreate(
+            $seededParcel = Parcel::firstOrCreate(
                 ['tracking_number' => $parcel['tracking_number']],
                 $parcel
             );
+
+            // Attach a sample parcel image from the parcel-images folder
+            if (!$seededParcel->images()->exists()) {
+                $imageFiles = ['p1.jpeg', 'p2.jpeg', 'p3.jpeg', 'p4.webp', 'p5.png'];
+                $imageFile = $imageFiles[($i - 1) % count($imageFiles)];
+                $imagePath = 'parcel-images/' . $imageFile;
+                $fullPath = storage_path('app/public/' . $imagePath);
+
+                ParcelImage::create([
+                    'parcel_id'     => $seededParcel->id,
+                    'path'          => $imagePath,
+                    'original_name' => $imageFile,
+                    'size'          => is_file($fullPath) ? filesize($fullPath) : null,
+                    'mime_type'     => is_file($fullPath) ? (mime_content_type($fullPath) ?: null) : null,
+                    'sort_order'    => 0,
+                ]);
+            }
         }
 
         $this->command->info('100 sample parcels seeded.');

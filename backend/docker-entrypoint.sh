@@ -18,8 +18,8 @@ php artisan view:cache || true
 # Run migrations
 php artisan migrate --force
 
-# Idempotent seed (first deploy only effectively)
-php artisan db:seed --force 2>/dev/null || true
+# Idempotent seed (safe to re-run on every deploy)
+php artisan db:seed --force || echo "Seeding skipped or already applied"
 
 # Public storage symlink for uploaded files
 php artisan storage:link --force 2>/dev/null || true

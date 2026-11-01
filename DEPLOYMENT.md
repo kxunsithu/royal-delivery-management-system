@@ -102,9 +102,10 @@ two services. If Blueprint sync is unavailable on your plan, use the manual step
 3. Set `DB_DATABASE=/var/data/database.sqlite`.
 
 ## Default credentials (seeded)
-- Admin: `admin@royal-myawaddy.local` / `Admin@123456`
-- Manager: `manager@royal-myawaddy.local` / `Manager@123456`
-- Staff: `staff1@royal-myawaddy.local` / `Staff@123456`
+- Admin: `admin@gmail.com` / `Admin@123456`
+- Manager: `mgmoe@gmail.com` / `Manager@123456`
+- Accountant: `makhin@gmail.com` / `Accountant@123456`
+- Staff: `kozaw@gmail.com` / `Staff@123456`
 
 ## Local development
 ```bash
