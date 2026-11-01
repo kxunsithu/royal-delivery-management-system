@@ -300,7 +300,7 @@ export default function ParcelDetailPage() {
 
         {/* Recipient info */}
         <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-4 h-4 text-primary" />Recipient</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-4 h-4 text-primary" />{t('parcels.recipientName')}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-secondary" />

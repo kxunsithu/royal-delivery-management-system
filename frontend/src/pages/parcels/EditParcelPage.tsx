@@ -110,7 +110,7 @@ export default function EditParcelPage() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           {/* LEFT — Recipient & Delivery */}
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Recipient &amp; Delivery</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-base">{t('parcels.recipientName')} &amp; Delivery</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               {[
                 ['recipient_name', t('parcels.recipientName'), 'text'],

@@ -26,14 +26,18 @@ export default function ParcelsPage() {
 
   const [search, setSearch] = usePersistedState('parcels:search', '')
   const [statusFilter, setStatusFilter] = usePersistedState<ParcelStatus | ''>('parcels:statusFilter', '')
+  const [dateFrom, setDateFrom] = usePersistedState('parcels:dateFrom', '')
+  const [dateTo, setDateTo] = usePersistedState('parcels:dateTo', '')
   const [page, setPage] = usePersistedState('parcels:page', 1)
   const [showFilters, setShowFilters] = useState(false)
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ['parcels', search, statusFilter, page],
+    queryKey: ['parcels', search, statusFilter, dateFrom, dateTo, page],
     queryFn: () => parcelService.list({
       search: search || undefined,
       status: statusFilter || undefined,
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
       page,
       per_page: 20,
     }).then(r => r.data),
@@ -125,6 +129,35 @@ export default function ParcelsPage() {
               </div>
             </div>
           )}
+
+          <div className="mt-3 pt-3 border-t border-border flex flex-col sm:flex-row gap-3">
+            <div className="flex items-center gap-2">
+              <label className="text-secondary text-xs whitespace-nowrap">{t('common.from') ?? 'From'}</label>
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={e => { setDateFrom(e.target.value); setPage(1) }}
+                className="w-auto"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-secondary text-xs whitespace-nowrap">{t('common.to') ?? 'To'}</label>
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={e => { setDateTo(e.target.value); setPage(1) }}
+              />
+            </div>
+            {(dateFrom || dateTo) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setDateFrom(''); setDateTo(''); setPage(1) }}
+              >
+                {'Clear'}
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
