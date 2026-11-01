@@ -7,7 +7,7 @@ import deliveryService from '@/services/deliveryService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Eye, RefreshCw, MapPin, Phone, Package, CheckCircle2, XCircle, X } from 'lucide-react'
+import { Search, Eye, RefreshCw, MapPin, Phone, Package, CheckCircle2, XCircle, X, Truck } from 'lucide-react'
 import { getParcelStatusClass, formatDate, formatCurrency, buildGoogleMapsUrl } from '@/utils/helpers'
 import { toast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
@@ -174,9 +174,14 @@ export default function MyAssignmentsPage() {
 
                     {/* Actions */}
                     <div className="flex flex-col gap-2 items-end">
-                      <Link to={`/deliveries/${a.id}`}>
-                        <Button variant="ghost" size="icon-sm">
+                      <Link to={`/parcels/${p.id}`}>
+                        <Button variant="ghost" size="icon-sm" title="View parcel details">
                           <Eye className="w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
+                      <Link to={`/deliveries/${a.id}`}>
+                        <Button variant="ghost" size="icon-sm" title="View delivery details">
+                          <Truck className="w-3.5 h-3.5" />
                         </Button>
                       </Link>
                       <a href={buildGoogleMapsUrl(p.delivery_address)} target="_blank" rel="noopener noreferrer">
