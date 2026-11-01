@@ -159,7 +159,7 @@ export default function ParcelDetailPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/parcels')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(hasRole('delivery_staff') ? '/deliveries/my-assignments' : '/parcels')}>
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div className="flex-1 min-w-0">

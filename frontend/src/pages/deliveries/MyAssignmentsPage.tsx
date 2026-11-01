@@ -7,7 +7,7 @@ import deliveryService from '@/services/deliveryService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Eye, RefreshCw, MapPin, Phone, Package, CheckCircle2, XCircle, X, Truck } from 'lucide-react'
+import { Search, Eye, RefreshCw, MapPin, Phone, Package, CheckCircle2, XCircle, X, Truck, ExternalLink } from 'lucide-react'
 import { getParcelStatusClass, formatDate, formatCurrency, buildGoogleMapsUrl } from '@/utils/helpers'
 import { toast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
@@ -17,6 +17,7 @@ export default function MyAssignmentsPage() {
   const [search, setSearch] = usePersistedState('myAssignments:search', '')
   const [activeTab, setActiveTab] = usePersistedState<'active' | 'completed'>('myAssignments:activeTab', 'active')
   const [showAttemptModal, setShowAttemptModal] = useState<number | null>(null)
+  const [detailAssignment, setDetailAssignment] = useState<any>(null)
   const [attemptForm, setAttemptForm] = useState({
     result: 'DELIVERED' as 'DELIVERED' | 'FAILED',
     failure_reason: '',
@@ -179,11 +180,9 @@ export default function MyAssignmentsPage() {
                           <Eye className="w-3.5 h-3.5" />
                         </Button>
                       </Link>
-                      <Link to={`/deliveries/${a.id}`}>
-                        <Button variant="ghost" size="icon-sm" title="View delivery details">
-                          <Truck className="w-3.5 h-3.5" />
-                        </Button>
-                      </Link>
+                      <Button variant="ghost" size="icon-sm" title="View delivery details" onClick={() => setDetailAssignment(a)}>
+                        <Truck className="w-3.5 h-3.5" />
+                      </Button>
                       <a href={buildGoogleMapsUrl(p.delivery_address)} target="_blank" rel="noopener noreferrer">
                         <Button variant="outline" size="sm">
                           <MapPin className="w-3.5 h-3.5" />
@@ -306,6 +305,73 @@ export default function MyAssignmentsPage() {
                 >
                   {t('deliveries.recordAttempt')}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Delivery Detail Modal */}
+      {detailAssignment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-lg border-border max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-primary" />
+                  {detailAssignment.parcel?.tracking_number}
+                </CardTitle>
+                <Button variant="ghost" size="icon-sm" onClick={() => setDetailAssignment(null)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              {detailAssignment.parcel && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded ${getParcelStatusClass(detailAssignment.parcel.status)}`}>{t(`status.${detailAssignment.parcel.status}`)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3.5 h-3.5 text-secondary" />
+                    <a href={`tel:${detailAssignment.parcel.recipient_phone}`} className="text-primary">{detailAssignment.parcel.recipient_phone}</a>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-3.5 h-3.5 text-secondary mt-0.5" />
+                    <div>
+                      <p className="text-foreground">{detailAssignment.parcel.delivery_address}</p>
+                      {detailAssignment.parcel.delivery_area && <p className="text-secondary text-xs">{detailAssignment.parcel.delivery_area.name}</p>}
+                    </div>
+                  </div>
+                  <a href={buildGoogleMapsUrl(detailAssignment.parcel.delivery_address)} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-primary text-xs hover:underline">
+                    <ExternalLink className="w-3 h-3" />
+                    {t('deliveries.openInMaps')}
+                  </a>
+                  <div className="pt-2 border-t border-border space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-secondary">{t('parcels.deliveryFee')}</span>
+                      <span className="text-foreground">{formatCurrency(detailAssignment.parcel.delivery_fee, i18n.language)}</span>
+                    </div>
+                    {detailAssignment.parcel.is_cod && (
+                      <div className="flex justify-between">
+                        <span className="text-secondary">COD</span>
+                        <span className="text-warning">{formatCurrency(detailAssignment.parcel.cod_amount, i18n.language)}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="pt-2 border-t border-border text-xs text-secondary">
+                    {t('deliveries.assignedAt')}: {formatDate(detailAssignment.assigned_at, i18n.language)}
+                  </div>
+                </>
+              )}
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setDetailAssignment(null)}>
+                  {t('common.close') ?? 'Close'}
+                </Button>
+                <Link to={`/parcels/${detailAssignment.parcel?.id}`} className="flex-1">
+                  <Button className="w-full">View full parcel details</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

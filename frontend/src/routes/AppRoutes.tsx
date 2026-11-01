@@ -18,7 +18,7 @@ import EditParcelPage from '@/pages/parcels/EditParcelPage'
 // Deliveries
 import DeliveriesPage from '@/pages/deliveries/DeliveriesPage'
 import MyAssignmentsPage from '@/pages/deliveries/MyAssignmentsPage'
-import AssignmentDetailPage from '@/pages/deliveries/AssignmentDetailPage'
+
 
 // Finance
 import FinancePage from '@/pages/finance/FinancePage'
@@ -134,7 +134,6 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route path="deliveries/:id" element={<AssignmentDetailPage />} />
 
         {/* Finance */}
         <Route
