@@ -58,7 +58,7 @@ class ParcelSeeder extends Seeder
             ['Mae Sot Pharmacy', '+66-55-000-013'],
         ];
 
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 30; $i++) {
             $useEnglish = ($i % 2 === 0);
             $namePool = $useEnglish ? $englishNames : $burmeseNames;
             $addressPool = $useEnglish ? $englishAddresses : $burmeseAddresses;
@@ -115,6 +115,6 @@ class ParcelSeeder extends Seeder
             }
         }
 
-        $this->command->info('100 sample parcels seeded.');
+        $this->command->info('30 sample parcels seeded.');
     }
 }
