@@ -85,7 +85,7 @@ export default function PaymentsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    {['Tracking #', 'Recipient', 'Type', 'Amount', 'Status', 'Collected By', 'Date'].map(h => (
+                    {['Tracking #', t('parcels.recipientName'), 'Type', 'Amount', 'Status', 'Collected By', 'Date'].map(h => (
                       <th key={h} className="text-left text-xs text-secondary font-medium px-5 py-3 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>

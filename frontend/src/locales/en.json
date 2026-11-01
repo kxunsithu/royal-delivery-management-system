@@ -176,7 +176,7 @@
     "changeStatus": "Change Status",
     "selectNewStatus": "Select New Status",
     "reason": "Reason",
-    "searchPlaceholder": "Search by tracking number, recipient name or phone...",
+    "searchPlaceholder": "Search by tracking number, sender, recipient, phone or date...",
     "filterByStatus": "Filter by Status",
     "filterByArea": "Filter by Area",
     "filterByPriority": "Filter by Priority",

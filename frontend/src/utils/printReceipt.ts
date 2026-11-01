@@ -70,11 +70,12 @@ export function printParcelReceipt(parcel: PrintableParcel, lang: string = 'en')
 
   const rows: Array<[string, string]> = [
     [L.tracking, parcel.tracking_number],
-    [L.recipient, parcel.recipient_name],
-    [L.phone, parcel.recipient_phone],
-    [L.address, parcel.delivery_address],
-    [L.area, areaName],
   ]
+  if (parcel.sender_name) rows.push([L.sender, `${parcel.sender_name}${parcel.sender_phone ? ' (' + parcel.sender_phone + ')' : ''}`])
+  rows.push([L.recipient, parcel.recipient_name])
+  rows.push([L.phone, parcel.recipient_phone])
+  rows.push([L.address, parcel.delivery_address])
+  rows.push([L.area, areaName])
   if (parcel.description) rows.push([L.description, parcel.description])
   rows.push([L.deliveryFee, money(parcel.delivery_fee)])
   if (parcel.is_cod) rows.push([L.cod, money(parcel.cod_amount)])

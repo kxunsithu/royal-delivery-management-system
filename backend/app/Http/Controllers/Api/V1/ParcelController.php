@@ -28,8 +28,11 @@ class ParcelController extends Controller
             ->when($request->search, fn($q) => $q->where(function ($sq) use ($request) {
                 $term = '%' . strtolower($request->search) . '%';
                 $sq->whereRaw('LOWER(tracking_number) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(sender_name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(sender_phone) LIKE ?', [$term])
                     ->orWhereRaw('LOWER(recipient_name) LIKE ?', [$term])
-                    ->orWhereRaw('LOWER(recipient_phone) LIKE ?', [$term]);
+                    ->orWhereRaw('LOWER(recipient_phone) LIKE ?', [$term])
+                    ->orWhereRaw('DATE(received_at) LIKE ?', [$term]);
             }))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->delivery_area_id, fn($q) => $q->where('delivery_area_id', $request->delivery_area_id))

@@ -148,7 +148,7 @@ export default function DeliveriesPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    {['Tracking #', 'Recipient', 'Staff', 'Area', t('common.status'), 'Assigned', ''].map(h => (
+                    {['Tracking #', t('parcels.recipientName'), 'Staff', 'Area', t('common.status'), 'Assigned', ''].map(h => (
                       <th key={h} className="text-left text-xs text-secondary font-medium px-5 py-3 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>

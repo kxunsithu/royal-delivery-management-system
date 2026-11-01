@@ -150,7 +150,7 @@ export default function ParcelsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    {['Image', 'Tracking #', t('parcels.recipientName'), t('parcels.deliveryFee'), t('parcels.priority'), t('common.status'), ''].map(h => (
+                    {['Image', 'Tracking #', t('parcels.senderName'), t('parcels.recipientName'), t('parcels.receivedAt'), t('common.status'), ''].map(h => (
                       <th key={h} className="text-left text-xs text-secondary font-medium px-5 py-3 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -175,19 +175,15 @@ export default function ParcelsPage() {
                         <span className="text-primary font-mono text-sm font-medium">{p.tracking_number}</span>
                       </td>
                       <td className="px-5 py-3.5">
+                        <p className="text-foreground text-sm">{p.sender_name ?? '-'}</p>
+                        <p className="text-secondary text-xs">{p.sender_phone ?? ''}</p>
+                      </td>
+                      <td className="px-5 py-3.5">
                         <p className="text-foreground text-sm">{p.recipient_name}</p>
                         <p className="text-secondary text-xs">{p.recipient_phone}</p>
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="text-foreground text-sm">{formatCurrency(p.delivery_fee, i18n.language)}</span>
-                        {p.is_cod && (
-                          <span className="ml-1.5 text-xs text-warning">+COD</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <span className={`text-xs px-2 py-0.5 rounded ${getPriorityClass(p.priority)}`}>
-                          {t(`parcels.priorities.${p.priority}`)}
-                        </span>
+                        <span className="text-secondary text-xs">{formatDate(p.received_at, i18n.language)}</span>
                       </td>
                       <td className="px-5 py-3.5">
                         <span className={`text-xs px-2 py-0.5 rounded ${getParcelStatusClass(p.status)}`}>
