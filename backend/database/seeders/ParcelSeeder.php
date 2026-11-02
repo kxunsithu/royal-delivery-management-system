@@ -68,10 +68,7 @@ class ParcelSeeder extends Seeder
             $description = $descriptions[($i - 1) % count($descriptions)];
             $priority = $priorities[($i - 1) % count($priorities)];
             $areaId = $areas[($i - 1) % max(count($areas), 1)] ?? null;
-            $isCod = ($i % 3 === 0);
             $quantity = ($i % 5) + 1;
-            $deliveryFee = 2000 + (($i % 10) * 500);
-            $codAmount = $isCod ? (10000 + (($i % 8) * 5000)) : 0;
 
             $parcel = [
                 'tracking_number' => sprintf('RMD-202411%02d-%05d', ($i % 28) + 1, $i),
@@ -83,9 +80,6 @@ class ParcelSeeder extends Seeder
                 'delivery_area_id'=> $areaId,
                 'description'     => $description,
                 'quantity'        => $quantity,
-                'delivery_fee'    => $deliveryFee,
-                'cod_amount'      => $codAmount,
-                'is_cod'          => $isCod,
                 'status'          => 'RECEIVED',
                 'priority'        => $priority,
                 'received_at'     => now()->subDays(($i - 1) % 30)->subHours($i % 24),

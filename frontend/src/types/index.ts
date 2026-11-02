@@ -83,7 +83,6 @@ export interface ParcelDetail extends Parcel {
   status_histories: ParcelStatusHistory[];
   delivery_assignments: DeliveryAssignment[];
   delivery_attempts: DeliveryAttempt[];
-  payments: Payment[];
 }
 
 export interface ParcelStatusHistory {
@@ -127,57 +126,10 @@ export interface DeliveryAttempt {
   result: DeliveryResult;
   failure_reason?: FailureReason;
   recipient_name?: string;
-  delivery_fee_collected: number;
-  cod_collected: number;
   notes?: string;
 }
 
-// ─── Finance Types ────────────────────────────────────────────────────────────
-
-export type PaymentType = 'DELIVERY_FEE' | 'COD';
-export type PaymentStatus = 'COLLECTED' | 'HANDED_OVER' | 'RECONCILED';
-export type HandoverStatus = 'PENDING' | 'SUBMITTED' | 'VERIFIED' | 'DISPUTED';
-
-export interface Payment {
-  id: number;
-  parcel?: { id: number; tracking_number: string; recipient_name: string };
-  payment_type: PaymentType;
-  amount: number;
-  status: PaymentStatus;
-  collected_by?: { id: number; name: string };
-  collected_at: string;
-  notes?: string;
-}
-
-export interface CashHandover {
-  id: number;
-  staff?: { id: number; name: string };
-  verified_by?: { id: number; name: string };
-  expected_amount: number;
-  submitted_amount: number;
-  verified_amount?: number;
-  discrepancy?: number;
-  status: HandoverStatus;
-  submission_notes?: string;
-  verification_notes?: string;
-  period_start?: string;
-  period_end?: string;
-  submitted_at?: string;
-  verified_at?: string;
-  created_at: string;
-}
-
-export interface Expense {
-  id: number;
-  category: string;
-  description: string;
-  amount: number;
-  expense_date: string;
-  is_voided: boolean;
-  void_reason?: string;
-  recorded_by?: { id: number; name: string };
-  created_at: string;
-}
+// Finance types removed
 
 // ─── API Response Types ───────────────────────────────────────────────────────
 
@@ -208,12 +160,6 @@ export interface AdminDashboard {
     failed: number;
     returned: number;
     delivery_success_rate: number;
-  };
-  financial_stats: {
-    total_delivery_fees: number;
-    today_delivery_fees: number;
-    outstanding_cod: number;
-    pending_handovers: number;
   };
   trends: Array<{ date: string; received: number; delivered: number; failed: number }>;
   active_staff_count: number;

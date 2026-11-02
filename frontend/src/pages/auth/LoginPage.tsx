@@ -78,7 +78,7 @@ export default function LoginPage() {
               efficiently.
             </h2>
             <p className="text-secondary text-base leading-relaxed">
-              Track parcels from Mae Sot to Myawaddy. Manage staff, finances,
+              Track parcels from Mae Sot to Myawaddy. Manage staff,
               and deliver with confidence.
             </p>
 

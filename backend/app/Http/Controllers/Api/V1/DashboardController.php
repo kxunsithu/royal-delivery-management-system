@@ -3,12 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\CashHandover;
 use App\Models\DeliveryAssignment;
 use App\Models\DeliveryAttempt;
-use App\Models\Expense;
 use App\Models\Parcel;
-use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,9 +19,8 @@ class DashboardController extends Controller
         return match (true) {
             $user->isAdmin()        => $this->adminDashboard(),
             $user->isManager()      => $this->managerDashboard(),
-            $user->isAccountant()   => $this->accountantDashboard(),
             $user->isDeliveryStaff()=> $this->staffDashboard($user),
-            default                 => response()->json(['message' => 'Unknown role'], 403),
+            default                 => $this->managerDashboard(),
         };
     }
 
@@ -38,21 +34,13 @@ class DashboardController extends Controller
             SUM(CASE WHEN status IN ('RECEIVED','IN_TRANSIT') THEN 1 ELSE 0 END) as in_progress,
             SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered,
             SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed,
-            SUM(CASE WHEN status IN ('FAILED','FAILED') THEN 1 ELSE 0 END) as returned
+            SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as returned
         ", [$today->toDateString()])->first();
 
         $deliveryRate = $parcelStats->delivered > 0 && ($parcelStats->delivered + $parcelStats->failed) > 0
             ? round($parcelStats->delivered / ($parcelStats->delivered + $parcelStats->failed) * 100, 1)
             : 0;
 
-        $financialStats = [
-            'total_delivery_fees' => (float) Payment::where('payment_type', 'DELIVERY_FEE')->sum('amount'),
-            'today_delivery_fees' => (float) Payment::where('payment_type', 'DELIVERY_FEE')->whereDate('collected_at', $today)->sum('amount'),
-            'outstanding_cod' => (float) Payment::where('payment_type', 'COD')->where('status', 'COLLECTED')->sum('amount'),
-            'pending_handovers' => CashHandover::where('status', 'SUBMITTED')->count(),
-        ];
-
-        // Delivery trends for last 7 days
         $trends = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
@@ -76,7 +64,6 @@ class DashboardController extends Controller
                     'returned' => (int) $parcelStats->returned,
                     'delivery_success_rate' => $deliveryRate,
                 ],
-                'financial_stats' => $financialStats,
                 'trends' => $trends,
                 'active_staff_count' => User::active()->deliveryStaff()->count(),
             ],
@@ -129,57 +116,11 @@ class DashboardController extends Controller
         ]);
     }
 
-    private function accountantDashboard(): JsonResponse
-    {
-        $today = today();
-
-        $todayPayments = Payment::whereDate('collected_at', $today);
-
-        $todayDeliveryFees = (float) (clone $todayPayments)->where('payment_type', 'DELIVERY_FEE')->sum('amount');
-        $todayCod = (float) (clone $todayPayments)->where('payment_type', 'COD')->sum('amount');
-
-        $thisMonthStart = today()->startOfMonth();
-        $monthlyExpenses = (float) Expense::active()->where('expense_date', '>=', $thisMonthStart)->sum('amount');
-        $monthlyFees = (float) Payment::where('payment_type', 'DELIVERY_FEE')->where('collected_at', '>=', $thisMonthStart)->sum('amount');
-
-        return response()->json([
-            'data' => [
-                'role' => 'accountant',
-                'today' => [
-                    'delivery_fees' => $todayDeliveryFees,
-                    'cod_collected' => $todayCod,
-                    'total_collected' => $todayDeliveryFees + $todayCod,
-                ],
-                'pending' => [
-                    'unverified_handovers' => CashHandover::where('status', 'SUBMITTED')->count(),
-                    'outstanding_payments' => (float) Payment::where('status', 'COLLECTED')->sum('amount'),
-                ],
-                'monthly' => [
-                    'delivery_fees' => $monthlyFees,
-                    'expenses' => $monthlyExpenses,
-                    'net_income' => $monthlyFees - $monthlyExpenses,
-                ],
-                'recent_handovers' => CashHandover::with('staff:id,name')
-                    ->orderByDesc('created_at')
-                    ->limit(5)
-                    ->get()
-                    ->map(fn($h) => [
-                        'id' => $h->id,
-                        'staff_name' => $h->staff?->name,
-                        'submitted_amount' => $h->submitted_amount,
-                        'status' => $h->status,
-                        'submitted_at' => $h->submitted_at?->toISOString(),
-                    ]),
-            ],
-        ]);
-    }
-
     private function staffDashboard(User $user): JsonResponse
     {
         $today = today();
 
         $myAssignments = DeliveryAssignment::where('staff_id', $user->id);
-        $myPayments = Payment::where('collected_by_id', $user->id);
 
         return response()->json([
             'data' => [
@@ -191,11 +132,6 @@ class DashboardController extends Controller
                 ],
                 'attempts_today' => DeliveryAttempt::where('staff_id', $user->id)->whereDate('attempted_at', $today)->count(),
                 'failed_today' => DeliveryAttempt::where('staff_id', $user->id)->whereDate('attempted_at', $today)->where('result', 'FAILED')->count(),
-                'cash' => [
-                    'collected_today' => (float) (clone $myPayments)->whereDate('collected_at', $today)->sum('amount'),
-                    'pending_handover' => (float) (clone $myPayments)->where('status', 'COLLECTED')->sum('amount'),
-                ],
-                'pending_handovers' => CashHandover::where('staff_id', $user->id)->where('status', 'SUBMITTED')->count(),
             ],
         ]);
     }

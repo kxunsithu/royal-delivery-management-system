@@ -130,7 +130,7 @@ export default function UsersPage() {
               onChange={e => { setRoleFilter(e.target.value); setPage(1) }}
               className="h-9 rounded border border-border bg-muted px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="">All Roles</option>
+              <option value="">{t('users.allRoles')}</option>
               {['admin', 'manager', 'accountant', 'delivery_staff'].map(r => (
                 <option key={r} value={r}>{t(`users.roles.${r}`)}</option>
               ))}

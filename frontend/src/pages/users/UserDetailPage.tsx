@@ -80,7 +80,7 @@ export default function UserDetailPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-4 h-4 text-primary" />Account</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-4 h-4 text-primary" />{t('users.account')}</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
             {[
               [t('common.name'), u.name],
@@ -97,7 +97,7 @@ export default function UserDetailPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" />Role & Status</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" />{t('users.roleAndStatus')}</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between border-b border-border/40 pb-2">
               <span className="text-secondary">{t('users.role')}</span>
@@ -116,7 +116,7 @@ export default function UserDetailPage() {
               <span className="text-foreground">{u.last_login_at ? formatDate(u.last_login_at, i18n.language) : 'Never'}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-secondary">Created</span>
+              <span className="text-secondary">{t('users.created')}</span>
               <span className="text-foreground">{formatDate(u.created_at, i18n.language)}</span>
             </div>
           </CardContent>

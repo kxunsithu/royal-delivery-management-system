@@ -86,13 +86,14 @@ export default function EditParcelPage() {
       quantity: parseInt(form.quantity),
       delivery_fee: parseFloat(form.delivery_fee),
       cod_amount: parseFloat(form.cod_amount),
+      is_cod: form.is_cod,
     }
     if (form.delivery_area_id) payload.delivery_area_id = parseInt(form.delivery_area_id)
     if (form.weight) payload.weight = parseFloat(form.weight)
     mutation.mutate(payload)
   }
 
-  if (!parcel) return <div className="text-secondary py-16 text-center">Loading...</div>
+  if (!parcel) return <div className="text-secondary py-16 text-center">{t('common.loading')}</div>
 
   return (
     <div className="space-y-6">
@@ -144,7 +145,7 @@ export default function EditParcelPage() {
 
           {/* RIGHT — Parcel Details */}
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Parcel Details</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-base">{t('parcels.parcelDetails')}</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               {[
                 ['description', t('parcels.parcelDescription'), 'text'],
@@ -157,6 +158,24 @@ export default function EditParcelPage() {
                   <Input type={type} value={form[k] ?? ''} onChange={e => set(k, e.target.value)} />
                 </div>
               ))}
+              <div className="space-y-1.5 col-span-2">
+                <div className="flex items-center gap-3 py-1">
+                  <input
+                    type="checkbox"
+                    id="is_cod"
+                    checked={form.is_cod ?? false}
+                    onChange={e => set('is_cod', e.target.checked)}
+                    className="w-4 h-4 rounded border-border bg-muted accent-primary"
+                  />
+                  <Label htmlFor="is_cod">{t('parcels.isCOD')}</Label>
+                </div>
+                {form.is_cod && (
+                  <div className="space-y-1.5">
+                    <Label>{t('parcels.codAmount')}</Label>
+                    <Input type="number" min="0" step="100" value={form.cod_amount ?? ''} onChange={e => set('cod_amount', e.target.value)} />
+                  </div>
+                )}
+              </div>
               <div className="space-y-1.5">
                 <Label>{t('parcels.priority')}</Label>
                 <select value={form.priority ?? 'NORMAL'} onChange={e => set('priority', e.target.value)}

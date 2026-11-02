@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Camera, X } from 'lucide-react'
 
 export function CameraCapture({ onCapture }: { onCapture: (file: File) => void }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
@@ -98,14 +100,14 @@ export function CameraCapture({ onCapture }: { onCapture: (file: File) => void }
     <>
       <Button type="button" variant="outline" size="sm" onClick={start}>
         <Camera className="w-3.5 h-3.5" />
-        Take Photo
+        {t('common.takePhoto')}
       </Button>
 
       {open && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={stop}>
           <div className="bg-background-surface border border-border rounded shadow-xl p-4 space-y-3 w-full max-w-lg" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <p className="text-foreground font-medium text-sm">Camera</p>
+              <p className="text-foreground font-medium text-sm">{t('common.camera')}</p>
               <button type="button" onClick={stop} className="text-secondary hover:text-foreground">
                 <X className="w-4 h-4" />
               </button>

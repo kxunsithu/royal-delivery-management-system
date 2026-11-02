@@ -342,7 +342,7 @@ export default function RegisterParcelPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm flex items-center gap-2 text-foreground/80">
                 <Images className="w-4 h-4 text-primary" />
-                Parcel Images
+                {t('parcels.parcelImages')}
                 <span className="text-xs font-normal text-secondary">(optional)</span>
                 {localImages.length > 0 && (
                   <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded font-normal">
@@ -353,7 +353,7 @@ export default function RegisterParcelPage() {
               {localImages.length > 0 && localImages.length < 10 && (
                 <Button type="button" variant="outline" size="sm" onClick={() => imageInputRef.current?.click()}>
                   <ImagePlus className="w-3.5 h-3.5" />
-                  Add More
+                  {t('common.addMore')}
                 </Button>
               )}
               {localImages.length < 10 && (
@@ -377,7 +377,7 @@ export default function RegisterParcelPage() {
                   <ImagePlus className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-foreground text-sm font-medium">Click or drag &amp; drop images here</p>
+                  <p className="text-foreground text-sm font-medium">{t('parcels.uploadDropText')}</p>
                   <p className="text-secondary text-xs mt-0.5">JPEG, PNG, WebP · max 5 MB each · up to 10 images</p>
                 </div>
               </div>

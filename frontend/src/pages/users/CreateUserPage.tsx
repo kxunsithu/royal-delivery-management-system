@@ -89,7 +89,7 @@ export default function CreateUserPage() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Account Information</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-base">{t('users.accountInformation')}</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="col-span-2"><Field k="name" label="Full Name" form={form} errors={errors} set={set} /></div>
               <Field k="email" label={t('auth.email')} type="email" form={form} errors={errors} set={set} />
@@ -108,7 +108,7 @@ export default function CreateUserPage() {
           </Card>
 
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Password</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-base">{t('users.password')}</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>{t('users.newPassword')}</Label>

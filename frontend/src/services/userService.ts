@@ -57,9 +57,7 @@ const userService = {
     apiClient.delete<ApiResponse<User>>(`/users/${id}/profile-image`),
 
   deliveryStaff: () =>
-    apiClient.get<PaginatedResponse<User>>('/users', {
-      params: { role: 'delivery_staff', is_active: true, per_page: 100 },
-    }),
+    apiClient.get<ApiResponse<User[]>>('/users/delivery-staff'),
 };
 
 export default userService;

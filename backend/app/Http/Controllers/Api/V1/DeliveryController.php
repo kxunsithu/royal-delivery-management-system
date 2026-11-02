@@ -8,7 +8,6 @@ use App\Models\DeliveryAssignment;
 use App\Models\DeliveryAttempt;
 use App\Models\Parcel;
 use App\Models\ParcelStatusHistory;
-use App\Models\Payment;
 use App\Models\ProofOfDelivery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -97,8 +96,6 @@ class DeliveryController extends Controller
             ],
             'recipient_name' => ['nullable', 'string', 'max:255'],
             'recipient_confirmation' => ['nullable', 'string'],
-            'delivery_fee_collected' => ['required', 'numeric', 'min:0'],
-            'cod_collected' => ['numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'attempted_at' => ['nullable', 'date'],
         ]);
@@ -118,37 +115,8 @@ class DeliveryController extends Controller
                 'failure_reason' => $validated['failure_reason'] ?? null,
                 'recipient_name' => $validated['recipient_name'] ?? null,
                 'recipient_confirmation' => $validated['recipient_confirmation'] ?? null,
-                'delivery_fee_collected' => $validated['delivery_fee_collected'],
-                'cod_collected' => $validated['cod_collected'] ?? 0,
                 'notes' => $validated['notes'] ?? null,
             ]);
-
-            // Record payments if money was collected
-            if ($validated['delivery_fee_collected'] > 0) {
-                Payment::firstOrCreate(
-                    ['parcel_id' => $parcel->id, 'payment_type' => 'DELIVERY_FEE'],
-                    [
-                        'delivery_attempt_id' => $attempt->id,
-                        'collected_by_id' => $request->user()->id,
-                        'amount' => $validated['delivery_fee_collected'],
-                        'collected_at' => $attempt->attempted_at,
-                        'status' => 'COLLECTED',
-                    ]
-                );
-            }
-
-            if (($validated['cod_collected'] ?? 0) > 0) {
-                Payment::firstOrCreate(
-                    ['parcel_id' => $parcel->id, 'payment_type' => 'COD'],
-                    [
-                        'delivery_attempt_id' => $attempt->id,
-                        'collected_by_id' => $request->user()->id,
-                        'amount' => $validated['cod_collected'],
-                        'collected_at' => $attempt->attempted_at,
-                        'status' => 'COLLECTED',
-                    ]
-                );
-            }
 
             // Update parcel status
             $oldStatus = $parcel->status;

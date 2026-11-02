@@ -1,4 +1,4 @@
-import type { ParcelStatus, ParcelPriority, PaymentType, HandoverStatus, AssignmentStatus } from '@/types';
+import type { ParcelStatus, ParcelPriority, AssignmentStatus } from '@/types';
 
 // ─── Status Styling Helpers ────────────────────────────────────────────────────
 
@@ -23,19 +23,9 @@ export function getPriorityClass(priority: ParcelPriority): string {
   return map[priority] || '';
 }
 
-export function getHandoverStatusClass(status: HandoverStatus): string {
-  const map: Record<HandoverStatus, string> = {
-    PENDING:   'bg-gray-500/15 text-gray-400 border border-gray-500/30',
-    SUBMITTED: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30',
-    VERIFIED:  'bg-green-500/15 text-green-400 border border-green-500/30',
-    DISPUTED:  'bg-red-500/15 text-red-400 border border-red-500/30',
-  };
-  return map[status] || '';
-}
-
 // ─── Currency Formatting ───────────────────────────────────────────────────────
 
-export function formatCurrency(amount: number | null | undefined, locale = 'en'): string {
+export function formatCurrency(amount: number | null | undefined, locale = 'my'): string {
   const value = Number(amount);
   if (!Number.isFinite(value)) {
     return locale === 'my' ? '— ကျပ်' : 'K —';
@@ -48,7 +38,7 @@ export function formatCurrency(amount: number | null | undefined, locale = 'en')
 
 // ─── Date Formatting ───────────────────────────────────────────────────────────
 
-export function formatDate(dateStr: string | null | undefined, locale = 'en'): string {
+export function formatDate(dateStr: string | null | undefined, locale = 'my'): string {
   if (!dateStr) return '-';
 
   const date = new Date(dateStr);
@@ -69,7 +59,7 @@ export function formatDate(dateStr: string | null | undefined, locale = 'en'): s
   });
 }
 
-export function formatDateTime(dateStr: string | null | undefined, locale = 'en'): string {
+export function formatDateTime(dateStr: string | null | undefined, locale = 'my'): string {
   if (!dateStr) return '-';
 
   const date = new Date(dateStr);

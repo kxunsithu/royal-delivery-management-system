@@ -353,7 +353,7 @@ export default function ParcelDetailPage() {
 
         {/* Parcel + fees */}
         <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Package className="w-4 h-4 text-primary" />Parcel Info</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Package className="w-4 h-4 text-primary" />{t('parcels.parcelInfo')}</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
             {[
               [t('parcels.parcelDescription'), p.description ?? '-'],
@@ -378,14 +378,14 @@ export default function ParcelDetailPage() {
         {/* Assignment */}
         {p.active_assignment && (
           <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><Truck className="w-4 h-4 text-primary" />Current Assignment</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Truck className="w-4 h-4 text-primary" />{t('parcels.currentAssignment')}</CardTitle></CardHeader>
             <CardContent className="text-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-secondary">Staff</span>
+                <span className="text-secondary">{t('parcels.staff')}</span>
                 <span className="text-foreground">{p.active_assignment.staff?.name ?? '-'}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-secondary">Assigned At</span>
+                <span className="text-secondary">{t('parcels.assignedAt')}</span>
                 <span className="text-foreground">{formatDate(p.active_assignment.assigned_at, i18n.language)}</span>
               </div>
             </CardContent>
@@ -399,7 +399,7 @@ export default function ParcelDetailPage() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Images className="w-4 h-4 text-primary" />
-              Parcel Images
+              {t('parcels.parcelImages')}
               {images.length > 0 && (
                 <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded font-normal">
                   {images.length}
@@ -415,7 +415,7 @@ export default function ParcelDetailPage() {
                   loading={uploadMutation.isPending}
                 >
                   <ImagePlus className="w-3.5 h-3.5" />
-                  Add Images
+                  {t('common.addImages')}
                 </Button>
                 <CameraCapture onCapture={(file) => handleFiles([file])} />
               </>
@@ -445,7 +445,7 @@ export default function ParcelDetailPage() {
               </div>
               <div className="min-w-0">
                 <p className="text-foreground text-sm font-medium">
-                  {uploadMutation.isPending ? 'Uploading…' : 'Click or drag & drop images here'}
+                  {uploadMutation.isPending ? t('parcels.uploading') : t('parcels.uploadDropText')}
                 </p>
                 <p className="text-secondary text-xs mt-0.5">JPEG, PNG, WebP · max 5 MB each · up to 10 at once</p>
               </div>
@@ -512,7 +512,7 @@ export default function ParcelDetailPage() {
             </div>
           ) : (
             !canManageImages && (
-              <p className="text-secondary text-sm text-center py-6">No images attached to this parcel.</p>
+              <p className="text-secondary text-sm text-center py-6">{t('parcels.noImages')}</p>
             )
           )}
         </CardContent>

@@ -89,7 +89,7 @@ export default function SettingsPage() {
         </div>
         <div>
           <h1 className="text-foreground text-2xl font-bold">{t('settings.title')}</h1>
-          <p className="text-secondary text-sm">Business configuration</p>
+          <p className="text-secondary text-sm">{t('settings.businessConfiguration')}</p>
         </div>
       </div>
 
@@ -164,7 +164,7 @@ export default function SettingsPage() {
             {/* Add area inline form */}
             {showAddArea && (
               <div className="space-y-2 p-3 bg-muted/60 rounded border border-primary/30">
-                <p className="text-xs text-secondary font-medium">New Delivery Area</p>
+                <p className="text-xs text-secondary font-medium">{t('settings.newDeliveryArea')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     placeholder={t('settings.areaName')}

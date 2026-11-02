@@ -95,6 +95,7 @@ class ParcelController extends Controller
                 'received_by_id' => $request->user()->id,
                 'received_at' => $validated['received_at'] ?? now(),
                 'quantity' => $validated['quantity'] ?? 1,
+                'delivery_fee' => $validated['delivery_fee'] ?? 0,
                 'cod_amount' => $validated['cod_amount'] ?? 0,
                 'is_cod' => $validated['is_cod'] ?? false,
                 'condition' => $validated['condition'] ?? 'GOOD',
@@ -136,7 +137,6 @@ class ParcelController extends Controller
             'deliveryAssignments.assignedBy',
             'deliveryAttempts.staff',
             'deliveryAttempts.proofOfDeliveries',
-            'payments.collectedBy',
             'activeAssignment.staff',
             'images',
         ]);
@@ -502,18 +502,7 @@ class ParcelController extends Controller
             'result' => $da->result,
             'failure_reason' => $da->failure_reason,
             'recipient_name' => $da->recipient_name,
-            'delivery_fee_collected' => $da->delivery_fee_collected,
-            'cod_collected' => $da->cod_collected,
             'notes' => $da->notes,
-        ]);
-
-        $base['payments'] = $parcel->payments->map(fn($p) => [
-            'id' => $p->id,
-            'payment_type' => $p->payment_type,
-            'amount' => $p->amount,
-            'status' => $p->status,
-            'collected_by' => $p->collectedBy ? ['id' => $p->collectedBy->id, 'name' => $p->collectedBy->name] : null,
-            'collected_at' => $p->collected_at->toISOString(),
         ]);
 
         $base['damage_description'] = $parcel->damage_description;

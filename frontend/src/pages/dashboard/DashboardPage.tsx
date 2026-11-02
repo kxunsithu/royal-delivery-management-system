@@ -5,13 +5,13 @@ import dashboardService from '@/services/dashboardService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Package, Truck, CheckCircle2, XCircle, ArrowUpRight,
-  DollarSign, Users, TrendingUp, AlertTriangle, Clock
+  Users, TrendingUp, AlertTriangle, Clock
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar
 } from 'recharts'
-import { formatCurrency, formatDate } from '@/utils/helpers'
+import { formatDate } from '@/utils/helpers'
 
 function StatCard({
   title, value, icon: Icon, trend, color = 'primary', sub
@@ -99,8 +99,8 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center space-y-2">
           <AlertTriangle className="w-10 h-10 text-warning mx-auto" />
-          <p className="text-foreground font-medium">Failed to load dashboard</p>
-          <p className="text-secondary text-sm">Please refresh the page</p>
+          <p className="text-foreground font-medium">{t('dashboard.failedToLoad')}</p>
+          <p className="text-secondary text-sm">{t('dashboard.refreshPage')}</p>
         </div>
       </div>
     )
@@ -127,13 +127,6 @@ export default function DashboardPage() {
           <StatCard title={t('dashboard.successRate')} value={`${data.parcel_stats.delivery_success_rate}%`} icon={TrendingUp} color="success" />
         </div>
 
-        {/* Financial stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title={t('dashboard.todayFees')} value={formatCurrency(data.financial_stats.today_delivery_fees, i18n.language)} icon={DollarSign} color="primary" />
-          <StatCard title={t('dashboard.totalFees')} value={formatCurrency(data.financial_stats.total_delivery_fees, i18n.language)} icon={DollarSign} color="primary" />
-          <StatCard title={t('dashboard.outstandingCOD')} value={formatCurrency(data.financial_stats.outstanding_cod, i18n.language)} icon={AlertTriangle} color="warning" />
-          <StatCard title={t('dashboard.pendingHandovers')} value={data.financial_stats.pending_handovers} icon={Users} color="blue" sub="awaiting verification" />
-        </div>
 
         {/* Trend chart */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -169,7 +162,7 @@ export default function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Parcel Status</CardTitle>
+              <CardTitle>{t('dashboard.parcelStatus')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -189,7 +182,7 @@ export default function DashboardPage() {
                 ))}
               </div>
               <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-sm">
-                <span className="text-secondary">Total</span>
+                <span className="text-secondary">{t('common.total')}</span>
                 <span className="text-foreground font-bold">{data.parcel_stats.total}</span>
               </div>
             </CardContent>
@@ -251,52 +244,8 @@ export default function DashboardPage() {
     )
   }
 
-  // ── Accountant dashboard ───────────────────────────────────────────────────
-  if (data.role === 'accountant') {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-foreground text-2xl font-bold">{t('dashboard.title')}</h1>
-          <p className="text-secondary text-sm mt-1">{t('dashboard.welcome', { name: user?.name })}</p>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title={t('dashboard.todayFees')} value={formatCurrency(data.today.delivery_fees, i18n.language)} icon={DollarSign} color="primary" />
-          <StatCard title={t('dashboard.codCollected')} value={formatCurrency(data.today.cod_collected, i18n.language)} icon={DollarSign} color="success" />
-          <StatCard title={t('finance.cashHandovers')} value={data.pending.unverified_handovers} icon={AlertTriangle} color="warning" sub="awaiting verification" />
-          <StatCard title={t('dashboard.pendingPayments')} value={formatCurrency(data.pending.outstanding_payments, i18n.language)} icon={Clock} color="destructive" />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <StatCard title={t('dashboard.monthlyIncome')} value={formatCurrency(data.monthly.delivery_fees, i18n.language)} icon={TrendingUp} color="success" />
-          <StatCard title={t('dashboard.monthlyExpenses')} value={formatCurrency(data.monthly.expenses, i18n.language)} icon={XCircle} color="destructive" />
-          <StatCard title={t('dashboard.netIncome')} value={formatCurrency(data.monthly.net_income, i18n.language)} icon={DollarSign} color="primary" />
-        </div>
-
-        <Card>
-          <CardHeader><CardTitle>{t('dashboard.recentHandovers')}</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {data.recent_handovers?.map((h: any) => (
-                <div key={h.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                  <div>
-                    <p className="text-foreground text-sm font-medium">{h.staff_name}</p>
-                    <p className="text-secondary text-xs">{h.submitted_at ? formatDate(h.submitted_at, i18n.language) : '-'}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-foreground text-sm font-semibold">{formatCurrency(h.submitted_amount, i18n.language)}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded ${h.status === 'VERIFIED' ? 'text-success bg-success/10' : 'text-warning bg-warning/10'}`}>
-                      {h.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  // ── Accountant dashboard — removed (financial features removed)
+  // Fallthrough to delivery staff / default view
 
   // ── Delivery Staff dashboard ───────────────────────────────────────────────
   return (
@@ -309,8 +258,6 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-4">
         <StatCard title={t('dashboard.pendingDeliveries')} value={data.assignments?.active ?? 0} icon={Package} color="warning" />
         <StatCard title={t('dashboard.completedToday')} value={data.assignments?.completed_today ?? 0} icon={CheckCircle2} color="success" />
-        <StatCard title={t('dashboard.cashCollected')} value={formatCurrency(data.cash?.collected_today ?? 0, i18n.language)} icon={DollarSign} color="primary" />
-        <StatCard title={t('dashboard.pendingHandover')} value={formatCurrency(data.cash?.pending_handover ?? 0, i18n.language)} icon={AlertTriangle} color="destructive" />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

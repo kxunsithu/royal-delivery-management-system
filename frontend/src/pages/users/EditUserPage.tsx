@@ -61,7 +61,7 @@ export default function EditUserPage() {
     },
   })
 
-  if (!user) return <div className="text-secondary py-16 text-center">Loading...</div>
+  if (!user) return <div className="text-secondary py-16 text-center">{t('common.loading')}</div>
 
   return (
     <div className="space-y-6">
@@ -77,7 +77,7 @@ export default function EditUserPage() {
 
       <form onSubmit={e => { e.preventDefault(); mutation.mutate() }} className="space-y-5">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Account Information</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-base">{t('users.accountInformation')}</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               ['name', 'Full Name', 'text'],

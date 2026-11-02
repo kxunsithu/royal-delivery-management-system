@@ -41,10 +41,28 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * Active delivery staff list for parcel assignment.
+     * Accessible to admins, managers and accountants.
+     */
+    public function deliveryStaff(): JsonResponse
+    {
+        $this->authorize('viewDeliveryStaff', User::class);
+
+        $staff = User::with('roles')
+            ->whereHas('roles', fn($q) => $q->where('name', 'delivery_staff'))
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'data' => $staff->map(fn($u) => $this->formatUser($u)),
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $this->authorize('create', User::class);
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],

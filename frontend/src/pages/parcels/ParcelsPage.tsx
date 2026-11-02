@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Plus, Search, Filter, Package, Eye, RefreshCw, X, Trash2 } from 'lucide-react'
-import { getParcelStatusClass, getPriorityClass, formatDate, formatCurrency } from '@/utils/helpers'
+import { getParcelStatusClass, getPriorityClass, formatDate } from '@/utils/helpers'
 import { useAuth } from '@/features/auth/AuthContext'
 import { toast } from '@/hooks/use-toast'
 
@@ -252,7 +252,7 @@ export default function ParcelsPage() {
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-1">
-                          {hasRole(['admin', 'manager']) && p.status === 'RECEIVED' && (
+                          {hasRole(['admin', 'manager', 'accountant']) && p.status === 'RECEIVED' && (
                             <Button
                               variant="outline"
                               size="sm"

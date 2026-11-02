@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DeliveryController;
-use App\Http\Controllers\Api\V1\FinanceController;
 use App\Http\Controllers\Api\V1\ParcelController;
 use App\Http\Controllers\Api\V1\SettingsController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -30,6 +29,7 @@ Route::prefix('v1')->group(function () {
         // Users
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
+        Route::get('/users/delivery-staff', [UserController::class, 'deliveryStaff']);
         Route::get('/users/{user}', [UserController::class, 'show']);
         Route::put('/users/{user}', [UserController::class, 'update']);
         Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
@@ -55,16 +55,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::post('/deliveries/{delivery}/attempts', [DeliveryController::class, 'recordAttempt']);
         Route::post('/deliveries/{delivery}/proof', [DeliveryController::class, 'uploadProof']);
-
-        // Finance
-        Route::get('/finance/payments', [FinanceController::class, 'payments']);
-        Route::get('/finance/expenses', [FinanceController::class, 'expenses']);
-        Route::post('/finance/expenses', [FinanceController::class, 'storeExpense']);
-        Route::patch('/finance/expenses/{expense}/void', [FinanceController::class, 'voidExpense']);
-        Route::get('/finance/handovers', [FinanceController::class, 'handovers']);
-        Route::post('/finance/handovers', [FinanceController::class, 'submitHandover']);
-        Route::patch('/finance/handovers/{handover}/verify', [FinanceController::class, 'verifyHandover']);
-        Route::get('/finance/summary', [FinanceController::class, 'financialSummary']);
 
         // Settings (admin-gated)
         Route::get('/settings', [SettingsController::class, 'index']);

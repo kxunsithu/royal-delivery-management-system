@@ -60,7 +60,12 @@
     "to": "To",
     "language": "Language",
     "english": "English",
-    "myanmar": "မြန်မာ"
+    "myanmar": "မြန်မာ",
+    "camera": "Camera",
+    "saving": "Saving…",
+    "addImages": "Add Images",
+    "takePhoto": "Take Photo",
+    "addMore": "Add More"
   },
   "auth": {
     "login": "Login",
@@ -80,7 +85,9 @@
     "unauthorized": "You are not authorized to access this page",
     "profile": "My Profile",
     "profileUpdated": "Profile updated successfully",
-    "loggingOut": "Logging out..."
+    "loggingOut": "Logging out...",
+    "accessDenied": "Access Denied",
+    "goToDashboard": "Go to Dashboard"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -92,7 +99,6 @@
     "settings": "Settings",
     "activityLogs": "Activity Logs",
     "myAssignments": "My Assignments",
-    "cashHandovers": "Cash Handovers",
     "profile": "My Profile"
   },
   "dashboard": {
@@ -106,31 +112,20 @@
     "returned": "Returned",
     "successRate": "Success Rate",
     "activeStaff": "Active Staff",
-    "todayFees": "Today's Fees",
-    "totalFees": "Total Delivery Fees",
-    "outstandingCOD": "Outstanding COD",
-    "pendingHandovers": "Pending Handovers",
     "deliveryTrends": "Delivery Trends (Last 7 Days)",
     "readyForDelivery": "Ready for Delivery",
     "assigned": "Assigned",
     "outForDelivery": "Out for Delivery",
     "returnToOffice": "Return to Office",
     "staffWorkload": "Staff Workload",
-    "todayCollections": "Today's Collections",
-    "deliveryFees": "Delivery Fees",
-    "codCollected": "COD Collected",
-    "pendingPayments": "Pending Payments",
-    "monthlyIncome": "Monthly Income",
-    "monthlyExpenses": "Monthly Expenses",
-    "netIncome": "Net Income",
-    "recentHandovers": "Recent Handovers",
     "myAssignments": "My Assignments",
     "todayDeliveries": "Today's Deliveries",
     "pendingDeliveries": "Pending Deliveries",
-    "cashCollected": "Cash Collected",
-    "pendingHandover": "Pending Handover",
     "failedToday": "Failed Today",
-    "completedToday": "Completed Today"
+    "completedToday": "Completed Today",
+    "failedToLoad": "Failed to load dashboard",
+    "refreshPage": "Please refresh the page",
+    "parcelStatus": "Parcel Status"
   },
   "parcels": {
     "title": "Parcels",
@@ -151,9 +146,6 @@
     "quantity": "Quantity",
     "weight": "Weight (kg)",
     "parcelNotes": "Notes",
-    "deliveryFee": "Delivery Fee",
-    "codAmount": "COD Amount",
-    "isCOD": "Cash on Delivery (COD)",
     "condition": "Parcel Condition",
     "priority": "Priority",
     "receivedAt": "Received (Date/Time)",
@@ -161,7 +153,6 @@
     "senderInfo": "Sender Info (Mae Sot)",
     "recipientInfo": "Recipient Info (Myawaddy)",
     "parcelDetailsSection": "Parcel Details",
-    "feePayment": "Fee & Payment",
     "damageDescription": "Damage Description",
     "registeredSuccess": "Parcel received from Mae Sot and registered",
     "updatedSuccess": "Parcel updated successfully",
@@ -202,7 +193,21 @@
       "URGENT": "Urgent"
     },
     "createdAt": "Created At",
-    "updatedAt": "Updated At"
+    "updatedAt": "Updated At",
+    "parcel": "Parcel",
+    "parcelInfo": "Parcel Info",
+    "parcelImages": "Parcel Images",
+    "noImages": "No images attached to this parcel.",
+    "uploadDropText": "Click or drag & drop images here",
+    "uploading": "Uploading…",
+    "viewFullDetails": "View full parcel details",
+    "currentAssignment": "Current Assignment",
+    "assignedAt": "Assigned At",
+    "staff": "Staff",
+    "deliveryFee": "Delivery Fee",
+    "codAmount": "COD Amount",
+    "isCOD": "Cash on Delivery (COD)",
+    "feePayment": "Fee & Payment"
   },
   "status": {
     "RECEIVED": "Received",
@@ -210,7 +215,8 @@
     "IN_TRANSIT": "In Transit",
     "DELIVERED": "Delivered",
     "FAILED": "Failed",
-    "DAMAGED": "Damaged"
+    "DAMAGED": "Damaged",
+    "RECEIVED_AT_MYAWADDY": "Received"
   },
   "deliveries": {
     "title": "Deliveries",
@@ -227,8 +233,6 @@
     "failureReason": "Failure Reason",
     "recipientName": "Recipient Name (who received)",
     "recipientConfirmation": "Recipient Confirmation",
-    "deliveryFeeCollected": "Delivery Fee Collected",
-    "codCollected": "COD Collected",
     "attemptedAt": "Attempted At",
     "proofOfDelivery": "Proof of Delivery",
     "uploadProof": "Upload Proof",
@@ -254,53 +258,11 @@
       "COMPLETED": "Completed",
       "REASSIGNED": "Reassigned",
       "CANCELLED": "Cancelled"
-    }
-  },
-  "finance": {
-    "title": "Finance",
-    "payments": "Payments",
-    "expenses": "Expenses",
-    "cashHandovers": "Cash Handovers",
-    "financialSummary": "Financial Summary",
-    "deliveryFees": "Delivery Fees",
-    "codPayments": "COD Payments",
-    "addExpense": "Add Expense",
-    "expenseCategory": "Category",
-    "expenseDescription": "Description",
-    "expenseAmount": "Amount",
-    "expenseDate": "Date",
-    "receipt": "Receipt",
-    "voidExpense": "Void Expense",
-    "voidReason": "Reason for Voiding",
-    "submitHandover": "Submit Cash Handover",
-    "verifyHandover": "Verify Handover",
-    "expectedAmount": "Expected Amount",
-    "submittedAmount": "Submitted Amount",
-    "verifiedAmount": "Verified Amount",
-    "discrepancy": "Discrepancy",
-    "periodStart": "Period Start",
-    "periodEnd": "Period End",
-    "submissionNotes": "Submission Notes",
-    "verificationNotes": "Verification Notes",
-    "handoverStatus": {
-      "PENDING": "Pending",
-      "SUBMITTED": "Submitted",
-      "VERIFIED": "Verified",
-      "DISPUTED": "Disputed"
     },
-    "paymentType": {
-      "DELIVERY_FEE": "Delivery Fee",
-      "COD": "Cash on Delivery"
-    },
-    "paymentStatus": {
-      "COLLECTED": "Collected",
-      "HANDED_OVER": "Handed Over",
-      "RECONCILED": "Reconciled"
-    },
-    "handoverSubmitted": "Cash handover submitted",
-    "handoverVerified": "Handover verified successfully",
-    "expenseAdded": "Expense added successfully",
-    "expenseVoided": "Expense voided"
+    "assignment": "Assignment",
+    "deliveryAttempts": "Delivery Attempts",
+    "receivedBy": "Received by: {name}",
+    "allStaff": "All Staff"
   },
   "users": {
     "title": "Users",
@@ -327,7 +289,13 @@
       "manager": "Manager",
       "accountant": "Accountant",
       "delivery_staff": "Delivery Staff"
-    }
+    },
+    "accountInformation": "Account Information",
+    "password": "Password",
+    "account": "Account",
+    "roleAndStatus": "Role & Status",
+    "created": "Created",
+    "allRoles": "All Roles"
   },
   "settings": {
     "title": "Settings",
@@ -347,20 +315,22 @@
     "areaMyanmarName": "Myanmar Name",
     "settingsSaved": "Settings saved",
     "language": "Language Settings",
-    "selectLanguage": "Select Language"
+    "selectLanguage": "Select Language",
+    "businessConfiguration": "Business configuration",
+    "newDeliveryArea": "New Delivery Area"
   },
   "reports": {
     "title": "Reports",
     "parcelSummary": "Parcel Summary",
     "deliveryPerformance": "Delivery Performance",
     "staffPerformance": "Staff Performance",
-    "financialReport": "Financial Report",
     "failedDeliveries": "Failed Deliveries",
     "returnedParcels": "Returned Parcels",
-    "cashHandoverReport": "Cash Handover Report",
     "generateReport": "Generate Report",
     "exportCsv": "Export CSV",
-    "exportPdf": "Export PDF"
+    "exportPdf": "Export PDF",
+    "businessIntelligence": "Business intelligence and analytics",
+    "advancedReports": "Advanced Reports"
   },
   "errors": {
     "required": "{{field}} is required",
@@ -374,8 +344,7 @@
     "unauthorized": "You are not authorized to perform this action.",
     "notFound": "The requested resource was not found.",
     "validationFailed": "Please fix the errors below.",
-    "invalidStatusTransition": "Cannot change status from {{from}} to {{to}}",
-    "duplicatePayment": "A payment record already exists for this parcel."
+    "invalidStatusTransition": "Cannot change status from {{from}} to {{to}}"
   },
   "confirm": {
     "deleteTitle": "Confirm Deletion",
@@ -386,5 +355,18 @@
     "voidMessage": "Are you sure you want to void this record?",
     "deactivateTitle": "Deactivate User",
     "deactivateMessage": "Are you sure you want to deactivate this user? They will no longer be able to login."
+  },
+  "profile": {
+    "contactInfo": "Contact Info",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "accountInformation": "Account Information",
+    "updatePersonalDetails": "Update your personal details",
+    "emailCannotBeChanged": "Email cannot be changed",
+    "changePassword": "Change Password",
+    "leaveBlankPassword": "Leave blank to keep your current password",
+    "loadingProfile": "Loading profile...",
+    "manageAccountSettings": "Manage your account settings and preferences"
   }
 }

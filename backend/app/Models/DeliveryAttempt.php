@@ -17,8 +17,6 @@ class DeliveryAttempt extends Model
         'failure_reason',
         'recipient_name',
         'recipient_confirmation',
-        'delivery_fee_collected',
-        'cod_collected',
         'notes',
     ];
 
@@ -26,8 +24,6 @@ class DeliveryAttempt extends Model
     {
         return [
             'attempted_at' => 'datetime',
-            'delivery_fee_collected' => 'decimal:2',
-            'cod_collected' => 'decimal:2',
         ];
     }
 
@@ -49,10 +45,5 @@ class DeliveryAttempt extends Model
     public function proofOfDeliveries(): HasMany
     {
         return $this->hasMany(ProofOfDelivery::class);
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
     }
 }

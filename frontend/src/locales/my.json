@@ -61,7 +61,11 @@
     "language": "ဘာသာစကား",
     "english": "English",
     "myanmar": "မြန်မာ",
-    "saving": "သိမ်းနေသည်..."
+    "saving": "သိမ်းနေသည်...",
+    "camera": "ကင်မရာ",
+    "addImages": "ပုံများထည့်ရန်",
+    "takePhoto": "ဓာတ်ပုံရိုက်ရန်",
+    "addMore": "ထပ်ထည့်ရန်"
   },
   "auth": {
     "login": "ဝင်ရောက်",
@@ -81,7 +85,9 @@
     "unauthorized": "ဤနေရာသို့ ဝင်ခွင့်မရှိပါ",
     "profile": "ကျွန်ုပ်၏ ပရိုဖိုင်",
     "profileUpdated": "ပရိုဖိုင် ပြင်ဆင်မှု ပြီးဆုံးပါသည်",
-    "loggingOut": "ထွက်ခွာနေသည်..."
+    "loggingOut": "ထွက်ခွာနေသည်...",
+    "accessDenied": "ဝင်ရောက်ခွင့်မရှိပါ",
+    "goToDashboard": "မူလစာမျက်နှာသို့"
   },
   "nav": {
     "dashboard": "မူလစာမျက်နှာ",
@@ -93,7 +99,6 @@
     "settings": "ဆက်တင်",
     "activityLogs": "လုပ်ဆောင်မှုမှတ်တမ်း",
     "myAssignments": "ကျွန်ုပ်ပို့ရမည့်ပစ္စည်းများ",
-    "cashHandovers": "ငွေလွှဲပြောင်းမှု",
     "profile": "ကျွန်ုပ်၏ ပရိုဖိုင်"
   },
   "dashboard": {
@@ -107,31 +112,20 @@
     "returned": "ပြန်ပို့ပြီး",
     "successRate": "အောင်မြင်မှုနှုန်း",
     "activeStaff": "ဝန်ထမ်းဦးရေ",
-    "todayFees": "ယနေ့ကောက်ခံငွေ",
-    "totalFees": "ပို့ဆောင်ခ စုစုပေါင်း",
-    "outstandingCOD": "ကျန်ရှိ COD",
-    "pendingHandovers": "ငွေလွှဲအပ်ရန် ကျန်သေး",
     "deliveryTrends": "ပို့ဆောင်မှုအစီအစဉ် (နောက်ဆုံး ၇ ရက်)",
     "readyForDelivery": "ပို့ဆောင်ရန် အဆင်သင့်",
     "assigned": "တာဝန်ပေးပြီး",
     "outForDelivery": "ပို့ဆောင်နေဆဲ",
     "returnToOffice": "ရုံးပြန်ရောက်",
     "staffWorkload": "ဝန်ထမ်းအလုပ်ပမာဏ",
-    "todayCollections": "ယနေ့ ကောက်ခံရရှိငွေ",
-    "deliveryFees": "ပို့ဆောင်ခ",
-    "codCollected": "COD ကောက်ခံပြီး",
-    "pendingPayments": "ကျန်ငွေများ",
-    "monthlyIncome": "ယခုလဝင်ငွေ",
-    "monthlyExpenses": "ယခုလအသုံးစရိတ်",
-    "netIncome": "အသားတင်ဝင်ငွေ",
-    "recentHandovers": "မကြာသေးမီ ငွေလွှဲအပ်နှံမှုများ",
     "myAssignments": "ကျွန်ုပ်ပို့ဆောင်ရမည့်ပါဆယ်များ",
     "todayDeliveries": "ယနေ့ပို့ဆောင်မှုများ",
     "pendingDeliveries": "ပို့ဆောင်ရန်ကျန်နေသောပါဆယ်များ",
-    "cashCollected": "ကောက်ခံပြီးသောငွေ",
-    "pendingHandover": "ငွေလွှဲအပ်ရန် ကျန်သေး",
     "failedToday": "ယနေ့ပို့ဆောင်မအောင်မြင်",
-    "completedToday": "ယနေ့ပို့ဆောင်ပြီးစီး"
+    "completedToday": "ယနေ့ပို့ဆောင်ပြီးစီး",
+    "failedToLoad": "ဒက်ရှ်ဘုတ် ဖွင့်မရပါ",
+    "refreshPage": "စာမျက်နှာကို ပြန်လည်ဖွင့်ပါ",
+    "parcelStatus": "ပါဆယ်အခြေအနေ"
   },
   "parcels": {
     "title": "ပါဆယ်များ",
@@ -152,9 +146,6 @@
     "quantity": "အရေအတွက်",
     "weight": "အလေးချိန် (ကီလိုဂရမ်)",
     "parcelNotes": "မှတ်ချက်",
-    "deliveryFee": "ပို့ဆောင်ခ",
-    "codAmount": "COD ငွေပမာဏ",
-    "isCOD": "COD — ရောက်ရှိချိန်တွင် ငွေသားဖြင့် ပေးချေရမည်",
     "condition": "ပါဆယ်အခြေအနေ",
     "priority": "ဦးစားပေးအဆင့်",
     "receivedAt": "လက်ခံရရှိသည့် ရက်စွဲနှင့်အချိန်",
@@ -162,7 +153,6 @@
     "senderInfo": "ပေးပို့သူ အချက်အလက် (မဲဆောက်)",
     "recipientInfo": "လက်ခံသူအချက်အလက် (မြဝတီ)",
     "parcelDetailsSection": "ပါဆယ်အသေးစိတ်",
-    "feePayment": "ငွေကြေးသက်ဆိုင်ရာ",
     "damageDescription": "ပျက်စီးမှုအသေးစိတ်",
     "registeredSuccess": "မဲဆောက်မှရောက်ရှိလာသော ပါဆယ်ကို မှတ်ပုံတင်ပြီးပါပြီ",
     "updatedSuccess": "ပါဆယ်အချက်အလက်ကို ပြင်ဆင်ပြီးပါပြီ",
@@ -203,7 +193,21 @@
       "URGENT": "အရေးပေါ်"
     },
     "createdAt": "ဖန်တီးသည့် ရက်စွဲ",
-    "updatedAt": "နောက်ဆုံးပြင်ဆင်သည့် ရက်စွဲ"
+    "updatedAt": "နောက်ဆုံးပြင်ဆင်သည့် ရက်စွဲ",
+    "parcel": "ပါဆယ်",
+    "parcelInfo": "ပါဆယ်အချက်အလက်",
+    "parcelImages": "ပါဆယ်ပုံများ",
+    "noImages": "ဤပါဆယ်တွင် ပုံများ မပါရှိပါ။",
+    "uploadDropText": "ပုံများကို နှိပ်၍ သို့မဟုတ် ဆွဲထည့်ပါ",
+    "uploading": "တင်နေသည်…",
+    "viewFullDetails": "ပါဆယ်အသေးစိတ်ကြည့်ရန်",
+    "currentAssignment": "လက်ရှိတာဝန်ခွဲတမ်း",
+    "assignedAt": "တာဝန်ပေးသည့်ရက်",
+    "staff": "ဝန်ထမ်း",
+    "deliveryFee": "ပို့ဆောင်ခ",
+    "codAmount": "COD ငွေပမာဏ",
+    "isCOD": "COD — ရောက်ရှိချိန်တွင် ငွေသားဖြင့် ပေးချေရမည်",
+    "feePayment": "ငွေကြေးသက်ဆိုင်ရာ"
   },
   "status": {
     "RECEIVED": "လက်ခံရရှိပြီ",
@@ -211,7 +215,8 @@
     "IN_TRANSIT": "ပို့ဆောင်နေဆဲ",
     "DELIVERED": "ပါဆယ်ပို့ပြီး",
     "FAILED": "ပို့ဆောင်မှုမအောင်မြင်",
-    "DAMAGED": "ပျက်စီး/ပျောက်ဆုံး"
+    "DAMAGED": "ပျက်စီး/ပျောက်ဆုံး",
+    "RECEIVED_AT_MYAWADDY": "လက်ခံရရှိ"
   },
   "deliveries": {
     "title": "ပို့ဆောင်မှုများ",
@@ -228,8 +233,6 @@
     "failureReason": "ပို့ဆောင်မအောင်မြင်သည့်အကြောင်းရင်း",
     "recipientName": "လက်ခံသူအမည်",
     "recipientConfirmation": "လက်ခံသူအတည်ပြုချက်",
-    "deliveryFeeCollected": "ကောက်ခံပြီးသော ပို့ဆောင်ခ",
-    "codCollected": "ကောက်ခံပြီးသော COD",
     "attemptedAt": "ကြိုးပမ်းသည့်ရက်စွဲနှင့်အချိန်",
     "proofOfDelivery": "ပါဆယ်ပို့ပြီးကြောင်း အထောက်အထား",
     "uploadProof": "ဓာတ်ပုံ/လက်မှတ် တင်မည်",
@@ -255,53 +258,11 @@
       "COMPLETED": "ပြီးစီးပြီ",
       "REASSIGNED": "ပြန်လည်သတ်မှတ်ပြီး",
       "CANCELLED": "ပယ်ဖျက်ပြီး"
-    }
-  },
-  "finance": {
-    "title": "ငွေကြေးစီမံ",
-    "payments": "ငွေပေးချေမှုများ",
-    "expenses": "အသုံးစရိတ်များ",
-    "cashHandovers": "ငွေလွှဲပြောင်းမှု",
-    "financialSummary": "ငွေကြေး အကျဉ်းချုပ်",
-    "deliveryFees": "ပို့ဆောင်ခများ",
-    "codPayments": "COD ငွေများ",
-    "addExpense": "အသုံးစရိတ် ထည့်မည်",
-    "expenseCategory": "အမျိုးအစား",
-    "expenseDescription": "ဖော်ပြချက်",
-    "expenseAmount": "ပမာဏ",
-    "expenseDate": "ရက်စွဲ",
-    "receipt": "ငွေဖြတ်ပိုင်း",
-    "voidExpense": "မှတ်တမ်းပယ်ဖျက်",
-    "voidReason": "ပယ်ဖျက်ရသည့် အကြောင်းအရင်း",
-    "submitHandover": "ငွေလွှဲပြောင်း တင်မည်",
-    "verifyHandover": "ငွေလွှဲပြောင်း စစ်ဆေးမည်",
-    "expectedAmount": "ပေးသင့်သောငွေ",
-    "submittedAmount": "တင်သောငွေ",
-    "verifiedAmount": "စစ်ဆေးပြီးသောငွေ",
-    "discrepancy": "ကွာဟချက်",
-    "periodStart": "ကာလ စတင်",
-    "periodEnd": "ကာလ ကုန်",
-    "submissionNotes": "တင်သွင်းစဉ် မှတ်ချက်",
-    "verificationNotes": "စစ်ဆေးစဉ် မှတ်ချက်",
-    "handoverStatus": {
-      "PENDING": "မပြီးသေး",
-      "SUBMITTED": "တင်ပြီး",
-      "VERIFIED": "စစ်ဆေးပြီး",
-      "DISPUTED": "ငြင်းဆိုဆဲ"
     },
-    "paymentType": {
-      "DELIVERY_FEE": "ပို့ဆောင်ခ",
-      "COD": "COD ငွေ"
-    },
-    "paymentStatus": {
-      "COLLECTED": "ကောက်ခံပြီး",
-      "HANDED_OVER": "လွှဲပြောင်းပြီး",
-      "RECONCILED": "စစ်ဆေးပြေလည်ပြီး"
-    },
-    "handoverSubmitted": "ငွေလွှဲပြောင်း တင်ပြီးပါပြီ",
-    "handoverVerified": "ငွေလွှဲပြောင်း စစ်ဆေးပြီးပါပြီ",
-    "expenseAdded": "အသုံးစရိတ် ထည့်ပြီးပါပြီ",
-    "expenseVoided": "မှတ်တမ်း ပယ်ဖျက်ပြီးပါပြီ"
+    "assignment": "တာဝန်ခွဲတမ်း",
+    "deliveryAttempts": "ပို့ဆောင်မှုကြိုးပမ်းမှုများ",
+    "receivedBy": "လက်ခံသူ: {name}",
+    "allStaff": "ဝန်ထမ်းအားလုံး"
   },
   "users": {
     "title": "ဝန်ထမ်းများ",
@@ -328,7 +289,13 @@
       "manager": "မန်နေဂျာ",
       "accountant": "စာရင်းကိုင်",
       "delivery_staff": "ပို့ဆောင်ရေးဝန်ထမ်း"
-    }
+    },
+    "accountInformation": "အကောင့်အချက်အလက်",
+    "password": "စကားဝှက်",
+    "account": "အကောင့်",
+    "roleAndStatus": "အခန်းကဏ္ဍနှင့် အခြေအနေ",
+    "created": "ဖန်တီးသည့်ရက်",
+    "allRoles": "အခန်းကဏ္ဍအားလုံး"
   },
   "settings": {
     "title": "စနစ်ဆက်တင်",
@@ -348,20 +315,22 @@
     "areaMyanmarName": "မြန်မာဘာသာ အမည်",
     "settingsSaved": "ဆက်တင် သိမ်းပြီးပါပြီ",
     "language": "ဘာသာစကားရွေးချယ်မှု",
-    "selectLanguage": "ဘာသာစကား ရွေးပါ"
+    "selectLanguage": "ဘာသာစကား ရွေးပါ",
+    "businessConfiguration": "စီးပွားရေး ဆက်တင်",
+    "newDeliveryArea": "ပို့ဆောင်ရမည့် ဧရိယာအသစ်"
   },
   "reports": {
     "title": "အစီရင်ခံစာများ",
     "parcelSummary": "ပစ္စည်း အကျဉ်းချုပ်",
     "deliveryPerformance": "ပို့ဆောင်မှု ထိရောက်မှု",
     "staffPerformance": "ဝန်ထမ်း ထိရောက်မှု",
-    "financialReport": "ငွေကြေး အစီရင်ခံ",
     "failedDeliveries": "မပို့နိုင်သော ပစ္စည်းများ",
     "returnedParcels": "ပြန်ပို့သော ပစ္စည်းများ",
-    "cashHandoverReport": "ငွေလွှဲပြောင်း အစီရင်ခံ",
     "generateReport": "အစီရင်ခံ ထုတ်မည်",
     "exportCsv": "CSV ထုတ်ယူ",
-    "exportPdf": "PDF ထုတ်ယူ"
+    "exportPdf": "PDF ထုတ်ယူ",
+    "businessIntelligence": "စီးပွားရေး ထိုးထွင်းသိမြင်မှုနှင့် ခွဲခြမ်းစိတ်ဖြာမှု",
+    "advancedReports": "အဆင့်မြင့်အစီရင်ခံစာများ"
   },
   "errors": {
     "required": "{{field}} ဖြည့်ရမည်",
@@ -385,5 +354,18 @@
     "voidMessage": "ဤမှတ်တမ်းကို ပယ်ဖျက်ရန် သေချာပါသလား?",
     "deactivateTitle": "အကောင့်ပိတ်မည်",
     "deactivateMessage": "ဤဝန်ထမ်း၏ အကောင့်ကိုပိတ်မည်။ ၎င်းသည် ဝင်ရောက်၍ မရတော့ပါ။ သေချာပါသလား?"
+  },
+  "profile": {
+    "contactInfo": "ဆက်သွယ်ရန် အချက်အလက်",
+    "email": "အီးမေးလ်",
+    "phone": "ဖုန်းနံပါတ်",
+    "role": "အခန်းကဏ္ဍ",
+    "accountInformation": "အကောင့်အချက်အလက်",
+    "updatePersonalDetails": "ကိုယ်ရေးအချက်အလက်များကို ပြင်ဆင်ပါ",
+    "emailCannotBeChanged": "အီးမေးလ် ပြင်ဆင်၍ မရပါ",
+    "changePassword": "စကားဝှက်ပြောင်းရန်",
+    "leaveBlankPassword": "လက်ရှိစကားဝှက်ကို ဆက်သုံးလိုပါက အလွတ်ထားပါ",
+    "loadingProfile": "ပရိုဖိုင် ဖွင့်နေသည်...",
+    "manageAccountSettings": "အကောင့်ဆက်တင်နှင့် နှစ်သက်ရေးများ စီမံပါ"
   }
 }

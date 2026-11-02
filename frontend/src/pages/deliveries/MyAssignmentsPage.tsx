@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { usePersistedState } from '@/hooks/usePersistedState'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import deliveryService from '@/services/deliveryService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Eye, RefreshCw, MapPin, Phone, Package, CheckCircle2, XCircle, X, Truck, ExternalLink } from 'lucide-react'
-import { getParcelStatusClass, formatDate, formatCurrency, buildGoogleMapsUrl } from '@/utils/helpers'
+import { getParcelStatusClass, formatDate, buildGoogleMapsUrl } from '@/utils/helpers'
 import { toast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 
@@ -22,8 +22,6 @@ export default function MyAssignmentsPage() {
     result: 'DELIVERED' as 'DELIVERED' | 'FAILED',
     failure_reason: '',
     recipient_name: '',
-    delivery_fee_collected: '',
-    cod_collected: '0',
     notes: '',
   })
 
@@ -43,8 +41,6 @@ export default function MyAssignmentsPage() {
       result: attemptForm.result,
       failure_reason: attemptForm.failure_reason || undefined,
       recipient_name: attemptForm.recipient_name || undefined,
-      delivery_fee_collected: parseFloat(attemptForm.delivery_fee_collected) || 0,
-      cod_collected: parseFloat(attemptForm.cod_collected) || 0,
       notes: attemptForm.notes || undefined,
     }),
     onSuccess: () => {
@@ -52,7 +48,7 @@ export default function MyAssignmentsPage() {
       queryClient.invalidateQueries({ queryKey: ['my-assignments'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       setShowAttemptModal(null)
-      setAttemptForm({ result: 'DELIVERED', failure_reason: '', recipient_name: '', delivery_fee_collected: '', cod_collected: '0', notes: '' })
+      setAttemptForm({ result: 'DELIVERED', failure_reason: '', recipient_name: '', notes: '' })
     },
     onError: (err: any) => toast({ title: err?.response?.data?.message ?? 'Failed', variant: 'destructive' }),
   })
@@ -163,12 +159,6 @@ export default function MyAssignmentsPage() {
                         </div>
                       </div>
 
-                      {/* Fees */}
-                      <div className="flex items-center gap-4 text-xs text-secondary">
-                        <span>{t('parcels.deliveryFee')}: <span className="text-foreground">{formatCurrency(p.delivery_fee, i18n.language)}</span></span>
-                        {p.is_cod && <span>COD: <span className="text-warning">{formatCurrency(p.cod_amount, i18n.language)}</span></span>}
-                      </div>
-
                       {/* Assigned at */}
                       <p className="text-secondary text-xs">{t('deliveries.assignedAt')}: {formatDate(a.assigned_at, i18n.language)}</p>
                     </div>
@@ -190,10 +180,7 @@ export default function MyAssignmentsPage() {
                         </Button>
                       </a>
                       {a.status === 'ACTIVE' && (
-                        <Button size="sm" onClick={() => {
-                          setShowAttemptModal(a.id)
-                          setAttemptForm(f => ({ ...f, delivery_fee_collected: p.delivery_fee?.toString() ?? '' }))
-                        }}>
+                        <Button size="sm" onClick={() => setShowAttemptModal(a.id)}>
                           Record
                         </Button>
                       )}
@@ -267,25 +254,6 @@ export default function MyAssignmentsPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-secondary text-sm">{t('deliveries.deliveryFeeCollected')}</label>
-                  <Input
-                    type="number" min="0"
-                    value={attemptForm.delivery_fee_collected}
-                    onChange={e => setAttemptForm(f => ({ ...f, delivery_fee_collected: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-secondary text-sm">{t('deliveries.codCollected')}</label>
-                  <Input
-                    type="number" min="0"
-                    value={attemptForm.cod_collected}
-                    onChange={e => setAttemptForm(f => ({ ...f, cod_collected: e.target.value }))}
-                  />
-                </div>
-              </div>
-
               <div className="space-y-1.5">
                 <label className="text-secondary text-sm">{t('common.notes')} ({t('common.optional')})</label>
                 <Input
@@ -348,18 +316,6 @@ export default function MyAssignmentsPage() {
                     <ExternalLink className="w-3 h-3" />
                     {t('deliveries.openInMaps')}
                   </a>
-                  <div className="pt-2 border-t border-border space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-secondary">{t('parcels.deliveryFee')}</span>
-                      <span className="text-foreground">{formatCurrency(detailAssignment.parcel.delivery_fee, i18n.language)}</span>
-                    </div>
-                    {detailAssignment.parcel.is_cod && (
-                      <div className="flex justify-between">
-                        <span className="text-secondary">COD</span>
-                        <span className="text-warning">{formatCurrency(detailAssignment.parcel.cod_amount, i18n.language)}</span>
-                      </div>
-                    )}
-                  </div>
                   <div className="pt-2 border-t border-border text-xs text-secondary">
                     {t('deliveries.assignedAt')}: {formatDate(detailAssignment.assigned_at, i18n.language)}
                   </div>
@@ -370,7 +326,7 @@ export default function MyAssignmentsPage() {
                   {t('common.close') ?? 'Close'}
                 </Button>
                 <Link to={`/parcels/${detailAssignment.parcel?.id}`} className="flex-1">
-                  <Button className="w-full">View full parcel details</Button>
+                  <Button className="w-full">{t('parcels.viewFullDetails')}</Button>
                 </Link>
               </div>
             </CardContent>

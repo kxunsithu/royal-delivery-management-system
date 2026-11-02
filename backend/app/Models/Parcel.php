@@ -38,9 +38,9 @@ class Parcel extends Model
     {
         return [
             'is_cod' => 'boolean',
-            'delivery_fee' => 'decimal:2',
-            'cod_amount' => 'decimal:2',
-            'weight' => 'decimal:3',
+        'delivery_fee' => 'decimal:2',
+        'cod_amount' => 'decimal:2',
+        'weight' => 'decimal:3',
             'received_at' => 'datetime',
             'quantity' => 'integer',
         ];
@@ -75,11 +75,6 @@ class Parcel extends Model
     public function deliveryAttempts(): HasMany
     {
         return $this->hasMany(DeliveryAttempt::class)->orderBy('attempted_at', 'desc');
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
     }
 
     public function images(): HasMany

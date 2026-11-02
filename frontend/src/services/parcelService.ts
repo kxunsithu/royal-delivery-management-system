@@ -27,9 +27,6 @@ export interface CreateParcelData {
   quantity?: number;
   weight?: number;
   notes?: string;
-  delivery_fee: number;
-  cod_amount?: number;
-  is_cod?: boolean;
   condition?: string;
   priority?: string;
   received_at?: string;

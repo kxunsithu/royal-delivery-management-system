@@ -12,13 +12,14 @@ i18n
       en: { translation: en },
       my: { translation: my },
     },
-    fallbackLng: 'en',
+    lng: 'my',
+    fallbackLng: 'my',
     defaultNS: 'translation',
     interpolation: {
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage'],
       caches: ['localStorage'],
       lookupLocalStorage: 'royal_myawaddy_language',
     },

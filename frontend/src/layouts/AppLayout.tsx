@@ -3,9 +3,9 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth/AuthContext'
 import {
-  LayoutDashboard, Package, Truck, DollarSign, Users,
+  LayoutDashboard, Package, Truck, Users,
   Settings, LogOut, Menu, X, Globe,
-  ClipboardList, ArrowDownToLine, User
+  ClipboardList, User
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -21,11 +21,9 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { key: 'dashboard',  labelKey: 'nav.dashboard',     href: '/',                          icon: LayoutDashboard, end: true },
-  { key: 'parcels',    labelKey: 'nav.parcels',       href: '/parcels',                   icon: Package,         roles: ['admin','manager','accountant'] },
+  { key: 'parcels',    labelKey: 'nav.parcels',       href: '/parcels',                   icon: Package,         roles: ['admin','manager'] },
   { key: 'deliveries', labelKey: 'nav.deliveries',    href: '/deliveries',                icon: Truck,           roles: ['admin','manager'] },
   { key: 'mywork',     labelKey: 'nav.myAssignments', href: '/deliveries/my-assignments', icon: ClipboardList,   roles: ['delivery_staff'] },
-  { key: 'handovers',  labelKey: 'nav.cashHandovers', href: '/finance/handovers',         icon: ArrowDownToLine, roles: ['delivery_staff','accountant','admin'] },
-  { key: 'finance',    labelKey: 'nav.finance',       href: '/finance',                   icon: DollarSign,      roles: ['admin','accountant'], end: true },
   { key: 'users',      labelKey: 'nav.users',         href: '/users',                     icon: Users,           roles: ['admin'] },
   { key: 'settings',   labelKey: 'nav.settings',      href: '/settings',                  icon: Settings,        roles: ['admin'] },
   { key: 'profile',    labelKey: 'nav.profile',       href: '/profile',                   icon: User },
@@ -127,7 +125,7 @@ export default function AppLayout() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-foreground text-xs font-medium truncate">{user?.name}</p>
-            <p className="text-secondary text-xs truncate">{user?.role_display}</p>
+            <p className="text-secondary text-xs truncate">{user?.role ? t(`users.roles.${user.role}`) : ''}</p>
           </div>
         </div>
 

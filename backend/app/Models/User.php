@@ -63,16 +63,6 @@ class User extends Authenticatable
         return $this->hasMany(DeliveryAttempt::class, 'staff_id');
     }
 
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class, 'collected_by_id');
-    }
-
-    public function cashHandovers(): HasMany
-    {
-        return $this->hasMany(CashHandover::class, 'staff_id');
-    }
-
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class);

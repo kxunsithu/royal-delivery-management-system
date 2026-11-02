@@ -121,7 +121,7 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center py-24">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-secondary text-sm">Loading profile...</p>
+          <p className="text-secondary text-sm">{t('profile.loadingProfile')}</p>
         </div>
       </div>
     )
@@ -136,7 +136,7 @@ export default function ProfilePage() {
         </Button>
         <div>
           <h1 className="text-foreground text-2xl font-bold">{t('auth.profile')}</h1>
-          <p className="text-secondary text-sm">Manage your account settings and preferences</p>
+          <p className="text-secondary text-sm">{t('profile.manageAccountSettings')}</p>
         </div>
       </div>
 
@@ -196,7 +196,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${roleColor}`}>
                     <BadgeCheck className="w-3 h-3" />
-                    {authUser.role_display ?? authUser.role}
+                    {authUser?.role ? t(`users.roles.${authUser.role}`) : ''}
                   </span>
                 </div>
 
@@ -217,14 +217,14 @@ export default function ProfilePage() {
 
             {/* Info summary card */}
             <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-              <p className="text-xs font-semibold text-secondary uppercase tracking-wider">Contact Info</p>
+              <p className="text-xs font-semibold text-secondary uppercase tracking-wider">{t('profile.contactInfo')}</p>
               <div className="space-y-2.5">
                 <div className="flex items-center gap-3">
                   <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                     <Mail className="w-3.5 h-3.5 text-secondary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-secondary">Email</p>
+                    <p className="text-xs text-secondary">{t('profile.email')}</p>
                     <p className="text-foreground text-sm truncate">{authUser.email}</p>
                   </div>
                 </div>
@@ -233,7 +233,7 @@ export default function ProfilePage() {
                     <Phone className="w-3.5 h-3.5 text-secondary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-secondary">Phone</p>
+                    <p className="text-xs text-secondary">{t('profile.phone')}</p>
                     <p className="text-foreground text-sm">{form.phone || '—'}</p>
                   </div>
                 </div>
@@ -242,8 +242,8 @@ export default function ProfilePage() {
                     <Shield className="w-3.5 h-3.5 text-secondary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-secondary">Role</p>
-                    <p className="text-foreground text-sm">{authUser.role_display ?? authUser.role}</p>
+                    <p className="text-xs text-secondary">{t('profile.role')}</p>
+                    <p className="text-foreground text-sm">{authUser?.role ? t(`users.roles.${authUser.role}`) : ''}</p>
                   </div>
                 </div>
               </div>
@@ -260,8 +260,8 @@ export default function ProfilePage() {
                   <User className="w-3.5 h-3.5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-foreground text-sm font-semibold">Account Information</h3>
-                  <p className="text-secondary text-xs">Update your personal details</p>
+                  <h3 className="text-foreground text-sm font-semibold">{t('profile.accountInformation')}</h3>
+                  <p className="text-secondary text-xs">{t('profile.updatePersonalDetails')}</p>
                 </div>
               </div>
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -286,7 +286,7 @@ export default function ProfilePage() {
                       className="pl-9 opacity-60 cursor-not-allowed"
                     />
                   </div>
-                  <p className="text-xs text-secondary">Email cannot be changed</p>
+                  <p className="text-xs text-secondary">{t('profile.emailCannotBeChanged')}</p>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-secondary text-xs font-medium uppercase tracking-wide">{t('common.phone')}</Label>
@@ -305,7 +305,7 @@ export default function ProfilePage() {
                   <div className="relative">
                     <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-secondary" />
                     <Input
-                      value={authUser.role_display ?? authUser.role}
+                      value={authUser?.role ? t(`users.roles.${authUser.role}`) : ''}
                       disabled
                       className="pl-9 opacity-60 cursor-not-allowed"
                     />
@@ -321,8 +321,8 @@ export default function ProfilePage() {
                   <Lock className="w-3.5 h-3.5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-foreground text-sm font-semibold">Change Password</h3>
-                  <p className="text-secondary text-xs">Leave blank to keep your current password</p>
+                  <h3 className="text-foreground text-sm font-semibold">{t('profile.changePassword')}</h3>
+                  <p className="text-secondary text-xs">{t('profile.leaveBlankPassword')}</p>
                 </div>
               </div>
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -113,3 +113,34 @@ bash setup.sh   # install deps, migrate, seed
 bash dev.sh     # run backend + frontend
 ```
 Frontend: http://localhost:5173 · Backend: http://localhost:8000
+
+## Mobile app (Expo)
+
+The mobile app is in `mobile/`. Start the Laravel API on all interfaces so a
+phone/emulator can reach it:
+
+```bash
+cd backend
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+Then start Expo from another terminal:
+
+```bash
+cd mobile
+npx expo start
+```
+
+In development the app automatically uses the same host Metro is served from
+(port `8000` for the API). That means Expo Go on a physical phone works as long
+as the phone and computer are on the same Wi-Fi network.
+
+If the API is deployed or on another machine, copy `mobile/.env.example` to
+`mobile/.env` and set:
+
+```
+EXPO_PUBLIC_API_BASE_URL=https://YOUR-BACKEND.onrender.com/api/v1
+```
+
+Restart Metro after changing the file (`npx expo start -c`). Use HTTPS for
+production builds; plain HTTP is only intended for local development.

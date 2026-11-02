@@ -5,7 +5,7 @@ import deliveryService from '@/services/deliveryService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, MapPin, Phone, Package, Clock, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
-import { getParcelStatusClass, formatDate, formatDateTime, formatCurrency, buildGoogleMapsUrl } from '@/utils/helpers'
+import { getParcelStatusClass, formatDate, formatDateTime, buildGoogleMapsUrl } from '@/utils/helpers'
 
 export default function AssignmentDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -48,14 +48,14 @@ export default function AssignmentDetailPage() {
         {/* Parcel info */}
         {p && (
           <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><Package className="w-4 h-4 text-primary" />Parcel</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Package className="w-4 h-4 text-primary" />{t('parcels.parcel')}</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
                 <span className={`text-xs px-2 py-0.5 rounded ${getParcelStatusClass(p.status)}`}>{t(`status.${p.status}`)}</span>
                 <span className="text-secondary">{p.tracking_number}</span>
               </div>
               <Link to={`/parcels/${p.id}`} className="text-primary text-xs hover:underline">
-                {'View full parcel details'}
+                {t('parcels.viewFullDetails')}
               </Link>
               <div className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-secondary" />
@@ -73,25 +73,13 @@ export default function AssignmentDetailPage() {
                 <ExternalLink className="w-3 h-3" />
                 {t('deliveries.openInMaps')}
               </a>
-              <div className="pt-2 border-t border-border space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-secondary">{t('parcels.deliveryFee')}</span>
-                  <span className="text-foreground">{formatCurrency(p.delivery_fee, i18n.language)}</span>
-                </div>
-                {p.is_cod && (
-                  <div className="flex justify-between">
-                    <span className="text-secondary">COD</span>
-                    <span className="text-warning">{formatCurrency(p.cod_amount, i18n.language)}</span>
-                  </div>
-                )}
-              </div>
             </CardContent>
           </Card>
         )}
 
         {/* Assignment info */}
         <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" />Assignment</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" />{t('deliveries.assignment')}</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
             {[
               ['Staff', a.staff?.name ?? '-'],
@@ -113,7 +101,7 @@ export default function AssignmentDetailPage() {
       {/* Delivery attempts */}
       {a.delivery_attempts && a.delivery_attempts.length > 0 && (
         <Card>
-          <CardHeader><CardTitle>Delivery Attempts</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t('deliveries.deliveryAttempts')}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {a.delivery_attempts.map((da: any) => (
               <div key={da.id} className="flex items-start gap-3 p-4 bg-muted rounded">
@@ -131,11 +119,7 @@ export default function AssignmentDetailPage() {
                     <span className="text-secondary text-xs">{formatDateTime(da.attempted_at, i18n.language)}</span>
                   </div>
                   {da.failure_reason && <p className="text-secondary text-xs mt-1">{t(`deliveries.failureReasons.${da.failure_reason}`)}</p>}
-                  {da.recipient_name && <p className="text-secondary text-xs">Received by: {da.recipient_name}</p>}
-                  <div className="flex gap-3 mt-2 text-xs">
-                    <span className="text-secondary">Fee: <span className="text-foreground">{formatCurrency(da.delivery_fee_collected, i18n.language)}</span></span>
-                    {da.cod_collected > 0 && <span className="text-secondary">COD: <span className="text-warning">{formatCurrency(da.cod_collected, i18n.language)}</span></span>}
-                  </div>
+                  {da.recipient_name && <p className="text-secondary text-xs">{t('deliveries.receivedBy', { name: da.recipient_name })}</p>}
                   {da.notes && <p className="text-secondary text-xs mt-1">{da.notes}</p>}
                 </div>
               </div>

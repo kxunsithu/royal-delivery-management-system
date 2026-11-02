@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
+import { useTranslation } from 'react-i18next'
 import AppLayout from '@/layouts/AppLayout'
 
 // Auth pages
@@ -19,13 +20,6 @@ import EditParcelPage from '@/pages/parcels/EditParcelPage'
 import DeliveriesPage from '@/pages/deliveries/DeliveriesPage'
 import MyAssignmentsPage from '@/pages/deliveries/MyAssignmentsPage'
 
-
-// Finance
-import FinancePage from '@/pages/finance/FinancePage'
-import PaymentsPage from '@/pages/finance/PaymentsPage'
-import ExpensesPage from '@/pages/finance/ExpensesPage'
-import HandoversPage from '@/pages/finance/HandoversPage'
-
 // Users
 import UsersPage from '@/pages/users/UsersPage'
 import UserDetailPage from '@/pages/users/UserDetailPage'
@@ -43,6 +37,7 @@ function ProtectedRoute({ children, roles }: {
   children: React.ReactNode
   roles?: string[]
 }) {
+  const { t } = useTranslation()
   const { isAuthenticated, isLoading, user } = useAuth()
 
   if (isLoading) {
@@ -50,7 +45,7 @@ function ProtectedRoute({ children, roles }: {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded animate-spin" />
-          <p className="text-secondary text-sm">Loading...</p>
+          <p className="text-secondary text-sm">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -68,6 +63,7 @@ function ProtectedRoute({ children, roles }: {
 }
 
 export default function AppRoutes() {
+  const { t } = useTranslation()
   const { isAuthenticated } = useAuth()
 
   return (
@@ -94,7 +90,7 @@ export default function AppRoutes() {
         <Route
           path="parcels"
           element={
-            <ProtectedRoute roles={['admin', 'manager', 'accountant']}>
+            <ProtectedRoute roles={['admin', 'manager']}>
               <ParcelsPage />
             </ProtectedRoute>
           }
@@ -134,33 +130,6 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
-        {/* Finance */}
-        <Route
-          path="finance"
-          element={
-            <ProtectedRoute roles={['admin', 'accountant']}>
-              <FinancePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="finance/payments"
-          element={
-            <ProtectedRoute roles={['admin', 'accountant']}>
-              <PaymentsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="finance/expenses"
-          element={
-            <ProtectedRoute roles={['admin', 'accountant']}>
-              <ExpensesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="finance/handovers" element={<HandoversPage />} />
 
         {/* Users */}
         <Route

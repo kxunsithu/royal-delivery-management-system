@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/utils/helpers'
+
 export interface PrintableParcel {
   tracking_number: string
   sender_name?: string | null
@@ -10,9 +12,9 @@ export interface PrintableParcel {
   quantity?: number
   weight?: number | null
   notes?: string | null
-  delivery_fee: number
-  cod_amount: number
-  is_cod: boolean
+  delivery_fee?: number | null
+  cod_amount?: number | null
+  is_cod?: boolean
   status: string
   condition?: string
   priority?: string
@@ -36,20 +38,17 @@ const labels = (lang: string) => {
     weight: my ? 'အလေးချိန် (kg)' : 'Weight (kg)',
     condition: my ? 'အခြေအနေ' : 'Condition',
     priority: my ? 'ဦးစားပေး' : 'Priority',
-    deliveryFee: my ? 'ပို့ဆောင်ခ' : 'Delivery Fee',
-    cod: my ? 'COD ငွေပမာဏ' : 'COD Amount',
     status: my ? 'အခြေအနေ' : 'Status',
     receivedAt: my ? 'လက်ခံရရှိသည့် ရက်စွဲ' : 'Received At',
     receivedBy: my ? 'လက်ခံသူ (Staff)' : 'Received By',
     notes: my ? 'မှတ်ချက်' : 'Notes',
+    deliveryFee: my ? 'ပို့ဆောင်ခ' : 'Delivery Fee',
+    cod: my ? 'COD ငွေကောက်ခံခြင်း' : 'COD',
     printedAt: my ? 'ပုံနှိပ်သည့် ရက်စွဲ' : 'Printed At',
     footer: my ? 'ဤဘောက်ချာကို Royal\'s Myawaddy Delivery မှ ထုတ်ပေးခြင်းဖြစ်ပါသည်။' : 'Issued by Royal\'s Myawaddy Delivery.',
   }
 }
 
-function money(n: number) {
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n)
-}
 
 function dt(s?: string | null) {
   if (!s) return '-'
@@ -62,7 +61,7 @@ function priorityLabel(priority: string | undefined, lang: string) {
   return ({ NORMAL: 'ပုံမှန်', HIGH: 'အရေးကြီး', URGENT: 'အရေးပေါ်' } as Record<string, string>)[priority] ?? priority
 }
 
-export function printParcelReceipt(parcel: PrintableParcel, lang: string = 'en') {
+export function printParcelReceipt(parcel: PrintableParcel, lang: string = 'my') {
   const L = labels(lang)
   const areaName = lang === 'my' && parcel.delivery_area?.name_mm
     ? parcel.delivery_area.name_mm
@@ -77,8 +76,8 @@ export function printParcelReceipt(parcel: PrintableParcel, lang: string = 'en')
   rows.push([L.address, parcel.delivery_address])
   rows.push([L.area, areaName])
   if (parcel.description) rows.push([L.description, parcel.description])
-  rows.push([L.deliveryFee, money(parcel.delivery_fee)])
-  if (parcel.is_cod) rows.push([L.cod, money(parcel.cod_amount)])
+  rows.push([L.deliveryFee, formatCurrency(parcel.delivery_fee, lang)])
+  rows.push([L.cod, parcel.is_cod ? `Yes — ${formatCurrency(parcel.cod_amount, lang)}` : 'No'])
 
   const html = `<!DOCTYPE html>
 <html>

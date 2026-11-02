@@ -23,11 +23,15 @@ return [
         env('FRONTEND_URL', 'http://localhost:5173'),
         'http://localhost:5173',
         'http://127.0.0.1:5173',
+        'http://localhost:8081',
+        'http://127.0.0.1:8081',
     ]),
 
-    // Allows any *.onrender.com subdomain (for Render deployments)
+    // Allows any *.onrender.com subdomain (for Render deployments) and
+    // LAN development origins such as Expo web on http://192.168.x.x:8081.
     'allowed_origins_patterns' => [
         '#^https://[a-z0-9\-]+\.onrender\.com$#',
+        '#^http://(?:localhost|127\.0\.0\.1|10\.0\.2\.2|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d+)?$#',
     ],
 
     'allowed_headers' => ['*'],

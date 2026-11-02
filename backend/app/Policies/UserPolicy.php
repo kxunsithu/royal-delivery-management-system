@@ -11,6 +11,11 @@ class UserPolicy
         return $authUser->isAdmin() || $authUser->isManager();
     }
 
+    public function viewDeliveryStaff(User $authUser): bool
+    {
+        return $authUser->isAdmin() || $authUser->isManager() || $authUser->isAccountant();
+    }
+
     public function view(User $authUser, User $user): bool
     {
         // Admins can view any user; others can only view themselves

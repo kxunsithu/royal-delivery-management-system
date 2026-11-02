@@ -9,13 +9,13 @@ class ParcelPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isManager() || $user->isAccountant();
+        return $user->isAdmin() || $user->isManager();
         // Delivery staff view parcels through the delivery assignments endpoint
     }
 
     public function view(User $user, Parcel $parcel): bool
     {
-        if ($user->isAdmin() || $user->isManager() || $user->isAccountant()) {
+        if ($user->isAdmin() || $user->isManager()) {
             return true;
         }
 
@@ -50,7 +50,6 @@ class ParcelPolicy
         }
 
         if ($user->isManager()) {
-            // Manager can transition to most statuses except delivery-related
             return !in_array($parcel->status, ['IN_TRANSIT']);
         }
 

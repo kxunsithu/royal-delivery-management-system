@@ -110,7 +110,7 @@ export default function DeliveriesPage() {
               onChange={e => { setStaffFilter(e.target.value); setPage(1) }}
               className="h-9 rounded border border-border bg-muted px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="">All Staff</option>
+              <option value="">{t('deliveries.allStaff')}</option>
               {(staffData as any[] ?? []).map((s: any) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}

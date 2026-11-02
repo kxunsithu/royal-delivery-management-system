@@ -6,8 +6,6 @@ export interface RecordAttemptData {
   failure_reason?: string;
   recipient_name?: string;
   recipient_confirmation?: string;
-  delivery_fee_collected: number;
-  cod_collected?: number;
   notes?: string;
   attempted_at?: string;
 }
