@@ -1,25 +1,47 @@
 {
   "expo": {
-    "name": "Royal Myawaddy Delivery",
+    "name": "Royal Myawaddy",
     "slug": "royal-myawaddy-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5A623"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.royalmyawaddy.delivery"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F5A623"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.royalmyawaddy.delivery"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "scheme": "royalmyawaddy",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to upload parcel images.",
+          "cameraPermission": "The app accesses your camera to capture delivery proof."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }

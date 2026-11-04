@@ -1,61 +1,48 @@
-import apiClient from '@/lib/api';
-import type { User, PaginatedResponse, ApiResponse } from '@/types';
+import apiClient from './apiClient';
 
-export interface UsersQuery {
-  search?: string;
-  role?: string;
-  is_active?: boolean;
-  page?: number;
-  per_page?: number;
-  sort_by?: string;
-  sort_dir?: 'asc' | 'desc';
-}
-
-export interface CreateUserData {
+export interface User {
+  id: number;
   name: string;
-  email: string;
-  phone?: string;
-  password: string;
-  employee_id?: string;
-  role: string;
-}
-
-export interface UpdateUserData {
-  name?: string;
+  phone: string;
   email?: string;
-  phone?: string;
-  password?: string;
-  employee_id?: string;
-  role?: string;
+  role: string;
+  is_active: boolean;
+  profile_image_url?: string;
+  created_at?: string;
 }
 
-const userService = {
-  list: (params: UsersQuery = {}) =>
-    apiClient.get<PaginatedResponse<User>>('/users', { params }),
+export interface UsersResponse {
+  data: User[];
+  meta: { current_page: number; last_page: number; per_page: number; total: number };
+}
 
-  get: (id: number) =>
-    apiClient.get<ApiResponse<User>>(`/users/${id}`),
-
-  create: (data: CreateUserData) =>
-    apiClient.post<ApiResponse<User>>('/users', data),
-
-  update: (id: number, data: UpdateUserData) =>
-    apiClient.put<ApiResponse<User>>(`/users/${id}`, data),
-
-  updateStatus: (id: number, is_active: boolean) =>
-    apiClient.patch<ApiResponse<User>>(`/users/${id}/status`, { is_active }),
-
-  uploadProfileImage: (id: number, file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    return apiClient.post<ApiResponse<User>>(`/users/${id}/profile-image`, formData);
+export const userService = {
+  async list(params?: { page?: number; per_page?: number; search?: string; role?: string }): Promise<UsersResponse> {
+    const response = await apiClient.get('/users', { params });
+    return response.data;
   },
 
-  deleteProfileImage: (id: number) =>
-    apiClient.delete<ApiResponse<User>>(`/users/${id}/profile-image`),
+  async get(id: number): Promise<User> {
+    const response = await apiClient.get(`/users/${id}`);
+    return response.data.data;
+  },
 
-  deliveryStaff: () =>
-    apiClient.get<ApiResponse<User[]>>('/users/delivery-staff'),
+  async create(data: Partial<User> & { password: string }): Promise<User> {
+    const response = await apiClient.post('/users', data);
+    return response.data.data;
+  },
+
+  async update(id: number, data: Partial<User>): Promise<User> {
+    const response = await apiClient.put(`/users/${id}`, data);
+    return response.data.data;
+  },
+
+  async updateStatus(id: number, isActive: boolean): Promise<void> {
+    await apiClient.patch(`/users/${id}/status`, { is_active: isActive });
+  },
+
+  async getDeliveryStaff(): Promise<User[]> {
+    const response = await apiClient.get('/users/delivery-staff');
+    return response.data.data || response.data;
+  },
 };
-
-export default userService;

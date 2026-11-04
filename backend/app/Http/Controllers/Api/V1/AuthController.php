@@ -14,16 +14,31 @@ class AuthController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
+        $loginId = $request->input('phone') ?? $request->input('email');
+
+        if (!$loginId || !is_string($loginId)) {
+            throw ValidationException::withMessages([
+                'phone' => ['ဖုန်းနံပါတ် ဖြည့်သွင်းရန် လိုအပ်ပါသည်။ (The phone field is required.)'],
+            ]);
+        }
+
         $request->validate([
-            'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $rawLogin = trim($loginId);
+        $cleanPhone = preg_replace('/[^0-9+]/', '', $rawLogin);
+        $localPhone = preg_replace('/^\+?95/', '0', $cleanPhone);
+
+        $user = User::where('phone', $rawLogin)
+            ->orWhere('phone', $cleanPhone)
+            ->orWhere('phone', $localPhone)
+            ->orWhere('email', $rawLogin)
+            ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'phone' => ['The provided credentials are incorrect.'],
             ]);
         }
 

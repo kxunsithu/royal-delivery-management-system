@@ -1,85 +1,145 @@
-import apiClient from '@/lib/api';
-import type { Parcel, ParcelDetail, PaginatedResponse, ApiResponse, ParcelStatus } from '@/types';
+import apiClient from './apiClient';
 
-export interface ParcelsQuery {
-  search?: string;
-  status?: ParcelStatus;
-  delivery_area_id?: number;
-  priority?: string;
-  assigned_to?: number;
-  date_from?: string;
-  date_to?: string;
-  page?: number;
-  per_page?: number;
-  sort_by?: string;
-  sort_dir?: 'asc' | 'desc';
-}
-
-export interface CreateParcelData {
-  tracking_number?: string;
+export interface Parcel {
+  id: number;
+  tracking_number: string;
   sender_name?: string;
   sender_phone?: string;
   recipient_name: string;
   recipient_phone: string;
   delivery_address: string;
-  delivery_area_id?: number;
+  delivery_area?: { id: number; name: string; name_mm?: string };
   description?: string;
-  quantity?: number;
+  quantity: number;
   weight?: number;
   notes?: string;
-  condition?: string;
-  priority?: string;
+  delivery_fee: number;
+  cod_amount: number;
+  is_cod: boolean;
+  status: string;
+  condition: string;
+  priority: string;
   received_at?: string;
+  received_by?: { id: number; name: string };
+  active_assignment?: {
+    id: number;
+    staff: { id: number; name: string };
+    assigned_at: string;
+  };
+  status_histories?: StatusHistory[];
+  delivery_assignments?: DeliveryAssignment[];
+  delivery_attempts?: DeliveryAttempt[];
+  damage_description?: string;
+  images?: ParcelImage[];
+  created_at: string;
+  updated_at: string;
 }
 
-export interface ParcelImageData {
+export interface StatusHistory {
+  id: number;
+  from_status?: string;
+  to_status: string;
+  reason?: string;
+  notes?: string;
+  changed_by?: { id: number; name: string };
+  created_at: string;
+}
+
+export interface DeliveryAssignment {
+  id: number;
+  staff?: { id: number; name: string; phone?: string };
+  assigned_by?: { id: number; name: string };
+  status: string;
+  notes?: string;
+  assigned_at: string;
+  completed_at?: string;
+}
+
+export interface DeliveryAttempt {
+  id: number;
+  staff?: { id: number; name: string };
+  attempted_at: string;
+  result: string;
+  failure_reason?: string;
+  recipient_name?: string;
+  notes?: string;
+}
+
+export interface ParcelImage {
   id: number;
   url: string;
-  original_name: string | null;
-  size: number | null;
-  mime_type: string | null;
+  original_name: string;
+  size?: number;
+  mime_type?: string;
   sort_order: number;
   created_at: string;
 }
 
-const parcelService = {
-  list: (params: ParcelsQuery = {}) =>
-    apiClient.get<PaginatedResponse<Parcel>>('/parcels', { params }),
+export interface ParcelsResponse {
+  data: Parcel[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
 
-  get: (id: number) =>
-    apiClient.get<ApiResponse<ParcelDetail>>(`/parcels/${id}`),
+export interface ParcelFilters {
+  search?: string;
+  status?: string;
+  priority?: string;
+  delivery_area_id?: number;
+  date_from?: string;
+  date_to?: string;
+  page?: number;
+  per_page?: number;
+  sort_by?: string;
+  sort_dir?: string;
+}
 
-  create: (data: CreateParcelData) =>
-    apiClient.post<ApiResponse<Parcel>>('/parcels', data),
-
-  update: (id: number, data: Partial<CreateParcelData>) =>
-    apiClient.put<ApiResponse<Parcel>>(`/parcels/${id}`, data),
-
-  delete: (id: number) =>
-    apiClient.delete(`/parcels/${id}`),
-
-  tracking: (id: number) =>
-    apiClient.get(`/parcels/${id}/tracking`),
-
-  statusTransition: (id: number, status: ParcelStatus, reason?: string, notes?: string) =>
-    apiClient.post(`/parcels/${id}/status-transitions`, { status, reason, notes }),
-
-  assign: (id: number, staff_id: number, notes?: string) =>
-    apiClient.post(`/parcels/${id}/assignments`, { staff_id, notes }),
-
-  /** Upload one or more images. Sends files as "images[]" multipart/form-data. */
-  uploadImages: (id: number, files: File[]) => {
-    const formData = new FormData();
-    files.forEach(file => formData.append('images[]', file));
-    return apiClient.post<ApiResponse<ParcelImageData[]>>(
-      `/parcels/${id}/images`,
-      formData
-    );
+export const parcelService = {
+  async list(filters?: ParcelFilters): Promise<ParcelsResponse> {
+    const response = await apiClient.get('/parcels', { params: filters });
+    return response.data;
   },
 
-  /** Delete a specific image by its own ID. */
-  deleteImage: (parcelId: number, imageId: number) =>
-    apiClient.delete(`/parcels/${parcelId}/images/${imageId}`),
-};
+  async get(id: number): Promise<Parcel> {
+    const response = await apiClient.get(`/parcels/${id}`);
+    return response.data.data;
+  },
 
-export default parcelService;
+  async create(data: Partial<Parcel>): Promise<Parcel> {
+    const response = await apiClient.post('/parcels', data);
+    return response.data.data;
+  },
+
+  async update(id: number, data: Partial<Parcel>): Promise<Parcel> {
+    const response = await apiClient.put(`/parcels/${id}`, data);
+    return response.data.data;
+  },
+
+  async delete(id: number): Promise<void> {
+    await apiClient.delete(`/parcels/${id}`);
+  },
+
+  async tracking(id: number): Promise<any> {
+    const response = await apiClient.get(`/parcels/${id}/tracking`);
+    return response.data.data;
+  },
+
+  async statusTransition(id: number, status: string, reason?: string, notes?: string): Promise<void> {
+    await apiClient.post(`/parcels/${id}/status-transitions`, { status, reason, notes });
+  },
+
+  async assign(id: number, staffId: number, notes?: string): Promise<void> {
+    await apiClient.post(`/parcels/${id}/assignments`, { staff_id: staffId, notes });
+  },
+
+  async uploadImages(id: number, formData: FormData): Promise<ParcelImage[]> {
+    const response = await apiClient.post(`/parcels/${id}/images`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data.data;
+  },
+};

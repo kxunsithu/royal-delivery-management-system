@@ -65,8 +65,8 @@ class UserController extends Controller
         $this->authorize('create', User::class);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', 'unique:users,phone'],
+            'email' => ['nullable', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'employee_id' => ['nullable', 'string', 'max:50', 'unique:users,employee_id'],
             'role' => ['required', 'string', Rule::in(['admin', 'manager', 'accountant', 'delivery_staff'])],
@@ -74,8 +74,8 @@ class UserController extends Controller
 
         $user = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $validated['phone'],
+            'email' => $validated['email'] ?? null,
             'password' => Hash::make($validated['password']),
             'employee_id' => $validated['employee_id'] ?? null,
             'is_active' => true,
@@ -106,8 +106,8 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['sometimes', 'string', 'max:30', Rule::unique('users')->ignore($user->id)],
+            'email' => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
             'employee_id' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
             'role' => ['sometimes', 'string', Rule::in(['admin', 'manager', 'accountant', 'delivery_staff'])],
@@ -115,9 +115,10 @@ class UserController extends Controller
 
         $oldValues = $user->toArray();
 
-        // Non-admin users cannot change their own email address
+        // Non-admin users cannot change their own phone or email address
         $authUser = $request->user();
         if (!$authUser->isAdmin() && $authUser->id === $user->id) {
+            unset($validated['phone']);
             unset($validated['email']);
         }
 
