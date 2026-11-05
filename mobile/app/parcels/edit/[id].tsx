@@ -9,13 +9,16 @@ import {
   Switch,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { parcelService } from '../../../src/services/parcelService';
+import * as ImagePicker from 'expo-image-picker';
+import { parcelService, ParcelImage } from '../../../src/services/parcelService';
 import apiClient from '../../../src/services/apiClient';
+import { useAuth } from '../../../src/context/AuthContext';
 import { COLORS } from '../../../src/constants';
 
 interface DeliveryArea { id: number; name: string; name_mm?: string; }
@@ -23,7 +26,16 @@ interface DeliveryArea { id: number; name: string; name_mm?: string; }
 export default function EditParcelScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Guard: only admin and manager can edit parcels — redirect accountant away
+  const canEdit = !user || user.role === 'admin' || user.role === 'manager';
+  useEffect(() => {
+    if (user && !canEdit) {
+      router.replace(`/parcels/${id}`);
+    }
+  }, [user, canEdit]);
 
   const { data: parcel, isLoading } = useQuery({
     queryKey: ['parcel', id],
@@ -47,6 +59,9 @@ export default function EditParcelScreen() {
     priority: 'NORMAL',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [existingImages, setExistingImages] = useState<ParcelImage[]>([]);
+  const [newImages, setNewImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   useEffect(() => {
     if (parcel) {
@@ -66,12 +81,32 @@ export default function EditParcelScreen() {
         is_cod: parcel.is_cod || false,
         priority: parcel.priority || 'NORMAL',
       });
+      setExistingImages(parcel.images ?? []);
     }
   }, [parcel]);
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => parcelService.update(Number(id), data),
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Upload new images if any
+      if (newImages.length > 0) {
+        setUploadingImages(true);
+        try {
+          const formData = new FormData();
+          newImages.forEach((img) => {
+            formData.append('images[]', {
+              uri: img.uri,
+              name: img.fileName ?? `parcel_${Date.now()}.jpg`,
+              type: img.mimeType ?? 'image/jpeg',
+            } as any);
+          });
+          await parcelService.uploadImages(Number(id), formData);
+        } catch {
+          // ignore upload error
+        } finally {
+          setUploadingImages(false);
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ['parcel', id] });
       queryClient.invalidateQueries({ queryKey: ['parcels'] });
       Alert.alert('အောင်မြင်သည်', 'ပါဆယ် ပြင်ဆင်မှု ပြီးပါပြီ', [
@@ -87,6 +122,41 @@ export default function EditParcelScreen() {
   function update(field: string, value: any) {
     setForm(f => ({ ...f, [field]: value }));
     setErrors(e => ({ ...e, [field]: undefined as any }));
+  }
+
+  async function pickImages() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') { Alert.alert('ခွင့်မပြု', 'ဓာတ်ပုံ တင်ရန် ခွင့်ပြုချက် လိုအပ်သည်'); return; }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true, quality: 0.8, selectionLimit: 10,
+    });
+    if (!result.canceled) setNewImages(prev => [...prev, ...result.assets].slice(0, 10));
+  }
+
+  async function takePhoto() {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') { Alert.alert('ခွင့်မပြု', 'ကင်မရာ သုံးရန် ခွင့်ပြုချက် လိုအပ်သည်'); return; }
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
+    if (!result.canceled) setNewImages(prev => [...prev, result.assets[0]]);
+  }
+
+  async function deleteExistingImage(imageId: number) {
+    Alert.alert('ဓာတ်ပုံ ဖျက်မည်', 'ဤဓာတ်ပုံကို ဖျက်မည်လား?', [
+      { text: 'မဖျက်ပါ', style: 'cancel' },
+      {
+        text: 'ဖျက်မည်', style: 'destructive',
+        onPress: async () => {
+          try {
+            await parcelService.deleteImage(Number(id), imageId);
+            setExistingImages(prev => prev.filter(img => img.id !== imageId));
+            queryClient.invalidateQueries({ queryKey: ['parcel', id] });
+          } catch {
+            Alert.alert('အမှား', 'ဓာတ်ပုံ ဖျက်မှု မအောင်မြင်ပါ');
+          }
+        },
+      },
+    ]);
   }
 
   function validate() {
@@ -125,7 +195,7 @@ export default function EditParcelScreen() {
     { value: 'URGENT', label: 'အရေးပေါ်' },
   ];
 
-  if (isLoading) {
+  if (isLoading || !canEdit) {
     return (
       <View style={styles.container}>
         <View style={styles.center}><ActivityIndicator size="large" color={COLORS.primary} /></View>
@@ -153,7 +223,7 @@ export default function EditParcelScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ပါဆယ် အချက်အလက်</Text>
           <View style={styles.card}>
@@ -232,8 +302,64 @@ export default function EditParcelScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={[styles.submitBtn, updateMutation.isPending && { opacity: 0.6 }]} onPress={handleSubmit} disabled={updateMutation.isPending}>
-          {updateMutation.isPending ? <ActivityIndicator color={COLORS.white} /> : (
+        {/* Images Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>ပါဆယ် ဓာတ်ပုံများ</Text>
+          <View style={[styles.card, { gap: 12 }]}>
+            <View style={styles.imageBtnRow}>
+              <TouchableOpacity style={styles.imagePickBtn} onPress={pickImages}>
+                <Ionicons name="images-outline" size={18} color={COLORS.primary} />
+                <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရွေးရန်</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.imagePickBtn} onPress={takePhoto}>
+                <Ionicons name="camera-outline" size={18} color={COLORS.primary} />
+                <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရိုက်ရန်</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Existing images */}
+            {existingImages.length > 0 && (
+              <>
+                <Text style={styles.imageGroupLabel}>လက်ရှိ ဓာတ်ပုံများ</Text>
+                <View style={styles.imageGrid}>
+                  {existingImages.map((img) => (
+                    <View key={img.id} style={styles.imageThumbWrap}>
+                      <Image source={{ uri: img.url }} style={styles.imageThumb} />
+                      <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => deleteExistingImage(img.id)}>
+                        <Ionicons name="close-circle" size={20} color={COLORS.error} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {/* New images to upload */}
+            {newImages.length > 0 && (
+              <>
+                <Text style={styles.imageGroupLabel}>ထည့်မည့် ဓာတ်ပုံများ</Text>
+                <View style={styles.imageGrid}>
+                  {newImages.map((img, i) => (
+                    <View key={i} style={styles.imageThumbWrap}>
+                      <Image source={{ uri: img.uri }} style={styles.imageThumb} />
+                      <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => setNewImages(p => p.filter((_, idx) => idx !== i))}>
+                        <Ionicons name="close-circle" size={20} color={COLORS.error} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {existingImages.length === 0 && newImages.length === 0 && (
+              <Text style={styles.imageHint}>ဓာတ်ပုံ မရှိသေးပါ</Text>
+            )}
+            <Text style={styles.imageHint}>အများဆုံး 10 ပုံ • JPEG, PNG • 5MB အောက်</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={[styles.submitBtn, (updateMutation.isPending || uploadingImages) && { opacity: 0.6 }]} onPress={handleSubmit} disabled={updateMutation.isPending || uploadingImages}>
+          {(updateMutation.isPending || uploadingImages) ? <ActivityIndicator color={COLORS.white} /> : (
             <><Ionicons name="checkmark-circle" size={22} color={COLORS.white} /><Text style={styles.submitBtnText}>ပြင်ဆင်မှု သိမ်းမည်</Text></>
           )}
         </TouchableOpacity>
@@ -278,17 +404,20 @@ function FormField({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
-    paddingBottom: 14,
+    paddingBottom: 20,
     gap: 12,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  closeBtn: { padding: 4 },
+  closeBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white },
   saveBtn: { backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
   saveBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white },
@@ -313,6 +442,19 @@ const styles = StyleSheet.create({
   areaChipActiveText: { color: COLORS.white },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
   switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text },
-  submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.primary, borderRadius: 16, padding: 18, marginTop: 8 },
+  submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.primary, borderRadius: 16, padding: 18, marginTop: 8, shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 4 },
   submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  imageBtnRow: { flexDirection: 'row', gap: 10 },
+  imagePickBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5,
+    borderColor: COLORS.primary, backgroundColor: '#FFF9EE',
+  },
+  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary },
+  imageGroupLabel: { fontSize: 12, fontWeight: '700', color: COLORS.textSecondary },
+  imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  imageThumbWrap: { position: 'relative' },
+  imageThumb: { width: 80, height: 80, borderRadius: 10 },
+  imageRemoveBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: COLORS.white, borderRadius: 10 },
+  imageHint: { fontSize: 11, color: COLORS.textLight, textAlign: 'center' },
 });

@@ -9,8 +9,8 @@
 | Role | အဓိကတာဝန် |
 |---|---|
 | Admin | စနစ်၊ အသုံးပြုသူ၊ ပါဆယ်၊ အစီအမံနှင့် settings အားလုံးကို စီမံခန့်ခွဲခြင်း |
-| Manager | ပါဆယ်လက်ခံခြင်း၊ စစ်ဆေးခြင်း၊ status လှုပ်ရှားခြင်းနှင့် delivery staff ချိတ်ဆက်ခြင်း |
-| Accountant | (ငွေကြေးလုပ်ငန်းများ ဖယ်ရှားပြီးနောက် ဤအခန်းကဏ္ဍသည် လက်ရှိတွင် အသုံးမပြုတော့ပါ) |
+| Manager | ပါဆယ်လက်ခံခြင်း၊ စစ်ဆေးခြင်း၊ status လှုပ်ရှားခြင်းနှင့် parcel register/edit |
+| Accountant | ပါဆယ်စစ်ဆေးခြင်း၊ status ပြောင်းလဲခြင်းနှင့် delivery staff ချိတ်ဆက်ခြင်း |
 | Delivery Staff | မိမိသို့ချိတ်ထားသော delivery များကို ဆောင်ရွက်ခြင်းနှင့် ငွေ/လက်မှတ် handover တင်ခြင်း |
 
 ## ၂။ Admin
@@ -53,11 +53,11 @@
 - ပါဆယ် ဖျက်ခြင်း (အတည်ပြု dialog ဖြင့်)
 - ပါဆယ်ကို `VERIFIED` သို့ စစ်ဆေးအတည်ပြုခြင်း
 - သတ်မှတ်ထားသော status transition ကို လုပ်ဆောင်ခြင်း
-- Parcel အသစ်ကို delivery staff ၏ assignment ထဲသို့ချိတ်ခြင်း၊ reassignment ပြုလုပ်ခြင်း
 - Delivery staff workload၊ active assignment နှင့် delivery attempt ကြည့်ခြင်း
 - `FAILED` ပါဆယ်များကို ပြန်လည်စီမံခြင်း
 
 ### ကန့်သတ်ချက်များ
+- **Delivery staff assign/reassign မလုပ်နိုင်ပါ** — ဤလုပ်ဆောင်ချက်မှာ Accountant လုပ်ပိုင်ခွင့်ဖြစ်ပါသည်။
 - `IN_TRANSIT` အခြေအနေရှိ ပါဆယ်ကို Manager က status မပြောင်းနိုင်ပါ။
 - Terminal status (`DELIVERED`, `DAMAGED`) ပါဆယ်များကို edit မလုပ်နိုင်ပါ။
 - Users နှင့် Settings UI မရှိပါ။ Backend Users list policy ထဲက Manager ကို view policy သတ်မှတ်ထားသော်လည်း frontend route/admin menu သည် Manager ဝင်ရောက်ခွင့် မပေးထားပါ။
@@ -65,7 +65,24 @@
 
 ## ၄။ Accountant
 
-> ငွေကြေးလုပ်ငန်းများ (payments, expenses, cash handovers) ကို စနစ်မှ ဖယ်ရှားထားသောကြောင့် ဤအခန်းကဏ္ဍသည် လက်ရှိတွင် အသုံးမပြုတော့ပါ။
+### သုံးနိုင်သော စာမျက်နှာများ
+- Dashboard (ပါဆယ် statistics — received, verified, out_for_delivery, failed)
+- Parcels list နှင့် parcel detail
+- Deliveries list နှင့် assignment detail
+- Profile
+
+### လုပ်ဆောင်နိုင်သော အဓိကလုပ်ငန်းများ
+- ပါဆယ် status ကြည့်ခြင်း (RECEIVED, VERIFIED, PENDING_ASSIGNMENT, ASSIGNED, OUT_FOR_DELIVERY, DELIVERED, FAILED)
+- ပါဆယ် status ပြောင်းလဲခြင်း (IN_TRANSIT မှလွဲ၍ — delivery staff သာ ပြောင်းနိုင်)
+- Delivery staff ကို ပါဆယ်တစ်ခုချင်း ချိတ်ဆက်ခြင်းနှင့် ပြန်လည်ချိတ်ဆက်ခြင်း (Assign / Reassign)
+- Delivery assignment detail ကြည့်ခြင်း
+
+### ကန့်သတ်ချက်များ
+- ပါဆယ်အသစ်ထည့်ခြင်း (create) မလုပ်နိုင်ပါ။
+- ပါဆယ်ပြင်ဆင်ခြင်း (edit) နှင့် ဖျက်ခြင်း (delete) မလုပ်နိုင်ပါ။
+- IN_TRANSIT status ကို တိုက်ရိုက်သတ်မှတ်ခွင့်မရှိပါ — assign လုပ်သောအခါ auto-set ဖြစ်ပါသည်။
+- Users management၊ Settings နှင့် Audit Logs ကို ကြည့်ခွင့်မရှိပါ။
+- Manager ၏ area/settings စီမံချက်များ မပါဝင်ပါ။
 
 ## ၅။ Delivery Staff
 
@@ -100,10 +117,12 @@
 | Parcel Detail / Tracking | ✅ | ✅ | ✅ | ✅ (ကိုယ်တိုင် assign ချည်ထားပါက) |
 | Parcel Register / Edit | ✅ | ✅ | ❌ | ❌ |
 | Terminal parcel edit | ❌ | ❌ | ❌ | ❌ |
-| Deliveries/Assignments list | ✅ | ✅ | ❌ | ❌ |
+| Parcel status ပြောင်းခြင်း | ✅ | ✅ (IN_TRANSIT မှလွဲ) | ✅ (IN_TRANSIT မှလွဲ) | ✅ (IN_TRANSIT သာ) |
+| Staff assign/reassign | ✅ | ❌ | ✅ | ❌ |
+| Deliveries/Assignments list | ✅ | ✅ | ✅ | ❌ |
 | My Assignments | ❌ | ❌ | ❌ | ✅ |
-| Assignment Detail | ✅ | ✅ | ❌ | ✅ (ကိုယ်တိုင်) |
-| Delivery Fee / COD (ပါဆယ်အချက်အလက်) | ✅ | ✅ | ❌ | ❌ |
+| Assignment Detail | ✅ | ✅ | ✅ | ✅ (ကိုယ်တိုင်) |
+| Delivery Fee / COD (ပါဆယ်အချက်အလက်) | ✅ | ✅ | ✅ (ကြည့်ရုံ) | ❌ |
 | Users Management | ✅ | ❌ | ❌ | ❌ |
 | Settings/Audit Logs | ✅ | ❌ | ❌ | ❌ |
 | Profile | ✅ | ✅ | ✅ | ✅ |

@@ -142,4 +142,8 @@ export const parcelService = {
     });
     return response.data.data;
   },
+
+  async deleteImage(parcelId: number, imageId: number): Promise<void> {
+    await apiClient.delete(`/parcels/${parcelId}/images/${imageId}`);
+  },
 };

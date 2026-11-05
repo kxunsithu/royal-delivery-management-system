@@ -7,17 +7,18 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { deliveryService, Assignment } from '../../src/services/deliveryService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM } from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM } from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'တက်ကြွ', value: 'ACTIVE' },
+  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'ပြောင်းလဲ', value: 'REASSIGNED' },
 ];
@@ -41,59 +42,86 @@ export default function DeliveriesScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Text style={styles.headerTitle}>ပို့ဆောင်မှုများ</Text>
+        <View style={styles.headerBadge}>
+          <Text style={styles.headerBadgeText}>{meta?.total ?? 0}</Text>
+        </View>
       </View>
 
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={STATUS_FILTERS}
-        keyExtractor={(item) => item.value}
-        contentContainerStyle={styles.filterList}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.filterTab, statusFilter === item.value && styles.filterTabActive]}
-            onPress={() => { setStatusFilter(item.value); setPage(1); }}
+      <View style={styles.contentArea}>
+        {/* Filter Chips */}
+        <View style={styles.filterRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterList}
           >
-            <Text style={[styles.filterTabText, statusFilter === item.value && styles.filterTabTextActive]}>
-              {item.label}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
+            {STATUS_FILTERS.map((item) => (
+              <TouchableOpacity
+                key={item.value}
+                style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
+                onPress={() => { setStatusFilter(item.value); setPage(1); }}
+              >
+                <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-      {isLoading ? (
-        <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
-      ) : (
-        <FlatList
-          data={assignments}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { setPage(1); refetch(); }} tintColor={COLORS.primary} />}
-          renderItem={({ item }) => <AssignmentCard assignment={item} />}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Ionicons name="car-outline" size={64} color={COLORS.border} />
-              <Text style={styles.emptyText}>ပို့ဆောင်မှု မတွေ့ပါ</Text>
-            </View>
-          }
-          ListFooterComponent={
-            meta && meta.last_page > 1 ? (
-              <View style={styles.pagination}>
-                <TouchableOpacity style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>
-                  <Ionicons name="chevron-back" size={18} color={page <= 1 ? COLORS.textLight : COLORS.primary} />
-                </TouchableOpacity>
-                <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
-                <TouchableOpacity style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.min(meta.last_page, p + 1))} disabled={page >= meta.last_page}>
-                  <Ionicons name="chevron-forward" size={18} color={page >= meta.last_page ? COLORS.textLight : COLORS.primary} />
-                </TouchableOpacity>
+        {/* List */}
+        <View style={styles.listArea}>
+          {isLoading ? (
+            <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
+          ) : (
+          <FlatList
+            data={assignments}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { setPage(1); refetch(); }} tintColor={COLORS.primary} />}
+            renderItem={({ item }) => <AssignmentCard assignment={item} />}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <View style={styles.emptyIcon}>
+                  <Ionicons name="car-outline" size={48} color={COLORS.primary} />
+                </View>
+                <Text style={styles.emptyTitle}>ပို့ဆောင်မှု မတွေ့ပါ</Text>
+                <Text style={styles.emptySub}>ရွေးချယ်ထားသော filter နှင့် မကိုက်ညီပါ</Text>
               </View>
-            ) : undefined
-          }
-        />
-      )}
+            }
+            ListFooterComponent={
+              meta && meta.last_page > 1 ? (
+                <View style={styles.pagination}>
+                  <TouchableOpacity
+                    style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]}
+                    onPress={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    <Ionicons name="chevron-back" size={16} color={page <= 1 ? COLORS.textLight : COLORS.primary} />
+                    <Text style={[styles.pageBtnText, page <= 1 && { color: COLORS.textLight }]}>နှုတ်</Text>
+                  </TouchableOpacity>
+                  <View style={styles.pageInfoBox}>
+                    <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]}
+                    onPress={() => setPage(p => Math.min(meta.last_page, p + 1))}
+                    disabled={page >= meta.last_page}
+                  >
+                    <Text style={[styles.pageBtnText, page >= meta.last_page && { color: COLORS.textLight }]}>နောက်</Text>
+                    <Ionicons name="chevron-forward" size={16} color={page >= meta.last_page ? COLORS.textLight : COLORS.primary} />
+                  </TouchableOpacity>
+                </View>
+              ) : undefined
+            }
+          />
+        )}
+        </View>
+      </View>
     </View>
   );
 }
@@ -104,6 +132,7 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
   const statusColor = STATUS_COLORS[parcelStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
   const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
   const assignStatus = assignment.status;
+  const isActive = assignStatus === 'ACTIVE';
 
   return (
     <TouchableOpacity
@@ -111,87 +140,183 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
       onPress={() => router.push(`/deliveries/${assignment.id}`)}
       activeOpacity={0.85}
     >
+      {/* Card Top */}
       <View style={styles.cardHeader}>
         <View style={styles.trackingRow}>
-          <Ionicons name="barcode-outline" size={16} color={COLORS.primary} />
+          <View style={styles.trackingIcon}>
+            <Ionicons name="barcode-outline" size={14} color={COLORS.primary} />
+          </View>
           <Text style={styles.trackingNumber}>{parcel?.tracking_number}</Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
+        <View style={[styles.statusBadge, { backgroundColor: statusColor + '18' }]}>
+          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
         </View>
       </View>
 
+      {/* Divider */}
+      <View style={styles.divider} />
+
+      {/* Card Body */}
       <View style={styles.cardBody}>
         <View style={styles.infoRow}>
-          <Ionicons name="person" size={14} color={COLORS.textSecondary} />
+          <Ionicons name="person-outline" size={14} color={COLORS.textSecondary} />
           <Text style={styles.infoText} numberOfLines={1}>{parcel?.recipient_name}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Ionicons name="location" size={14} color={COLORS.textSecondary} />
-          <Text style={styles.infoText} numberOfLines={1}>{parcel?.delivery_address}</Text>
+          <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
+          <Text style={styles.infoText} numberOfLines={2}>{parcel?.delivery_address}</Text>
         </View>
         {assignment.staff && (
           <View style={styles.infoRow}>
-            <Ionicons name="bicycle" size={14} color={COLORS.textSecondary} />
+            <Ionicons name="bicycle-outline" size={14} color={COLORS.textSecondary} />
             <Text style={styles.infoText}>{assignment.staff.name}</Text>
           </View>
         )}
       </View>
 
+      {/* Card Footer */}
       <View style={styles.cardFooter}>
-        <View style={[styles.assignStatusBadge, assignStatus === 'ACTIVE' ? styles.activeBadge : styles.doneBadge]}>
-          <Text style={assignStatus === 'ACTIVE' ? styles.activeText : styles.doneText}>
-            {assignStatus === 'ACTIVE' ? 'တက်ကြွ' : assignStatus === 'COMPLETED' ? 'ပြီးစီး' : 'ပြောင်းလဲ'}
+        <View style={[
+          styles.assignBadge,
+          isActive ? styles.assignBadgeActive : styles.assignBadgeDone,
+        ]}>
+          <Ionicons
+            name={isActive ? 'flash' : 'checkmark-circle'}
+            size={12}
+            color={isActive ? COLORS.primary : COLORS.success}
+          />
+          <Text style={[styles.assignBadgeText, { color: isActive ? COLORS.primary : COLORS.success }]}>
+            {assignStatus === 'ACTIVE' ? 'ဆောင်ရွက်နေ' : assignStatus === 'COMPLETED' ? 'ပြီးစီး' : 'ပြောင်းလဲ'}
           </Text>
         </View>
         {parcel?.is_cod && (
           <View style={styles.codBadge}>
+            <Ionicons name="cash-outline" size={12} color={COLORS.info} />
             <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()} ကျပ်</Text>
           </View>
         )}
+        <Ionicons name="chevron-forward" size={16} color={COLORS.border} style={{ marginLeft: 'auto' }} />
       </View>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white },
-  filterList: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-  filterTab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border },
-  filterTabActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  filterTabText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600' },
-  filterTabTextActive: { color: COLORS.white },
+  headerBadge: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  headerBadgeText: { fontSize: 13, fontWeight: '700', color: COLORS.white },
+  filterRow: { height: 64 },
+  filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
+  listArea: { flex: 1 },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.white,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    height: 40,
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  filterChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600' },
+  filterChipTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
-  card: { backgroundColor: COLORS.white, borderRadius: 16, padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  trackingRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  trackingNumber: { fontSize: 14, fontWeight: '700', color: COLORS.primary },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
+
+  // Card
+  card: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  trackingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  trackingIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#FFF3DC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontSize: 12, fontWeight: '600' },
-  cardBody: { gap: 6, marginBottom: 10 },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { fontSize: 14, color: COLORS.text, flex: 1 },
-  cardFooter: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  assignStatusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  activeBadge: { backgroundColor: '#FFF3DC' },
-  doneBadge: { backgroundColor: '#E8F8EF' },
-  activeText: { fontSize: 12, fontWeight: '600', color: COLORS.primary },
-  doneText: { fontSize: 12, fontWeight: '600', color: COLORS.success },
-  codBadge: { backgroundColor: '#E8F4FB', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
+  cardBody: { gap: 6 },
+  infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  infoText: { fontSize: 13, color: COLORS.text, flex: 1, lineHeight: 18 },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  assignBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  assignBadgeActive: { backgroundColor: '#FFF3DC' },
+  assignBadgeDone: { backgroundColor: '#E8F8EF' },
+  assignBadgeText: { fontSize: 12, fontWeight: '600' },
+  codBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#E8F4FB', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info },
+
+  // Empty
   empty: { alignItems: 'center', paddingVertical: 60 },
-  emptyText: { fontSize: 16, color: COLORS.textLight, marginTop: 12 },
-  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 16 },
-  pageBtn: { padding: 8 },
+  emptyIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: '#FFF3DC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
+  emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center' },
+
+  // Pagination
+  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
+  pageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
-  pageInfo: { fontSize: 14, color: COLORS.textSecondary },
+  pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary },
+  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: COLORS.border },
+  pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600' },
 });

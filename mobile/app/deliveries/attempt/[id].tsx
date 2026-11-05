@@ -93,10 +93,13 @@ export default function RecordAttemptScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
           <Ionicons name="close" size={24} color={COLORS.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
+          {parcel && <Text style={styles.headerSub}>{parcel.tracking_number}</Text>}
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
         {/* Parcel Info */}
         {parcel && (
           <View style={styles.parcelCard}>
@@ -232,18 +235,22 @@ export default function RecordAttemptScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
-    paddingBottom: 14,
+    paddingBottom: 20,
     gap: 12,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  closeBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: COLORS.white },
+  closeBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
   content: { padding: 16, paddingBottom: 40 },
   parcelCard: {
     backgroundColor: COLORS.white,
@@ -274,7 +281,7 @@ const styles = StyleSheet.create({
   },
   codText: { fontSize: 14, fontWeight: '700', color: COLORS.info },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 10 },
-  section: { marginBottom: 20 },
+  section: { marginBottom: 18 },
   resultRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
   resultBtn: {
     flex: 1,
@@ -327,8 +334,8 @@ const styles = StyleSheet.create({
     padding: 18,
     marginTop: 8,
   },
-  submitDelivered: { backgroundColor: COLORS.success },
-  submitFailed: { backgroundColor: COLORS.error },
+  submitDelivered: { backgroundColor: COLORS.success, shadowColor: COLORS.success, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5 },
+  submitFailed: { backgroundColor: COLORS.error, shadowColor: COLORS.error, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5 },
   submitDisabled: { backgroundColor: COLORS.textLight },
   submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
 });

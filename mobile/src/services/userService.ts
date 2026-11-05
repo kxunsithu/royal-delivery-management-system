@@ -45,4 +45,25 @@ export const userService = {
     const response = await apiClient.get('/users/delivery-staff');
     return response.data.data || response.data;
   },
+
+  async updateProfile(id: number, data: { name?: string; phone?: string; email?: string; password?: string; current_password?: string }): Promise<User> {
+    const response = await apiClient.put(`/users/${id}`, data);
+    return response.data.data;
+  },
+
+  async uploadProfileImage(id: number, imageUri: string): Promise<User> {
+    const formData = new FormData();
+    const filename = imageUri.split('/').pop() || 'avatar.jpg';
+    const match = /\.([a-zA-Z]+)$/.exec(filename);
+    const type = match ? `image/${match[1].toLowerCase().replace('jpg', 'jpeg')}` : 'image/jpeg';
+    formData.append('image', { uri: imageUri, name: filename, type } as any);
+    const response = await apiClient.post(`/users/${id}/profile-image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data.data;
+  },
+
+  async deleteProfileImage(id: number): Promise<void> {
+    await apiClient.delete(`/users/${id}/profile-image`);
+  },
 };

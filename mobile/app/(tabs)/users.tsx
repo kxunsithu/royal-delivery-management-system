@@ -9,6 +9,8 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  ScrollView,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -60,19 +62,24 @@ export default function UsersScreen() {
     { label: 'အားလုံး', value: '' },
     { label: 'အက်ဒ်မင်', value: 'admin' },
     { label: 'မန်နေဂျာ', value: 'manager' },
+    { label: 'စာရင်းကိုင်', value: 'accountant' },
     { label: 'ပို့ဆောင်', value: 'delivery_staff' },
   ];
 
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={styles.headerTitle}>အသုံးပြုသူများ</Text>
+        <View>
+          <Text style={styles.headerTitle}>အသုံးပြုသူများ</Text>
+          <Text style={styles.headerSubtitle}>စုစုပေါင်း {meta?.total ?? 0} ဦး</Text>
+        </View>
         <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/users/create')}>
           <Ionicons name="add" size={24} color={COLORS.white} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchWrapper}>
+      <View style={styles.contentArea}>
+        <View style={styles.searchWrapper}>
         <Ionicons name="search" size={18} color={COLORS.textLight} style={{ marginRight: 8 }} />
         <TextInput
           style={styles.searchInput}
@@ -83,75 +90,101 @@ export default function UsersScreen() {
         />
       </View>
 
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={roleFilters}
-        keyExtractor={item => item.value}
-        contentContainerStyle={styles.filterList}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.filterTab, roleFilter === item.value && styles.filterTabActive]}
-            onPress={() => { setRoleFilter(item.value); setPage(1); }}
-          >
-            <Text style={[styles.filterTabText, roleFilter === item.value && styles.filterTabTextActive]}>
-              {item.label}
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={styles.filterRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterList}
+        >
+          {roleFilters.map((item) => (
+            <TouchableOpacity
+              key={item.value}
+              style={[styles.filterTab, roleFilter === item.value && styles.filterTabActive]}
+              onPress={() => { setRoleFilter(item.value); setPage(1); }}
+            >
+              <Text style={[styles.filterTabText, roleFilter === item.value && styles.filterTabTextActive]}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-      {isLoading ? (
-        <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
-      ) : (
-        <FlatList
-          data={users}
-          keyExtractor={item => item.id.toString()}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { setPage(1); refetch(); }} tintColor={COLORS.primary} />}
-          renderItem={({ item }) => (
-            <UserCard user={item} onToggleStatus={() => handleToggleStatus(item)} />
-          )}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Ionicons name="people-outline" size={64} color={COLORS.border} />
-              <Text style={styles.emptyText}>အသုံးပြုသူ မတွေ့ပါ</Text>
-            </View>
-          }
-          ListFooterComponent={
-            meta && meta.last_page > 1 ? (
-              <View style={styles.pagination}>
-                <TouchableOpacity style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>
-                  <Ionicons name="chevron-back" size={18} color={page <= 1 ? COLORS.textLight : COLORS.primary} />
-                </TouchableOpacity>
-                <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
-                <TouchableOpacity style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.min(meta.last_page, p + 1))} disabled={page >= meta.last_page}>
-                  <Ionicons name="chevron-forward" size={18} color={page >= meta.last_page ? COLORS.textLight : COLORS.primary} />
-                </TouchableOpacity>
+      <View style={styles.listArea}>
+        {isLoading ? (
+          <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
+        ) : (
+          <FlatList
+            data={users}
+            keyExtractor={item => item.id.toString()}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { setPage(1); refetch(); }} tintColor={COLORS.primary} />}
+            renderItem={({ item }) => (
+              <UserCard user={item} onToggleStatus={() => handleToggleStatus(item)} />
+            )}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <View style={styles.emptyIconContainer}>
+                  <Ionicons name="people-outline" size={48} color="#F59E0B" />
+                </View>
+                <Text style={styles.emptyTitle}>အသုံးပြုသူ မတွေ့ပါ</Text>
+                <Text style={styles.emptySubtitle}>ရှာဖွေမှုနှင့် ကိုက်ညီသော အသုံးပြုသူ မရှိပါ</Text>
               </View>
-            ) : undefined
-          }
-        />
-      )}
+            }
+            ListFooterComponent={
+              meta && meta.last_page > 1 ? (
+                <View style={styles.pagination}>
+                  <TouchableOpacity style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>
+                    <Ionicons name="chevron-back" size={18} color={page <= 1 ? COLORS.textLight : COLORS.primary} />
+                  </TouchableOpacity>
+                  <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
+                  <TouchableOpacity style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.min(meta.last_page, p + 1))} disabled={page >= meta.last_page}>
+                    <Ionicons name="chevron-forward" size={18} color={page >= meta.last_page ? COLORS.textLight : COLORS.primary} />
+                  </TouchableOpacity>
+                </View>
+              ) : undefined
+            }
+          />
+        )}
+      </View>
+      </View>
     </View>
   );
 }
 
 function UserCard({ user, onToggleStatus }: { user: User; onToggleStatus: () => void }) {
   const roleLabel = ROLE_LABELS_MM[user.role as keyof typeof ROLE_LABELS_MM] || user.role;
-  const roleColor = user.role === 'admin' ? '#8B5CF6' : user.role === 'manager' ? COLORS.info : COLORS.success;
+  const roleColor =
+    user.role === 'admin'
+      ? '#8B5CF6'
+      : user.role === 'manager'
+      ? COLORS.info
+      : user.role === 'accountant'
+      ? '#F59E0B'
+      : COLORS.success;
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { borderLeftColor: roleColor }]}
       onPress={() => router.push(`/users/${user.id}`)}
       activeOpacity={0.85}
     >
+      {/* Status pill — top-right */}
+      <View style={[styles.statusPill, user.is_active ? styles.statusPillActive : styles.statusPillInactive]}>
+        <Text style={[styles.statusPillText, { color: user.is_active ? '#15803D' : '#B91C1C' }]}>
+          {user.is_active ? 'ဖွင့်' : 'ပိတ်'}
+        </Text>
+      </View>
+
       <View style={styles.cardLeft}>
-        <View style={[styles.avatar, { backgroundColor: roleColor + '30' }]}>
-          <Text style={[styles.avatarText, { color: roleColor }]}>{user.name[0]?.toUpperCase()}</Text>
-        </View>
+        {user.profile_image_url ? (
+          <Image source={{ uri: user.profile_image_url }} style={styles.avatarImage} />
+        ) : (
+          <View style={[styles.avatar, { backgroundColor: roleColor + '30' }]}>
+            <Text style={[styles.avatarText, { color: roleColor }]}>{user.name[0]?.toUpperCase()}</Text>
+          </View>
+        )}
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{user.name}</Text>
           <Text style={styles.userEmail} numberOfLines={1}>{user.phone || user.email}</Text>
@@ -162,12 +195,6 @@ function UserCard({ user, onToggleStatus }: { user: User; onToggleStatus: () => 
         </View>
       </View>
       <View style={styles.cardRight}>
-        <TouchableOpacity
-          style={[styles.statusToggle, user.is_active ? styles.activeToggle : styles.inactiveToggle]}
-          onPress={onToggleStatus}
-        >
-          <Text style={styles.statusToggleText}>{user.is_active ? 'ဖွင့်' : 'ပိတ်'}</Text>
-        </TouchableOpacity>
         <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} />
       </View>
     </TouchableOpacity>
@@ -175,7 +202,8 @@ function UserCard({ user, onToggleStatus }: { user: User; onToggleStatus: () => 
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -183,23 +211,27 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
     paddingBottom: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white },
+  headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontWeight: '500' },
   addBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
-  searchWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 16, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  searchWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 16, paddingTop: 12, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   searchInput: { flex: 1, fontSize: 15, color: COLORS.text },
-  filterList: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-  filterTab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border },
+  filterRow: { height: 64 },
+  filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
+  listArea: { flex: 1 },
+  filterTab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 40, justifyContent: 'center', alignSelf: 'center' },
   filterTabActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   filterTabText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600' },
   filterTabTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
-  card: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  card: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, borderLeftWidth: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   avatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  avatarImage: { width: 48, height: 48, borderRadius: 24 },
   avatarText: { fontSize: 20, fontWeight: '700' },
   userInfo: { flex: 1 },
   userName: { fontSize: 15, fontWeight: '700', color: COLORS.text },
@@ -208,12 +240,14 @@ const styles = StyleSheet.create({
   roleIndicator: { width: 6, height: 6, borderRadius: 3 },
   roleText: { fontSize: 12, fontWeight: '600' },
   cardRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  statusToggle: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
-  activeToggle: { backgroundColor: '#E8F8EF' },
-  inactiveToggle: { backgroundColor: '#FDE8E8' },
-  statusToggleText: { fontSize: 12, fontWeight: '700', color: COLORS.text },
+  statusPill: { position: 'absolute', top: 8, right: 36, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
+  statusPillActive: { backgroundColor: '#DCFCE7' },
+  statusPillInactive: { backgroundColor: '#FEE2E2' },
+  statusPillText: { fontSize: 11, fontWeight: '700' },
   empty: { alignItems: 'center', paddingVertical: 60 },
-  emptyText: { fontSize: 16, color: COLORS.textLight, marginTop: 12 },
+  emptyIconContainer: { width: 88, height: 88, borderRadius: 44, backgroundColor: '#FEF3C7', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  emptyTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginTop: 4 },
+  emptySubtitle: { fontSize: 14, color: COLORS.textLight, marginTop: 6 },
   pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 16 },
   pageBtn: { padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },

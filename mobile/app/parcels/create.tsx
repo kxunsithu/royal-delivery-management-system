@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,16 @@ import {
   Switch,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { parcelService } from '../../src/services/parcelService';
 import apiClient from '../../src/services/apiClient';
+import { useAuth } from '../../src/context/AuthContext';
 import { COLORS } from '../../src/constants';
 
 interface DeliveryArea {
@@ -26,7 +29,17 @@ interface DeliveryArea {
 
 export default function CreateParcelScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Guard: only admin and manager can create parcels — redirect accountant away
+  const canCreate = !user || user.role === 'admin' || user.role === 'manager';
+  useEffect(() => {
+    if (user && !canCreate) {
+      router.replace('/(tabs)/parcels');
+    }
+  }, [user, canCreate]);
+
   const [form, setForm] = useState({
     tracking_number: '',
     sender_name: '',
@@ -46,6 +59,7 @@ export default function CreateParcelScreen() {
     condition: 'GOOD',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [localImages, setLocalImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
   const { data: areas } = useQuery({
     queryKey: ['delivery-areas'],
@@ -57,7 +71,23 @@ export default function CreateParcelScreen() {
 
   const createMutation = useMutation({
     mutationFn: (data: any) => parcelService.create(data),
-    onSuccess: () => {
+    onSuccess: async (createdParcel) => {
+      // Upload images after parcel creation
+      if (localImages.length > 0) {
+        try {
+          const formData = new FormData();
+          localImages.forEach((img) => {
+            formData.append('images[]', {
+              uri: img.uri,
+              name: img.fileName ?? `parcel_${Date.now()}.jpg`,
+              type: img.mimeType ?? 'image/jpeg',
+            } as any);
+          });
+          await parcelService.uploadImages(createdParcel.id, formData);
+        } catch {
+          // Image upload failed but parcel was created — still proceed
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ['parcels'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       Alert.alert('အောင်မြင်သည်', 'ပါဆယ် မှတ်ပုံတင်ပြီးပါပြီ', [
@@ -73,6 +103,41 @@ export default function CreateParcelScreen() {
   function update(field: string, value: any) {
     setForm(f => ({ ...f, [field]: value }));
     setErrors(e => ({ ...e, [field]: undefined as any }));
+  }
+
+  async function pickImages() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('ခွင့်မပြု', 'ဓာတ်ပုံ တင်ရန် ခွင့်ပြုချက် လိုအပ်သည်');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.8,
+      selectionLimit: 10,
+    });
+    if (!result.canceled) {
+      setLocalImages(prev => [...prev, ...result.assets].slice(0, 10));
+    }
+  }
+
+  async function takePhoto() {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('ခွင့်မပြု', 'ကင်မရာ သုံးရန် ခွင့်ပြုချက် လိုအပ်သည်');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.8,
+    });
+    if (!result.canceled && localImages.length < 10) {
+      setLocalImages(prev => [...prev, result.assets[0]]);
+    }
+  }
+
+  function removeLocalImage(index: number) {
+    setLocalImages(prev => prev.filter((_, i) => i !== index));
   }
 
   function validate() {
@@ -113,6 +178,8 @@ export default function CreateParcelScreen() {
     { value: 'URGENT', label: 'အရေးပေါ်' },
   ];
 
+  if (!canCreate) return null;
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -134,7 +201,7 @@ export default function CreateParcelScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
         {/* Tracking number */}
         <FormSection title="ပါဆယ် အချက်အလက်">
           <FormField
@@ -300,6 +367,33 @@ export default function CreateParcelScreen() {
           />
         </FormSection>
 
+        {/* Images Section */}
+        <FormSection title="ပါဆယ် ဓာတ်ပုံများ">
+          <View style={styles.imageBtnRow}>
+            <TouchableOpacity style={styles.imagePickBtn} onPress={pickImages}>
+              <Ionicons name="images-outline" size={20} color={COLORS.primary} />
+              <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရွေးရန်</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imagePickBtn} onPress={takePhoto}>
+              <Ionicons name="camera-outline" size={20} color={COLORS.primary} />
+              <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရိုက်ရန်</Text>
+            </TouchableOpacity>
+          </View>
+          {localImages.length > 0 && (
+            <View style={styles.imageGrid}>
+              {localImages.map((img, index) => (
+                <View key={index} style={styles.imageThumbWrap}>
+                  <Image source={{ uri: img.uri }} style={styles.imageThumb} />
+                  <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => removeLocalImage(index)}>
+                    <Ionicons name="close-circle" size={20} color={COLORS.error} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+          <Text style={styles.imageHint}>အများဆုံး 10 ပုံ • JPEG, PNG • 5MB အောက်</Text>
+        </FormSection>
+
         <TouchableOpacity
           style={[styles.submitBtn, createMutation.isPending && { opacity: 0.6 }]}
           onPress={handleSubmit}
@@ -353,14 +447,17 @@ function FormField({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
-    paddingBottom: 14,
+    paddingBottom: 20,
     gap: 12,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   closeBtn: { padding: 4 },
   headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white },
@@ -447,4 +544,16 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  imageBtnRow: { flexDirection: 'row', gap: 10 },
+  imagePickBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5,
+    borderColor: COLORS.primary, backgroundColor: '#FFF9EE',
+  },
+  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary },
+  imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  imageThumbWrap: { position: 'relative' },
+  imageThumb: { width: 80, height: 80, borderRadius: 10 },
+  imageRemoveBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: COLORS.white, borderRadius: 10 },
+  imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center' },
 });

@@ -25,12 +25,15 @@ export default function DashboardScreen() {
 
   const isStaff = user?.role === 'delivery_staff';
   const isAdmin = user?.role === 'admin';
+  const canCreateParcel = user?.role === 'admin' || user?.role === 'manager';
 
   return (
     <View style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => { refetch(); }} tintColor={COLORS.primary} />}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
       >
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
@@ -41,6 +44,7 @@ export default function DashboardScreen() {
               <Text style={styles.roleText}>
                 {user?.role === 'admin' ? 'အက်ဒ်မင်' :
                   user?.role === 'manager' ? 'မန်နေဂျာ' :
+                  user?.role === 'accountant' ? 'စာရင်းကိုင်' :
                   user?.role === 'delivery_staff' ? 'ပို့ဆောင်ရေးဝန်ထမ်း' : user?.role}
               </Text>
             </View>
@@ -50,15 +54,17 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
-          </View>
-        ) : isStaff ? (
-          <StaffDashboard data={data} />
-        ) : (
-          <AdminManagerDashboard data={data} isAdmin={isAdmin} />
-        )}
+        <View style={styles.contentArea}>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
+            </View>
+          ) : isStaff ? (
+            <StaffDashboard data={data} />
+          ) : (
+            <AdminManagerDashboard data={data} isAdmin={isAdmin} canCreateParcel={canCreateParcel} />
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -72,7 +78,7 @@ function StaffDashboard({ data }: { data: any }) {
       <View style={styles.statsGrid}>
         <StatCard
           icon="bicycle"
-          label="တက်ကြွသောလုပ်ငန်းများ"
+          label="ဆောင်ရွက်နေသောလုပ်ငန်းများ"
           value={data?.assignments?.active ?? 0}
           color={COLORS.primary}
           bg="#FFF3DC"
@@ -120,7 +126,7 @@ function StaffDashboard({ data }: { data: any }) {
   );
 }
 
-function AdminManagerDashboard({ data, isAdmin }: { data: any; isAdmin: boolean }) {
+function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; isAdmin: boolean; canCreateParcel: boolean }) {
   const stats = data?.parcel_stats;
 
   const statItems = isAdmin ? [
@@ -139,19 +145,6 @@ function AdminManagerDashboard({ data, isAdmin }: { data: any; isAdmin: boolean 
 
   return (
     <View style={styles.content}>
-      {/* Success rate banner for admin */}
-      {isAdmin && (
-        <View style={styles.successBanner}>
-          <View>
-            <Text style={styles.successRate}>{stats?.delivery_success_rate ?? 0}%</Text>
-            <Text style={styles.successLabel}>ပို့ဆောင်မှု အောင်မြင်နှုန်း</Text>
-          </View>
-          <View style={styles.successRight}>
-            <Text style={styles.staffCount}>{data?.active_staff_count ?? 0}</Text>
-            <Text style={styles.staffLabel}>တက်ကြွသောဝန်ထမ်း</Text>
-          </View>
-        </View>
-      )}
 
       {!isAdmin && (
         <View style={styles.todayBanner}>
@@ -200,12 +193,14 @@ function AdminManagerDashboard({ data, isAdmin }: { data: any; isAdmin: boolean 
       {/* Quick Actions */}
       <Text style={styles.sectionTitle}>အမြန်လုပ်ဆောင်မှုများ</Text>
       <View style={styles.quickActions}>
-        <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/parcels/create')}>
-          <View style={[styles.quickIcon, { backgroundColor: '#FFF3DC' }]}>
-            <Ionicons name="add-circle" size={24} color={COLORS.primary} />
-          </View>
-          <Text style={styles.quickLabel}>ပါဆယ်အသစ်</Text>
-        </TouchableOpacity>
+        {canCreateParcel && (
+          <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/parcels/create')}>
+            <View style={[styles.quickIcon, { backgroundColor: '#FFF3DC' }]}>
+              <Ionicons name="add-circle" size={24} color={COLORS.primary} />
+            </View>
+            <Text style={styles.quickLabel}>ပါဆယ်အသစ်</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/(tabs)/parcels')}>
           <View style={[styles.quickIcon, { backgroundColor: '#E8F4FB' }]}>
             <Ionicons name="search" size={24} color={COLORS.info} />
@@ -237,7 +232,7 @@ function StatCard({ icon, label, value, color, bg }: {
   return (
     <View style={[styles.statCard, { backgroundColor: bg }]}>
       <View style={[styles.statIcon, { backgroundColor: color + '20' }]}>
-        <Ionicons name={icon as any} size={22} color={color} />
+        <Ionicons name={icon as any} size={18} color={color} />
       </View>
       <Text style={[styles.statValue, { color }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
@@ -252,7 +247,10 @@ function SkeletonCard() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollView: { backgroundColor: COLORS.primary },
+  scrollContent: { flexGrow: 1 },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -294,39 +292,25 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
     marginBottom: 16,
   },
   statCard: {
-    width: '47%',
-    borderRadius: 16,
-    padding: 16,
+    width: '30.5%',
+    borderRadius: 14,
+    padding: 12,
     alignItems: 'flex-start',
   },
   statIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  statValue: { fontSize: 26, fontWeight: '800', marginBottom: 4 },
-  statLabel: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 16 },
-  successBanner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: COLORS.primary,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
-  },
-  successRate: { fontSize: 36, fontWeight: '800', color: COLORS.white },
-  successLabel: { fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 2 },
-  successRight: { alignItems: 'flex-end' },
-  staffCount: { fontSize: 30, fontWeight: '800', color: COLORS.white },
-  staffLabel: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 2 },
+  statValue: { fontSize: 22, fontWeight: '800', marginBottom: 2 },
+  statLabel: { fontSize: 10, color: COLORS.textSecondary, lineHeight: 14 },
   todayBanner: {
     flexDirection: 'row',
     alignItems: 'center',

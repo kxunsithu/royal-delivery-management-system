@@ -8,8 +8,10 @@ export default function TabLayout() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
+  const isAccountant = user?.role === 'accountant';
   const isStaff = user?.role === 'delivery_staff';
-  const isAdminOrManager = isAdmin || isManager;
+  // parcels & deliveries tabs: visible to admin, manager, accountant
+  const canSeeParcels = isAdmin || isManager || isAccountant;
 
   return (
     <Tabs
@@ -21,8 +23,8 @@ export default function TabLayout() {
           backgroundColor: COLORS.white,
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+          height: Platform.OS === 'ios' ? 88 : 72,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 16,
           paddingTop: 8,
           elevation: 8,
           shadowColor: '#000',
@@ -33,6 +35,11 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          marginBottom: Platform.OS === 'ios' ? 0 : 4,
+          textDecorationLine: 'none',
+        },
+        tabBarIconStyle: {
+          marginTop: 4,
         },
       }}
     >
@@ -45,7 +52,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      {isAdminOrManager && (
+      {canSeeParcels && (
         <Tabs.Screen
           name="parcels"
           options={{
@@ -67,7 +74,7 @@ export default function TabLayout() {
           }}
         />
       )}
-      {isAdminOrManager && (
+      {canSeeParcels && (
         <Tabs.Screen
           name="deliveries"
           options={{
@@ -99,7 +106,7 @@ export default function TabLayout() {
         }}
       />
       {/* Hidden tabs - accessible but not in tab bar */}
-      {!isAdminOrManager && (
+      {!canSeeParcels && (
         <Tabs.Screen
           name="parcels"
           options={{ href: null }}
@@ -111,7 +118,7 @@ export default function TabLayout() {
           options={{ href: null }}
         />
       )}
-      {!isAdminOrManager && (
+      {!canSeeParcels && (
         <Tabs.Screen
           name="deliveries"
           options={{ href: null }}

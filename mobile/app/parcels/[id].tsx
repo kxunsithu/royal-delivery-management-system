@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Image,
   Linking,
+  TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,12 +25,13 @@ import {
   PRIORITY_LABELS_MM,
   PRIORITY_COLORS,
 } from '../../src/constants';
+import ImagePreviewModal from '../../src/components/ImagePreviewModal';
 
 const STATUS_TRANSITIONS: Record<string, string[]> = {
   RECEIVED: ['VERIFIED', 'DAMAGED'],
-  VERIFIED: ['IN_TRANSIT', 'DELIVERED', 'FAILED', 'DAMAGED'],
+  VERIFIED: ['DELIVERED', 'FAILED', 'DAMAGED'],
   IN_TRANSIT: ['DELIVERED', 'FAILED'],
-  FAILED: ['IN_TRANSIT', 'DELIVERED'],
+  FAILED: ['DELIVERED'],
   DELIVERED: [],
   DAMAGED: [],
 };
@@ -45,10 +47,18 @@ export default function ParcelDetailScreen() {
     queryFn: () => parcelService.get(Number(id)),
   });
 
+  // Permission flags
+  // canChangeStatus: admin, manager, accountant
+  // canAssign: admin, accountant (manager CANNOT assign)
+  // canEditParcel: admin, manager (accountant CANNOT add/edit/delete)
+  const canChangeStatus = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'accountant';
+  const canAssign = user?.role === 'admin' || user?.role === 'accountant';
+  const canEditParcel = user?.role === 'admin' || user?.role === 'manager';
+
   const { data: staffList } = useQuery({
     queryKey: ['delivery-staff'],
     queryFn: () => userService.getDeliveryStaff(),
-    enabled: user?.role === 'admin' || user?.role === 'manager',
+    enabled: canAssign,
   });
 
   const deleteMutation = useMutation({
@@ -77,7 +87,10 @@ export default function ParcelDetailScreen() {
     },
   });
 
-  const isAdminOrManager = user?.role === 'admin' || user?.role === 'manager';
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [staffSearch, setStaffSearch] = useState('');
+
   const isTerminal = parcel?.status === 'DELIVERED' || parcel?.status === 'DAMAGED';
 
   function handleDelete() {
@@ -103,9 +116,15 @@ export default function ParcelDetailScreen() {
   }
 
   function handleAssign(staffId: number, staffName: string) {
-    Alert.alert('ချိတ်ဆက်မည်', `${staffName} ကို ချိတ်ဆက်မည်လား?`, [
+    const hasExisting = !!parcel?.active_assignment;
+    const currentName = parcel?.active_assignment?.staff?.name;
+    const title = hasExisting ? 'ဝန်ထမ်း ပြောင်းချိတ်မည်' : 'ဝန်ထမ်း ချိတ်ဆက်မည်';
+    const msg = hasExisting
+      ? `${currentName} မှ ${staffName} သို့ ပြောင်းချိတ်မည်လား?`
+      : `${staffName} ကို ချိတ်ဆက်မည်လား?`;
+    Alert.alert(title, msg, [
       { text: 'မလုပ်တော့', style: 'cancel' },
-      { text: 'ချိတ်ဆက်မည်', onPress: () => assignMutation.mutate({ staffId }) },
+      { text: hasExisting ? 'ပြောင်းချိတ်မည်' : 'ချိတ်ဆက်မည်', onPress: () => assignMutation.mutate({ staffId }) },
     ]);
   }
 
@@ -134,7 +153,7 @@ export default function ParcelDetailScreen() {
   const availableTransitions = STATUS_TRANSITIONS[parcel.status] || [];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: statusColor }]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: statusColor, paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
@@ -146,7 +165,7 @@ export default function ParcelDetailScreen() {
             <Text style={styles.headerStatusText}>{statusLabel}</Text>
           </View>
         </View>
-        {isAdminOrManager && !isTerminal && (
+        {canEditParcel && !isTerminal && (
           <View style={styles.headerActions}>
             <TouchableOpacity
               style={styles.headerActionBtn}
@@ -161,14 +180,37 @@ export default function ParcelDetailScreen() {
         )}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} style={styles.scrollArea}>
         {/* Images */}
         {parcel.images && parcel.images.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
-            {parcel.images.map((img) => (
-              <Image key={img.id} source={{ uri: img.url }} style={styles.parcelImage} />
-            ))}
-          </ScrollView>
+          <>
+            <View style={styles.imageSectionHeader}>
+              <Ionicons name="images-outline" size={15} color={COLORS.textSecondary} />
+              <Text style={styles.imageSectionLabel}>ဓာတ်ပုံများ ({parcel.images.length})</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
+              {parcel.images.map((img, index) => (
+                <TouchableOpacity
+                  key={img.id}
+                  onPress={() => { setPreviewIndex(index); setPreviewVisible(true); }}
+                  activeOpacity={0.85}
+                >
+                  <View style={styles.imageThumbWrap}>
+                    <Image source={{ uri: img.url }} style={styles.parcelImage} />
+                    <View style={styles.imageTapHint}>
+                      <Ionicons name="expand-outline" size={14} color="#fff" />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <ImagePreviewModal
+              visible={previewVisible}
+              images={parcel.images}
+              initialIndex={previewIndex}
+              onClose={() => setPreviewVisible(false)}
+            />
+          </>
         )}
 
         {/* Info Cards */}
@@ -209,20 +251,38 @@ export default function ParcelDetailScreen() {
         )}
 
         {/* Status Transitions */}
-        {isAdminOrManager && availableTransitions.length > 0 && (
+        {canChangeStatus && availableTransitions.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>အခြေအနေ ပြောင်းမည်</Text>
+            <View style={styles.transitionHeader}>
+              <Text style={styles.sectionTitle}>အခြေအနေ ပြောင်းမည်</Text>
+              {statusMutation.isPending && (
+                <View style={styles.transitionLoading}>
+                  <ActivityIndicator size="small" color={COLORS.primary} />
+                  <Text style={styles.transitionLoadingText}>ပြောင်းနေဆဲ...</Text>
+                </View>
+              )}
+            </View>
             <View style={styles.transitionGrid}>
               {availableTransitions.map((toStatus) => {
                 const color = STATUS_COLORS[toStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
                 const label = STATUS_LABELS_MM[toStatus as keyof typeof STATUS_LABELS_MM] || toStatus;
+                const isPendingThis = statusMutation.isPending && statusMutation.variables?.status === toStatus;
                 return (
                   <TouchableOpacity
                     key={toStatus}
-                    style={[styles.transitionBtn, { borderColor: color, backgroundColor: color + '15' }]}
+                    style={[
+                      styles.transitionBtn,
+                      { borderColor: color, backgroundColor: color + '15' },
+                      statusMutation.isPending && { opacity: 0.55 },
+                    ]}
                     onPress={() => handleStatusChange(toStatus)}
                     disabled={statusMutation.isPending}
                   >
+                    {isPendingThis ? (
+                      <ActivityIndicator size="small" color={color} />
+                    ) : (
+                      <Ionicons name="swap-horizontal" size={14} color={color} />
+                    )}
                     <Text style={[styles.transitionBtnText, { color }]}>{label}</Text>
                   </TouchableOpacity>
                 );
@@ -232,28 +292,89 @@ export default function ParcelDetailScreen() {
         )}
 
         {/* Assign Delivery Staff */}
-        {isAdminOrManager && staffList && staffList.length > 0 && !isTerminal && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>ဝန်ထမ်းကို ချိတ်ဆက်မည်</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={styles.staffRow}>
-                {staffList.filter(s => s.is_active).map((s) => (
-                  <TouchableOpacity
-                    key={s.id}
-                    style={styles.staffChip}
-                    onPress={() => handleAssign(s.id, s.name)}
-                    disabled={assignMutation.isPending}
-                  >
-                    <View style={styles.staffAvatar}>
-                      <Text style={styles.staffAvatarText}>{s.name[0]}</Text>
-                    </View>
-                    <Text style={styles.staffChipName} numberOfLines={1}>{s.name}</Text>
+        {canAssign && staffList && staffList.length > 0 && ['VERIFIED', 'IN_TRANSIT', 'FAILED'].includes(parcel.status) && (() => {
+          const filtered = staffList.filter(s =>
+            s.is_active && s.name.toLowerCase().includes(staffSearch.toLowerCase())
+          );
+          return (
+            <View style={styles.section}>
+              <View style={styles.assignHeader}>
+              <Text style={styles.sectionTitle}>
+                {parcel.active_assignment ? 'ဝန်ထမ်း ပြောင်းချိတ်မည်' : 'ဝန်ထမ်းကို ချိတ်ဆက်မည်'}
+              </Text>
+              {parcel.active_assignment && (
+                <View style={styles.currentStaffPill}>
+                  <Ionicons name="bicycle" size={12} color={COLORS.primary} />
+                  <Text style={styles.currentStaffPillText} numberOfLines={1}>
+                    {parcel.active_assignment.staff?.name}
+                  </Text>
+                </View>
+              )}
+            </View>
+              {/* Search box */}
+              <View style={styles.staffSearchBox}>
+                <Ionicons name="search-outline" size={16} color={COLORS.textLight} />
+                <TextInput
+                  style={styles.staffSearchInput}
+                  placeholder="အမည်ဖြင့် ရှာရန်..."
+                  placeholderTextColor={COLORS.textLight}
+                  value={staffSearch}
+                  onChangeText={setStaffSearch}
+                  returnKeyType="search"
+                />
+                {staffSearch.length > 0 && (
+                  <TouchableOpacity onPress={() => setStaffSearch('')}>
+                    <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
                   </TouchableOpacity>
-                ))}
+                )}
               </View>
-            </ScrollView>
-          </View>
-        )}
+              {/* Staff list */}
+              {filtered.length === 0 ? (
+                <View style={styles.staffEmpty}>
+                  <Ionicons name="person-outline" size={28} color={COLORS.textLight} />
+                  <Text style={styles.staffEmptyText}>ဝန်ထမ်း မတွေ့ပါ</Text>
+                </View>
+              ) : (
+                <View style={styles.staffList}>
+                  {filtered.map((s) => {
+                    const isCurrentStaff = parcel?.active_assignment?.staff?.id === s.id;
+                    return (
+                      <TouchableOpacity
+                        key={s.id}
+                        style={[styles.staffListItem, isCurrentStaff && styles.staffListItemActive]}
+                        onPress={() => handleAssign(s.id, s.name)}
+                        disabled={assignMutation.isPending}
+                        activeOpacity={0.7}
+                      >
+                        {s.profile_image_url ? (
+                          <Image source={{ uri: s.profile_image_url }} style={[styles.staffAvatarImg, isCurrentStaff && { borderColor: COLORS.primary }]} />
+                        ) : (
+                          <View style={[styles.staffAvatar, isCurrentStaff && styles.staffAvatarActive]}>
+                            <Text style={[styles.staffAvatarText, isCurrentStaff && { color: COLORS.white }]}>
+                              {s.name[0].toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={styles.staffListInfo}>
+                          <Text style={[styles.staffListName, isCurrentStaff && { color: COLORS.primary }]}>
+                            {s.name}
+                          </Text>
+                          {isCurrentStaff && (
+                            <Text style={styles.staffCurrentBadge}>လက်ရှိ ချိတ်ဆက်ထားသည်</Text>
+                          )}
+                        </View>
+                        {isCurrentStaff
+                          ? <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />
+                          : <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} />
+                        }
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          );
+        })()}
 
         {/* Status History */}
         {parcel.status_histories && parcel.status_histories.length > 0 && (
@@ -309,13 +430,16 @@ function InfoRow({ icon, label, value, valueColor, onPress }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: 14,
+    paddingBottom: 20,
     gap: 12,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   backBtn: { padding: 4 },
   headerCenter: { flex: 1 },
@@ -365,12 +489,21 @@ const styles = StyleSheet.create({
   infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500' },
   transitionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   transitionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1.5,
   },
   transitionBtnText: { fontSize: 14, fontWeight: '600' },
+  transitionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  transitionLoading: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.primaryLight + '30', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  transitionLoadingText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
+  assignHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  currentStaffPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.primaryLight + '30', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  currentStaffPillText: { fontSize: 11, color: COLORS.primary, fontWeight: '600', maxWidth: 100 },
   staffRow: { flexDirection: 'row', gap: 10 },
   staffChip: {
     alignItems: 'center',
@@ -404,4 +537,55 @@ const styles = StyleSheet.create({
   timelineStatus: { fontSize: 14, fontWeight: '700', marginBottom: 2 },
   timelineReason: { fontSize: 13, color: COLORS.textSecondary },
   timelineTime: { fontSize: 12, color: COLORS.textLight, marginTop: 2 },
+  staffSearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    marginBottom: 10,
+  },
+  staffSearchInput: { flex: 1, fontSize: 14, color: COLORS.text },
+  staffList: {
+    backgroundColor: COLORS.white,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  staffListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  staffListItemActive: { backgroundColor: COLORS.primaryLight + '30' },
+  staffListInfo: { flex: 1 },
+  staffListName: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  staffCurrentBadge: { fontSize: 11, color: COLORS.primary, marginTop: 2 },
+  staffAvatarActive: { backgroundColor: COLORS.primary },
+  staffAvatarImg: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, borderColor: COLORS.border },
+  staffEmpty: { alignItems: 'center', paddingVertical: 24, gap: 8 },
+  staffEmptyText: { fontSize: 13, color: COLORS.textLight },
+  imageSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  imageSectionLabel: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary },
+  imageThumbWrap: { position: 'relative', marginRight: 10 },
+  imageTapHint: {
+    position: 'absolute',
+    bottom: 6,
+    right: 6,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderRadius: 8,
+    padding: 3,
+  },
 });

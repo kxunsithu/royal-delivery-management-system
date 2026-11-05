@@ -17,10 +17,11 @@ class DashboardController extends Controller
         $user = $request->user();
 
         return match (true) {
-            $user->isAdmin()        => $this->adminDashboard(),
-            $user->isManager()      => $this->managerDashboard(),
-            $user->isDeliveryStaff()=> $this->staffDashboard($user),
-            default                 => $this->managerDashboard(),
+            $user->isAdmin()         => $this->adminDashboard(),
+            $user->isManager()       => $this->managerDashboard(),
+            $user->isAccountant()    => $this->accountantDashboard(),
+            $user->isDeliveryStaff() => $this->staffDashboard($user),
+            default                  => $this->managerDashboard(),
         };
     }
 
@@ -112,6 +113,31 @@ class DashboardController extends Controller
                 ],
                 'today_received' => Parcel::whereDate('received_at', $today)->count(),
                 'staff_workload' => $staffWorkload,
+            ],
+        ]);
+    }
+
+    private function accountantDashboard(): JsonResponse
+    {
+        $today = today();
+
+        $statuses = Parcel::selectRaw("
+            SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received,
+            SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified,
+            SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as out_for_delivery,
+            SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed
+        ")->first();
+
+        return response()->json([
+            'data' => [
+                'role' => 'accountant',
+                'parcel_stats' => [
+                    'received'         => (int) $statuses->received,
+                    'verified'         => (int) $statuses->verified,
+                    'out_for_delivery' => (int) $statuses->out_for_delivery,
+                    'failed'           => (int) $statuses->failed,
+                ],
+                'today_received' => Parcel::whereDate('received_at', $today)->count(),
             ],
         ]);
     }

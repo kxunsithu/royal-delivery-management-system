@@ -17,9 +17,10 @@ import { userService } from '../../src/services/userService';
 import { COLORS } from '../../src/constants';
 
 const ROLES = [
-  { value: 'admin', label: 'အက်ဒ်မင်' },
-  { value: 'manager', label: 'မန်နေဂျာ' },
-  { value: 'delivery_staff', label: 'ပို့ဆောင်ရေးဝန်ထမ်း' },
+  { value: 'admin', label: 'အက်ဒ်မင်', icon: 'shield', color: '#8B5CF6' },
+  { value: 'manager', label: 'မန်နေဂျာ', icon: 'briefcase', color: '#3B82F6' },
+  { value: 'accountant', label: 'စာရင်းကိုင်', icon: 'calculator', color: '#F59E0B' },
+  { value: 'delivery_staff', label: 'ပို့ဆောင်ရေးဝန်ထမ်း', icon: 'bicycle', color: '#10B981' },
 ];
 
 export default function CreateUserScreen() {
@@ -79,7 +80,7 @@ export default function CreateUserScreen() {
         <Text style={styles.headerTitle}>အသုံးပြုသူ အသစ်ဖန်တီးမည်</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
         <View style={styles.card}>
           <FormField label="နာမည် *" value={form.name} onChangeText={v => update('name', v)} error={errors.name} placeholder="အမည်" />
           <FormField label="ဖုန်းနံပါတ် *" value={form.phone} onChangeText={v => update('phone', v)} error={errors.phone} placeholder="၀၉... (09...)" keyboardType="phone-pad" />
@@ -91,17 +92,21 @@ export default function CreateUserScreen() {
             {ROLES.map(r => (
               <TouchableOpacity
                 key={r.value}
-                style={[styles.roleItem, form.role === r.value && styles.roleItemActive]}
+                style={[styles.roleItem, form.role === r.value && { borderColor: r.color, backgroundColor: r.color + '12' }]}
                 onPress={() => update('role', r.value)}
               >
+                <View style={[styles.roleIconWrap, { backgroundColor: r.color + '20' }]}>
+                  <Ionicons name={r.icon as any} size={18} color={r.color} />
+                </View>
+                <Text style={[styles.roleItemText, form.role === r.value && { color: r.color, fontWeight: '700' }]}>
+                  {r.label}
+                </Text>
                 <Ionicons
                   name={form.role === r.value ? 'radio-button-on' : 'radio-button-off'}
                   size={20}
-                  color={form.role === r.value ? COLORS.primary : COLORS.textLight}
+                  color={form.role === r.value ? r.color : COLORS.textLight}
+                  style={{ marginLeft: 'auto' }}
                 />
-                <Text style={[styles.roleItemText, form.role === r.value && styles.roleItemTextActive]}>
-                  {r.label}
-                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -157,8 +162,9 @@ function FormField({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingBottom: 14, gap: 12 },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background },
+  header: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingBottom: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 12 },
   closeBtn: { padding: 4 },
   headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white },
   content: { padding: 16, paddingBottom: 40 },
@@ -173,6 +179,7 @@ const styles = StyleSheet.create({
   roleItemActive: { borderColor: COLORS.primary, backgroundColor: COLORS.primaryBg },
   roleItemText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500' },
   roleItemTextActive: { color: COLORS.primary, fontWeight: '700' },
+  roleIconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.primary, borderRadius: 16, padding: 18 },
   submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
 });

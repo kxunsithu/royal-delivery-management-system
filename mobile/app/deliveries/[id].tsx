@@ -19,15 +19,15 @@ export default function DeliveryDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const { data: assignment, isLoading, refetch } = useQuery({
+  const { data: assignment, isLoading } = useQuery({
     queryKey: ['assignment', id],
     queryFn: () => deliveryService.getAssignment(Number(id)),
   });
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <View style={styles.center}><ActivityIndicator size="large" color={COLORS.primary} /></View>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -36,45 +36,60 @@ export default function DeliveryDetailScreen() {
   const parcelStatus = parcel?.status ?? '';
   const statusColor = STATUS_COLORS[parcelStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
   const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
+  const isActive = assignment?.status === 'ACTIVE';
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color={COLORS.white} />
+    <View style={[styles.container, { backgroundColor: statusColor }]}>
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: statusColor, paddingTop: insets.top + 10 }]}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.white} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>{parcel?.tracking_number || 'အချိတ်အဆက်'}</Text>
-          <Text style={styles.headerSub}>{assignment?.staff?.name || ''}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {parcel?.tracking_number || 'ချိတ်ဆက်မှု'}
+          </Text>
+          {assignment?.staff && (
+            <Text style={styles.headerSub}>🚲 {assignment.staff.name}</Text>
+          )}
+        </View>
+        <View style={styles.assignStatusPill}>
+          <Text style={styles.assignStatusText}>
+            {assignment?.status === 'ACTIVE' ? 'ဆောင်ရွက်နေ' : assignment?.status === 'COMPLETED' ? 'ပြီးစီး' : 'ပြောင်းလဲ'}
+          </Text>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Status card */}
-        <View style={[styles.statusCard, { borderColor: statusColor }]}>
-          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-          <Text style={[styles.statusCardText, { color: statusColor }]}>{statusLabel}</Text>
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Status hero */}
+        <View style={[styles.statusHero, { backgroundColor: statusColor + '18', borderColor: statusColor + '40' }]}>
+          <View style={[styles.statusDotLg, { backgroundColor: statusColor }]} />
+          <Text style={[styles.statusHeroLabel, { color: statusColor }]}>{statusLabel}</Text>
         </View>
 
         {/* Parcel info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ပါဆယ် အချက်အလက်</Text>
           <View style={styles.card}>
-            <InfoRow icon="barcode-outline" label="ခြေရာခံနံပါတ်" value={parcel?.tracking_number || '-'} />
-            <InfoRow icon="person" label="လက်ခံသူ" value={parcel?.recipient_name || '-'} />
+            <InfoRow icon="barcode-outline"   label="ခြေရာခံ"    value={parcel?.tracking_number || '—'} />
+            <InfoRow icon="person-outline"    label="လက်ခံသူ"   value={parcel?.recipient_name  || '—'} />
             <InfoRow
-              icon="call"
-              label="ဖုန်းနံပါတ်"
-              value={parcel?.recipient_phone || '-'}
-              onPress={() => Linking.openURL(`tel:${parcel?.recipient_phone}`)}
+              icon="call-outline" label="ဖုန်းနံပါတ်"
+              value={parcel?.recipient_phone || '—'}
+              onPress={parcel?.recipient_phone ? () => Linking.openURL(`tel:${parcel.recipient_phone}`) : undefined}
             />
-            <InfoRow icon="location" label="လိပ်စာ" value={parcel?.delivery_address || '-'} />
-            {parcel?.delivery_area && <InfoRow icon="map" label="ဒေသ" value={parcel.delivery_area.name} />}
+            <InfoRow icon="location-outline"  label="လိပ်စာ"     value={parcel?.delivery_address || '—'} />
+            {parcel?.delivery_area && (
+              <InfoRow icon="map-outline" label="ဒေသ" value={parcel.delivery_area.name} />
+            )}
             {parcel?.is_cod && (
               <InfoRow
-                icon="cash"
-                label="COD"
-                value={`${Number(parcel.cod_amount).toLocaleString()} ကျပ် ကောက်ရမည်`}
+                icon="cash-outline" label="COD"
+                value={`${Number(parcel.cod_amount).toLocaleString()} ကျပ်`}
                 valueColor={COLORS.info}
               />
             )}
@@ -85,57 +100,79 @@ export default function DeliveryDetailScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ချိတ်ဆက်မှု အချက်အလက်</Text>
           <View style={styles.card}>
-            {assignment?.staff && <InfoRow icon="bicycle" label="ဝန်ထမ်း" value={assignment.staff.name} />}
-            {assignment?.assigned_by && <InfoRow icon="person-circle" label="ချိတ်ဆက်သူ" value={assignment.assigned_by.name} />}
-            {assignment?.assigned_at && (
-              <InfoRow icon="calendar" label="ချိတ်ဆက်သည့်ရက်" value={new Date(assignment.assigned_at).toLocaleString('my-MM')} />
+            {assignment?.staff && (
+              <InfoRow icon="bicycle-outline" label="ဝန်ထမ်း" value={assignment.staff.name} />
             )}
-            {assignment?.notes && <InfoRow icon="document-text" label="မှတ်ချက်" value={assignment.notes} />}
+            {assignment?.assigned_by && (
+              <InfoRow icon="person-circle-outline" label="ချိတ်ဆက်သူ" value={assignment.assigned_by.name} />
+            )}
+            {assignment?.assigned_at && (
+              <InfoRow
+                icon="calendar-outline" label="ချိတ်ဆက်ရက်"
+                value={new Date(assignment.assigned_at).toLocaleString('my-MM')}
+              />
+            )}
+            {assignment?.notes && (
+              <InfoRow icon="document-text-outline" label="မှတ်ချက်" value={assignment.notes} />
+            )}
           </View>
         </View>
 
         {/* Delivery attempts */}
         {assignment?.delivery_attempts && assignment.delivery_attempts.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>ပို့ဆောင်ကြိုးပမ်းမှုများ</Text>
-            {assignment.delivery_attempts.map((attempt: any, i: number) => (
-              <View key={attempt.id} style={styles.attemptCard}>
-                <View style={styles.attemptHeader}>
-                  <View style={[
-                    styles.attemptBadge,
-                    attempt.result === 'DELIVERED' ? styles.attemptDelivered : styles.attemptFailed
-                  ]}>
-                    <Ionicons
-                      name={attempt.result === 'DELIVERED' ? 'checkmark-circle' : 'close-circle'}
-                      size={16}
-                      color={attempt.result === 'DELIVERED' ? COLORS.success : COLORS.error}
-                    />
-                    <Text style={[
-                      styles.attemptBadgeText,
-                      { color: attempt.result === 'DELIVERED' ? COLORS.success : COLORS.error }
-                    ]}>
-                      {attempt.result === 'DELIVERED' ? 'ပို့ဆောင်ပြီး' : 'မအောင်မြင်'}
+            <Text style={styles.sectionTitle}>
+              ပို့ဆောင်ကြိုးပမ်းမှုများ ({assignment.delivery_attempts.length})
+            </Text>
+            {[...assignment.delivery_attempts].reverse().map((attempt: any, i: number) => {
+              const delivered = attempt.result === 'DELIVERED';
+              return (
+                <View key={attempt.id ?? i} style={styles.attemptCard}>
+                  <View style={styles.attemptHeader}>
+                    <View style={[styles.attemptBadge, delivered ? styles.attemptDelivered : styles.attemptFailed]}>
+                      <Ionicons
+                        name={delivered ? 'checkmark-circle' : 'close-circle'}
+                        size={14}
+                        color={delivered ? COLORS.success : COLORS.error}
+                      />
+                      <Text style={[styles.attemptBadgeText, { color: delivered ? COLORS.success : COLORS.error }]}>
+                        {delivered ? 'ပို့ဆောင်ပြီး' : 'မအောင်မြင်'}
+                      </Text>
+                    </View>
+                    <Text style={styles.attemptTime}>
+                      {new Date(attempt.attempted_at).toLocaleString('my-MM')}
                     </Text>
                   </View>
-                  <Text style={styles.attemptTime}>{new Date(attempt.attempted_at).toLocaleString('my-MM')}</Text>
+                  {attempt.failure_reason && (
+                    <View style={styles.attemptDetailRow}>
+                      <Ionicons name="alert-circle-outline" size={13} color={COLORS.error} />
+                      <Text style={styles.attemptDetailText}>{attempt.failure_reason}</Text>
+                    </View>
+                  )}
+                  {attempt.recipient_name && (
+                    <View style={styles.attemptDetailRow}>
+                      <Ionicons name="person-outline" size={13} color={COLORS.textSecondary} />
+                      <Text style={styles.attemptDetailText}>{attempt.recipient_name}</Text>
+                    </View>
+                  )}
+                  {attempt.notes && (
+                    <View style={styles.attemptDetailRow}>
+                      <Ionicons name="chatbubble-outline" size={13} color={COLORS.textSecondary} />
+                      <Text style={[styles.attemptDetailText, { fontStyle: 'italic' }]}>{attempt.notes}</Text>
+                    </View>
+                  )}
                 </View>
-                {attempt.failure_reason && (
-                  <Text style={styles.attemptReason}>အကြောင်းအရင်း: {attempt.failure_reason}</Text>
-                )}
-                {attempt.recipient_name && (
-                  <Text style={styles.attemptRecipient}>လက်ခံသူ: {attempt.recipient_name}</Text>
-                )}
-                {attempt.notes && <Text style={styles.attemptNotes}>{attempt.notes}</Text>}
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
 
-        {/* Record attempt button for active assignments */}
-        {assignment?.status === 'ACTIVE' && (
+        {/* Record attempt button */}
+        {isActive && (
           <TouchableOpacity
             style={styles.recordBtn}
             onPress={() => router.push(`/deliveries/attempt/${id}`)}
+            activeOpacity={0.85}
           >
             <Ionicons name="add-circle" size={22} color={COLORS.white} />
             <Text style={styles.recordBtnText}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
@@ -151,9 +188,16 @@ function InfoRow({ icon, label, value, valueColor, onPress }: {
 }) {
   const content = (
     <View style={styles.infoRow}>
-      <Ionicons name={icon as any} size={16} color={COLORS.primary} />
+      <View style={styles.infoIconBox}>
+        <Ionicons name={icon as any} size={16} color={COLORS.primary} />
+      </View>
       <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={[styles.infoValue, valueColor ? { color: valueColor, fontWeight: '700' } : {}]} numberOfLines={3}>{value}</Text>
+      <Text
+        style={[styles.infoValue, valueColor ? { color: valueColor, fontWeight: '700' } : {}]}
+        numberOfLines={3}
+      >
+        {value}
+      </Text>
       {onPress && <Ionicons name="chevron-forward" size={14} color={COLORS.textLight} />}
     </View>
   );
@@ -161,62 +205,65 @@ function InfoRow({ icon, label, value, valueColor, onPress }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
+  container: { flex: 1 },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-    gap: 12,
+    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
+    paddingBottom: 20, gap: 12, borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
   },
-  backBtn: { padding: 4 },
+  iconBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center',
+  },
   headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white },
-  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
+  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 2 },
+  assignStatusPill: { backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  assignStatusText: { fontSize: 12, fontWeight: '700', color: COLORS.white },
   content: { padding: 16, paddingBottom: 32 },
-  statusCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 2,
+
+  statusHero: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1.5,
   },
-  statusDot: { width: 12, height: 12, borderRadius: 6 },
-  statusCardText: { fontSize: 16, fontWeight: '700' },
+  statusDotLg: { width: 14, height: 14, borderRadius: 7 },
+  statusHeroLabel: { fontSize: 17, fontWeight: '800' },
+
   section: { marginBottom: 16 },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
-  card: { backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
-  infoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, gap: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 96 },
+  card: {
+    backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+  },
+  infoRow: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 14, paddingVertical: 12, gap: 10,
+    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+  },
+  infoIconBox: {
+    width: 32, height: 32, borderRadius: 8,
+    backgroundColor: COLORS.primary + '15', alignItems: 'center', justifyContent: 'center',
+  },
+  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 86 },
   infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500' },
-  attemptCard: { backgroundColor: COLORS.white, borderRadius: 14, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 },
-  attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+
+  attemptCard: {
+    backgroundColor: COLORS.white, borderRadius: 14, padding: 14, marginBottom: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
+  },
+  attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   attemptDelivered: { backgroundColor: '#E8F8EF' },
   attemptFailed: { backgroundColor: '#FDE8E8' },
-  attemptBadgeText: { fontSize: 13, fontWeight: '600' },
+  attemptBadgeText: { fontSize: 13, fontWeight: '700' },
   attemptTime: { fontSize: 12, color: COLORS.textLight },
-  attemptReason: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 4 },
-  attemptRecipient: { fontSize: 13, color: COLORS.text, fontWeight: '600', marginBottom: 4 },
-  attemptNotes: { fontSize: 13, color: COLORS.textSecondary, fontStyle: 'italic' },
+  attemptDetailRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, marginTop: 5 },
+  attemptDetailText: { flex: 1, fontSize: 13, color: COLORS.textSecondary },
+
   recordBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    padding: 18,
-    marginTop: 8,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 4,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    backgroundColor: COLORS.primary, borderRadius: 16, padding: 18, marginTop: 8,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5,
   },
   recordBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
 });
