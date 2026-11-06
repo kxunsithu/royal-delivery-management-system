@@ -44,8 +44,8 @@ export default function DashboardScreen() {
               <Text style={styles.roleText}>
                 {user?.role === 'admin' ? 'အက်ဒ်မင်' :
                   user?.role === 'manager' ? 'မန်နေဂျာ' :
-                  user?.role === 'accountant' ? 'စာရင်းကိုင်' :
-                  user?.role === 'delivery_staff' ? 'ပို့ဆောင်ရေးဝန်ထမ်း' : user?.role}
+                    user?.role === 'accountant' ? 'စာရင်းကိုင်' :
+                      user?.role === 'delivery_staff' ? 'ပို့ဆောင်ရေးဝန်ထမ်း' : user?.role}
               </Text>
             </View>
           </View>
@@ -140,7 +140,9 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
     { label: 'လက်ခံပြီး', value: stats?.received ?? 0, icon: 'download', color: COLORS.statusReceived, bg: '#E8F4FB' },
     { label: 'စစ်ဆေးပြီး', value: stats?.verified ?? 0, icon: 'shield-checkmark', color: COLORS.statusVerified, bg: '#F3E8FB' },
     { label: 'ပို့ဆောင်နေဆဲ', value: stats?.out_for_delivery ?? 0, icon: 'car', color: COLORS.statusInTransit, bg: '#FEF3E2' },
+    { label: 'ပို့ဆောင်ပြီး', value: stats?.delivered ?? 0, icon: 'checkmark-circle', color: COLORS.success, bg: '#E8F8EF' },
     { label: 'မအောင်မြင်', value: stats?.failed ?? 0, icon: 'close-circle', color: COLORS.error, bg: '#FDE8E8' },
+    { label: 'ပျက်စီး/ဆုံးရှုံး', value: stats?.damaged ?? 0, icon: 'warning', color: COLORS.statusDamaged, bg: '#FDE8E8' },
   ];
 
   return (
@@ -167,28 +169,6 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
           />
         ))}
       </View>
-
-      {/* Staff workload (admin/manager) */}
-      {data?.staff_workload && data.staff_workload.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>ဝန်ထမ်း အလုပ်ချိန်</Text>
-          <View style={styles.workloadCard}>
-            {data.staff_workload.map((item: any, i: number) => (
-              <View key={i} style={[styles.workloadRow, i < data.staff_workload.length - 1 && styles.workloadBorder]}>
-                <View style={styles.workloadLeft}>
-                  <View style={styles.workloadAvatar}>
-                    <Text style={styles.workloadAvatarText}>{item.staff_name?.[0] ?? '?'}</Text>
-                  </View>
-                  <Text style={styles.workloadName}>{item.staff_name}</Text>
-                </View>
-                <View style={styles.workloadBadge}>
-                  <Text style={styles.workloadCount}>{item.active_count}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        </>
-      )}
 
       {/* Quick Actions */}
       <Text style={styles.sectionTitle}>အမြန်လုပ်ဆောင်မှုများ</Text>
@@ -261,8 +241,14 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  greeting: { fontSize: 14, color: 'rgba(255,255,255,0.85)' },
-  username: { fontSize: 22, fontWeight: '800', color: COLORS.white, marginVertical: 2 },
+  greeting: {
+    fontSize: 14, color: 'rgba(255,255,255,0.85)',
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  username: {
+    fontSize: 22, fontWeight: '800', color: COLORS.white, marginVertical: 2,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   roleBadge: {
     backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 10,
@@ -271,7 +257,10 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: 2,
   },
-  roleText: { fontSize: 12, color: COLORS.white, fontWeight: '600' },
+  roleText: {
+    fontSize: 12, color: COLORS.white, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   logoMini: {
     width: 60,
     height: 60,
@@ -288,6 +277,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 12,
     marginTop: 8,
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -299,6 +289,7 @@ const styles = StyleSheet.create({
     width: '30.5%',
     borderRadius: 14,
     padding: 12,
+    paddingBottom: 16,
     alignItems: 'flex-start',
   },
   statIcon: {
@@ -309,8 +300,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
-  statValue: { fontSize: 22, fontWeight: '800', marginBottom: 2 },
-  statLabel: { fontSize: 10, color: COLORS.textSecondary, lineHeight: 14 },
+  statValue: {
+    fontSize: 22, fontWeight: '800', marginBottom: 2,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  statLabel: {
+    fontSize: 10, color: COLORS.textSecondary, lineHeight: 19,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   todayBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -320,8 +317,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     gap: 8,
   },
-  todayText: { fontSize: 14, color: COLORS.text, flex: 1 },
-  todayCount: { fontSize: 20, fontWeight: '800', color: COLORS.primary },
+  todayText: {
+    fontSize: 14, color: COLORS.text, flex: 1,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  todayCount: {
+    fontSize: 20, fontWeight: '800', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   totalCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -337,8 +340,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   totalInfo: { flex: 1 },
-  totalLabel: { fontSize: 13, color: COLORS.textSecondary },
-  totalValue: { fontSize: 32, fontWeight: '800', color: COLORS.primary, marginTop: 2 },
+  totalLabel: {
+    fontSize: 13, color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  totalValue: {
+    fontSize: 32, fontWeight: '800', color: COLORS.primary, marginTop: 2,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -348,43 +357,10 @@ const styles = StyleSheet.create({
     gap: 10,
     justifyContent: 'center',
   },
-  actionBtnText: { flex: 1, fontSize: 15, fontWeight: '700', color: COLORS.white },
-  workloadCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 4,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+  actionBtnText: {
+    flex: 1, fontSize: 15, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
-  workloadRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 14,
-  },
-  workloadBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  workloadLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  workloadAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: COLORS.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  workloadAvatarText: { fontSize: 16, fontWeight: '700', color: COLORS.primaryDark },
-  workloadName: { fontSize: 15, fontWeight: '600', color: COLORS.text },
-  workloadBadge: {
-    backgroundColor: COLORS.primaryBg,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  workloadCount: { fontSize: 14, fontWeight: '700', color: COLORS.primary },
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -399,7 +375,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quickLabel: { fontSize: 11, color: COLORS.textSecondary, fontWeight: '600', textAlign: 'center' },
+  quickLabel: {
+    fontSize: 11, color: COLORS.textSecondary, fontWeight: '600', textAlign: 'center',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   skeleton: {
     height: 100,
     backgroundColor: COLORS.border,

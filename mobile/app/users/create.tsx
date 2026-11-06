@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { userService } from '../../src/services/userService';
-import { COLORS } from '../../src/constants';
+import { COLORS} from '../../src/constants';
 
 const ROLES = [
   { value: 'admin', label: 'အက်ဒ်မင်', icon: 'shield', color: '#8B5CF6' },
@@ -166,20 +166,32 @@ const styles = StyleSheet.create({
   scrollArea: { flex: 1, backgroundColor: COLORS.background },
   header: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingBottom: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 12 },
   closeBtn: { padding: 4 },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white },
+  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   content: { padding: 16, paddingBottom: 40 },
   card: { backgroundColor: COLORS.white, borderRadius: 16, padding: 16, gap: 12, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   field: {},
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6 },
-  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 10, padding: 12, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 10, padding: 12, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   inputError: { borderColor: COLORS.error },
-  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4 },
+  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   roleList: { gap: 8 },
   roleItem: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border },
   roleItemActive: { borderColor: COLORS.primary, backgroundColor: COLORS.primaryBg },
-  roleItemText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500' },
+  roleItemText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500',
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
   roleItemTextActive: { color: COLORS.primary, fontWeight: '700' },
   roleIconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.primary, borderRadius: 16, padding: 18 },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 });

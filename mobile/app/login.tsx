@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/context/AuthContext';
-import { COLORS } from '../src/constants';
+import { COLORS} from '../src/constants';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
@@ -173,11 +173,13 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.white,
     letterSpacing: 0.5,
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
   appSubtitle: {
     fontSize: 14,
     color: 'rgba(255,255,255,0.85)',
     marginTop: 4,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
   card: {
     paddingHorizontal: 4,
@@ -189,12 +191,14 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: 'center',
     marginBottom: 4,
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
   subtitle: {
     fontSize: 14,
     color: 'rgba(255,255,255,0.85)',
     textAlign: 'center',
     marginBottom: 24,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
   fieldGroup: { marginBottom: 16 },
   label: {
@@ -202,6 +206,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.white,
     marginBottom: 8,
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -224,6 +229,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
   eyeButton: { padding: 4 },
   errorText: {
@@ -232,6 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 4,
     marginLeft: 4,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
   loginBtn: {
     alignItems: 'center',
@@ -253,11 +260,13 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
   footer: {
     textAlign: 'center',
     color: 'rgba(255,255,255,0.6)',
     fontSize: 12,
     marginTop: 24,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
 });

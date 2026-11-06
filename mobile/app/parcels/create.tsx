@@ -19,7 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { parcelService } from '../../src/services/parcelService';
 import apiClient from '../../src/services/apiClient';
 import { useAuth } from '../../src/context/AuthContext';
-import { COLORS } from '../../src/constants';
+import { COLORS} from '../../src/constants';
 
 interface DeliveryArea {
   id: number;
@@ -460,17 +460,23 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 28,
   },
   closeBtn: { padding: 4 },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white },
+  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   saveBtn: {
     backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
   },
-  saveBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white },
+  saveBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   content: { padding: 16, paddingBottom: 40 },
   formSection: { marginBottom: 16 },
-  formSectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  formSectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   formCard: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
@@ -483,7 +489,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   formField: {},
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   textInput: {
     borderWidth: 1.5,
     borderColor: COLORS.border,
@@ -492,10 +500,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.text,
     backgroundColor: COLORS.background,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
   textArea: { height: 80, textAlignVertical: 'top' },
   inputError: { borderColor: COLORS.error },
-  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4 },
+  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   row: { flexDirection: 'row', gap: 12 },
   segmented: {
     flexDirection: 'row',
@@ -507,7 +518,9 @@ const styles = StyleSheet.create({
   },
   segmentItem: { flex: 1, paddingVertical: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: COLORS.primary },
-  segmentText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary },
+  segmentText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   segmentActiveText: { color: COLORS.white },
   areaChip: {
     paddingHorizontal: 14,
@@ -518,7 +531,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   areaChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  areaChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary },
+  areaChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   areaChipActiveText: { color: COLORS.white },
   switchRow: {
     flexDirection: 'row',
@@ -526,8 +541,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 4,
   },
-  switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text },
-  switchSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+  switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  switchSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   submitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -543,17 +562,23 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   imageBtnRow: { flexDirection: 'row', gap: 10 },
   imagePickBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5,
     borderColor: COLORS.primary, backgroundColor: '#FFF9EE',
   },
-  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary },
+  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
   imageThumbWrap: { position: 'relative' },
   imageThumb: { width: 80, height: 80, borderRadius: 10 },
   imageRemoveBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: COLORS.white, borderRadius: 10 },
-  imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center' },
+  imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center',
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 });

@@ -5,8 +5,31 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
-import { ActivityIndicator, View } from 'react-native';
-import { COLORS } from '../src/constants';
+import { ActivityIndicator, View, Text, TextInput } from 'react-native';
+import { COLORS, FONTS } from '../src/constants';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import {
+  NotoSansMyanmar_400Regular,
+  NotoSansMyanmar_500Medium,
+  NotoSansMyanmar_600SemiBold,
+  NotoSansMyanmar_700Bold,
+} from '@expo-google-fonts/noto-sans-myanmar';
+
+SplashScreen.preventAutoHideAsync();
+
+// ─── Global font override ────────────────────────────────────────────────────
+// Apply NotoSansMyanmar to every <Text> and <TextInput> so Myanmar glyphs
+// render correctly on all platforms without touching individual stylesheets.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(Text as any).defaultProps = (Text as any).defaultProps ?? {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(Text as any).defaultProps.style = { fontFamily: FONTS.regular };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(TextInput as any).defaultProps = (TextInput as any).defaultProps ?? {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(TextInput as any).defaultProps.style = { fontFamily: FONTS.regular };
+// ────────────────────────────────────────────────────────────────────────────
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,6 +98,27 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    NotoSansMyanmar_400Regular,
+    NotoSansMyanmar_500Medium,
+    NotoSansMyanmar_600SemiBold,
+    NotoSansMyanmar_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.primary }}>
+        <ActivityIndicator size="large" color={COLORS.white} />
+      </View>
+    );
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

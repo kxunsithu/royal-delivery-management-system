@@ -10,6 +10,7 @@ import {
   Image,
   Linking,
   TextInput,
+  Share,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -26,6 +27,9 @@ import {
   PRIORITY_COLORS,
 } from '../../src/constants';
 import ImagePreviewModal from '../../src/components/ImagePreviewModal';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const STATUS_TRANSITIONS: Record<string, string[]> = {
   RECEIVED: ['VERIFIED', 'DAMAGED'],
@@ -128,6 +132,119 @@ export default function ParcelDetailScreen() {
     ]);
   }
 
+  function buildReceiptHtml(): string {
+    if (!parcel) return '';
+    return `
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            body { font-family: 'Noto Sans Myanmar', sans-serif; padding: 24px; color: #111827; }
+            h1 { text-align: center; margin-bottom: 4px; }
+            h2 { text-align: center; color: #6B7280; font-size: 14px; margin-top: 0; }
+            .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB; }
+            .label { color: #6B7280; font-weight: 600; }
+            .value { font-weight: 700; text-align: right; max-width: 60%; }
+            .section { margin-top: 16px; font-size: 16px; font-weight: 800; color: #1F2937; }
+            .footer { text-align: center; margin-top: 24px; color: #6B7280; }
+          </style>
+        </head>
+        <body>
+          <h1>Royal Myawaddy Delivery</h1>
+          <h2>ပါဆယ် ဘောင်ချာ / Parcel Receipt</h2>
+          <div class="section">ပါဆယ် အချက်အလက်</div>
+          <div class="row"><span class="label">ခြေရာခံနံပါတ်</span><span class="value">${parcel.tracking_number}</span></div>
+          <div class="row"><span class="label">အခြေအနေ</span><span class="value">${statusLabel}</span></div>
+          <div class="row"><span class="label">ရက်စွဲ</span><span class="value">${new Date(parcel.created_at).toLocaleString('my-MM')}</span></div>
+          ${parcel.sender_name ? `<div class="row"><span class="label">ပေးပို့သူ</span><span class="value">${parcel.sender_name}</span></div>` : ''}
+          ${parcel.sender_phone ? `<div class="row"><span class="label">ပေးပို့သူ ဖုန်း</span><span class="value">${parcel.sender_phone}</span></div>` : ''}
+          <div class="row"><span class="label">လက်ခံသူ</span><span class="value">${parcel.recipient_name}</span></div>
+          <div class="row"><span class="label">လက်ခံသူ ဖုန်း</span><span class="value">${parcel.recipient_phone}</span></div>
+          <div class="row"><span class="label">လိပ်စာ</span><span class="value">${parcel.delivery_address}</span></div>
+          ${parcel.delivery_area ? `<div class="row"><span class="label">ဒေသ</span><span class="value">${parcel.delivery_area.name_mm || parcel.delivery_area.name}</span></div>` : ''}
+          <div class="row"><span class="label">ဦးစားပေးအဆင့်</span><span class="value">${PRIORITY_LABELS_MM[parcel.priority as keyof typeof PRIORITY_LABELS_MM] || parcel.priority}</span></div>
+          <div class="row"><span class="label">အရေအတွက်</span><span class="value">${parcel.quantity} ခု</span></div>
+          ${parcel.weight ? `<div class="row"><span class="label">အလေးချိန်</span><span class="value">${parcel.weight} kg</span></div>` : ''}
+          ${parcel.description ? `<div class="row"><span class="label">ဖော်ပြချက်</span><span class="value">${parcel.description}</span></div>` : ''}
+          <div class="row"><span class="label">ပို့ဆောင်ခ</span><span class="value">${Number(parcel.delivery_fee).toLocaleString()} ကျပ်</span></div>
+          ${parcel.is_cod ? `<div class="row"><span class="label">COD ပမာဏ</span><span class="value">${Number(parcel.cod_amount).toLocaleString()} ကျပ်</span></div>` : ''}
+          ${parcel.active_assignment?.staff?.name ? `<div class="row"><span class="label">ချိတ်ဆက်ထားသောဝန်ထမ်း</span><span class="value">${parcel.active_assignment.staff.name}</span></div>` : ''}
+          <div class="footer">ကျေးဇူးတင်ပါသည်။</div>
+        </body>
+      </html>
+    `;
+  }
+
+  async function handleDownloadReceipt() {
+    if (!parcel) return;
+    try {
+      const html = buildReceiptHtml();
+      const result = await Print.printToFileAsync({ html, base64: true });
+      if (!result.base64) {
+        Alert.alert('အမှား', 'PDF ဖန်တီး၍ မရပါ');
+        return;
+      }
+      const fileName = `parcel_receipt_${parcel.tracking_number}.pdf`;
+      // Let the user choose where to save (e.g. Downloads).
+      const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (!permissions.granted) {
+        Alert.alert('ပယ်ဖျက်ခဲ့သည်', 'ဖိုင်သိမ်းဆည်းရန် ဖိုင်တွဲ ရွေးချယ်မှု ပယ်ဖျက်ခဲ့ပါသည်');
+        return;
+      }
+      const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+        permissions.directoryUri,
+        fileName,
+        'application/pdf'
+      );
+      await FileSystem.writeAsStringAsync(fileUri, result.base64, { encoding: FileSystem.EncodingType.Base64 });
+      Alert.alert('အောင်မြင်ပါသည်', `PDF ဖိုင် သိမ်းဆည်းပြီးပါပြီ:\n${fileName}`);
+    } catch (e: any) {
+      console.error('PDF download failed:', e);
+      Alert.alert('အမှား', `PDF ဒေါင်းလုပ် မအောင်မြင်ပါ:\n${e?.message || e}`);
+    }
+  }
+
+  async function handleExportReceipt() {
+    if (!parcel) return;
+    const html = buildReceiptHtml();
+
+    try {
+      const result = await Print.printToFileAsync({ html, base64: true });
+      console.log('PDF generated:', result.uri);
+
+      const dest = FileSystem.cacheDirectory + 'parcel_receipt.pdf';
+      try { await FileSystem.deleteAsync(dest, { idempotent: true }); } catch (_) {}
+
+      if (result.base64) {
+        await FileSystem.writeAsStringAsync(dest, result.base64, { encoding: FileSystem.EncodingType.Base64 });
+      } else {
+        await FileSystem.copyAsync({ from: result.uri, to: dest });
+      }
+      console.log('written to:', dest);
+
+      if (await Sharing.isAvailableAsync()) {
+        try {
+          await Sharing.shareAsync(dest, { mimeType: 'application/pdf', dialogTitle: 'Parcel Receipt' });
+        } catch (e) {
+          console.log('shareAsync failed:', e);
+          // Fallback: open native print dialog so user can save/print the PDF.
+          await Print.printAsync({ html });
+        }
+      } else {
+        await Print.printAsync({ html });
+      }
+    } catch (e: any) {
+      console.error('PDF export failed:', e);
+      // Fallback: share a text receipt
+      try {
+        const text = `Royal Myawaddy Delivery - Parcel Receipt\nTracking: ${parcel.tracking_number}\nStatus: ${statusLabel}\nRecipient: ${parcel.recipient_name} (${parcel.recipient_phone})\nAddress: ${parcel.delivery_address}\nFee: ${Number(parcel.delivery_fee).toLocaleString()} ကျပ်`;
+        await Share.share({ message: text, title: 'Parcel Receipt' });
+      } catch (_) {
+        Alert.alert('အမှား', `PDF ဘောင်ချာ ထုတ်ယူခြင်း မအောင်မြင်ပါ:\n${e?.message || e}`);
+      }
+    }
+  }
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -150,7 +267,9 @@ export default function ParcelDetailScreen() {
 
   const statusColor = STATUS_COLORS[parcel.status as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
   const statusLabel = STATUS_LABELS_MM[parcel.status as keyof typeof STATUS_LABELS_MM] || parcel.status;
-  const availableTransitions = STATUS_TRANSITIONS[parcel.status] || [];
+  const availableTransitions = (STATUS_TRANSITIONS[parcel.status] || []).filter(
+    (s) => s !== 'IN_TRANSIT'
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: statusColor }]}>
@@ -401,6 +520,22 @@ export default function ParcelDetailScreen() {
             </View>
           </View>
         )}
+
+        {/* Export Receipt */}
+        <View style={styles.exportWrap}>
+          <TouchableOpacity style={styles.exportBtn} onPress={handleExportReceipt} activeOpacity={0.85}>
+            <Ionicons name="document-text-outline" size={18} color={COLORS.white} />
+            <Text style={styles.exportBtnText}>ပါဆယ် ဘောင်ချာ ထုတ်ယူမည်</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Download PDF */}
+        <View style={styles.exportWrap}>
+          <TouchableOpacity style={[styles.exportBtn, { backgroundColor: COLORS.success }]} onPress={handleDownloadReceipt} activeOpacity={0.85}>
+            <Ionicons name="download-outline" size={18} color={COLORS.white} />
+            <Text style={styles.exportBtnText}>PDF ဒေါင်းလုပ်မည်</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -443,7 +578,9 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 4 },
   headerCenter: { flex: 1 },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   headerStatusBadge: {
     backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 8,
@@ -452,7 +589,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: 3,
   },
-  headerStatusText: { fontSize: 11, color: COLORS.white, fontWeight: '600' },
+  headerStatusText: { fontSize: 11, color: COLORS.white, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   headerActions: { flexDirection: 'row', gap: 4 },
   headerActionBtn: { padding: 6 },
   content: { padding: 16, paddingBottom: 32 },
@@ -465,7 +604,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   infoCard: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
@@ -485,8 +626,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 96 },
-  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500' },
+  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 96,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500',
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
   transitionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   transitionBtn: {
     flexDirection: 'row',
@@ -497,13 +642,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1.5,
   },
-  transitionBtnText: { fontSize: 14, fontWeight: '600' },
+  transitionBtnText: { fontSize: 14, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   transitionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
   transitionLoading: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.primaryLight + '30', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  transitionLoadingText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
+  transitionLoadingText: { fontSize: 12, color: COLORS.primary, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   assignHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
   currentStaffPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.primaryLight + '30', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  currentStaffPillText: { fontSize: 11, color: COLORS.primary, fontWeight: '600', maxWidth: 100 },
+  currentStaffPillText: { fontSize: 11, color: COLORS.primary, fontWeight: '600', maxWidth: 100,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   staffRow: { flexDirection: 'row', gap: 10 },
   staffChip: {
     alignItems: 'center',
@@ -526,17 +677,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 6,
   },
-  staffAvatarText: { fontSize: 18, fontWeight: '700', color: COLORS.primaryDark },
-  staffChipName: { fontSize: 11, color: COLORS.text, textAlign: 'center', fontWeight: '600' },
+  staffAvatarText: { fontSize: 18, fontWeight: '700', color: COLORS.primaryDark,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  staffChipName: { fontSize: 11, color: COLORS.text, textAlign: 'center', fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   timeline: { paddingLeft: 4 },
   timelineItem: { flexDirection: 'row', gap: 12, marginBottom: 4 },
   timelineDot: { alignItems: 'center', width: 16 },
   timelineDotInner: { width: 14, height: 14, borderRadius: 7 },
   timelineLine: { width: 2, flex: 1, backgroundColor: COLORS.border, marginTop: 2 },
   timelineContent: { flex: 1, paddingBottom: 16 },
-  timelineStatus: { fontSize: 14, fontWeight: '700', marginBottom: 2 },
-  timelineReason: { fontSize: 13, color: COLORS.textSecondary },
-  timelineTime: { fontSize: 12, color: COLORS.textLight, marginTop: 2 },
+  timelineStatus: { fontSize: 14, fontWeight: '700', marginBottom: 2,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  timelineReason: { fontSize: 13, color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  timelineTime: { fontSize: 12, color: COLORS.textLight, marginTop: 2,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   staffSearchBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -549,7 +710,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     marginBottom: 10,
   },
-  staffSearchInput: { flex: 1, fontSize: 14, color: COLORS.text },
+  staffSearchInput: { flex: 1, fontSize: 14, color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   staffList: {
     backgroundColor: COLORS.white,
     borderRadius: 14,
@@ -571,14 +734,22 @@ const styles = StyleSheet.create({
   },
   staffListItemActive: { backgroundColor: COLORS.primaryLight + '30' },
   staffListInfo: { flex: 1 },
-  staffListName: { fontSize: 14, fontWeight: '600', color: COLORS.text },
-  staffCurrentBadge: { fontSize: 11, color: COLORS.primary, marginTop: 2 },
+  staffListName: { fontSize: 14, fontWeight: '600', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  staffCurrentBadge: { fontSize: 11, color: COLORS.primary, marginTop: 2,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   staffAvatarActive: { backgroundColor: COLORS.primary },
   staffAvatarImg: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, borderColor: COLORS.border },
   staffEmpty: { alignItems: 'center', paddingVertical: 24, gap: 8 },
-  staffEmptyText: { fontSize: 13, color: COLORS.textLight },
+  staffEmptyText: { fontSize: 13, color: COLORS.textLight,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   imageSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  imageSectionLabel: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary },
+  imageSectionLabel: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   imageThumbWrap: { position: 'relative', marginRight: 10 },
   imageTapHint: {
     position: 'absolute',
@@ -587,5 +758,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
     borderRadius: 8,
     padding: 3,
+  },
+  exportWrap: { marginTop: 8, marginBottom: 16 },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    borderRadius: 14,
+    paddingVertical: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  exportBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
 });

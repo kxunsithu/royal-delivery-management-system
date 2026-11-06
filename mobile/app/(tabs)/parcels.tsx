@@ -9,14 +9,16 @@ import {
   RefreshControl,
   ActivityIndicator,
   ScrollView,
+  Image,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { parcelService, Parcel } from '../../src/services/parcelService';
 import { useAuth } from '../../src/context/AuthContext';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_LABELS_MM, PRIORITY_COLORS } from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_LABELS_MM, PRIORITY_COLORS} from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
@@ -31,6 +33,7 @@ const STATUS_FILTERS = [
 export default function ParcelsScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -38,6 +41,8 @@ export default function ParcelsScreen() {
 
   // accountant can NOT create parcels; admin and manager can
   const canCreateParcel = user?.role === 'admin' || user?.role === 'manager';
+  // admin, manager, accountant can change status
+  const canChangeStatus = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'accountant';
 
   const debounceRef = React.useRef<any>(null);
 
@@ -89,7 +94,7 @@ export default function ParcelsScreen() {
           <Ionicons name="search" size={18} color={COLORS.textLight} />
           <TextInput
             style={styles.searchInput}
-            placeholder="ပါဆယ် ရှာဖွေမည်..."
+            placeholder="ပါဆယ်၊ ပေးပို့သူ၊ လက်ခံသူ၊ လိပ်စာ ရှာဖွေမည်..."
             placeholderTextColor={COLORS.textLight}
             value={search}
             onChangeText={handleSearch}
@@ -130,7 +135,7 @@ export default function ParcelsScreen() {
             <FlatList
             data={parcels}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => <ParcelCard parcel={item} />}
+            renderItem={({ item }) => <ParcelCard parcel={item} canChangeStatus={canChangeStatus} queryClient={queryClient} />}
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { setPage(1); refetch(); }} tintColor={COLORS.primary} />}
@@ -178,11 +183,40 @@ export default function ParcelsScreen() {
   );
 }
 
-function ParcelCard({ parcel }: { parcel: Parcel }) {
+function ParcelCard({ parcel, canChangeStatus, queryClient }: {
+  parcel: Parcel;
+  canChangeStatus: boolean;
+  queryClient: ReturnType<typeof useQueryClient>;
+}) {
   const statusColor = STATUS_COLORS[parcel.status as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
   const statusLabel = STATUS_LABELS_MM[parcel.status as keyof typeof STATUS_LABELS_MM] || parcel.status;
   const priorityColor = PRIORITY_COLORS[parcel.priority as keyof typeof PRIORITY_COLORS] || COLORS.textSecondary;
   const priorityLabel = PRIORITY_LABELS_MM[parcel.priority as keyof typeof PRIORITY_LABELS_MM] || parcel.priority;
+  const firstImage = parcel.images && parcel.images.length > 0 ? parcel.images[0] : null;
+
+  const verifyMutation = useMutation({
+    mutationFn: () => parcelService.statusTransition(parcel.id, 'VERIFIED'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['parcels'] });
+    },
+    onError: (err: any) => {
+      Alert.alert('အမှား', err?.response?.data?.message || 'Status ပြောင်း၍ မရပါ');
+    },
+  });
+
+  function handleVerify() {
+    Alert.alert(
+      'စစ်ဆေးပြီး အတည်ပြုမည်',
+      `${parcel.tracking_number} ကို စစ်ဆေးပြီး (VERIFIED) status သို့ ပြောင်းမည်လား?`,
+      [
+        { text: 'မလုပ်တော့', style: 'cancel' },
+        { text: 'အတည်ပြုမည်', onPress: () => verifyMutation.mutate() },
+      ]
+    );
+  }
+
+  const isReceived = parcel.status === 'RECEIVED';
+  const canVerify = canChangeStatus && isReceived;
 
   return (
     <TouchableOpacity
@@ -206,21 +240,64 @@ function ParcelCard({ parcel }: { parcel: Parcel }) {
 
       <View style={styles.divider} />
 
-      {/* Card Body */}
+      {/* Card Body — image thumbnail + info side by side */}
       <View style={styles.cardBody}>
-        <View style={styles.infoRow}>
-          <Ionicons name="person-outline" size={14} color={COLORS.textSecondary} />
-          <Text style={styles.infoText} numberOfLines={1}>{parcel.recipient_name}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Ionicons name="call-outline" size={14} color={COLORS.textSecondary} />
-          <Text style={styles.infoText}>{parcel.recipient_phone}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Ionicons name="location-outline" size={14} color={COLORS.textSecondary} />
-          <Text style={styles.infoText} numberOfLines={1}>{parcel.delivery_address}</Text>
+        {firstImage ? (
+          <Image
+            source={{ uri: firstImage.url }}
+            style={styles.parcelThumb}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.parcelThumbPlaceholder}>
+            <Ionicons name="cube-outline" size={22} color={COLORS.primary + '60'} />
+          </View>
+        )}
+
+        <View style={styles.infoSide}>
+          {/* Sender */}
+          {(parcel.sender_name || parcel.sender_phone) && (
+            <View style={styles.senderBox}>
+              <Ionicons name="arrow-up-circle-outline" size={12} color={COLORS.textLight} />
+              <Text style={styles.senderText} numberOfLines={1}>
+                {parcel.sender_name || ''}{parcel.sender_name && parcel.sender_phone ? ' · ' : ''}{parcel.sender_phone || ''}
+              </Text>
+            </View>
+          )}
+          {/* Recipient */}
+          <View style={styles.infoRow}>
+            <Ionicons name="person-outline" size={13} color={COLORS.textSecondary} />
+            <Text style={styles.infoText} numberOfLines={1}>{parcel.recipient_name}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="call-outline" size={13} color={COLORS.textSecondary} />
+            <Text style={styles.infoText}>{parcel.recipient_phone}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="location-outline" size={13} color={COLORS.textSecondary} />
+            <Text style={styles.infoText} numberOfLines={1}>{parcel.delivery_address}</Text>
+          </View>
         </View>
       </View>
+
+      {/* Quick Verify Button — shown only for RECEIVED parcels with permission */}
+      {canVerify && (
+        <TouchableOpacity
+          style={[styles.verifyBtn, verifyMutation.isPending && { opacity: 0.6 }]}
+          onPress={handleVerify}
+          disabled={verifyMutation.isPending}
+          activeOpacity={0.8}
+        >
+          {verifyMutation.isPending ? (
+            <ActivityIndicator size="small" color={COLORS.white} />
+          ) : (
+            <>
+              <Ionicons name="checkmark-circle-outline" size={15} color={COLORS.white} />
+              <Text style={styles.verifyBtnText}>စစ်ဆေးပြီး အတည်ပြုမည်</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      )}
 
       {/* Card Footer */}
       <View style={styles.cardFooter}>
@@ -232,6 +309,12 @@ function ParcelCard({ parcel }: { parcel: Parcel }) {
             <View style={styles.codBadge}>
               <Ionicons name="cash-outline" size={11} color={COLORS.info} />
               <Text style={styles.codText}>COD</Text>
+            </View>
+          )}
+          {firstImage && (
+            <View style={styles.imgCountBadge}>
+              <Ionicons name="images-outline" size={11} color={COLORS.textSecondary} />
+              <Text style={styles.imgCountText}>{parcel.images!.length}</Text>
             </View>
           )}
         </View>
@@ -256,8 +339,12 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white },
-  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   addBtn: {
     width: 42,
     height: 42,
@@ -282,15 +369,16 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 4,
     borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingHorizontal: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
   },
-  searchInput: { flex: 1, fontSize: 15, color: COLORS.text },
+  searchInput: { flex: 1, fontSize: 15, color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 
   // Filter chips
   filterRow: { height: 64 },
@@ -311,7 +399,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
-  filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600' },
+  filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   filterChipTextActive: { color: COLORS.white },
 
   loader: { marginTop: 60 },
@@ -338,7 +428,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary },
+  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -348,11 +440,36 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 12, fontWeight: '600' },
+  statusText: { fontSize: 12, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
-  cardBody: { gap: 6 },
+  cardBody: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+  parcelThumb: {
+    width: 68, height: 68, borderRadius: 10,
+    backgroundColor: '#F3F4F6',
+    flexShrink: 0,
+  },
+  parcelThumbPlaceholder: {
+    width: 68, height: 68, borderRadius: 10,
+    backgroundColor: '#FFF3DC',
+    alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
+  },
+  infoSide: { flex: 1, gap: 5 },
+  senderBox: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: '#F3F4F6', borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 3,
+    alignSelf: 'flex-start',
+  },
+  senderText: { fontSize: 11, color: COLORS.textSecondary, fontWeight: '500', flexShrink: 1,
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { fontSize: 13, color: COLORS.text, flex: 1 },
+  infoText: { fontSize: 13, color: COLORS.text, flex: 1,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -364,7 +481,9 @@ const styles = StyleSheet.create({
   },
   footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  priorityText: { fontSize: 11, fontWeight: '700' },
+  priorityText: { fontSize: 11, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   codBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -374,8 +493,28 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
-  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info },
-  feeText: { fontSize: 14, fontWeight: '700', color: COLORS.text },
+  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  imgCountBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 7, paddingVertical: 4, borderRadius: 20,
+  },
+  imgCountText: { fontSize: 11, fontWeight: '600', color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  verifyBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: COLORS.success,
+    borderRadius: 10, paddingVertical: 9, marginTop: 10,
+  },
+  verifyBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  feeText: { fontSize: 14, fontWeight: '700', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 
   // Empty
   empty: { alignItems: 'center', paddingVertical: 60 },
@@ -388,14 +527,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
   },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
-  emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center' },
+  emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center',
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 
   // Pagination
   pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
   pageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
-  pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary },
+  pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: COLORS.border },
-  pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600' },
+  pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
 });

@@ -17,7 +17,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { userService, User } from '../../src/services/userService';
-import { COLORS, ROLE_LABELS_MM } from '../../src/constants';
+import { COLORS, ROLE_LABELS_MM} from '../../src/constants';
 
 export default function UsersScreen() {
   const insets = useSafeAreaInsets();
@@ -166,7 +166,7 @@ function UserCard({ user, onToggleStatus }: { user: User; onToggleStatus: () => 
 
   return (
     <TouchableOpacity
-      style={[styles.card, { borderLeftColor: roleColor }]}
+      style={styles.card}
       onPress={() => router.push(`/users/${user.id}`)}
       activeOpacity={0.85}
     >
@@ -214,42 +214,66 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white },
-  headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontWeight: '500' },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontWeight: '500',
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
   addBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
-  searchWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 16, paddingTop: 12, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
-  searchInput: { flex: 1, fontSize: 15, color: COLORS.text },
+  searchWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 16, borderRadius: 14, paddingHorizontal: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  searchInput: { flex: 1, fontSize: 15, color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   filterRow: { height: 64 },
   filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
   listArea: { flex: 1 },
   filterTab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 40, justifyContent: 'center', alignSelf: 'center' },
   filterTabActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  filterTabText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600' },
+  filterTabText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   filterTabTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
-  card: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, borderLeftWidth: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  card: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   avatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   avatarImage: { width: 48, height: 48, borderRadius: 24 },
-  avatarText: { fontSize: 20, fontWeight: '700' },
+  avatarText: { fontSize: 20, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   userInfo: { flex: 1 },
-  userName: { fontSize: 15, fontWeight: '700', color: COLORS.text },
-  userEmail: { fontSize: 13, color: COLORS.textSecondary, marginVertical: 2 },
+  userName: { fontSize: 15, fontWeight: '700', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  userEmail: { fontSize: 13, color: COLORS.textSecondary, marginVertical: 2,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
   roleIndicator: { width: 6, height: 6, borderRadius: 3 },
-  roleText: { fontSize: 12, fontWeight: '600' },
+  roleText: { fontSize: 12, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   cardRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   statusPill: { position: 'absolute', top: 8, right: 36, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   statusPillActive: { backgroundColor: '#DCFCE7' },
   statusPillInactive: { backgroundColor: '#FEE2E2' },
-  statusPillText: { fontSize: 11, fontWeight: '700' },
+  statusPillText: { fontSize: 11, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   empty: { alignItems: 'center', paddingVertical: 60 },
   emptyIconContainer: { width: 88, height: 88, borderRadius: 44, backgroundColor: '#FEF3C7', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  emptyTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginTop: 4 },
-  emptySubtitle: { fontSize: 14, color: COLORS.textLight, marginTop: 6 },
+  emptyTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginTop: 4,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  emptySubtitle: { fontSize: 14, color: COLORS.textLight, marginTop: 6,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 16 },
   pageBtn: { padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
-  pageInfo: { fontSize: 14, color: COLORS.textSecondary },
+  pageInfo: { fontSize: 14, color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 });

@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { deliveryService, Assignment } from '../../src/services/deliveryService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM } from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
@@ -215,14 +215,18 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   headerBadge: {
     backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
   },
-  headerBadgeText: { fontSize: 13, fontWeight: '700', color: COLORS.white },
+  headerBadgeText: { fontSize: 13, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   filterRow: { height: 64 },
   filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
   listArea: { flex: 1 },
@@ -241,7 +245,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
-  filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600' },
+  filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   filterChipTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
@@ -267,7 +273,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary },
+  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -277,11 +285,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 12, fontWeight: '600' },
+  statusText: { fontSize: 12, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
   cardBody: { gap: 6 },
   infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  infoText: { fontSize: 13, color: COLORS.text, flex: 1, lineHeight: 18 },
+  infoText: { fontSize: 13, color: COLORS.text, flex: 1, lineHeight: 24,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -294,9 +306,13 @@ const styles = StyleSheet.create({
   assignBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   assignBadgeActive: { backgroundColor: '#FFF3DC' },
   assignBadgeDone: { backgroundColor: '#E8F8EF' },
-  assignBadgeText: { fontSize: 12, fontWeight: '600' },
+  assignBadgeText: { fontSize: 12, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   codBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#E8F4FB', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
-  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info },
+  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 
   // Empty
   empty: { alignItems: 'center', paddingVertical: 60 },
@@ -309,14 +325,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
   },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
-  emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center' },
+  emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center',
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 
   // Pagination
   pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
   pageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
-  pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary },
+  pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: COLORS.border },
-  pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600' },
+  pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
 });

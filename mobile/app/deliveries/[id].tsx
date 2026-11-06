@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { deliveryService } from '../../src/services/deliveryService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM } from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
 
 export default function DeliveryDetailScreen() {
   const insets = useSafeAreaInsets();
@@ -216,10 +216,16 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center',
   },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white },
-  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 2 },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 2,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   assignStatusPill: { backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
-  assignStatusText: { fontSize: 12, fontWeight: '700', color: COLORS.white },
+  assignStatusText: { fontSize: 12, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   content: { padding: 16, paddingBottom: 32 },
 
   statusHero: {
@@ -227,10 +233,14 @@ const styles = StyleSheet.create({
     borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1.5,
   },
   statusDotLg: { width: 14, height: 14, borderRadius: 7 },
-  statusHeroLabel: { fontSize: 17, fontWeight: '800' },
+  statusHeroLabel: { fontSize: 17, fontWeight: '800',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 
   section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   card: {
     backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
@@ -244,8 +254,12 @@ const styles = StyleSheet.create({
     width: 32, height: 32, borderRadius: 8,
     backgroundColor: COLORS.primary + '15', alignItems: 'center', justifyContent: 'center',
   },
-  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 86 },
-  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500' },
+  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 86,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500',
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
 
   attemptCard: {
     backgroundColor: COLORS.white, borderRadius: 14, padding: 14, marginBottom: 10,
@@ -255,15 +269,23 @@ const styles = StyleSheet.create({
   attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   attemptDelivered: { backgroundColor: '#E8F8EF' },
   attemptFailed: { backgroundColor: '#FDE8E8' },
-  attemptBadgeText: { fontSize: 13, fontWeight: '700' },
-  attemptTime: { fontSize: 12, color: COLORS.textLight },
+  attemptBadgeText: { fontSize: 13, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  attemptTime: { fontSize: 12, color: COLORS.textLight,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   attemptDetailRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, marginTop: 5 },
-  attemptDetailText: { flex: 1, fontSize: 13, color: COLORS.textSecondary },
+  attemptDetailText: { flex: 1, fontSize: 13, color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 
   recordBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     backgroundColor: COLORS.primary, borderRadius: 16, padding: 18, marginTop: 8,
     shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5,
   },
-  recordBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  recordBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 });

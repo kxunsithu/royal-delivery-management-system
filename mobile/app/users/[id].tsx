@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService, User } from '../../src/services/userService';
-import { COLORS, ROLE_LABELS_MM } from '../../src/constants';
+import { COLORS, ROLE_LABELS_MM} from '../../src/constants';
 
 // ── Shared with create page ───────────────────────────────────────────────────
 const ROLES = [
@@ -385,7 +385,9 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center',
   },
-  headerTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: COLORS.white, textAlign: 'center' },
+  headerTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: COLORS.white, textAlign: 'center',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   content: { padding: 16, paddingBottom: 40, gap: 14 },
 
   // Profile card
@@ -396,20 +398,32 @@ const styles = StyleSheet.create({
   },
   avatar: { width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   avatarImage: { width: 88, height: 88, borderRadius: 44, marginBottom: 12, borderWidth: 3, borderColor: COLORS.border },
-  avatarText: { fontSize: 34, fontWeight: '800' },
-  userName: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 4 },
-  userContact: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 12 },
+  avatarText: { fontSize: 34, fontWeight: '800',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  userName: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 4,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  userContact: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 12,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   badgeRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 14 },
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-  roleBadgeText: { fontSize: 13, fontWeight: '700' },
+  roleBadgeText: { fontSize: 13, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   statusDot: { width: 7, height: 7, borderRadius: 4 },
-  statusBadgeText: { fontSize: 13, fontWeight: '700' },
+  statusBadgeText: { fontSize: 13, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   callBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: COLORS.success,
     paddingHorizontal: 18, paddingVertical: 9, borderRadius: 20,
   },
-  callBtnText: { color: COLORS.white, fontSize: 14, fontWeight: '700' },
+  callBtnText: { color: COLORS.white, fontSize: 14, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 
   // Generic card
   card: {
@@ -417,26 +431,40 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
   },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 16 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 16,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 
   // Detail view rows
   detailRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   detailIconBox: { width: 38, height: 38, borderRadius: 10, backgroundColor: COLORS.primaryLight + '30', alignItems: 'center', justifyContent: 'center' },
-  detailLabel: { fontSize: 11, color: COLORS.textLight, marginBottom: 1 },
-  detailValue: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  detailLabel: { fontSize: 11, color: COLORS.textLight, marginBottom: 1,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  detailValue: { fontSize: 15, fontWeight: '600', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
 
   // Status toggle
   toggleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderRadius: 16, padding: 16 },
   activateBtn: { backgroundColor: COLORS.success },
   deactivateBtn: { backgroundColor: COLORS.error },
-  toggleBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700' },
+  toggleBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 
   // Form fields — same as create page
   field: { marginBottom: 14 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6 },
-  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 10, padding: 12, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 10, padding: 12, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   inputError: { borderColor: COLORS.error },
-  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4 },
+  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   passRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   eyeBtn: { padding: 10 },
 
@@ -444,9 +472,13 @@ const styles = StyleSheet.create({
   roleList: { gap: 8 },
   roleItem: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border },
   roleIconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  roleItemText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500' },
+  roleItemText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500',
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
 
   // Submit
   submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.primary, borderRadius: 16, padding: 18 },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 });

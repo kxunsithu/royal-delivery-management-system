@@ -20,7 +20,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../src/context/AuthContext';
 import { userService } from '../../src/services/userService';
-import { COLORS, ROLE_LABELS_MM } from '../../src/constants';
+import { COLORS, ROLE_LABELS_MM} from '../../src/constants';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -434,14 +434,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
   },
-  heroTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white },
+  heroTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   editBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: 'rgba(255,255,255,0.22)',
     paddingHorizontal: 14, paddingVertical: 8,
     borderRadius: 20,
   },
-  editBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white },
+  editBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   heroBody: { alignItems: 'center' },
   avatarWrap: { position: 'relative', marginBottom: 14 },
   avatarRing: {
@@ -455,7 +459,9 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   avatarImage: { width: '100%', height: '100%', borderRadius: 54 },
-  avatarText: { fontSize: 40, fontWeight: '800', color: COLORS.white },
+  avatarText: { fontSize: 40, fontWeight: '800', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   cameraOverlay: {
     position: 'absolute', bottom: 2, right: 2,
     width: 26, height: 26, borderRadius: 13,
@@ -463,7 +469,9 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: COLORS.white,
   },
-  heroName: { fontSize: 22, fontWeight: '800', color: COLORS.white, marginBottom: 10 },
+  heroName: { fontSize: 22, fontWeight: '800', color: COLORS.white, marginBottom: 10,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   heroBadgeRow: { flexDirection: 'row', gap: 8 },
   heroBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -473,7 +481,9 @@ const styles = StyleSheet.create({
   },
   activeBadge: { backgroundColor: '#DCFCE7' },
   inactiveBadge: { backgroundColor: '#FEE2E2' },
-  heroBadgeText: { fontSize: 12, fontWeight: '700', color: COLORS.text },
+  heroBadgeText: { fontSize: 12, fontWeight: '700', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   statusDot: { width: 7, height: 7, borderRadius: 4 },
 
   // ── Content ──
@@ -481,7 +491,9 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
 
   section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 8, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 8, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.5,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 
   // Info card
   card: {
@@ -499,8 +511,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary + '12',
     alignItems: 'center', justifyContent: 'center',
   },
-  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 90 },
-  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', textAlign: 'right' },
+  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 90,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', textAlign: 'right',
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
 
   // Action rows
   actionRow: {
@@ -510,10 +526,14 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   actionIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  actionText: { flex: 1, fontSize: 15, fontWeight: '600' },
+  actionText: { flex: 1, fontSize: 15, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   actionDivider: { height: StyleSheet.hairlineWidth, backgroundColor: '#E5E7EB', marginLeft: 66 },
 
-  versionText: { textAlign: 'center', fontSize: 12, color: COLORS.textLight, marginTop: 8 },
+  versionText: { textAlign: 'center', fontSize: 12, color: COLORS.textLight, marginTop: 8,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 
   // ── Modal ──
   modalContainer: { flex: 1, backgroundColor: '#F3F4F6' },
@@ -525,22 +545,31 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   modalCloseBtn: { padding: 4 },
-  modalTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.text },
+  modalTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   modalSaveBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20 },
-  modalSaveBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white },
+  modalSaveBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   modalScroll: { flex: 1 },
   modalContent: { padding: 16, paddingBottom: 40 },
 
   formGroup: { marginBottom: 14 },
-  formLabel: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 6 },
+  formLabel: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 6,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   formInput: {
     borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 12,
     fontSize: 15, color: COLORS.text, backgroundColor: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
   passRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   eyeBtn: { padding: 10 },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 16 },
   dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.border },
-  dividerLabel: { fontSize: 12, color: COLORS.textLight, fontWeight: '600' },
+  dividerLabel: { fontSize: 12, color: COLORS.textLight, fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
 });

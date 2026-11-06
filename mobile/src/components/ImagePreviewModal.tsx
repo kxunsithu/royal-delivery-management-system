@@ -218,6 +218,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
   slide: {
     width: SCREEN_W,
@@ -247,6 +248,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.75)',
     fontSize: 12,
     flexShrink: 1,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
   dots: {
     position: 'absolute',

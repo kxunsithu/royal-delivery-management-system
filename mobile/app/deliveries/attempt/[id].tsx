@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { deliveryService } from '../../../src/services/deliveryService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM } from '../../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../../src/constants';
 
 const FAILURE_REASONS = [
   { value: 'RECIPIENT_UNAVAILABLE', label: 'လက်ခံသူ မရှိ' },
@@ -249,8 +249,12 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 28,
   },
   closeBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 17, fontWeight: '700', color: COLORS.white },
-  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   content: { padding: 16, paddingBottom: 40 },
   parcelCard: {
     backgroundColor: COLORS.white,
@@ -266,10 +270,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   parcelHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  trackingNum: { fontSize: 15, fontWeight: '700', color: COLORS.primary },
-  recipientName: { fontSize: 18, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  trackingNum: { fontSize: 15, fontWeight: '700', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  recipientName: { fontSize: 18, fontWeight: '700', color: COLORS.text, marginBottom: 8,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  infoText: { fontSize: 14, color: COLORS.textSecondary },
+  infoText: { fontSize: 14, color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
   codInfo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -279,8 +289,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 8,
   },
-  codText: { fontSize: 14, fontWeight: '700', color: COLORS.info },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 10 },
+  codText: { fontSize: 14, fontWeight: '700', color: COLORS.info,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 10,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   section: { marginBottom: 18 },
   resultRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
   resultBtn: {
@@ -302,7 +316,9 @@ const styles = StyleSheet.create({
   },
   resultBtnDelivered: { backgroundColor: COLORS.success, borderColor: COLORS.success },
   resultBtnFailed: { backgroundColor: COLORS.error, borderColor: COLORS.error },
-  resultBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.text },
+  resultBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   reasonGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   reasonChip: {
     paddingHorizontal: 14,
@@ -313,7 +329,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   reasonChipActive: { backgroundColor: COLORS.error, borderColor: COLORS.error },
-  reasonChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary },
+  reasonChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
   reasonChipTextActive: { color: COLORS.white },
   textInput: {
     borderWidth: 1.5,
@@ -323,6 +341,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.text,
     backgroundColor: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
   textArea: { height: 80, textAlignVertical: 'top' },
   submitBtn: {
@@ -337,5 +356,7 @@ const styles = StyleSheet.create({
   submitDelivered: { backgroundColor: COLORS.success, shadowColor: COLORS.success, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5 },
   submitFailed: { backgroundColor: COLORS.error, shadowColor: COLORS.error, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5 },
   submitDisabled: { backgroundColor: COLORS.textLight },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white },
+  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
 });

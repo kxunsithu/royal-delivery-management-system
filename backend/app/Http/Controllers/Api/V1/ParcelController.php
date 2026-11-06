@@ -31,7 +31,8 @@ class ParcelController extends Controller
                     ->orWhereRaw('LOWER(sender_name) LIKE ?', [$term])
                     ->orWhereRaw('LOWER(sender_phone) LIKE ?', [$term])
                     ->orWhereRaw('LOWER(recipient_name) LIKE ?', [$term])
-                    ->orWhereRaw('LOWER(recipient_phone) LIKE ?', [$term]);
+                    ->orWhereRaw('LOWER(recipient_phone) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(delivery_address) LIKE ?', [$term]);
             }))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->delivery_area_id, fn($q) => $q->where('delivery_area_id', $request->delivery_area_id))

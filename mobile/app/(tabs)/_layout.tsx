@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../../src/constants';
+import { COLORS, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
-import { Platform } from 'react-native';
+import { Platform, TouchableOpacity } from 'react-native';
 
 export default function TabLayout() {
   const { user } = useAuth();
@@ -35,11 +35,24 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          fontFamily: FONTS.semiBold,
           marginBottom: Platform.OS === 'ios' ? 0 : 4,
           textDecorationLine: 'none',
         },
         tabBarIconStyle: {
           marginTop: 4,
+        },
+        // Strip href from tab button to remove Android underline
+        tabBarButton: (props) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { href: _href, ...rest } = props as any;
+          return (
+            <TouchableOpacity
+              {...rest}
+              activeOpacity={0.7}
+              style={[rest.style, { alignItems: 'center', justifyContent: 'center' }]}
+            />
+          );
         },
       }}
     >
@@ -52,50 +65,46 @@ export default function TabLayout() {
           ),
         }}
       />
-      {canSeeParcels && (
-        <Tabs.Screen
-          name="parcels"
-          options={{
-            title: 'ပါဆယ်များ',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="cube" size={size} color={color as string} />
-            ),
-          }}
-        />
-      )}
-      {isStaff && (
-        <Tabs.Screen
-          name="my-assignments"
-          options={{
-            title: 'ကျွန်ုပ်၏လုပ်ငန်းများ',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="bicycle" size={size} color={color as string} />
-            ),
-          }}
-        />
-      )}
-      {canSeeParcels && (
-        <Tabs.Screen
-          name="deliveries"
-          options={{
-            title: 'ပို့ဆောင်မှုများ',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="car" size={size} color={color as string} />
-            ),
-          }}
-        />
-      )}
-      {isAdmin && (
-        <Tabs.Screen
-          name="users"
-          options={{
-            title: 'အသုံးပြုသူများ',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="people" size={size} color={color as string} />
-            ),
-          }}
-        />
-      )}
+      <Tabs.Screen
+        name="parcels"
+        options={{
+          title: 'ပါဆယ်များ',
+          href: canSeeParcels ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cube" size={size} color={color as string} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="my-assignments"
+        options={{
+          title: 'ကျွန်ုပ်၏လုပ်ငန်းများ',
+          href: isStaff ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bicycle" size={size} color={color as string} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="deliveries"
+        options={{
+          title: 'ပို့ဆောင်မှုများ',
+          href: canSeeParcels ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="car" size={size} color={color as string} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="users"
+        options={{
+          title: 'အသုံးပြုသူများ',
+          href: isAdmin ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" size={size} color={color as string} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="profile"
         options={{
@@ -105,31 +114,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* Hidden tabs - accessible but not in tab bar */}
-      {!canSeeParcels && (
-        <Tabs.Screen
-          name="parcels"
-          options={{ href: null }}
-        />
-      )}
-      {!isStaff && (
-        <Tabs.Screen
-          name="my-assignments"
-          options={{ href: null }}
-        />
-      )}
-      {!canSeeParcels && (
-        <Tabs.Screen
-          name="deliveries"
-          options={{ href: null }}
-        />
-      )}
-      {!isAdmin && (
-        <Tabs.Screen
-          name="users"
-          options={{ href: null }}
-        />
-      )}
     </Tabs>
   );
 }

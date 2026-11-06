@@ -1,6 +1,14 @@
 // Production API Base URL
 export const API_BASE_URL = 'https://royal-delivery-management-system.onrender.com/api/v1';
 
+// Myanmar Font Family
+export const FONTS = {
+  regular: 'NotoSansMyanmar_400Regular',
+  medium: 'NotoSansMyanmar_500Medium',
+  semiBold: 'NotoSansMyanmar_600SemiBold',
+  bold: 'NotoSansMyanmar_700Bold',
+};
+
 // Colors - Yellow/Parcel theme
 export const COLORS = {
   primary: '#F5A623',
