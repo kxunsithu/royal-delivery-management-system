@@ -42,7 +42,14 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@babel/plugin-transform-react-jsx-self": "^7.29.7",
+    "@babel/plugin-transform-react-jsx-source": "^7.29.7",
+    "@babel/plugin-transform-regenerator": "^7.29.8",
+    "@react-native/babel-preset": "0.88.1",
+    "@react-native/metro-babel-transformer": "0.88.1",
+    "@react-native/metro-config": "0.88.1",
     "@types/react": "~19.3.0",
+    "react-dom": "19.3.0",
     "typescript": "~5.8.0"
   },
   "private": true
