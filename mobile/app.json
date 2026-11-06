@@ -33,6 +33,14 @@
       "favicon": "./assets/favicon.png"
     },
     "scheme": "royalmyawaddy",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 30000
+    },
     "plugins": [
       "expo-router",
       "expo-secure-store",

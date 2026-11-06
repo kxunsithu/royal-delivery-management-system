@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { ActivityIndicator, View, Text, TextInput } from 'react-native';
 import { COLORS, FONTS } from '../src/constants';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
 import {
   NotoSansMyanmar_400Regular,
@@ -17,6 +18,22 @@ import {
 } from '@expo-google-fonts/noto-sans-myanmar';
 
 SplashScreen.preventAutoHideAsync();
+
+async function applyAvailableUpdate() {
+  if (!Updates.isEnabled || __DEV__) {
+    return;
+  }
+
+  try {
+    const update = await Updates.checkForUpdateAsync();
+    if (update.isAvailable) {
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync();
+    }
+  } catch (error) {
+    console.warn('OTA update check failed:', error);
+  }
+}
 
 // ─── Global font override ────────────────────────────────────────────────────
 // Apply NotoSansMyanmar to every <Text> and <TextInput> so Myanmar glyphs
@@ -104,6 +121,10 @@ export default function RootLayout() {
     NotoSansMyanmar_600SemiBold,
     NotoSansMyanmar_700Bold,
   });
+
+  useEffect(() => {
+    applyAvailableUpdate();
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
