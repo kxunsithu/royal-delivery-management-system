@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "kxunsithu",
     "name": "Royal Myawaddy",
     "slug": "royal-myawaddy-mobile",
     "version": "1.0.0",
@@ -23,7 +24,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5A623"
       },
-      "package": "com.royalmyawaddy.delivery"
+      "package": "com.royalmyawaddy.delivery",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -42,6 +46,16 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "723c0863-b1bb-46d1-bf82-e24779abc368"
+      }
     }
   }
 }
