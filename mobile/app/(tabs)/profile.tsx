@@ -12,6 +12,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -299,11 +300,30 @@ export default function ProfileScreen() {
       </ScrollView>
 
       {/* ── Edit Profile Modal ── */}
-      <Modal visible={editVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setEditVisible(false)}>
+      <Modal
+        visible={editVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        statusBarTranslucent
+        onRequestClose={() => setEditVisible(false)}
+      >
+        <StatusBar barStyle="dark-content" />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
           <View style={styles.modalContainer}>
             {/* Modal header */}
-            <View style={styles.modalHeader}>
+            <View
+              style={[
+                styles.modalHeader,
+                {
+                  paddingTop:
+                    (Platform.OS === 'android'
+                      ? Math.max(insets.top, StatusBar.currentHeight ?? 0)
+                      : insets.top > 0
+                        ? insets.top
+                        : 14) + 8,
+                },
+              ]}
+            >
               <TouchableOpacity onPress={() => setEditVisible(false)} style={styles.modalCloseBtn}>
                 <Ionicons name="close" size={24} color={COLORS.text} />
               </TouchableOpacity>
@@ -320,7 +340,11 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent} keyboardShouldPersistTaps="handled">
+            <ScrollView
+              style={styles.modalScroll}
+              contentContainerStyle={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, 20) + 30 }]}
+              keyboardShouldPersistTaps="handled"
+            >
 
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>နာမည် *</Text>

@@ -62,7 +62,7 @@ export default function DeliveryDetailScreen() {
 
       <ScrollView
         style={styles.scrollArea}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Status hero */}

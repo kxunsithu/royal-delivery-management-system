@@ -3,8 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
 import { Platform, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
@@ -12,6 +14,9 @@ export default function TabLayout() {
   const isStaff = user?.role === 'delivery_staff';
   // parcels & deliveries tabs: visible to admin, manager, accountant
   const canSeeParcels = isAdmin || isManager || isAccountant;
+
+  const bottomInset = insets.bottom > 0 ? insets.bottom : (Platform.OS === 'ios' ? 20 : 8);
+  const tabHeight = (Platform.OS === 'ios' ? 56 : 58) + bottomInset;
 
   return (
     <Tabs
@@ -23,8 +28,8 @@ export default function TabLayout() {
           backgroundColor: COLORS.white,
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 72,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+          height: tabHeight,
+          paddingBottom: bottomInset,
           paddingTop: 8,
           elevation: 8,
           shadowColor: '#000',
@@ -36,11 +41,11 @@ export default function TabLayout() {
           fontSize: 11,
           fontWeight: '600',
           fontFamily: FONTS.semiBold,
-          marginBottom: Platform.OS === 'ios' ? 0 : 4,
+          marginBottom: insets.bottom > 0 ? 0 : (Platform.OS === 'ios' ? 0 : 4),
           textDecorationLine: 'none',
         },
         tabBarIconStyle: {
-          marginTop: 4,
+          marginTop: 2,
         },
         // Strip href from tab button to remove Android underline
         tabBarButton: (props) => {

@@ -147,15 +147,6 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
 
   return (
     <View style={styles.content}>
-
-      {!isAdmin && (
-        <View style={styles.todayBanner}>
-          <Ionicons name="calendar" size={22} color={COLORS.primary} />
-          <Text style={styles.todayText}>ယနေ့ ရောက်ရှိသောပါဆယ်: </Text>
-          <Text style={styles.todayCount}>{data?.today_received ?? 0}</Text>
-        </View>
-      )}
-
       <Text style={styles.sectionTitle}>ပါဆယ် အခြေအနေ</Text>
       <View style={styles.statsGrid}>
         {statItems.map((item, i) => (
@@ -307,23 +298,6 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 10, color: COLORS.textSecondary, lineHeight: 19,
     fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  todayBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.primaryBg,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 16,
-    gap: 8,
-  },
-  todayText: {
-    fontSize: 14, color: COLORS.text, flex: 1,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  todayCount: {
-    fontSize: 20, fontWeight: '800', color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
   },
   totalCard: {
     flexDirection: 'row',
