@@ -23,144 +23,6 @@ class UserSeeder extends Seeder
                 'is_active'   => true,
                 'role'        => 'admin',
             ],
-            // Managers (2)
-            [
-                'name'        => 'Mg Moe',
-                'email'       => 'mgmoe@gmail.com',
-                'phone'       => '09944074982',
-                'password'    => Hash::make('Manager@123456'),
-                'employee_id' => 'EMP-002',
-                'is_active'   => true,
-                'role'        => 'manager',
-            ],
-            [
-                'name'        => 'Mg Tun',
-                'email'       => 'mgtun@gmail.com',
-                'phone'       => '09944074983',
-                'password'    => Hash::make('Manager@123456'),
-                'employee_id' => 'EMP-003',
-                'is_active'   => true,
-                'role'        => 'manager',
-            ],
-            // Accountants (3)
-            [
-                'name'        => 'Ma Khin',
-                'email'       => 'makhin@gmail.com',
-                'phone'       => '09944074984',
-                'password'    => Hash::make('Accountant@123456'),
-                'employee_id' => 'EMP-004',
-                'is_active'   => true,
-                'role'        => 'accountant',
-            ],
-            [
-                'name'        => 'Ma Su',
-                'email'       => 'masu@gmail.com',
-                'phone'       => '09944074985',
-                'password'    => Hash::make('Accountant@123456'),
-                'employee_id' => 'EMP-005',
-                'is_active'   => true,
-                'role'        => 'accountant',
-            ],
-            [
-                'name'        => 'Ma Mya',
-                'email'       => 'mamya@gmail.com',
-                'phone'       => '09944074986',
-                'password'    => Hash::make('Accountant@123456'),
-                'employee_id' => 'EMP-006',
-                'is_active'   => true,
-                'role'        => 'accountant',
-            ],
-            // Delivery Staff (10)
-            [
-                'name'        => 'Ko Zaw',
-                'email'       => 'kozaw@gmail.com',
-                'phone'       => '09944074987',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-007',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ko Aung',
-                'email'       => 'koaung@gmail.com',
-                'phone'       => '09944074988',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-008',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ma Thida',
-                'email'       => 'mathida@gmail.com',
-                'phone'       => '09944074989',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-009',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ko Min',
-                'email'       => 'komin@gmail.com',
-                'phone'       => '09944074990',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-010',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ko Htet',
-                'email'       => 'kohtet@gmail.com',
-                'phone'       => '09944074991',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-011',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ma Nandar',
-                'email'       => 'manandar@gmail.com',
-                'phone'       => '09944074992',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-012',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ko Phyo',
-                'email'       => 'kophyo@gmail.com',
-                'phone'       => '09944074993',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-013',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ma Ei',
-                'email'       => 'maei@gmail.com',
-                'phone'       => '09944074994',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-014',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ko Naing',
-                'email'       => 'konaing@gmail.com',
-                'phone'       => '09944074995',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-015',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
-            [
-                'name'        => 'Ma Hla',
-                'email'       => 'mahla@gmail.com',
-                'phone'       => '09944074996',
-                'password'    => Hash::make('Staff@123456'),
-                'employee_id' => 'EMP-016',
-                'is_active'   => true,
-                'role'        => 'delivery_staff',
-            ],
         ];
 
         foreach ($users as $userData) {
@@ -182,6 +44,12 @@ class UserSeeder extends Seeder
             }
         }
 
-        $this->command->info('Users seeded. Development accounts: ' . count($users) . ' users.');
+        $this->command->info('Users seeded. Development accounts: ' . count($users) . ' user.');
+        $this->command->table(
+            ['Role', 'Email', 'Password'],
+            [
+                ['Admin', 'admin@gmail.com', 'Admin@123456'],
+            ]
+        );
     }
 }
