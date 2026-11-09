@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
-import { Platform, TouchableOpacity } from 'react-native';
+import { Platform, TouchableOpacity, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
@@ -15,8 +15,10 @@ export default function TabLayout() {
   // parcels & deliveries tabs: visible to admin, manager, accountant
   const canSeeParcels = isAdmin || isManager || isAccountant;
 
-  const bottomInset = insets.bottom > 0 ? insets.bottom : (Platform.OS === 'ios' ? 20 : 8);
-  const tabHeight = (Platform.OS === 'ios' ? 56 : 58) + bottomInset;
+  const isWeb = Platform.OS === 'web';
+  const isIos = Platform.OS === 'ios';
+  const bottomInset = insets.bottom > 0 ? insets.bottom : (isIos ? 20 : 8);
+  const tabHeight = isWeb ? 72 : ((isIos ? 56 : 58) + bottomInset);
 
   return (
     <Tabs
@@ -29,24 +31,41 @@ export default function TabLayout() {
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
           height: tabHeight,
-          paddingBottom: bottomInset,
-          paddingTop: 8,
+          paddingBottom: isWeb ? 8 : bottomInset,
+          paddingTop: isWeb ? 6 : 8,
           elevation: 8,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.08,
           shadowRadius: 8,
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-          fontFamily: FONTS.semiBold,
-          marginBottom: insets.bottom > 0 ? 0 : (Platform.OS === 'ios' ? 0 : 4),
-          textDecorationLine: 'none',
+        tabBarItemStyle: {
+          paddingVertical: 2,
+          justifyContent: 'center',
+          alignItems: 'center',
         },
         tabBarIconStyle: {
-          marginTop: 2,
+          marginTop: 0,
+          marginBottom: 1,
         },
+        tabBarLabel: ({ color, children }) => (
+          <Text
+            style={{
+              color,
+              fontSize: 10.5,
+              fontWeight: '600',
+              fontFamily: FONTS.semiBold,
+              textAlign: 'center',
+              lineHeight: 18,
+              paddingBottom: 3,
+              overflow: 'visible',
+              textDecorationLine: 'none',
+              ...(isWeb ? { userSelect: 'none' } : {}),
+            }}
+          >
+            {children}
+          </Text>
+        ),
         // Strip href from tab button to remove Android underline
         tabBarButton: (props) => {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,7 +74,14 @@ export default function TabLayout() {
             <TouchableOpacity
               {...rest}
               activeOpacity={0.7}
-              style={[rest.style, { alignItems: 'center', justifyContent: 'center' }]}
+              style={[
+                rest.style,
+                {
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  ...(isWeb ? { cursor: 'pointer', outline: 'none' } : {}),
+                },
+              ]}
             />
           );
         },
@@ -93,7 +119,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="deliveries"
         options={{
-          title: 'ပို့ဆောင်မှုများ',
+          title: 'ပို့ဆောင်မှု',
           href: canSeeParcels ? undefined : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="car" size={size} color={color as string} />
@@ -103,7 +129,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="users"
         options={{
-          title: 'အသုံးပြုသူများ',
+          title: 'အသုံးပြုသူ',
           href: isAdmin ? undefined : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people" size={size} color={color as string} />

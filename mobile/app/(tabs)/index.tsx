@@ -6,6 +6,7 @@ import {
   StyleSheet,
   RefreshControl,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { dashboardService } from '../../src/services/dashboardService';
 import { useAuth } from '../../src/context/AuthContext';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM } from '../../src/constants';
+import { COLORS, FONTS, ROLE_LABELS_MM, STATUS_COLORS, STATUS_LABELS_MM } from '../../src/constants';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -27,6 +28,15 @@ export default function DashboardScreen() {
   const isAdmin = user?.role === 'admin';
   const canCreateParcel = user?.role === 'admin' || user?.role === 'manager';
 
+  const roleLabel = (user?.role && ROLE_LABELS_MM[user.role as keyof typeof ROLE_LABELS_MM]) || user?.role || 'ဝန်ထမ်း';
+  const roleIcon = user?.role === 'admin'
+    ? 'shield-checkmark'
+    : user?.role === 'manager'
+      ? 'briefcase'
+      : user?.role === 'accountant'
+        ? 'calculator'
+        : 'bicycle';
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -37,21 +47,45 @@ export default function DashboardScreen() {
       >
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-          <View>
-            <Text style={styles.greeting}>မင်္ဂလာပါ 👋</Text>
-            <Text style={styles.username}>{user?.name}</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.roleText}>
-                {user?.role === 'admin' ? 'အက်ဒ်မင်' :
-                  user?.role === 'manager' ? 'မန်နေဂျာ' :
-                    user?.role === 'accountant' ? 'စာရင်းကိုင်' :
-                      user?.role === 'delivery_staff' ? 'ပို့ဆောင်ရေးဝန်ထမ်း' : user?.role}
-              </Text>
+          <View style={styles.headerLeft}>
+            <View style={styles.greetingRow}>
+              <Text style={styles.greeting}>မင်္ဂလာပါ 👋</Text>
+            </View>
+            <Text style={styles.username} numberOfLines={1}>
+              {user?.name ?? 'အသုံးပြုသူ'}
+            </Text>
+            <View style={styles.metaRow}>
+              <View style={styles.roleBadge}>
+                <Ionicons name={roleIcon as any} size={13} color={COLORS.white} />
+                <Text style={styles.roleText}>{roleLabel}</Text>
+              </View>
+              {user?.phone ? (
+                <View style={styles.phoneChip}>
+                  <Ionicons name="call-outline" size={11} color="rgba(255,255,255,0.9)" />
+                  <Text style={styles.phoneText}>{user.phone}</Text>
+                </View>
+              ) : null}
             </View>
           </View>
-          <View style={styles.logoMini}>
-            <Ionicons name="cube" size={32} color={COLORS.white} />
-          </View>
+
+          <TouchableOpacity
+            style={styles.avatarButton}
+            activeOpacity={0.8}
+            onPress={() => router.push('/(tabs)/profile')}
+          >
+            <View style={styles.avatarWrapper}>
+              {user?.profile_image_url ? (
+                <Image source={{ uri: user.profile_image_url }} style={styles.avatarImage} />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Text style={styles.avatarInitial}>
+                    {user?.name ? user.name[0]?.toUpperCase() : 'U'}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.onlineIndicator} />
+            </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.contentArea}>
@@ -228,37 +262,116 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 22,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
+  headerLeft: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  greetingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   greeting: {
-    fontSize: 14, color: 'rgba(255,255,255,0.85)',
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.9)',
+    fontFamily: FONTS.medium,
+  },
+  waveEmoji: {
+    fontSize: 14,
   },
   username: {
-    fontSize: 22, fontWeight: '800', color: COLORS.white, marginVertical: 2,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.white,
+    marginTop: 2,
+    marginBottom: 6,
+    fontFamily: FONTS.bold,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: 20,
-    alignSelf: 'flex-start',
-    marginTop: 2,
+    gap: 5,
   },
   roleText: {
-    fontSize: 12, color: COLORS.white, fontWeight: '600',
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontSize: 12,
+    color: COLORS.white,
+    fontWeight: '600',
+    fontFamily: FONTS.semiBold,
   },
-  logoMini: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+  phoneChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+    gap: 4,
+  },
+  phoneText: {
+    fontSize: 11,
+    color: COLORS.white,
+    fontFamily: FONTS.regular,
+  },
+  avatarButton: {
+    padding: 2,
+  },
+  avatarWrapper: {
+    position: 'relative',
+    width: 54,
+    height: 54,
+  },
+  avatarImage: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.9)',
+  },
+  avatarFallback: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: COLORS.white,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  avatarInitial: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#22C55E',
+    borderWidth: 2,
+    borderColor: COLORS.primary,
   },
   content: { padding: 16 },
   loadingContainer: { padding: 16 },

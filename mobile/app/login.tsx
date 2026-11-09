@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/context/AuthContext';
-import { COLORS} from '../src/constants';
+import { COLORS } from '../src/constants';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
@@ -140,7 +140,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.footer}>Royal Myawaddy Delivery © 2024</Text>
+          <Text style={styles.footer}>Royal Myawaddy Delivery © 2026</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
