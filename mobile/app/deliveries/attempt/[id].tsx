@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -47,15 +48,24 @@ export default function RecordAttemptScreen() {
       queryClient.invalidateQueries({ queryKey: ['assignment', id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       const isDelivered = (res as any)?.data?.result === 'DELIVERED' || (res as any)?.result === 'DELIVERED';
-      Alert.alert(
-        isDelivered ? 'ပို့ဆောင်အောင်မြင်' : 'မအောင်မြင်မှု မှတ်တမ်းတင်ပြီး',
-        isDelivered ? 'ပါဆယ် အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ' : 'မအောင်မြင်မှု မှတ်တမ်းတင်ပြီးပါပြီ',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      if (Platform.OS === 'web') {
+        window.alert(isDelivered ? 'ပါဆယ် အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ' : 'မအောင်မြင်မှု မှတ်တမ်းတင်ပြီးပါပြီ');
+        router.back();
+      } else {
+        Alert.alert(
+          isDelivered ? 'ပို့ဆောင်အောင်မြင်' : 'မအောင်မြင်မှု မှတ်တမ်းတင်ပြီး',
+          isDelivered ? 'ပါဆယ် အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ' : 'မအောင်မြင်မှု မှတ်တမ်းတင်ပြီးပါပြီ',
+          [{ text: 'OK', onPress: () => router.back() }]
+        );
+      }
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'မှတ်တမ်းတင်မှု မအောင်မြင်ပါ';
-      Alert.alert('အမှားဖြစ်ပွားသည်', msg);
+      if (Platform.OS === 'web') {
+        window.alert(`အမှား: ${msg}`);
+      } else {
+        Alert.alert('အမှားဖြစ်ပွားသည်', msg);
+      }
     },
   });
 

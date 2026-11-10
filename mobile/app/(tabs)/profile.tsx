@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +23,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../src/context/AuthContext';
 import { userService } from '../../src/services/userService';
 import { COLORS, ROLE_LABELS_MM } from '../../src/constants';
+
+const isWeb = Platform.OS === 'web';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -42,6 +45,16 @@ export default function ProfileScreen() {
   // Profile image upload state
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Web file input ref
+  const webFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Web image options dialog state
+  const [imageOptionsVisible, setImageOptionsVisible] = useState(false);
+  // Web confirm delete dialog
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  // Web logout confirm dialog
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
+
   // ── Mutations ────────────────────────────────────────────────────────────────
   const updateMutation = useMutation({
     mutationFn: (data: { name?: string; phone?: string; email?: string; password?: string }) =>
@@ -50,12 +63,24 @@ export default function ProfileScreen() {
       await refreshUser();
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setEditVisible(false);
-      Alert.alert('✅ အောင်မြင်ပါသည်', 'ပရိုဖိုင် ပြင်ဆင်မှု သိမ်းဆည်းပြီးပါပြီ');
+      showAlert('✅ အောင်မြင်ပါသည်', 'ပရိုဖိုင် ပြင်ဆင်မှု သိမ်းဆည်းပြီးပါပြီ');
     },
     onError: (err: any) => {
-      Alert.alert('အမှား', err?.response?.data?.message || 'ပြင်ဆင်မှု မအောင်မြင်ပါ');
+      showAlert('အမှား', err?.response?.data?.message || 'ပြင်ဆင်မှု မအောင်မြင်ပါ');
     },
   });
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  /**
+   * Cross-platform alert: use browser alert on web, native Alert on mobile.
+   */
+  function showAlert(title: string, message?: string) {
+    if (isWeb) {
+      window.alert(message ? `${title}\n${message}` : title);
+    } else {
+      Alert.alert(title, message);
+    }
+  }
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   function openEdit() {
@@ -68,12 +93,12 @@ export default function ProfileScreen() {
   }
 
   function handleSave() {
-    if (!editName.trim()) return Alert.alert('အမှား', 'နာမည် ထည့်ပေးပါ');
+    if (!editName.trim()) return showAlert('အမှား', 'နာမည် ထည့်ပေးပါ');
     if (editPassword && editPassword !== editPasswordConfirm) {
-      return Alert.alert('အမှား', 'စကားဝှက် နှစ်ခု မတူညီပါ');
+      return showAlert('အမှား', 'စကားဝှက် နှစ်ခု မတူညီပါ');
     }
     if (editPassword && editPassword.length < 8) {
-      return Alert.alert('အမှား', 'စကားဝှက် အနည်းဆုံး 8 လုံး ဖြစ်ရမည်');
+      return showAlert('အမှား', 'စကားဝှက် အနည်းဆုံး 8 လုံး ဖြစ်ရမည်');
     }
 
     const payload: Record<string, string> = { name: editName.trim() };
@@ -84,10 +109,17 @@ export default function ProfileScreen() {
     updateMutation.mutate(payload);
   }
 
+  // ── Image picking ─────────────────────────────────────────────────────────────
+
   async function pickProfileImage() {
+    if (isWeb) {
+      // On web, trigger the hidden <input type="file">
+      webFileInputRef.current?.click();
+      return;
+    }
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      return Alert.alert('ခွင့်မပြု', 'ဓာတ်ပုံ လိုင်ဘရာရီ ခွင့်ပြုချက် မရရှိပါ');
+      return showAlert('ခွင့်မပြု', 'ဓာတ်ပုံ လိုင်ဘရာရီ ခွင့်ပြုချက် မရရှိပါ');
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -101,9 +133,14 @@ export default function ProfileScreen() {
   }
 
   async function takeProfilePhoto() {
+    if (isWeb) {
+      // Camera not supported on desktop web — just open file picker
+      webFileInputRef.current?.click();
+      return;
+    }
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      return Alert.alert('ခွင့်မပြု', 'ကင်မရာ ခွင့်ပြုချက် မရရှိပါ');
+      return showAlert('ခွင့်မပြု', 'ကင်မရာ ခွင့်ပြုချက် မရရှိပါ');
     }
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -115,6 +152,40 @@ export default function ProfileScreen() {
     }
   }
 
+  /**
+   * Handle web <input type="file"> change event.
+   */
+  async function handleWebFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Build a blob URL for preview / upload
+    const uri = URL.createObjectURL(file);
+    await doUploadWebFile(file, uri);
+    // Reset so the same file can be re-selected
+    if (webFileInputRef.current) webFileInputRef.current.value = '';
+  }
+
+  async function doUploadWebFile(file: File, uri: string) {
+    if (!user) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file, file.name);
+      // Use axios directly with FormData on web (no special RN blob trick needed)
+      const { default: apiClient } = await import('../../src/services/apiClient');
+      const response = await apiClient.post(`/users/${user.id}/profile-image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      await refreshUser();
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    } catch (e: any) {
+      showAlert('အမှား', e?.response?.data?.message || 'ဓာတ်ပုံ တင်ရန် မအောင်မြင်ပါ');
+    } finally {
+      setUploadingImage(false);
+      URL.revokeObjectURL(uri);
+    }
+  }
+
   async function doUpload(uri: string) {
     if (!user) return;
     setUploadingImage(true);
@@ -123,56 +194,75 @@ export default function ProfileScreen() {
       await refreshUser();
       queryClient.invalidateQueries({ queryKey: ['users'] });
     } catch (e: any) {
-      Alert.alert('အမှား', e?.response?.data?.message || 'ဓာတ်ပုံ တင်ရန် မအောင်မြင်ပါ');
+      showAlert('အမှား', e?.response?.data?.message || 'ဓာတ်ပုံ တင်ရန် မအောင်မြင်ပါ');
     } finally {
       setUploadingImage(false);
     }
   }
 
   function showImageOptions() {
-    Alert.alert('ပရိုဖိုင် ဓာတ်ပုံ', 'ဓာတ်ပုံ ရွေးချယ်ပါ', [
-      { text: 'ဓာတ်ပုံ ရွေးရန် (Gallery)', onPress: pickProfileImage },
-      { text: 'ဓာတ်ပုံ ရိုက်ရန် (Camera)', onPress: takeProfilePhoto },
-      ...(user?.profile_image_url
-        ? [{ text: 'ဓာတ်ပုံ ဖျက်ရန်', style: 'destructive' as const, onPress: confirmDeleteImage }]
-        : []),
-      { text: 'မလုပ်တော့', style: 'cancel' as const },
-    ]);
+    if (isWeb) {
+      setImageOptionsVisible(true);
+    } else {
+      Alert.alert('ပရိုဖိုင် ဓာတ်ပုံ', 'ဓာတ်ပုံ ရွေးချယ်ပါ', [
+        { text: 'ဓာတ်ပုံ ရွေးရန် (Gallery)', onPress: pickProfileImage },
+        { text: 'ဓာတ်ပုံ ရိုက်ရန် (Camera)', onPress: takeProfilePhoto },
+        ...(user?.profile_image_url
+          ? [{ text: 'ဓာတ်ပုံ ဖျက်ရန်', style: 'destructive' as const, onPress: confirmDeleteImage }]
+          : []),
+        { text: 'မလုပ်တော့', style: 'cancel' as const },
+      ]);
+    }
   }
 
   function confirmDeleteImage() {
-    Alert.alert('ဓာတ်ပုံ ဖျက်မည်', 'ပရိုဖိုင် ဓာတ်ပုံကို ဖျက်မည်လား?', [
-      { text: 'မလုပ်တော့', style: 'cancel' },
-      {
-        text: 'ဖျက်မည်', style: 'destructive', onPress: async () => {
-          if (!user) return;
-          setUploadingImage(true);
-          try {
-            await userService.deleteProfileImage(user.id);
-            await refreshUser();
-            queryClient.invalidateQueries({ queryKey: ['users'] });
-          } catch (e: any) {
-            Alert.alert('အမှား', e?.response?.data?.message || 'ဖျက်ရန် မအောင်မြင်ပါ');
-          } finally {
-            setUploadingImage(false);
-          }
-        }
-      },
-    ]);
+    if (isWeb) {
+      setImageOptionsVisible(false);
+      setDeleteConfirmVisible(true);
+    } else {
+      Alert.alert('ဓာတ်ပုံ ဖျက်မည်', 'ပရိုဖိုင် ဓာတ်ပုံကို ဖျက်မည်လား?', [
+        { text: 'မလုပ်တော့', style: 'cancel' },
+        {
+          text: 'ဖျက်မည်', style: 'destructive', onPress: doDeleteImage,
+        },
+      ]);
+    }
+  }
+
+  async function doDeleteImage() {
+    if (!user) return;
+    setDeleteConfirmVisible(false);
+    setUploadingImage(true);
+    try {
+      await userService.deleteProfileImage(user.id);
+      await refreshUser();
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    } catch (e: any) {
+      showAlert('အမှား', e?.response?.data?.message || 'ဖျက်ရန် မအောင်မြင်ပါ');
+    } finally {
+      setUploadingImage(false);
+    }
   }
 
   async function handleLogout() {
-    Alert.alert('ထွက်မည်', 'အကောင့်မှ ထွက်မည်လား?', [
-      { text: 'မထွက်ပါ', style: 'cancel' },
-      {
-        text: 'ထွက်မည်', style: 'destructive',
-        onPress: async () => {
-          setIsLoggingOut(true);
-          try { await logout(); router.replace('/login'); }
-          catch { setIsLoggingOut(false); }
+    if (isWeb) {
+      setLogoutConfirmVisible(true);
+    } else {
+      Alert.alert('ထွက်မည်', 'အကောင့်မှ ထွက်မည်လား?', [
+        { text: 'မထွက်ပါ', style: 'cancel' },
+        {
+          text: 'ထွက်မည်', style: 'destructive',
+          onPress: doLogout,
         },
-      },
-    ]);
+      ]);
+    }
+  }
+
+  async function doLogout() {
+    setLogoutConfirmVisible(false);
+    setIsLoggingOut(true);
+    try { await logout(); router.replace('/login'); }
+    catch { setIsLoggingOut(false); }
   }
 
   if (!user) return null;
@@ -183,6 +273,17 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Hidden web file input */}
+      {isWeb && (
+        <input
+          ref={webFileInputRef as any}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleWebFileChange as any}
+        />
+      )}
+
       {/* ── Hero Header ── */}
       <View style={[styles.hero, { paddingTop: insets.top + 16 }]}>
         {/* Top bar */}
@@ -300,30 +401,10 @@ export default function ProfileScreen() {
       </ScrollView>
 
       {/* ── Edit Profile Modal ── */}
-      <Modal
-        visible={editVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        statusBarTranslucent
-        onRequestClose={() => setEditVisible(false)}
-      >
-        <StatusBar barStyle="dark-content" />
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      {isWeb ? (
+        <WebModal visible={editVisible} onClose={() => setEditVisible(false)}>
           <View style={styles.modalContainer}>
-            {/* Modal header */}
-            <View
-              style={[
-                styles.modalHeader,
-                {
-                  paddingTop:
-                    (Platform.OS === 'android'
-                      ? Math.max(insets.top, StatusBar.currentHeight ?? 0)
-                      : insets.top > 0
-                        ? insets.top
-                        : 14) + 8,
-                },
-              ]}
-            >
+            <View style={styles.modalHeader}>
               <TouchableOpacity onPress={() => setEditVisible(false)} style={styles.modalCloseBtn}>
                 <Ionicons name="close" size={24} color={COLORS.text} />
               </TouchableOpacity>
@@ -339,91 +420,277 @@ export default function ProfileScreen() {
                 }
               </TouchableOpacity>
             </View>
-
-            <ScrollView
-              style={styles.modalScroll}
-              contentContainerStyle={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, 20) + 30 }]}
-              keyboardShouldPersistTaps="handled"
-            >
-
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>နာမည် *</Text>
-                <TextInput
-                  style={styles.formInput}
-                  value={editName}
-                  onChangeText={setEditName}
-                  placeholder="နာမည် ထည့်ပါ"
-                  placeholderTextColor={COLORS.textLight}
-                />
-              </View>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>ဖုန်းနံပါတ်</Text>
-                <TextInput
-                  style={styles.formInput}
-                  value={editPhone}
-                  onChangeText={setEditPhone}
-                  placeholder="ဖုန်းနံပါတ် ထည့်ပါ"
-                  placeholderTextColor={COLORS.textLight}
-                  keyboardType="phone-pad"
-                />
-              </View>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>အီးမေးလ်</Text>
-                <TextInput
-                  style={styles.formInput}
-                  value={editEmail}
-                  onChangeText={setEditEmail}
-                  placeholder="အီးမေးလ် ထည့်ပါ (မဖြစ်မနေ မလိုအပ်)"
-                  placeholderTextColor={COLORS.textLight}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerLabel}>စကားဝှက် ပြောင်းလဲခြင်း</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>စကားဝှက်အသစ်</Text>
-                <View style={styles.passRow}>
-                  <TextInput
-                    style={[styles.formInput, { flex: 1, marginBottom: 0 }]}
-                    value={editPassword}
-                    onChangeText={setEditPassword}
-                    placeholder="အနည်းဆုံး 8 လုံး"
-                    placeholderTextColor={COLORS.textLight}
-                    secureTextEntry={!showPass}
-                    autoCapitalize="none"
-                  />
-                  <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPass(v => !v)}>
-                    <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textLight} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>စကားဝှက်အသစ် အတည်ပြုရန်</Text>
-                <TextInput
-                  style={styles.formInput}
-                  value={editPasswordConfirm}
-                  onChangeText={setEditPasswordConfirm}
-                  placeholder="စကားဝှက်ကို ထပ်ရိုက်ပါ"
-                  placeholderTextColor={COLORS.textLight}
-                  secureTextEntry={!showPass}
-                  autoCapitalize="none"
-                />
-              </View>
-
+            <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent} keyboardShouldPersistTaps="handled">
+              <EditFormContent
+                editName={editName} setEditName={setEditName}
+                editPhone={editPhone} setEditPhone={setEditPhone}
+                editEmail={editEmail} setEditEmail={setEditEmail}
+                editPassword={editPassword} setEditPassword={setEditPassword}
+                editPasswordConfirm={editPasswordConfirm} setEditPasswordConfirm={setEditPasswordConfirm}
+                showPass={showPass} setShowPass={setShowPass}
+              />
             </ScrollView>
           </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        </WebModal>
+      ) : (
+        <Modal
+          visible={editVisible}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          statusBarTranslucent
+          onRequestClose={() => setEditVisible(false)}
+        >
+          <StatusBar barStyle="dark-content" />
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+            <View style={styles.modalContainer}>
+              <View
+                style={[
+                  styles.modalHeader,
+                  {
+                    paddingTop:
+                      (Platform.OS === 'android'
+                        ? Math.max(insets.top, StatusBar.currentHeight ?? 0)
+                        : insets.top > 0
+                          ? insets.top
+                          : 14) + 8,
+                  },
+                ]}
+              >
+                <TouchableOpacity onPress={() => setEditVisible(false)} style={styles.modalCloseBtn}>
+                  <Ionicons name="close" size={24} color={COLORS.text} />
+                </TouchableOpacity>
+                <Text style={styles.modalTitle}>ပရိုဖိုင် ပြင်ဆင်ရန်</Text>
+                <TouchableOpacity
+                  style={[styles.modalSaveBtn, updateMutation.isPending && { opacity: 0.6 }]}
+                  onPress={handleSave}
+                  disabled={updateMutation.isPending}
+                >
+                  {updateMutation.isPending
+                    ? <ActivityIndicator size="small" color={COLORS.white} />
+                    : <Text style={styles.modalSaveBtnText}>သိမ်းမည်</Text>
+                  }
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={[styles.modalContent, { paddingBottom: Math.max(insets.bottom, 20) + 30 }]}
+                keyboardShouldPersistTaps="handled"
+              >
+                <EditFormContent
+                  editName={editName} setEditName={setEditName}
+                  editPhone={editPhone} setEditPhone={setEditPhone}
+                  editEmail={editEmail} setEditEmail={setEditEmail}
+                  editPassword={editPassword} setEditPassword={setEditPassword}
+                  editPasswordConfirm={editPasswordConfirm} setEditPasswordConfirm={setEditPasswordConfirm}
+                  showPass={showPass} setShowPass={setShowPass}
+                />
+              </ScrollView>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+      )}
+
+      {/* ── Web: Image Options Dialog ── */}
+      {isWeb && (
+        <WebModal visible={imageOptionsVisible} onClose={() => setImageOptionsVisible(false)} compact>
+          <View style={styles.dialogContainer}>
+            <Text style={styles.dialogTitle}>ပရိုဖိုင် ဓာတ်ပုံ</Text>
+            <TouchableOpacity style={styles.dialogBtn} onPress={() => { setImageOptionsVisible(false); pickProfileImage(); }}>
+              <Ionicons name="images-outline" size={20} color={COLORS.text} />
+              <Text style={styles.dialogBtnText}>ဓာတ်ပုံ ရွေးရန် (Gallery)</Text>
+            </TouchableOpacity>
+            {user.profile_image_url && (
+              <TouchableOpacity style={styles.dialogBtn} onPress={confirmDeleteImage}>
+                <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                <Text style={[styles.dialogBtnText, { color: '#EF4444' }]}>ဓာတ်ပုံ ဖျက်ရန်</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={[styles.dialogBtn, styles.dialogCancelBtn]} onPress={() => setImageOptionsVisible(false)}>
+              <Text style={[styles.dialogBtnText, { color: COLORS.textSecondary }]}>မလုပ်တော့</Text>
+            </TouchableOpacity>
+          </View>
+        </WebModal>
+      )}
+
+      {/* ── Web: Delete Confirm Dialog ── */}
+      {isWeb && (
+        <WebModal visible={deleteConfirmVisible} onClose={() => setDeleteConfirmVisible(false)} compact>
+          <View style={styles.dialogContainer}>
+            <Text style={styles.dialogTitle}>ဓာတ်ပုံ ဖျက်မည်</Text>
+            <Text style={styles.dialogMsg}>ပရိုဖိုင် ဓာတ်ပုံကို ဖျက်မည်လား?</Text>
+            <View style={styles.dialogBtnRow}>
+              <TouchableOpacity style={[styles.dialogActionBtn, styles.dialogCancelActionBtn]} onPress={() => setDeleteConfirmVisible(false)}>
+                <Text style={styles.dialogCancelActionText}>မလုပ်တော့</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.dialogActionBtn, styles.dialogDestructiveBtn]} onPress={doDeleteImage}>
+                <Text style={styles.dialogDestructiveText}>ဖျက်မည်</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </WebModal>
+      )}
+
+      {/* ── Web: Logout Confirm Dialog ── */}
+      {isWeb && (
+        <WebModal visible={logoutConfirmVisible} onClose={() => setLogoutConfirmVisible(false)} compact>
+          <View style={styles.dialogContainer}>
+            <Text style={styles.dialogTitle}>ထွက်မည်</Text>
+            <Text style={styles.dialogMsg}>အကောင့်မှ ထွက်မည်လား?</Text>
+            <View style={styles.dialogBtnRow}>
+              <TouchableOpacity style={[styles.dialogActionBtn, styles.dialogCancelActionBtn]} onPress={() => setLogoutConfirmVisible(false)}>
+                <Text style={styles.dialogCancelActionText}>မထွက်ပါ</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.dialogActionBtn, styles.dialogDestructiveBtn]} onPress={doLogout}>
+                <Text style={styles.dialogDestructiveText}>ထွက်မည်</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </WebModal>
+      )}
     </View>
+  );
+}
+
+// ── WebModal: cross-platform modal overlay for web ────────────────────────────
+function WebModal({
+  visible,
+  onClose,
+  children,
+  compact = false,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  compact?: boolean;
+}) {
+  if (!visible) return null;
+  return (
+    <View style={webModalStyles.overlay}>
+      <Pressable style={webModalStyles.backdrop} onPress={onClose} />
+      <View style={[webModalStyles.sheet, compact && webModalStyles.compactSheet]}>
+        {children}
+      </View>
+    </View>
+  );
+}
+
+const webModalStyles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    zIndex: 1000,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  sheet: {
+    width: '90%',
+    maxWidth: 520,
+    maxHeight: '90%',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  compactSheet: {
+    maxWidth: 360,
+  },
+});
+
+// ── EditFormContent ───────────────────────────────────────────────────────────
+function EditFormContent({
+  editName, setEditName,
+  editPhone, setEditPhone,
+  editEmail, setEditEmail,
+  editPassword, setEditPassword,
+  editPasswordConfirm, setEditPasswordConfirm,
+  showPass, setShowPass,
+}: {
+  editName: string; setEditName: (v: string) => void;
+  editPhone: string; setEditPhone: (v: string) => void;
+  editEmail: string; setEditEmail: (v: string) => void;
+  editPassword: string; setEditPassword: (v: string) => void;
+  editPasswordConfirm: string; setEditPasswordConfirm: (v: string) => void;
+  showPass: boolean; setShowPass: (v: boolean | ((prev: boolean) => boolean)) => void;
+}) {
+  return (
+    <>
+      <View style={styles.formGroup}>
+        <Text style={styles.formLabel}>နာမည် *</Text>
+        <TextInput
+          style={styles.formInput}
+          value={editName}
+          onChangeText={setEditName}
+          placeholder="နာမည် ထည့်ပါ"
+          placeholderTextColor={COLORS.textLight}
+        />
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.formLabel}>ဖုန်းနံပါတ်</Text>
+        <TextInput
+          style={styles.formInput}
+          value={editPhone}
+          onChangeText={setEditPhone}
+          placeholder="ဖုန်းနံပါတ် ထည့်ပါ"
+          placeholderTextColor={COLORS.textLight}
+          keyboardType="phone-pad"
+        />
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.formLabel}>အီးမေးလ်</Text>
+        <TextInput
+          style={styles.formInput}
+          value={editEmail}
+          onChangeText={setEditEmail}
+          placeholder="အီးမေးလ် ထည့်ပါ (မဖြစ်မနေ မလိုအပ်)"
+          placeholderTextColor={COLORS.textLight}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      </View>
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerLabel}>စကားဝှက် ပြောင်းလဲခြင်း</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.formLabel}>စကားဝှက်အသစ်</Text>
+        <View style={styles.passRow}>
+          <TextInput
+            style={[styles.formInput, { flex: 1, marginBottom: 0 }]}
+            value={editPassword}
+            onChangeText={setEditPassword}
+            placeholder="အနည်းဆုံး 8 လုံး"
+            placeholderTextColor={COLORS.textLight}
+            secureTextEntry={!showPass}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPass(v => !v)}>
+            <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textLight} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.formLabel}>စကားဝှက်အသစ် အတည်ပြုရန်</Text>
+        <TextInput
+          style={styles.formInput}
+          value={editPasswordConfirm}
+          onChangeText={setEditPasswordConfirm}
+          placeholder="စကားဝှက်ကို ထပ်ရိုက်ပါ"
+          placeholderTextColor={COLORS.textLight}
+          secureTextEntry={!showPass}
+          autoCapitalize="none"
+        />
+      </View>
+    </>
   );
 }
 
@@ -609,5 +876,54 @@ const styles = StyleSheet.create({
   dividerLabel: {
     fontSize: 12, color: COLORS.textLight, fontWeight: '600',
     fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+
+  // ── Web Dialogs ──
+  dialogContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    overflow: 'hidden',
+    padding: 20,
+    gap: 4,
+  },
+  dialogTitle: {
+    fontSize: 17, fontWeight: '700', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+    marginBottom: 10,
+  },
+  dialogMsg: {
+    fontSize: 14, color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+    marginBottom: 16,
+  },
+  dialogBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 14, paddingHorizontal: 4,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E5E7EB',
+  },
+  dialogBtnText: {
+    fontSize: 15, color: COLORS.text, fontWeight: '500',
+    fontFamily: 'NotoSansMyanmar_500Medium',
+  },
+  dialogCancelBtn: { marginTop: 4 },
+  dialogBtnRow: {
+    flexDirection: 'row', gap: 10, marginTop: 4,
+  },
+  dialogActionBtn: {
+    flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
+  },
+  dialogCancelActionBtn: {
+    backgroundColor: '#F3F4F6',
+  },
+  dialogCancelActionText: {
+    fontSize: 14, fontWeight: '600', color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  dialogDestructiveBtn: {
+    backgroundColor: '#FEE2E2',
+  },
+  dialogDestructiveText: {
+    fontSize: 14, fontWeight: '700', color: '#EF4444',
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
 });

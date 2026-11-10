@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             DeliveryAreaSeeder::class,
             BusinessSettingSeeder::class,
+            ParcelSeeder::class
         ]);
     }
 }

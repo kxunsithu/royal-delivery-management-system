@@ -11,6 +11,7 @@ import {
   Linking,
   TextInput,
   Share,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,12 +22,14 @@ import { userService } from '../../src/services/userService';
 import { useAuth } from '../../src/context/AuthContext';
 import {
   COLORS,
+  FONTS,
   STATUS_COLORS,
   STATUS_LABELS_MM,
   PRIORITY_LABELS_MM,
   PRIORITY_COLORS,
 } from '../../src/constants';
 import ImagePreviewModal from '../../src/components/ImagePreviewModal';
+import ConfirmModal from '../../src/components/ConfirmModal';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -94,42 +97,24 @@ export default function ParcelDetailScreen() {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [staffSearch, setStaffSearch] = useState('');
+  const [targetStatus, setTargetStatus] = useState<string | null>(null);
+  const [transitionReason, setTransitionReason] = useState('');
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [assignTarget, setAssignTarget] = useState<{ id: number; name: string } | null>(null);
 
   const isTerminal = parcel?.status === 'DELIVERED' || parcel?.status === 'DAMAGED';
 
   function handleDelete() {
-    Alert.alert(
-      'ပါဆယ် ဖျက်မည်',
-      'ဤပါဆယ်ကို အတည်ပြု ဖျက်မည်လား?',
-      [
-        { text: 'မလုပ်တော့', style: 'cancel' },
-        { text: 'ဖျက်မည်', style: 'destructive', onPress: () => deleteMutation.mutate() },
-      ]
-    );
+    setDeleteModalVisible(true);
   }
 
   function handleStatusChange(toStatus: string) {
-    Alert.alert(
-      'အခြေအနေ ပြောင်းမည်',
-      `"${STATUS_LABELS_MM[toStatus as keyof typeof STATUS_LABELS_MM]}" သို့ ပြောင်းမည်လား?`,
-      [
-        { text: 'မလုပ်တော့', style: 'cancel' },
-        { text: 'ပြောင်းမည်', onPress: () => statusMutation.mutate({ status: toStatus }) },
-      ]
-    );
+    setTargetStatus(toStatus);
+    setTransitionReason('');
   }
 
   function handleAssign(staffId: number, staffName: string) {
-    const hasExisting = !!parcel?.active_assignment;
-    const currentName = parcel?.active_assignment?.staff?.name;
-    const title = hasExisting ? 'ဝန်ထမ်း ပြောင်းချိတ်မည်' : 'ဝန်ထမ်း ချိတ်ဆက်မည်';
-    const msg = hasExisting
-      ? `${currentName} မှ ${staffName} သို့ ပြောင်းချိတ်မည်လား?`
-      : `${staffName} ကို ချိတ်ဆက်မည်လား?`;
-    Alert.alert(title, msg, [
-      { text: 'မလုပ်တော့', style: 'cancel' },
-      { text: hasExisting ? 'ပြောင်းချိတ်မည်' : 'ချိတ်ဆက်မည်', onPress: () => assignMutation.mutate({ staffId }) },
-    ]);
+    setAssignTarget({ id: staffId, name: staffName });
   }
 
   function buildReceiptHtml(): string {
@@ -537,6 +522,157 @@ export default function ParcelDetailScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Status Change Modal */}
+      <ConfirmModal
+        visible={!!targetStatus}
+        onClose={() => {
+          setTargetStatus(null);
+          setTransitionReason('');
+        }}
+        onConfirm={() => {
+          if (!targetStatus) return;
+          statusMutation.mutate(
+            { status: targetStatus, reason: transitionReason.trim() || undefined },
+            {
+              onSuccess: () => {
+                setTargetStatus(null);
+                setTransitionReason('');
+              },
+              onError: (err: any) => {
+                const msg = err?.response?.data?.message || 'အခြေအနေ ပြောင်း၍ မရပါ';
+                if (Platform.OS === 'web') {
+                  window.alert(`အမှား: ${msg}`);
+                } else {
+                  Alert.alert('အမှား', msg);
+                }
+              },
+            }
+          );
+        }}
+        title="အခြေအနေ ပြောင်းမည်"
+        message={
+          targetStatus
+            ? `ပါဆယ်အခြေအနေကို "${STATUS_LABELS_MM[targetStatus as keyof typeof STATUS_LABELS_MM] || targetStatus}" သို့ ပြောင်းလဲရန် သေချာပါသလား?`
+            : ''
+        }
+        confirmText="ပြောင်းမည်"
+        confirmColor={
+          targetStatus
+            ? STATUS_COLORS[targetStatus as keyof typeof STATUS_COLORS] || COLORS.primary
+            : COLORS.primary
+        }
+        icon="swap-horizontal"
+        isLoading={statusMutation.isPending}
+      >
+        {targetStatus && (
+          <View style={styles.statusModalDetail}>
+            <View style={styles.statusBadgeRow}>
+              <View
+                style={[
+                  styles.statusBadgePill,
+                  { backgroundColor: statusColor + '18', borderColor: statusColor },
+                ]}
+              >
+                <Text style={[styles.statusBadgeText, { color: statusColor }]}>{statusLabel}</Text>
+              </View>
+              <Ionicons name="arrow-forward" size={16} color={COLORS.textLight} />
+              <View
+                style={[
+                  styles.statusBadgePill,
+                  {
+                    backgroundColor:
+                      (STATUS_COLORS[targetStatus as keyof typeof STATUS_COLORS] || COLORS.primary) +
+                      '18',
+                    borderColor:
+                      STATUS_COLORS[targetStatus as keyof typeof STATUS_COLORS] || COLORS.primary,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    {
+                      color:
+                        STATUS_COLORS[targetStatus as keyof typeof STATUS_COLORS] ||
+                        COLORS.primary,
+                    },
+                  ]}
+                >
+                  {STATUS_LABELS_MM[targetStatus as keyof typeof STATUS_LABELS_MM] || targetStatus}
+                </Text>
+              </View>
+            </View>
+
+            {['FAILED', 'DAMAGED'].includes(targetStatus) && (
+              <View style={styles.reasonInputWrap}>
+                <Text style={styles.reasonInputLabel}>အကြောင်းအရင်း / မှတ်ချက် (မဖြစ်မနေ မလိုအပ်)</Text>
+                <TextInput
+                  style={styles.reasonInput}
+                  placeholder="အကြောင်းအရင်း ရိုက်ထည့်ပါ..."
+                  placeholderTextColor={COLORS.textLight}
+                  value={transitionReason}
+                  onChangeText={setTransitionReason}
+                />
+              </View>
+            )}
+          </View>
+        )}
+      </ConfirmModal>
+
+      {/* Delete Confirm Modal */}
+      <ConfirmModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={() => {
+          deleteMutation.mutate(undefined, {
+            onSuccess: () => setDeleteModalVisible(false),
+            onError: (err: any) => {
+              const msg = err?.response?.data?.message || 'ပါဆယ် ဖျက်၍ မရပါ';
+              if (Platform.OS === 'web') window.alert(`အမှား: ${msg}`);
+              else Alert.alert('အမှား', msg);
+            },
+          });
+        }}
+        title="ပါဆယ် ဖျက်မည်"
+        message="ဤပါဆယ်ကို အတည်ပြု ဖျက်မည်လား? ဤလုပ်ဆောင်ချက်ကို ပြန်လည်ပြင်ဆင်၍ မရနိုင်ပါ။"
+        confirmText="ဖျက်မည်"
+        isDestructive
+        icon="trash-outline"
+        isLoading={deleteMutation.isPending}
+      />
+
+      {/* Assign Confirm Modal */}
+      <ConfirmModal
+        visible={!!assignTarget}
+        onClose={() => setAssignTarget(null)}
+        onConfirm={() => {
+          if (!assignTarget) return;
+          assignMutation.mutate(
+            { staffId: assignTarget.id },
+            {
+              onSuccess: () => setAssignTarget(null),
+              onError: (err: any) => {
+                const msg = err?.response?.data?.message || 'ဝန်ထမ်း ချိတ်ဆက်၍ မရပါ';
+                if (Platform.OS === 'web') window.alert(`အမှား: ${msg}`);
+                else Alert.alert('အမှား', msg);
+              },
+            }
+          );
+        }}
+        title={parcel?.active_assignment ? 'ဝန်ထမ်း ပြောင်းချိတ်မည်' : 'ဝန်ထမ်း ချိတ်ဆက်မည်'}
+        message={
+          assignTarget
+            ? parcel?.active_assignment
+              ? `${parcel.active_assignment.staff?.name} မှ ${assignTarget.name} သို့ ပြောင်းချိတ်မည်လား?`
+              : `${assignTarget.name} ကို ဤပါဆယ်နှင့် ချိတ်ဆက်မည်လား?`
+            : ''
+        }
+        confirmText={parcel?.active_assignment ? 'ပြောင်းချိတ်မည်' : 'ချိတ်ဆက်မည်'}
+        icon="bicycle"
+        confirmColor={COLORS.primary}
+        isLoading={assignMutation.isPending}
+      />
     </View>
   );
 }
@@ -776,5 +912,50 @@ const styles = StyleSheet.create({
   },
   exportBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700',
     fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  statusModalDetail: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  statusBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  statusBadgePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1.5,
+  },
+  statusBadgeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  reasonInputWrap: {
+    width: '100%',
+    marginTop: 8,
+  },
+  reasonInputLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+    marginBottom: 6,
+  },
+  reasonInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: COLORS.text,
+    backgroundColor: '#F9FAFB',
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
 });

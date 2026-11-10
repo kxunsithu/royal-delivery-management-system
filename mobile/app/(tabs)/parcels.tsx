@@ -11,6 +11,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +19,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { parcelService, Parcel } from '../../src/services/parcelService';
 import { useAuth } from '../../src/context/AuthContext';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_LABELS_MM, PRIORITY_COLORS} from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_LABELS_MM, PRIORITY_COLORS } from '../../src/constants';
+import ConfirmModal from '../../src/components/ConfirmModal';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
@@ -194,36 +196,35 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
   const priorityLabel = PRIORITY_LABELS_MM[parcel.priority as keyof typeof PRIORITY_LABELS_MM] || parcel.priority;
   const firstImage = parcel.images && parcel.images.length > 0 ? parcel.images[0] : null;
 
+  const [verifyModalVisible, setVerifyModalVisible] = useState(false);
+
   const verifyMutation = useMutation({
     mutationFn: () => parcelService.statusTransition(parcel.id, 'VERIFIED'),
     onSuccess: () => {
+      setVerifyModalVisible(false);
       queryClient.invalidateQueries({ queryKey: ['parcels'] });
     },
     onError: (err: any) => {
-      Alert.alert('အမှား', err?.response?.data?.message || 'Status ပြောင်း၍ မရပါ');
+      const msg = err?.response?.data?.message || 'Status ပြောင်း၍ မရပါ';
+      if (Platform.OS === 'web') window.alert(`အမှား: ${msg}`);
+      else Alert.alert('အမှား', msg);
     },
   });
 
   function handleVerify() {
-    Alert.alert(
-      'စစ်ဆေးပြီး အတည်ပြုမည်',
-      `${parcel.tracking_number} ကို စစ်ဆေးပြီး (VERIFIED) status သို့ ပြောင်းမည်လား?`,
-      [
-        { text: 'မလုပ်တော့', style: 'cancel' },
-        { text: 'အတည်ပြုမည်', onPress: () => verifyMutation.mutate() },
-      ]
-    );
+    setVerifyModalVisible(true);
   }
 
   const isReceived = parcel.status === 'RECEIVED';
   const canVerify = canChangeStatus && isReceived;
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => router.push(`/parcels/${parcel.id}`)}
-      activeOpacity={0.85}
-    >
+    <>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => router.push(`/parcels/${parcel.id}`)}
+        activeOpacity={0.85}
+      >
       {/* Card Header */}
       <View style={styles.cardHeader}>
         <View style={styles.trackingRow}>
@@ -321,6 +322,19 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
         <Text style={styles.feeText}>{Number(parcel.delivery_fee).toLocaleString()} ကျပ်</Text>
       </View>
     </TouchableOpacity>
+
+    <ConfirmModal
+      visible={verifyModalVisible}
+      onClose={() => setVerifyModalVisible(false)}
+      onConfirm={() => verifyMutation.mutate()}
+      title="စစ်ဆေးပြီး အတည်ပြုမည်"
+      message={`${parcel.tracking_number} ကို စစ်ဆေးပြီး (VERIFIED) status သို့ ပြောင်းမည်လား?`}
+      confirmText="အတည်ပြုမည်"
+      confirmColor={STATUS_COLORS.VERIFIED || COLORS.primary}
+      icon="shield-checkmark"
+      isLoading={verifyMutation.isPending}
+    />
+  </>
   );
 }
 

@@ -1,5 +1,6 @@
 import apiClient from './apiClient';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 export interface LoginCredentials {
   phone: string;
@@ -21,28 +22,43 @@ export interface AuthResponse {
   user: User;
 }
 
+// ── Cross-platform storage ────────────────────────────────────────────────────
+// expo-secure-store does NOT work on web. Fall back to localStorage on web.
+const isWeb = Platform.OS === 'web';
+
 async function safeSetItem(key: string, value: string): Promise<void> {
   try {
-    await SecureStore.setItemAsync(key, value);
+    if (isWeb) {
+      localStorage.setItem(key, value);
+    } else {
+      await SecureStore.setItemAsync(key, value);
+    }
   } catch (e) {
-    console.warn(`SecureStore set failed for ${key}:`, e);
+    console.warn(`Storage set failed for ${key}:`, e);
   }
 }
 
 async function safeGetItem(key: string): Promise<string | null> {
   try {
+    if (isWeb) {
+      return localStorage.getItem(key);
+    }
     return await SecureStore.getItemAsync(key);
   } catch (e) {
-    console.warn(`SecureStore get failed for ${key}:`, e);
+    console.warn(`Storage get failed for ${key}:`, e);
     return null;
   }
 }
 
 async function safeDeleteItem(key: string): Promise<void> {
   try {
-    await SecureStore.deleteItemAsync(key);
+    if (isWeb) {
+      localStorage.removeItem(key);
+    } else {
+      await SecureStore.deleteItemAsync(key);
+    }
   } catch (e) {
-    console.warn(`SecureStore delete failed for ${key}:`, e);
+    console.warn(`Storage delete failed for ${key}:`, e);
   }
 }
 
