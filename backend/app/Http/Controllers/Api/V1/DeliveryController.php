@@ -25,7 +25,14 @@ class DeliveryController extends Controller
 
         $query = DeliveryAssignment::with(['parcel.deliveryArea'])
             ->where('staff_id', $user->id)
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->status, function ($q) use ($request) {
+                // IN_PROGRESS and PENDING are both "active" assignments
+                if ($request->status === 'IN_PROGRESS') {
+                    $q->whereIn('status', ['IN_PROGRESS', 'PENDING']);
+                } else {
+                    $q->where('status', $request->status);
+                }
+            })
             ->orderBy('assigned_at', 'desc');
 
         $assignments = $query->paginate($request->per_page ?? 20);

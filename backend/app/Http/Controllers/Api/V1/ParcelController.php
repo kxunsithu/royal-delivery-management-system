@@ -102,8 +102,8 @@ class ParcelController extends Controller
         // Delivery staff can only see their own assigned parcels
         if ($user->isDeliveryStaff()) {
             $query->whereHas('deliveryAssignments', fn($q) =>
-                $q->where('staff_id', $user->id)->where('status', 'ACTIVE')
-            );
+                $q->where('staff_id', $user->id)
+            )->distinct();
         }
 
         $parcels = $query->paginate($request->per_page ?? 20);

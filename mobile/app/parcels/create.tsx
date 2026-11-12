@@ -336,19 +336,7 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <FormSection title="ပေးပို့သူ">
-          {/* Sender Name */}
-          <View style={styles.acField}>
-            <Text style={styles.label}>နာမည်</Text>
-            <TextInput
-              style={styles.textInput}
-              value={form.sender_name}
-              onChangeText={v => handleSenderInput('sender_name', v)}
-              placeholder="ပေးပို့သူ နာမည်"
-              placeholderTextColor={COLORS.textLight}
-            />
-          </View>
-
-          {/* Sender Phone */}
+          {/* Sender Phone — first */}
           <View style={styles.acField}>
             <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
             <TextInput
@@ -361,7 +349,19 @@ export default function CreateParcelScreen() {
             />
           </View>
 
-          {/* Sender suggestions — inline, no overlap */}
+          {/* Sender Name — second */}
+          <View style={styles.acField}>
+            <Text style={styles.label}>နာမည်</Text>
+            <TextInput
+              style={styles.textInput}
+              value={form.sender_name}
+              onChangeText={v => handleSenderInput('sender_name', v)}
+              placeholder="ပေးပို့သူ နာမည်"
+              placeholderTextColor={COLORS.textLight}
+            />
+          </View>
+
+          {/* Sender suggestions — inline */}
           {showSenderSug && senderSuggestions.length > 0 && (
             <View style={styles.inlineSugBox}>
               <View style={styles.inlineSugHeader}>
@@ -386,20 +386,7 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <FormSection title="လက်ခံသူ *">
-          {/* Recipient Name */}
-          <View style={styles.acField}>
-            <Text style={styles.label}>နာမည် *</Text>
-            <TextInput
-              style={[styles.textInput, !!errors.recipient_name && styles.inputError]}
-              value={form.recipient_name}
-              onChangeText={v => handleRecipientInput('recipient_name', v)}
-              placeholder="လက်ခံသူ နာမည်"
-              placeholderTextColor={COLORS.textLight}
-            />
-            {errors.recipient_name && <Text style={styles.errorText}>{errors.recipient_name}</Text>}
-          </View>
-
-          {/* Recipient Phone */}
+          {/* Recipient Phone — first */}
           <View style={styles.acField}>
             <Text style={styles.label}>ဖုန်းနံပါတ် *</Text>
             <TextInput
@@ -413,7 +400,20 @@ export default function CreateParcelScreen() {
             {errors.recipient_phone && <Text style={styles.errorText}>{errors.recipient_phone}</Text>}
           </View>
 
-          {/* Recipient suggestions — inline, no overlap */}
+          {/* Recipient Name — second */}
+          <View style={styles.acField}>
+            <Text style={styles.label}>နာမည် *</Text>
+            <TextInput
+              style={[styles.textInput, !!errors.recipient_name && styles.inputError]}
+              value={form.recipient_name}
+              onChangeText={v => handleRecipientInput('recipient_name', v)}
+              placeholder="လက်ခံသူ နာမည်"
+              placeholderTextColor={COLORS.textLight}
+            />
+            {errors.recipient_name && <Text style={styles.errorText}>{errors.recipient_name}</Text>}
+          </View>
+
+          {/* Recipient suggestions — inline */}
           {showRecipientSug && recipientSuggestions.length > 0 && (
             <View style={styles.inlineSugBox}>
               <View style={styles.inlineSugHeader}>
@@ -725,44 +725,53 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
   // ── Autocomplete ────────────────────────────────────────────────────────────
-  autocompleteWrap: { position: 'relative', zIndex: 10 },
-  suggestionBox: {
-    position: 'absolute', top: '100%' as any, left: 0, right: 0, zIndex: 999,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    elevation: 12,
-    maxHeight: 220,
+  acField: {},
+  autocompleteWrap: {},
+  // Inline suggestion box — no absolute positioning, pushes content down
+  inlineSugBox: {
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary + '40',
+    backgroundColor: COLORS.primary + '08',
     overflow: 'hidden',
+    marginTop: 2,
   },
-  suggestionBoxAbove: {
-    position: 'absolute', bottom: '100%' as any, left: 0, right: 0, zIndex: 999,
+  inlineSugHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: COLORS.primary + '15',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.primary + '25',
+  },
+  inlineSugHeaderText: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  inlineSugItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.primary + '15',
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    elevation: 12,
-    maxHeight: 220,
-    overflow: 'hidden',
-    marginBottom: 4,
   },
+  // Keep these for backward compat (unused now but avoids TS errors)
+  suggestionBox: { display: 'none' as any },
+  suggestionBoxAbove: { display: 'none' as any },
   suggestionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   suggestionName: { fontSize: 14, fontWeight: '600', color: COLORS.text,
     fontFamily: 'NotoSansMyanmar_600SemiBold',

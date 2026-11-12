@@ -70,7 +70,7 @@ class Parcel extends Model
 
     public function activeAssignment()
     {
-        return $this->hasOne(DeliveryAssignment::class)->where('status', 'ACTIVE');
+        return $this->hasOne(DeliveryAssignment::class)->whereIn('status', ['PENDING', 'IN_PROGRESS'])->latest('assigned_at');
     }
 
     public function deliveryAttempts(): HasMany

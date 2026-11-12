@@ -14,17 +14,19 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { deliveryService, Assignment } from '../../src/services/deliveryService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM} from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM, ASSIGNMENT_STATUS_LABELS_MM, ASSIGNMENT_STATUS_COLORS} from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
+  { label: 'ဆောင်ရွက်နေ', value: 'IN_PROGRESS' },
+  { label: 'စောင့်ဆိုင်း', value: 'PENDING' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
+  { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
 
 export default function MyAssignmentsScreen() {
   const insets = useSafeAreaInsets();
-  const [statusFilter, setStatusFilter] = useState('ACTIVE');
+  const [statusFilter, setStatusFilter] = useState('IN_PROGRESS');
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isFetching, refetch } = useQuery({
@@ -39,7 +41,7 @@ export default function MyAssignmentsScreen() {
   const assignments = data?.data ?? [];
   const meta = data?.meta;
 
-  const activeCount = statusFilter === 'ACTIVE' ? (meta?.total ?? 0) : (data?.data ?? []).filter((a: Assignment) => a.status === 'ACTIVE').length;
+  const activeCount = statusFilter === 'IN_PROGRESS' ? (meta?.total ?? 0) : (data?.data ?? []).filter((a: Assignment) => a.status === 'IN_PROGRESS' || a.status === 'PENDING').length;
 
   return (
     <View style={styles.container}>
@@ -58,7 +60,7 @@ export default function MyAssignmentsScreen() {
         {/* Quick stat strip */}
         <View style={styles.statStrip}>
           <View style={styles.statItem}>
-            <Text style={styles.statNum}>{(data?.data ?? []).filter((a: Assignment) => a.status === 'ACTIVE').length}</Text>
+            <Text style={styles.statNum}>{(data?.data ?? []).filter((a: Assignment) => a.status === 'IN_PROGRESS' || a.status === 'PENDING').length}</Text>
             <Text style={styles.statLabel}>ဆောင်ရွက်နေ</Text>
           </View>
           <View style={styles.statDivider} />
@@ -112,7 +114,13 @@ export default function MyAssignmentsScreen() {
                     <Ionicons name="bicycle-outline" size={48} color={COLORS.primary} />
                   </View>
                   <Text style={styles.emptyText}>
-                    {statusFilter === 'ACTIVE' ? 'လက်ရှိ လုပ်ငန်းမရှိပါ' : 'ပြီးစီးသောလုပ်ငန်း မတွေ့ပါ'}
+                  {statusFilter === 'IN_PROGRESS'
+                    ? 'လက်ရှိ ဆောင်ရွက်နေသော လုပ်ငန်းမရှိပါ'
+                    : statusFilter === 'PENDING'
+                    ? 'စောင့်ဆိုင်းနေသော လုပ်ငန်းမရှိပါ'
+                    : statusFilter === 'COMPLETED'
+                    ? 'ပြီးစီးသောလုပ်ငန်း မတွေ့ပါ'
+                    : 'လုပ်ငန်းများ မတွေ့ပါ'}
                   </Text>
                   <Text style={styles.emptySubText}>ပါဆယ် ချိတ်ဆက်မှုများ ဤနေရာတွင် ပေါ်ပါမည်</Text>
                 </View>
@@ -146,6 +154,9 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
   const priority = parcel?.priority ?? 'NORMAL';
   const priorityColor = PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS] || COLORS.success;
   const priorityLabel = PRIORITY_LABELS_MM[priority as keyof typeof PRIORITY_LABELS_MM] || priority;
+  const assignStatus = assignment.status ?? '';
+  const assignColor = ASSIGNMENT_STATUS_COLORS[assignStatus] || COLORS.textSecondary;
+  const assignLabel = ASSIGNMENT_STATUS_LABELS_MM[assignStatus] || assignStatus;
 
   return (
     <TouchableOpacity
@@ -193,8 +204,11 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
 
         {/* Footer */}
         <View style={styles.cardFooter}>
-          <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
-            <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {/* Assignment status */}
+            <View style={[styles.statusBadge, { backgroundColor: assignColor + '20' }]}>
+              <Text style={[styles.statusText, { color: assignColor }]}>{assignLabel}</Text>
+            </View>
           </View>
           <View style={styles.footerRight}>
             {parcel?.is_cod && (
@@ -203,13 +217,16 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
                 <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()}</Text>
               </View>
             )}
-            <TouchableOpacity
-              style={styles.attemptBtn}
-              onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
-            >
-              <Ionicons name="add-circle-outline" size={14} color={COLORS.white} />
-              <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
-            </TouchableOpacity>
+            {/* Only show attempt button for active assignments */}
+            {(assignStatus === 'IN_PROGRESS' || assignStatus === 'PENDING') && (
+              <TouchableOpacity
+                style={styles.attemptBtn}
+                onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
+              >
+                <Ionicons name="add-circle-outline" size={14} color={COLORS.white} />
+                <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>

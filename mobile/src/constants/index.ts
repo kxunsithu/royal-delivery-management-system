@@ -82,3 +82,17 @@ export const ROLE_LABELS_MM = {
   delivery_staff: 'ပို့ဆောင်ရေးဝန်ထမ်း',
   accountant: 'စာရင်းကိုင်',
 };
+
+export const ASSIGNMENT_STATUS_LABELS_MM: Record<string, string> = {
+  PENDING:     'စောင့်ဆိုင်းနေ',
+  IN_PROGRESS: 'ဆောင်ရွက်နေ',
+  COMPLETED:   'ပြီးစီးပြီ',
+  FAILED:      'မအောင်မြင်',
+};
+
+export const ASSIGNMENT_STATUS_COLORS: Record<string, string> = {
+  PENDING:     COLORS.warning,
+  IN_PROGRESS: COLORS.statusInTransit,
+  COMPLETED:   COLORS.statusDelivered,
+  FAILED:      COLORS.statusFailed,
+};
