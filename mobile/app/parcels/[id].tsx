@@ -151,8 +151,8 @@ export default function ParcelDetailScreen() {
           <div class="row"><span class="label">အရေအတွက်</span><span class="value">${parcel.quantity} ခု</span></div>
           ${parcel.weight ? `<div class="row"><span class="label">အလေးချိန်</span><span class="value">${parcel.weight} kg</span></div>` : ''}
           ${parcel.description ? `<div class="row"><span class="label">ဖော်ပြချက်</span><span class="value">${parcel.description}</span></div>` : ''}
-          <div class="row"><span class="label">ပို့ဆောင်ခ</span><span class="value">${Number(parcel.delivery_fee).toLocaleString()} ကျပ်</span></div>
-          ${parcel.is_cod ? `<div class="row"><span class="label">COD ပမာဏ</span><span class="value">${Number(parcel.cod_amount).toLocaleString()} ကျပ်</span></div>` : ''}
+          <div class="row"><span class="label">ပို့ဆောင်ခ</span><span class="value">${Number(parcel.delivery_fee).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>
+          ${parcel.is_cod ? `<div class="row"><span class="label">COD ပမာဏ</span><span class="value">${Number(parcel.cod_amount).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>` : ''}
           ${parcel.active_assignment?.staff?.name ? `<div class="row"><span class="label">ချိတ်ဆက်ထားသောဝန်ထမ်း</span><span class="value">${parcel.active_assignment.staff.name}</span></div>` : ''}
           <div class="footer">ကျေးဇူးတင်ပါသည်။</div>
         </body>
@@ -344,8 +344,9 @@ export default function ParcelDetailScreen() {
         </InfoSection>
 
         <InfoSection title="ငွေကြေး">
-          <InfoRow icon="cash-outline" label="ပို့ဆောင်ခ" value={`${Number(parcel.delivery_fee).toLocaleString()} ကျပ်`} />
-          {parcel.is_cod && <InfoRow icon="wallet-outline" label="COD ပမာဏ" value={`${Number(parcel.cod_amount).toLocaleString()} ကျပ်`} />}
+          <InfoRow icon="cash-outline" label="ငွေကြေးအမျိုး" value={parcel.currency === 'THB' ? '🇹🇭 Thai Baht (THB)' : '🇲🇲 ကျပ် (MMK)'} />
+          <InfoRow icon="cash-outline" label="ပို့ဆောင်ခ" value={`${Number(parcel.delivery_fee).toLocaleString()} ${parcel.currency === 'THB' ? 'THB' : 'MMK'}`} />
+          {parcel.is_cod && <InfoRow icon="wallet-outline" label="COD ပမာဏ" value={`${Number(parcel.cod_amount).toLocaleString()} ${parcel.currency === 'THB' ? 'THB' : 'MMK'}`} />}
         </InfoSection>
 
         {parcel.active_assignment && (

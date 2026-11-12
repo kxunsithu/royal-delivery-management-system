@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Linking,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -161,6 +162,22 @@ export default function DeliveryDetailScreen() {
                       <Text style={[styles.attemptDetailText, { fontStyle: 'italic' }]}>{attempt.notes}</Text>
                     </View>
                   )}
+                  {/* Proof Photos */}
+                  {attempt.proof_photos && attempt.proof_photos.length > 0 && (
+                    <View style={styles.proofSection}>
+                      <View style={styles.proofSectionHeader}>
+                        <Ionicons name="camera-outline" size={13} color={COLORS.primary} />
+                        <Text style={styles.proofSectionTitle}>
+                          သက်သေဓာတ်ပုံ ({attempt.proof_photos.length})
+                        </Text>
+                      </View>
+                      <View style={styles.proofGrid}>
+                        {attempt.proof_photos.map((p: any) => (
+                          <Image key={p.id} source={{ uri: p.file_url }} style={styles.proofThumb} />
+                        ))}
+                      </View>
+                    </View>
+                  )}
                 </View>
               );
             })}
@@ -279,6 +296,15 @@ const styles = StyleSheet.create({
   attemptDetailText: { flex: 1, fontSize: 13, color: COLORS.textSecondary,
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
+
+  // Proof photo section inside attempt card
+  proofSection: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
+  proofSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 },
+  proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  proofThumb: { width: 72, height: 72, borderRadius: 8, backgroundColor: COLORS.border },
 
   recordBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,

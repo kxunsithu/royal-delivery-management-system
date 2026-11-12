@@ -37,6 +37,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('/users/{user}/profile-image', [UserController::class, 'deleteProfileImage']);
 
         // Parcels
+        Route::get('/parcels/contacts', [ParcelController::class, 'contacts']);  // must be before {parcel}
         Route::get('/parcels', [ParcelController::class, 'index']);
         Route::post('/parcels', [ParcelController::class, 'store']);
         Route::get('/parcels/{parcel}', [ParcelController::class, 'show']);

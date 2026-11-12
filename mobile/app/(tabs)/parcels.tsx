@@ -40,6 +40,11 @@ export default function ParcelsScreen() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [searchDebounced, setSearchDebounced] = useState('');
+  const [showDateFilter, setShowDateFilter] = useState(false);
+  const [dateFromInput, setDateFromInput] = useState('');
+  const [dateToInput, setDateToInput] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   // accountant can NOT create parcels; admin and manager can
   const canCreateParcel = user?.role === 'admin' || user?.role === 'manager';
@@ -57,13 +62,31 @@ export default function ParcelsScreen() {
     }, 500);
   };
 
+  const handleApplyDateFilter = () => {
+    setDateFrom(dateFromInput);
+    setDateTo(dateToInput);
+    setPage(1);
+  };
+
+  const handleClearDateFilter = () => {
+    setDateFromInput('');
+    setDateToInput('');
+    setDateFrom('');
+    setDateTo('');
+    setPage(1);
+  };
+
+  const hasActiveDateFilter = !!(dateFrom || dateTo);
+
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['parcels', searchDebounced, statusFilter, page],
+    queryKey: ['parcels', searchDebounced, statusFilter, page, dateFrom, dateTo],
     queryFn: () => parcelService.list({
       search: searchDebounced || undefined,
       status: statusFilter || undefined,
       page,
       per_page: 20,
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
     }),
   });
 
@@ -80,14 +103,26 @@ export default function ParcelsScreen() {
             <Text style={styles.headerSub}>စုစုပေါင်း {meta.total} ခု</Text>
           )}
         </View>
-        {canCreateParcel && (
+        <View style={styles.headerActions}>
           <TouchableOpacity
-            style={styles.addBtn}
-            onPress={() => router.push('/parcels/create')}
+            style={[styles.calendarBtn, hasActiveDateFilter && styles.calendarBtnActive]}
+            onPress={() => setShowDateFilter(v => !v)}
           >
-            <Ionicons name="add" size={24} color={COLORS.primary} />
+            <Ionicons
+              name="calendar-outline"
+              size={20}
+              color={hasActiveDateFilter ? COLORS.white : COLORS.primary}
+            />
           </TouchableOpacity>
-        )}
+          {canCreateParcel && (
+            <TouchableOpacity
+              style={styles.addBtn}
+              onPress={() => router.push('/parcels/create')}
+            >
+              <Ionicons name="add" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <View style={styles.contentArea}>
@@ -128,6 +163,61 @@ export default function ParcelsScreen() {
             ))}
           </ScrollView>
         </View>
+
+        {/* Date Range Filter (collapsible) */}
+        {showDateFilter && (
+          <View style={styles.dateFilterBox}>
+            <View style={styles.dateFilterRow}>
+              <View style={styles.dateInputWrap}>
+                <Text style={styles.dateLabel}>မှ ရက်စွဲ</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={COLORS.textLight}
+                  value={dateFromInput}
+                  onChangeText={setDateFromInput}
+                  keyboardType="numbers-and-punctuation"
+                  maxLength={10}
+                />
+              </View>
+              <Ionicons name="arrow-forward" size={16} color={COLORS.textLight} style={styles.dateArrow} />
+              <View style={styles.dateInputWrap}>
+                <Text style={styles.dateLabel}>ထိ ရက်စွဲ</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={COLORS.textLight}
+                  value={dateToInput}
+                  onChangeText={setDateToInput}
+                  keyboardType="numbers-and-punctuation"
+                  maxLength={10}
+                />
+              </View>
+            </View>
+            <View style={styles.dateFilterActions}>
+              <TouchableOpacity style={styles.dateApplyBtn} onPress={handleApplyDateFilter}>
+                <Ionicons name="search" size={14} color={COLORS.white} />
+                <Text style={styles.dateApplyBtnText}>🔍 ရှာဖွေမည်</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.dateClearBtn} onPress={handleClearDateFilter}>
+                <Ionicons name="close" size={14} color={COLORS.textSecondary} />
+                <Text style={styles.dateClearBtnText}>✕ ဖျက်မည်</Text>
+              </TouchableOpacity>
+            </View>
+            {hasActiveDateFilter && (
+              <View style={styles.dateActiveIndicator}>
+                <Ionicons name="checkmark-circle" size={13} color={COLORS.primary} />
+                <Text style={styles.dateActiveText}>
+                  {dateFrom && dateTo
+                    ? `${dateFrom} မှ ${dateTo} ထိ`
+                    : dateFrom
+                    ? `${dateFrom} မှ`
+                    : `${dateTo} ထိ`}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* Parcel List */}
         <View style={styles.listArea}>
@@ -319,7 +409,7 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
             </View>
           )}
         </View>
-        <Text style={styles.feeText}>{Number(parcel.delivery_fee).toLocaleString()} ကျပ်</Text>
+        <Text style={styles.feeText}>{Number(parcel.delivery_fee).toLocaleString()} {parcel.currency === 'THB' ? 'THB' : 'MMK'}</Text>
       </View>
     </TouchableOpacity>
 
@@ -358,6 +448,29 @@ const styles = StyleSheet.create({
   },
   headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2,
     fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  calendarBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  calendarBtnActive: {
+    backgroundColor: COLORS.primary,
+    borderWidth: 2,
+    borderColor: COLORS.white,
   },
   addBtn: {
     width: 42,
@@ -417,6 +530,102 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
   filterChipTextActive: { color: COLORS.white },
+
+  // Date Filter
+  dateFilterBox: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: COLORS.white,
+    borderRadius: 14,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  dateFilterRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  dateInputWrap: {
+    flex: 1,
+  },
+  dateLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  dateInput: {
+    backgroundColor: COLORS.background,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  dateArrow: {
+    marginBottom: 10,
+  },
+  dateFilterActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+  },
+  dateApplyBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+    paddingVertical: 9,
+  },
+  dateApplyBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  dateClearBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: COLORS.background,
+    borderRadius: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+  },
+  dateClearBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  dateActiveIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 8,
+    backgroundColor: COLORS.primary + '12',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  dateActiveText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
 
   loader: { marginTop: 60 },
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },

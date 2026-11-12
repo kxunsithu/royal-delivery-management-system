@@ -28,6 +28,7 @@ export interface Assignment {
     failure_reason?: string;
     recipient_name?: string;
     notes?: string;
+    proof_photos?: { id: number; file_url: string }[];
   }[];
 }
 

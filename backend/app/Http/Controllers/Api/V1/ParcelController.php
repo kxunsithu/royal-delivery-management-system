@@ -16,6 +16,63 @@ use Illuminate\Validation\Rule;
 
 class ParcelController extends Controller
 {
+    /**
+     * Search unique sender / recipient contacts from past parcels.
+     * GET /parcels/contacts?search=...&type=sender|recipient|both&limit=8
+     */
+    public function contacts(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', Parcel::class);
+
+        $search = trim($request->input('search', ''));
+        $type   = $request->input('type', 'both'); // sender | recipient | both
+        $limit  = min((int) $request->input('limit', 8), 20);
+        $term   = '%' . mb_strtolower($search) . '%';
+
+        $results = collect();
+
+        if ($type === 'sender' || $type === 'both') {
+            $senders = Parcel::select('sender_name', 'sender_phone')
+                ->whereNotNull('sender_name')
+                ->whereNotNull('sender_phone')
+                ->where(function ($q) use ($term) {
+                    $q->whereRaw('LOWER(sender_name) LIKE ?', [$term])
+                      ->orWhereRaw('LOWER(sender_phone) LIKE ?', [$term]);
+                })
+                ->groupBy('sender_name', 'sender_phone')
+                ->orderByRaw('MAX(created_at) DESC')
+                ->limit($limit)
+                ->get()
+                ->map(fn($p) => [
+                    'type'  => 'sender',
+                    'name'  => $p->sender_name,
+                    'phone' => $p->sender_phone,
+                ]);
+            $results = $results->merge($senders);
+        }
+
+        if ($type === 'recipient' || $type === 'both') {
+            $recipients = Parcel::select('recipient_name', 'recipient_phone', 'delivery_address')
+                ->where(function ($q) use ($term) {
+                    $q->whereRaw('LOWER(recipient_name) LIKE ?', [$term])
+                      ->orWhereRaw('LOWER(recipient_phone) LIKE ?', [$term]);
+                })
+                ->groupBy('recipient_name', 'recipient_phone', 'delivery_address')
+                ->orderByRaw('MAX(created_at) DESC')
+                ->limit($limit)
+                ->get()
+                ->map(fn($p) => [
+                    'type'             => 'recipient',
+                    'name'             => $p->recipient_name,
+                    'phone'            => $p->recipient_phone,
+                    'delivery_address' => $p->delivery_address,
+                ]);
+            $results = $results->merge($recipients);
+        }
+
+        return response()->json(['data' => $results->take($limit)->values()]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Parcel::class);
@@ -81,6 +138,7 @@ class ParcelController extends Controller
             'delivery_fee' => ['required', 'numeric', 'min:0'],
             'cod_amount' => ['numeric', 'min:0'],
             'is_cod' => ['boolean'],
+            'currency' => ['required', 'string', Rule::in(['MMK', 'THB'])],
             'condition' => ['string', Rule::in(['GOOD', 'DAMAGED', 'MISSING'])],
             'priority' => ['string', Rule::in(['NORMAL', 'HIGH', 'URGENT'])],
             'received_at' => ['nullable', 'date'],
@@ -99,6 +157,7 @@ class ParcelController extends Controller
                 'delivery_fee' => $validated['delivery_fee'] ?? 0,
                 'cod_amount' => $validated['cod_amount'] ?? 0,
                 'is_cod' => $validated['is_cod'] ?? false,
+                'currency' => $validated['currency'] ?? 'MMK',
                 'condition' => $validated['condition'] ?? 'GOOD',
                 'priority' => $validated['priority'] ?? 'NORMAL',
             ]);
@@ -169,6 +228,7 @@ class ParcelController extends Controller
             'delivery_fee' => ['sometimes', 'numeric', 'min:0'],
             'cod_amount' => ['sometimes', 'numeric', 'min:0'],
             'is_cod' => ['sometimes', 'boolean'],
+            'currency' => ['sometimes', 'string', Rule::in(['MMK', 'THB'])],
             'condition' => ['sometimes', 'string', Rule::in(['GOOD', 'DAMAGED', 'MISSING'])],
             'priority' => ['sometimes', 'string', Rule::in(['NORMAL', 'HIGH', 'URGENT'])],
             'damage_description' => ['nullable', 'string'],
@@ -448,6 +508,7 @@ class ParcelController extends Controller
             'delivery_fee' => $parcel->delivery_fee,
             'cod_amount' => $parcel->cod_amount,
             'is_cod' => $parcel->is_cod,
+            'currency' => $parcel->currency ?? 'MMK',
             'status' => $parcel->status,
             'condition' => $parcel->condition,
             'priority' => $parcel->priority,

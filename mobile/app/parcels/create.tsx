@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,14 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  FlatList,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { parcelService } from '../../src/services/parcelService';
+import { parcelService, ContactSuggestion } from '../../src/services/parcelService';
 import apiClient from '../../src/services/apiClient';
 import { useAuth } from '../../src/context/AuthContext';
 import { COLORS} from '../../src/constants';
@@ -55,11 +56,20 @@ export default function CreateParcelScreen() {
     delivery_fee: '',
     cod_amount: '0',
     is_cod: false,
+    currency: 'MMK' as 'MMK' | 'THB',
     priority: 'NORMAL',
     condition: 'GOOD',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [localImages, setLocalImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+
+  // ── Autocomplete state ──────────────────────────────────────────────────────
+  const [senderSuggestions, setSenderSuggestions] = useState<any[]>([]);
+  const [recipientSuggestions, setRecipientSuggestions] = useState<any[]>([]);
+  const [showSenderSug, setShowSenderSug] = useState(false);
+  const [showRecipientSug, setShowRecipientSug] = useState(false);
+  const senderDebounce = useRef<any>(null);
+  const recipientDebounce = useRef<any>(null);
 
   const { data: areas } = useQuery({
     queryKey: ['delivery-areas'],
@@ -103,6 +113,49 @@ export default function CreateParcelScreen() {
   function update(field: string, value: any) {
     setForm(f => ({ ...f, [field]: value }));
     setErrors(e => ({ ...e, [field]: undefined as any }));
+  }
+
+  // ── Sender autocomplete ──────────────────────────────────────────────────────
+  function handleSenderInput(field: 'sender_name' | 'sender_phone', value: string) {
+    update(field, value);
+    clearTimeout(senderDebounce.current);
+    if (value.trim().length < 1) { setSenderSuggestions([]); setShowSenderSug(false); return; }
+    senderDebounce.current = setTimeout(async () => {
+      try {
+        const results = await parcelService.searchContacts(value, 'sender');
+        setSenderSuggestions(results);
+        setShowSenderSug(results.length > 0);
+      } catch { /* ignore */ }
+    }, 400);
+  }
+
+  function applySenderSuggestion(s: ContactSuggestion) {
+    update('sender_name', s.name);
+    update('sender_phone', s.phone);
+    setSenderSuggestions([]);
+    setShowSenderSug(false);
+  }
+
+  // ── Recipient autocomplete ───────────────────────────────────────────────────
+  function handleRecipientInput(field: 'recipient_name' | 'recipient_phone', value: string) {
+    update(field, value);
+    clearTimeout(recipientDebounce.current);
+    if (value.trim().length < 1) { setRecipientSuggestions([]); setShowRecipientSug(false); return; }
+    recipientDebounce.current = setTimeout(async () => {
+      try {
+        const results = await parcelService.searchContacts(value, 'recipient');
+        setRecipientSuggestions(results);
+        setShowRecipientSug(results.length > 0);
+      } catch { /* ignore */ }
+    }, 400);
+  }
+
+  function applyRecipientSuggestion(s: ContactSuggestion) {
+    update('recipient_name', s.name);
+    update('recipient_phone', s.phone);
+    if (s.delivery_address) update('delivery_address', s.delivery_address);
+    setRecipientSuggestions([]);
+    setShowRecipientSug(false);
   }
 
   async function pickImages() {
@@ -167,6 +220,7 @@ export default function CreateParcelScreen() {
       delivery_fee: Number(form.delivery_fee),
       cod_amount: Number(form.cod_amount) || 0,
       is_cod: form.is_cod,
+      currency: form.currency,
       priority: form.priority,
       condition: form.condition,
     });
@@ -282,37 +336,112 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <FormSection title="ပေးပို့သူ">
-          <FormField
-            label="နာမည်"
-            value={form.sender_name}
-            onChangeText={(v) => update('sender_name', v)}
-            placeholder="ပေးပို့သူ နာမည်"
-          />
-          <FormField
-            label="ဖုန်းနံပါတ်"
-            value={form.sender_phone}
-            onChangeText={(v) => update('sender_phone', v)}
-            placeholder="09..."
-            keyboardType="phone-pad"
-          />
+          {/* Sender Name with autocomplete */}
+          <View style={styles.autocompleteWrap}>
+            <Text style={styles.label}>နာမည်</Text>
+            <TextInput
+              style={styles.textInput}
+              value={form.sender_name}
+              onChangeText={v => handleSenderInput('sender_name', v)}
+              placeholder="ပေးပို့သူ နာမည်"
+              placeholderTextColor={COLORS.textLight}
+            />
+            {showSenderSug && senderSuggestions.length > 0 && (
+              <View style={styles.suggestionBox}>
+                {senderSuggestions.map((s, i) => (
+                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applySenderSuggestion(s)}>
+                    <Ionicons name="person-outline" size={14} color={COLORS.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.suggestionName}>{s.name}</Text>
+                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
+                    </View>
+                    <Ionicons name="checkmark-circle-outline" size={14} color={COLORS.textLight} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+          {/* Sender Phone with autocomplete */}
+          <View style={styles.autocompleteWrap}>
+            <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
+            <TextInput
+              style={styles.textInput}
+              value={form.sender_phone}
+              onChangeText={v => handleSenderInput('sender_phone', v)}
+              placeholder="09..."
+              placeholderTextColor={COLORS.textLight}
+              keyboardType="phone-pad"
+            />
+            {showSenderSug && senderSuggestions.length > 0 && (
+              <View style={styles.suggestionBox}>
+                {senderSuggestions.map((s, i) => (
+                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applySenderSuggestion(s)}>
+                    <Ionicons name="call-outline" size={14} color={COLORS.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.suggestionName}>{s.name}</Text>
+                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
         </FormSection>
 
         <FormSection title="လက်ခံသူ *">
-          <FormField
-            label="နာမည် *"
-            value={form.recipient_name}
-            onChangeText={(v) => update('recipient_name', v)}
-            error={errors.recipient_name}
-            placeholder="လက်ခံသူ နာမည်"
-          />
-          <FormField
-            label="ဖုန်းနံပါတ် *"
-            value={form.recipient_phone}
-            onChangeText={(v) => update('recipient_phone', v)}
-            error={errors.recipient_phone}
-            placeholder="09..."
-            keyboardType="phone-pad"
-          />
+          {/* Recipient Name with autocomplete */}
+          <View style={styles.autocompleteWrap}>
+            <Text style={styles.label}>နာမည် *</Text>
+            <TextInput
+              style={[styles.textInput, !!errors.recipient_name && styles.inputError]}
+              value={form.recipient_name}
+              onChangeText={v => handleRecipientInput('recipient_name', v)}
+              placeholder="လက်ခံသူ နာမည်"
+              placeholderTextColor={COLORS.textLight}
+            />
+            {errors.recipient_name && <Text style={styles.errorText}>{errors.recipient_name}</Text>}
+            {showRecipientSug && recipientSuggestions.length > 0 && (
+              <View style={styles.suggestionBox}>
+                {recipientSuggestions.map((s, i) => (
+                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applyRecipientSuggestion(s)}>
+                    <Ionicons name="person-outline" size={14} color={COLORS.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.suggestionName}>{s.name}</Text>
+                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
+                      {s.delivery_address ? <Text style={styles.suggestionAddr} numberOfLines={1}>{s.delivery_address}</Text> : null}
+                    </View>
+                    <Ionicons name="checkmark-circle-outline" size={14} color={COLORS.textLight} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+          {/* Recipient Phone with autocomplete */}
+          <View style={styles.autocompleteWrap}>
+            <Text style={styles.label}>ဖုန်းနံပါတ် *</Text>
+            <TextInput
+              style={[styles.textInput, !!errors.recipient_phone && styles.inputError]}
+              value={form.recipient_phone}
+              onChangeText={v => handleRecipientInput('recipient_phone', v)}
+              placeholder="09..."
+              placeholderTextColor={COLORS.textLight}
+              keyboardType="phone-pad"
+            />
+            {errors.recipient_phone && <Text style={styles.errorText}>{errors.recipient_phone}</Text>}
+            {showRecipientSug && recipientSuggestions.length > 0 && (
+              <View style={styles.suggestionBox}>
+                {recipientSuggestions.map((s, i) => (
+                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applyRecipientSuggestion(s)}>
+                    <Ionicons name="call-outline" size={14} color={COLORS.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.suggestionName}>{s.name}</Text>
+                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
           <FormField
             label="လိပ်စာ *"
             value={form.delivery_address}
@@ -324,8 +453,24 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <FormSection title="ငွေကြေး">
+          {/* Currency Selector */}
+          <Text style={styles.label}>ငွေကြေးအမျိုးအစား *</Text>
+          <View style={styles.segmented}>
+            {(['MMK', 'THB'] as const).map(cur => (
+              <TouchableOpacity
+                key={cur}
+                style={[styles.segmentItem, form.currency === cur && styles.segmentActive]}
+                onPress={() => update('currency', cur)}
+              >
+                <Text style={[styles.segmentText, form.currency === cur && styles.segmentActiveText]}>
+                  {cur === 'MMK' ? '🇲🇲 ကျပ် (MMK)' : '🇹🇭 ဘတ် (THB)'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <FormField
-            label="ပို့ဆောင်ခ (ကျပ်) *"
+            label={`ပို့ဆောင်ခ (${form.currency}) *`}
             value={form.delivery_fee}
             onChangeText={(v) => update('delivery_fee', v)}
             error={errors.delivery_fee}
@@ -348,7 +493,7 @@ export default function CreateParcelScreen() {
 
           {form.is_cod && (
             <FormField
-              label="COD ပမာဏ (ကျပ်)"
+              label={`COD ပမာဏ (${form.currency})`}
               value={form.cod_amount}
               onChangeText={(v) => update('cod_amount', v)}
               keyboardType="numeric"
@@ -487,6 +632,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
     gap: 12,
+    overflow: 'visible',
   },
   formField: {},
   label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6,
@@ -579,6 +725,40 @@ const styles = StyleSheet.create({
   imageThumb: { width: 80, height: 80, borderRadius: 10 },
   imageRemoveBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: COLORS.white, borderRadius: 10 },
   imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center',
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  // ── Autocomplete ────────────────────────────────────────────────────────────
+  autocompleteWrap: { position: 'relative', zIndex: 10 },
+  suggestionBox: {
+    position: 'absolute', top: '100%' as any, left: 0, right: 0, zIndex: 999,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    elevation: 12,
+    maxHeight: 220,
+    overflow: 'hidden',
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  suggestionName: { fontSize: 14, fontWeight: '600', color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  suggestionPhone: { fontSize: 12, color: COLORS.textSecondary, marginTop: 1,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  suggestionAddr: { fontSize: 11, color: COLORS.textLight, marginTop: 1,
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
 });

@@ -56,6 +56,7 @@ export default function EditParcelScreen() {
     delivery_address: '', delivery_area_id: '',
     description: '', quantity: '1', weight: '', notes: '',
     delivery_fee: '', cod_amount: '0', is_cod: false,
+    currency: 'MMK' as 'MMK' | 'THB',
     priority: 'NORMAL',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -79,6 +80,7 @@ export default function EditParcelScreen() {
         delivery_fee: String(parcel.delivery_fee || 0),
         cod_amount: String(parcel.cod_amount || 0),
         is_cod: parcel.is_cod || false,
+        currency: (parcel.currency as 'MMK' | 'THB') || 'MMK',
         priority: parcel.priority || 'NORMAL',
       });
       setExistingImages(parcel.images ?? []);
@@ -185,6 +187,7 @@ export default function EditParcelScreen() {
       delivery_fee: Number(form.delivery_fee),
       cod_amount: Number(form.cod_amount) || 0,
       is_cod: form.is_cod,
+      currency: form.currency,
       priority: form.priority,
     });
   }
@@ -284,14 +287,29 @@ export default function EditParcelScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ငွေကြေး</Text>
           <View style={styles.card}>
-            <FormField label="ပို့ဆောင်ခ (ကျပ်) *" value={form.delivery_fee} onChangeText={v => update('delivery_fee', v)} error={errors.delivery_fee} keyboardType="numeric" placeholder="0" />
+            {/* Currency Selector */}
+            <Text style={styles.label}>ငွေကြေးအမျိုးအစား *</Text>
+            <View style={styles.segmented}>
+              {(['MMK', 'THB'] as const).map(cur => (
+                <TouchableOpacity
+                  key={cur}
+                  style={[styles.segmentItem, form.currency === cur && styles.segmentActive]}
+                  onPress={() => update('currency', cur)}
+                >
+                  <Text style={[styles.segmentText, form.currency === cur && styles.segmentActiveText]}>
+                    {cur === 'MMK' ? '🇲🇲 ကျပ် (MMK)' : '🇹🇭 ဘတ် (THB)'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <FormField label={`ပို့ဆောင်ခ (${form.currency}) *`} value={form.delivery_fee} onChangeText={v => update('delivery_fee', v)} error={errors.delivery_fee} keyboardType="numeric" placeholder="0" />
             <View style={styles.switchRow}>
               <View>
                 <Text style={styles.switchLabel}>COD (ငွေတောင်းမည်)</Text>
               </View>
               <Switch value={form.is_cod} onValueChange={v => update('is_cod', v)} trackColor={{ false: COLORS.border, true: COLORS.primary }} thumbColor={COLORS.white} />
             </View>
-            {form.is_cod && <FormField label="COD ပမာဏ (ကျပ်)" value={form.cod_amount} onChangeText={v => update('cod_amount', v)} keyboardType="numeric" placeholder="0" />}
+            {form.is_cod && <FormField label={`COD ပမာဏ (${form.currency})`} value={form.cod_amount} onChangeText={v => update('cod_amount', v)} keyboardType="numeric" placeholder="0" />}
           </View>
         </View>
 

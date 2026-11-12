@@ -164,7 +164,7 @@ class DeliveryController extends Controller
     }
 
     /**
-     * Upload proof of delivery
+     * Upload proof of delivery (supports multiple photos)
      */
     public function uploadProof(Request $request, DeliveryAssignment $delivery): JsonResponse
     {
@@ -172,32 +172,54 @@ class DeliveryController extends Controller
 
         $validated = $request->validate([
             'delivery_attempt_id' => ['required', 'integer', 'exists:delivery_attempts,id'],
-            'type' => ['required', 'string', Rule::in(['PHOTO', 'SIGNATURE', 'RECIPIENT_NAME'])],
-            'file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-            'notes' => ['nullable', 'string'],
+            'type'                => ['required', 'string', Rule::in(['PHOTO', 'SIGNATURE', 'RECIPIENT_NAME'])],
+            'file'                => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'files'               => ['nullable', 'array', 'max:5'],
+            'files.*'             => ['file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'notes'               => ['nullable', 'string'],
         ]);
 
-        $filePath = null;
-        if ($request->hasFile('file')) {
+        $proofs = [];
+
+        // Support multiple files via 'files[]' array
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $filePath = $file->store('proof-of-delivery/' . $delivery->parcel_id, 'public');
+                $proof = ProofOfDelivery::create([
+                    'delivery_attempt_id' => $validated['delivery_attempt_id'],
+                    'parcel_id'           => $delivery->parcel_id,
+                    'type'                => $validated['type'],
+                    'file_path'           => $filePath,
+                    'notes'               => $validated['notes'] ?? null,
+                ]);
+                $proofs[] = [
+                    'id'       => $proof->id,
+                    'type'     => $proof->type,
+                    'file_url' => $proof->file_url,
+                    'notes'    => $proof->notes,
+                ];
+            }
+        } elseif ($request->hasFile('file')) {
+            // Single file fallback
             $filePath = $request->file('file')->store('proof-of-delivery/' . $delivery->parcel_id, 'public');
+            $proof = ProofOfDelivery::create([
+                'delivery_attempt_id' => $validated['delivery_attempt_id'],
+                'parcel_id'           => $delivery->parcel_id,
+                'type'                => $validated['type'],
+                'file_path'           => $filePath,
+                'notes'               => $validated['notes'] ?? null,
+            ]);
+            $proofs[] = [
+                'id'       => $proof->id,
+                'type'     => $proof->type,
+                'file_url' => $proof->file_url,
+                'notes'    => $proof->notes,
+            ];
         }
 
-        $proof = ProofOfDelivery::create([
-            'delivery_attempt_id' => $validated['delivery_attempt_id'],
-            'parcel_id' => $delivery->parcel_id,
-            'type' => $validated['type'],
-            'file_path' => $filePath,
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
         return response()->json([
-            'data' => [
-                'id' => $proof->id,
-                'type' => $proof->type,
-                'file_url' => $proof->file_url,
-                'notes' => $proof->notes,
-            ],
-            'message' => 'Proof of delivery uploaded',
+            'data'    => $proofs,
+            'message' => count($proofs) . ' proof(s) of delivery uploaded',
         ], 201);
     }
 
@@ -263,12 +285,20 @@ class DeliveryController extends Controller
             'completed_at' => $a->completed_at?->toISOString(),
             'delivery_attempts' => $a->relationLoaded('deliveryAttempts')
                 ? $a->deliveryAttempts->map(fn($da) => [
-                    'id' => $da->id,
-                    'attempted_at' => $da->attempted_at->toISOString(),
-                    'result' => $da->result,
+                    'id'             => $da->id,
+                    'attempted_at'   => $da->attempted_at->toISOString(),
+                    'result'         => $da->result,
                     'failure_reason' => $da->failure_reason,
                     'recipient_name' => $da->recipient_name,
-                    'notes' => $da->notes,
+                    'notes'          => $da->notes,
+                    'proof_photos'   => $da->relationLoaded('proofOfDeliveries')
+                        ? $da->proofOfDeliveries
+                            ->where('type', 'PHOTO')
+                            ->map(fn($p) => [
+                                'id'       => $p->id,
+                                'file_url' => $p->file_url,
+                            ])->values()->all()
+                        : [],
                 ]) : [],
         ];
     }

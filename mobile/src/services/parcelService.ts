@@ -16,6 +16,7 @@ export interface Parcel {
   delivery_fee: number;
   cod_amount: number;
   is_cod: boolean;
+  currency: 'MMK' | 'THB';
   status: string;
   condition: string;
   priority: string;
@@ -98,7 +99,20 @@ export interface ParcelFilters {
   sort_dir?: string;
 }
 
+export interface ContactSuggestion {
+  type: 'sender' | 'recipient';
+  name: string;
+  phone: string;
+  delivery_address?: string;
+}
+
 export const parcelService = {
+  async searchContacts(search: string, type: 'sender' | 'recipient' | 'both' = 'both'): Promise<ContactSuggestion[]> {
+    if (!search || search.trim().length < 1) return [];
+    const response = await apiClient.get('/parcels/contacts', { params: { search, type, limit: 8 } });
+    return response.data.data as ContactSuggestion[];
+  },
+
   async list(filters?: ParcelFilters): Promise<ParcelsResponse> {
     const response = await apiClient.get('/parcels', { params: filters });
     return response.data;
