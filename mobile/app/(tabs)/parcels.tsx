@@ -13,6 +13,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import CalendarPicker from '../../src/components/CalendarPicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -45,6 +46,8 @@ export default function ParcelsScreen() {
   const [dateToInput, setDateToInput] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
 
   // accountant can NOT create parcels; admin and manager can
   const canCreateParcel = user?.role === 'admin' || user?.role === 'manager';
@@ -66,6 +69,7 @@ export default function ParcelsScreen() {
     setDateFrom(dateFromInput);
     setDateTo(dateToInput);
     setPage(1);
+    setShowDateFilter(false);
   };
 
   const handleClearDateFilter = () => {
@@ -168,40 +172,52 @@ export default function ParcelsScreen() {
         {showDateFilter && (
           <View style={styles.dateFilterBox}>
             <View style={styles.dateFilterRow}>
+              {/* From date button */}
               <View style={styles.dateInputWrap}>
                 <Text style={styles.dateLabel}>မှ ရက်စွဲ</Text>
-                <TextInput
-                  style={styles.dateInput}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={COLORS.textLight}
-                  value={dateFromInput}
-                  onChangeText={setDateFromInput}
-                  keyboardType="numbers-and-punctuation"
-                  maxLength={10}
-                />
+                <TouchableOpacity
+                  style={styles.datePressable}
+                  onPress={() => setShowFromPicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={15} color={COLORS.primary} />
+                  <Text style={[styles.datePressableText, !dateFromInput && styles.datePressablePlaceholder]}>
+                    {dateFromInput || 'ရက်စွဲ ရွေးမည်'}
+                  </Text>
+                </TouchableOpacity>
+                {dateFromInput ? (
+                  <TouchableOpacity style={styles.dateClearX} onPress={() => setDateFromInput('')}>
+                    <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
+                  </TouchableOpacity>
+                ) : null}
               </View>
               <Ionicons name="arrow-forward" size={16} color={COLORS.textLight} style={styles.dateArrow} />
+              {/* To date button */}
               <View style={styles.dateInputWrap}>
                 <Text style={styles.dateLabel}>ထိ ရက်စွဲ</Text>
-                <TextInput
-                  style={styles.dateInput}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={COLORS.textLight}
-                  value={dateToInput}
-                  onChangeText={setDateToInput}
-                  keyboardType="numbers-and-punctuation"
-                  maxLength={10}
-                />
+                <TouchableOpacity
+                  style={styles.datePressable}
+                  onPress={() => setShowToPicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={15} color={COLORS.primary} />
+                  <Text style={[styles.datePressableText, !dateToInput && styles.datePressablePlaceholder]}>
+                    {dateToInput || 'ရက်စွဲ ရွေးမည်'}
+                  </Text>
+                </TouchableOpacity>
+                {dateToInput ? (
+                  <TouchableOpacity style={styles.dateClearX} onPress={() => setDateToInput('')}>
+                    <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
+                  </TouchableOpacity>
+                ) : null}
               </View>
             </View>
             <View style={styles.dateFilterActions}>
               <TouchableOpacity style={styles.dateApplyBtn} onPress={handleApplyDateFilter}>
                 <Ionicons name="search" size={14} color={COLORS.white} />
-                <Text style={styles.dateApplyBtnText}>🔍 ရှာဖွေမည်</Text>
+                <Text style={styles.dateApplyBtnText}>ရှာဖွေမည်</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.dateClearBtn} onPress={handleClearDateFilter}>
                 <Ionicons name="close" size={14} color={COLORS.textSecondary} />
-                <Text style={styles.dateClearBtnText}>✕ ဖျက်မည်</Text>
+                <Text style={styles.dateClearBtnText}>ဖျက်မည်</Text>
               </TouchableOpacity>
             </View>
             {hasActiveDateFilter && (
@@ -218,6 +234,24 @@ export default function ParcelsScreen() {
             )}
           </View>
         )}
+
+        {/* Calendar Pickers */}
+        <CalendarPicker
+          visible={showFromPicker}
+          value={dateFromInput}
+          title="မှ ရက်စွဲ ရွေးချယ်ပါ"
+          maxDate={dateToInput || undefined}
+          onConfirm={(d) => { setDateFromInput(d); setShowFromPicker(false); }}
+          onCancel={() => setShowFromPicker(false)}
+        />
+        <CalendarPicker
+          visible={showToPicker}
+          value={dateToInput}
+          title="ထိ ရက်စွဲ ရွေးချယ်ပါ"
+          minDate={dateFromInput || undefined}
+          onConfirm={(d) => { setDateToInput(d); setShowToPicker(false); }}
+          onCancel={() => setShowToPicker(false)}
+        />
 
         {/* Parcel List */}
         <View style={styles.listArea}>
@@ -568,6 +602,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.text,
     fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  datePressable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.background,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  datePressableText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: COLORS.text,
+    flex: 1,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  datePressablePlaceholder: {
+    color: COLORS.textLight,
+  },
+  dateClearX: {
+    position: 'absolute',
+    right: 8,
+    top: '50%' as any,
+    marginTop: -8,
   },
   dateArrow: {
     marginBottom: 10,

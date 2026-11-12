@@ -336,8 +336,8 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <FormSection title="ပေးပို့သူ">
-          {/* Sender Name with autocomplete */}
-          <View style={styles.autocompleteWrap}>
+          {/* Sender Name */}
+          <View style={styles.acField}>
             <Text style={styles.label}>နာမည်</Text>
             <TextInput
               style={styles.textInput}
@@ -346,23 +346,10 @@ export default function CreateParcelScreen() {
               placeholder="ပေးပို့သူ နာမည်"
               placeholderTextColor={COLORS.textLight}
             />
-            {showSenderSug && senderSuggestions.length > 0 && (
-              <View style={styles.suggestionBox}>
-                {senderSuggestions.map((s, i) => (
-                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applySenderSuggestion(s)}>
-                    <Ionicons name="person-outline" size={14} color={COLORS.primary} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.suggestionName}>{s.name}</Text>
-                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
-                    </View>
-                    <Ionicons name="checkmark-circle-outline" size={14} color={COLORS.textLight} />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
           </View>
-          {/* Sender Phone with autocomplete */}
-          <View style={styles.autocompleteWrap}>
+
+          {/* Sender Phone */}
+          <View style={styles.acField}>
             <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
             <TextInput
               style={styles.textInput}
@@ -372,25 +359,35 @@ export default function CreateParcelScreen() {
               placeholderTextColor={COLORS.textLight}
               keyboardType="phone-pad"
             />
-            {showSenderSug && senderSuggestions.length > 0 && (
-              <View style={styles.suggestionBox}>
-                {senderSuggestions.map((s, i) => (
-                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applySenderSuggestion(s)}>
-                    <Ionicons name="call-outline" size={14} color={COLORS.primary} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.suggestionName}>{s.name}</Text>
-                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
           </View>
+
+          {/* Sender suggestions — inline, no overlap */}
+          {showSenderSug && senderSuggestions.length > 0 && (
+            <View style={styles.inlineSugBox}>
+              <View style={styles.inlineSugHeader}>
+                <Ionicons name="search-outline" size={12} color={COLORS.primary} />
+                <Text style={styles.inlineSugHeaderText}>ရှိပြီးသား ဖောက်သည်များ</Text>
+                <TouchableOpacity onPress={() => setShowSenderSug(false)}>
+                  <Ionicons name="close" size={14} color={COLORS.textLight} />
+                </TouchableOpacity>
+              </View>
+              {senderSuggestions.map((s, i) => (
+                <TouchableOpacity key={i} style={styles.inlineSugItem} onPress={() => applySenderSuggestion(s)}>
+                  <Ionicons name="person-circle-outline" size={28} color={COLORS.primary} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.suggestionName}>{s.name}</Text>
+                    <Text style={styles.suggestionPhone}>{s.phone}</Text>
+                  </View>
+                  <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.primary} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </FormSection>
 
         <FormSection title="လက်ခံသူ *">
-          {/* Recipient Name with autocomplete */}
-          <View style={styles.autocompleteWrap}>
+          {/* Recipient Name */}
+          <View style={styles.acField}>
             <Text style={styles.label}>နာမည် *</Text>
             <TextInput
               style={[styles.textInput, !!errors.recipient_name && styles.inputError]}
@@ -400,24 +397,10 @@ export default function CreateParcelScreen() {
               placeholderTextColor={COLORS.textLight}
             />
             {errors.recipient_name && <Text style={styles.errorText}>{errors.recipient_name}</Text>}
-            {showRecipientSug && recipientSuggestions.length > 0 && (
-              <View style={styles.suggestionBox}>
-                {recipientSuggestions.map((s, i) => (
-                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applyRecipientSuggestion(s)}>
-                    <Ionicons name="person-outline" size={14} color={COLORS.primary} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.suggestionName}>{s.name}</Text>
-                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
-                      {s.delivery_address ? <Text style={styles.suggestionAddr} numberOfLines={1}>{s.delivery_address}</Text> : null}
-                    </View>
-                    <Ionicons name="checkmark-circle-outline" size={14} color={COLORS.textLight} />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
           </View>
-          {/* Recipient Phone with autocomplete */}
-          <View style={styles.autocompleteWrap}>
+
+          {/* Recipient Phone */}
+          <View style={styles.acField}>
             <Text style={styles.label}>ဖုန်းနံပါတ် *</Text>
             <TextInput
               style={[styles.textInput, !!errors.recipient_phone && styles.inputError]}
@@ -428,20 +411,34 @@ export default function CreateParcelScreen() {
               keyboardType="phone-pad"
             />
             {errors.recipient_phone && <Text style={styles.errorText}>{errors.recipient_phone}</Text>}
-            {showRecipientSug && recipientSuggestions.length > 0 && (
-              <View style={styles.suggestionBox}>
-                {recipientSuggestions.map((s, i) => (
-                  <TouchableOpacity key={i} style={styles.suggestionItem} onPress={() => applyRecipientSuggestion(s)}>
-                    <Ionicons name="call-outline" size={14} color={COLORS.primary} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.suggestionName}>{s.name}</Text>
-                      <Text style={styles.suggestionPhone}>{s.phone}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
           </View>
+
+          {/* Recipient suggestions — inline, no overlap */}
+          {showRecipientSug && recipientSuggestions.length > 0 && (
+            <View style={styles.inlineSugBox}>
+              <View style={styles.inlineSugHeader}>
+                <Ionicons name="search-outline" size={12} color={COLORS.primary} />
+                <Text style={styles.inlineSugHeaderText}>ရှိပြီးသား ဖောက်သည်များ</Text>
+                <TouchableOpacity onPress={() => setShowRecipientSug(false)}>
+                  <Ionicons name="close" size={14} color={COLORS.textLight} />
+                </TouchableOpacity>
+              </View>
+              {recipientSuggestions.map((s, i) => (
+                <TouchableOpacity key={i} style={styles.inlineSugItem} onPress={() => applyRecipientSuggestion(s)}>
+                  <Ionicons name="person-circle-outline" size={28} color={COLORS.primary} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.suggestionName}>{s.name}</Text>
+                    <Text style={styles.suggestionPhone}>{s.phone}</Text>
+                    {s.delivery_address ? (
+                      <Text style={styles.suggestionAddr} numberOfLines={1}>{s.delivery_address}</Text>
+                    ) : null}
+                  </View>
+                  <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.primary} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
           <FormField
             label="လိပ်စာ *"
             value={form.delivery_address}
@@ -742,6 +739,21 @@ const styles = StyleSheet.create({
     elevation: 12,
     maxHeight: 220,
     overflow: 'hidden',
+  },
+  suggestionBoxAbove: {
+    position: 'absolute', bottom: '100%' as any, left: 0, right: 0, zIndex: 999,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    elevation: 12,
+    maxHeight: 220,
+    overflow: 'hidden',
+    marginBottom: 4,
   },
   suggestionItem: {
     flexDirection: 'row',
