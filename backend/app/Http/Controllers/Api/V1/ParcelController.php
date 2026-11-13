@@ -364,7 +364,7 @@ class ParcelController extends Controller
 
         try {
             // Cancel existing active assignment
-            $parcel->deliveryAssignments()->whereIn('status', ['IN_PROGRESS', 'PENDING'])->update([
+            $parcel->deliveryAssignments()->whereNotIn('status', ['COMPLETED', 'FAILED', 'REASSIGNED'])->update([
                 'status' => 'REASSIGNED',
                 'completed_at' => now(),
             ]);

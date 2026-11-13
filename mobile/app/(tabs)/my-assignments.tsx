@@ -18,8 +18,6 @@ import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABE
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'ဆောင်ရွက်နေ', value: 'IN_PROGRESS' },
-  { label: 'စောင့်ဆိုင်း', value: 'PENDING' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
@@ -41,8 +39,8 @@ export default function MyAssignmentsScreen() {
   const assignments = data?.data ?? [];
   const meta = data?.meta;
 
-  // Use backend-computed counts (accurate across all pages/filters)
-  const activeCount    = meta?.active_count    ?? (data?.data ?? []).filter((a: Assignment) => a.status === 'IN_PROGRESS' || a.status === 'PENDING').length;
+  // Counts from backend (active = not completed/failed/reassigned)
+  const activeCount    = meta?.active_count    ?? (data?.data ?? []).filter((a: Assignment) => !['COMPLETED','FAILED','REASSIGNED'].includes(a.status)).length;
   const completedCount = meta?.completed_count ?? (data?.data ?? []).filter((a: Assignment) => a.status === 'COMPLETED').length;
   const totalCount     = meta?.total_count     ?? (meta?.total ?? 0);
 
@@ -117,12 +115,10 @@ export default function MyAssignmentsScreen() {
                     <Ionicons name="bicycle-outline" size={48} color={COLORS.primary} />
                   </View>
                   <Text style={styles.emptyText}>
-                  {statusFilter === 'IN_PROGRESS'
-                    ? 'လက်ရှိ ဆောင်ရွက်နေသော လုပ်ငန်းမရှိပါ'
-                    : statusFilter === 'PENDING'
-                    ? 'စောင့်ဆိုင်းနေသော လုပ်ငန်းမရှိပါ'
-                    : statusFilter === 'COMPLETED'
+                  {statusFilter === 'COMPLETED'
                     ? 'ပြီးစီးသောလုပ်ငန်း မတွေ့ပါ'
+                    : statusFilter === 'FAILED'
+                    ? 'မအောင်မြင်သောလုပ်ငန်း မတွေ့ပါ'
                     : 'လုပ်ငန်းများ မတွေ့ပါ'}
                   </Text>
                   <Text style={styles.emptySubText}>ပါဆယ် ချိတ်ဆက်မှုများ ဤနေရာတွင် ပေါ်ပါမည်</Text>
@@ -220,8 +216,8 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
                 <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()}</Text>
               </View>
             )}
-            {/* Only show attempt button for active assignments */}
-            {(assignStatus === 'IN_PROGRESS' || assignStatus === 'PENDING') && (
+            {/* Only show attempt button for non-terminal assignments */}
+            {!['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignStatus) && (
               <TouchableOpacity
                 style={styles.attemptBtn}
                 onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}

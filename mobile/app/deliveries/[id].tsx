@@ -37,7 +37,7 @@ export default function DeliveryDetailScreen() {
   const parcelStatus = parcel?.status ?? '';
   const statusColor = STATUS_COLORS[parcelStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
   const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
-  const isActive = assignment?.status === 'IN_PROGRESS' || assignment?.status === 'PENDING';
+  const isActive = !['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignment?.status ?? '');
 
   return (
     <View style={[styles.container, { backgroundColor: statusColor }]}>
@@ -56,12 +56,10 @@ export default function DeliveryDetailScreen() {
         </View>
         <View style={styles.assignStatusPill}>
           <Text style={styles.assignStatusText}>
-            {assignment?.status === 'IN_PROGRESS' ? 'ဆောင်ရွက်နေ'
-              : assignment?.status === 'PENDING' ? 'စောင့်ဆိုင်း'
-              : assignment?.status === 'COMPLETED' ? 'ပြီးစီး'
+            {assignment?.status === 'COMPLETED' ? 'ပြီးစီး'
               : assignment?.status === 'FAILED' ? 'မအောင်မြင်'
               : assignment?.status === 'REASSIGNED' ? 'ပြောင်းလဲ'
-              : (assignment?.status ?? '')}
+              : 'ဆောင်ရွက်နေ'}
           </Text>
         </View>
       </View>

@@ -34,7 +34,7 @@ class DeliveryController extends Controller
 
         // Real counts (always from full dataset, not filtered page)
         $baseQuery = DeliveryAssignment::where('staff_id', $user->id);
-        $activeCount    = (clone $baseQuery)->whereIn('status', ['IN_PROGRESS', 'PENDING'])->count();
+        $activeCount    = (clone $baseQuery)->whereNotIn('status', ['COMPLETED', 'FAILED', 'REASSIGNED'])->count();
         $completedCount = (clone $baseQuery)->where('status', 'COMPLETED')->count();
         $totalCount     = (clone $baseQuery)->count();
 
@@ -62,11 +62,7 @@ class DeliveryController extends Controller
         $query = DeliveryAssignment::with(['parcel.deliveryArea', 'staff', 'assignedBy'])
             ->when($request->staff_id, fn($q) => $q->where('staff_id', $request->staff_id))
             ->when($request->status, function ($q) use ($request) {
-                if ($request->status === 'IN_PROGRESS') {
-                    $q->whereIn('status', ['IN_PROGRESS', 'PENDING']);
-                } else {
-                    $q->where('status', $request->status);
-                }
+                $q->where('status', $request->status);
             })
             ->when($request->date_from, fn($q) => $q->whereDate('assigned_at', '>=', $request->date_from))
             ->when($request->date_to, fn($q) => $q->whereDate('assigned_at', '<=', $request->date_to))
@@ -249,7 +245,7 @@ class DeliveryController extends Controller
 
         $workload = DeliveryAssignment::query()
             ->selectRaw("staff_id, COUNT(*) as total_assignments,
-                          SUM(CASE WHEN status IN ('IN_PROGRESS','PENDING') THEN 1 ELSE 0 END) as active,
+                          SUM(CASE WHEN status NOT IN ('COMPLETED','FAILED','REASSIGNED') THEN 1 ELSE 0 END) as active,
                           SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed")
             ->with('staff:id,name,email')
             ->when($request->date_from, fn($q) => $q->whereDate('assigned_at', '>=', $request->date_from))

@@ -87,7 +87,7 @@ class DashboardController extends Controller
         $staffWorkload = DeliveryAssignment::selectRaw("
             staff_id, COUNT(*) as active_count
         ")
-            ->whereIn('status', ['IN_PROGRESS', 'PENDING'])
+            ->whereNotIn('status', ['COMPLETED', 'FAILED', 'REASSIGNED'])
             ->with('staff:id,name')
             ->groupBy('staff_id')
             ->orderByDesc('active_count')
@@ -150,7 +150,7 @@ class DashboardController extends Controller
             'data' => [
                 'role' => 'delivery_staff',
                 'assignments' => [
-                    'active' => (clone $myAssignments)->whereIn('status', ['IN_PROGRESS', 'PENDING'])->count(),
+                    'active' => (clone $myAssignments)->whereNotIn('status', ['COMPLETED', 'FAILED', 'REASSIGNED'])->count(),
                     'completed_today' => (clone $myAssignments)->where('status', 'COMPLETED')->whereDate('completed_at', $today)->count(),
                     'total_completed' => (clone $myAssignments)->where('status', 'COMPLETED')->count(),
                 ],
