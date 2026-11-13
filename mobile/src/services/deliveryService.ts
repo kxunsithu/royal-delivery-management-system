@@ -8,7 +8,6 @@ export interface Assignment {
     recipient_name: string;
     recipient_phone: string;
     delivery_address: string;
-    delivery_area?: { id: number; name: string };
     status: string;
     delivery_fee: number;
     cod_amount: number;

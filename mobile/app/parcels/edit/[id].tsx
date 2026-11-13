@@ -17,11 +17,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { parcelService, ParcelImage } from '../../../src/services/parcelService';
-import apiClient from '../../../src/services/apiClient';
 import { useAuth } from '../../../src/context/AuthContext';
 import { COLORS} from '../../../src/constants';
-
-interface DeliveryArea { id: number; name: string; name_mm?: string; }
 
 export default function EditParcelScreen() {
   const insets = useSafeAreaInsets();
@@ -42,18 +39,10 @@ export default function EditParcelScreen() {
     queryFn: () => parcelService.get(Number(id)),
   });
 
-  const { data: areas } = useQuery({
-    queryKey: ['delivery-areas'],
-    queryFn: async () => {
-      const res = await apiClient.get('/settings/delivery-areas');
-      return res.data.data as DeliveryArea[];
-    },
-  });
-
   const [form, setForm] = useState({
     sender_name: '', sender_phone: '',
     recipient_name: '', recipient_phone: '',
-    delivery_address: '', delivery_area_id: '',
+    delivery_address: '',
     description: '', quantity: '1', weight: '', notes: '',
     delivery_fee: '', cod_amount: '0', is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
@@ -72,7 +61,6 @@ export default function EditParcelScreen() {
         recipient_name: parcel.recipient_name || '',
         recipient_phone: parcel.recipient_phone || '',
         delivery_address: parcel.delivery_address || '',
-        delivery_area_id: parcel.delivery_area ? String(parcel.delivery_area.id) : '',
         description: parcel.description || '',
         quantity: String(parcel.quantity || 1),
         weight: parcel.weight ? String(parcel.weight) : '',
@@ -179,7 +167,6 @@ export default function EditParcelScreen() {
       recipient_name: form.recipient_name,
       recipient_phone: form.recipient_phone,
       delivery_address: form.delivery_address,
-      delivery_area_id: form.delivery_area_id ? Number(form.delivery_area_id) : undefined,
       description: form.description || undefined,
       quantity: Number(form.quantity) || 1,
       weight: form.weight ? Number(form.weight) : undefined,
@@ -247,23 +234,6 @@ export default function EditParcelScreen() {
                 </TouchableOpacity>
               ))}
             </View>
-            {areas && areas.length > 0 && (
-              <>
-                <Text style={styles.label}>ဒေသ</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View style={{ flexDirection: 'row', gap: 8, paddingBottom: 4 }}>
-                    <TouchableOpacity style={[styles.areaChip, !form.delivery_area_id && styles.areaChipActive]} onPress={() => update('delivery_area_id', '')}>
-                      <Text style={[styles.areaChipText, !form.delivery_area_id && styles.areaChipActiveText]}>မသတ်မှတ်</Text>
-                    </TouchableOpacity>
-                    {areas.map(a => (
-                      <TouchableOpacity key={a.id} style={[styles.areaChip, form.delivery_area_id === String(a.id) && styles.areaChipActive]} onPress={() => update('delivery_area_id', String(a.id))}>
-                        <Text style={[styles.areaChipText, form.delivery_area_id === String(a.id) && styles.areaChipActiveText]}>{a.name_mm || a.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </ScrollView>
-              </>
-            )}
           </View>
         </View>
 
@@ -468,12 +438,6 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
   segmentActiveText: { color: COLORS.white },
-  areaChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: COLORS.border, backgroundColor: COLORS.background },
-  areaChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  areaChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
-  areaChipActiveText: { color: COLORS.white },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
   switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text,
     fontFamily: 'NotoSansMyanmar_600SemiBold',

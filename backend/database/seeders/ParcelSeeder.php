@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\DeliveryArea;
 use App\Models\Parcel;
 use App\Models\ParcelImage;
 use App\Models\User;
@@ -13,7 +12,6 @@ class ParcelSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('email', 'admin@gmail.com')->firstOrFail();
-        $areas = DeliveryArea::pluck('id')->toArray();
 
         $burmeseNames = [
             'မောင်အောင်ကျော်', 'မသန်းဒါး', 'ကိုဇင်ဖြိုး', 'ဦးကျော်ဝင်း', 'ဒေါ်စုစု',
@@ -67,7 +65,6 @@ class ParcelSeeder extends Seeder
             $sender = $senders[($i - 1) % count($senders)];
             $description = $descriptions[($i - 1) % count($descriptions)];
             $priority = $priorities[($i - 1) % count($priorities)];
-            $areaId = $areas[($i - 1) % max(count($areas), 1)] ?? null;
             $quantity = ($i % 5) + 1;
 
             $parcel = [
@@ -77,7 +74,6 @@ class ParcelSeeder extends Seeder
                 'recipient_name'  => $recipientName,
                 'recipient_phone' => sprintf('09%09d', 944074981 + $i),
                 'delivery_address'=> $deliveryAddress,
-                'delivery_area_id'=> $areaId,
                 'description'     => $description,
                 'quantity'        => $quantity,
                 'status'          => 'RECEIVED',

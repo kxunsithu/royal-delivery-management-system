@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\BusinessSetting;
-use App\Models\DeliveryArea;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -65,67 +64,6 @@ class SettingsController extends Controller
         ActivityLog::record('settings.updated', $setting, ['value' => $oldValue], ['value' => $validated['value']]);
 
         return response()->json(['message' => "Setting '{$key}' updated"]);
-    }
-
-    // ---- DELIVERY AREAS ----
-
-    public function deliveryAreas(): JsonResponse
-    {
-        $areas = DeliveryArea::where('is_active', true)->orderBy('name')->get();
-
-        return response()->json([
-            'data' => $areas->map(fn($a) => [
-                'id' => $a->id,
-                'name' => $a->name,
-                'name_mm' => $a->name_mm,
-                'description' => $a->description,
-                'is_active' => $a->is_active,
-            ]),
-        ]);
-    }
-
-    public function storeDeliveryArea(Request $request): JsonResponse
-    {
-        $this->authorize('manageDeliveryAreas', DeliveryArea::class);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:delivery_areas,name'],
-            'name_mm' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-        ]);
-
-        $area = DeliveryArea::create([...$validated, 'is_active' => true]);
-
-        return response()->json([
-            'data' => $area->toArray(),
-            'message' => 'Delivery area created',
-        ], 201);
-    }
-
-    public function updateDeliveryArea(Request $request, DeliveryArea $area): JsonResponse
-    {
-        $this->authorize('manageDeliveryAreas', DeliveryArea::class);
-
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255', Rule::unique('delivery_areas')->ignore($area->id)],
-            'name_mm' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
-
-        $area->update($validated);
-
-        return response()->json([
-            'data' => $area->fresh()->toArray(),
-            'message' => 'Delivery area updated',
-        ]);
-    }
-
-    public function destroyDeliveryArea(DeliveryArea $area): JsonResponse
-    {
-        $this->authorize('manageDeliveryAreas', DeliveryArea::class);
-        $area->update(['is_active' => false]);
-        return response()->json(['message' => 'Delivery area deactivated']);
     }
 
     // ---- ACTIVITY LOGS ----

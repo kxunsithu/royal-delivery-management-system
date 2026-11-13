@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use App\Models\ActivityLog;
 use App\Models\BusinessSetting;
-use App\Models\DeliveryArea;
 use App\Models\DeliveryAssignment;
 use App\Models\Parcel;
 use App\Models\User;
@@ -40,10 +39,6 @@ class AppServiceProvider extends ServiceProvider
                 return $user->isAdmin();
             }
             return false;
-        });
-
-        Gate::define('manageDeliveryAreas', function (User $user) {
-            return $user->isAdmin() || $user->isManager();
         });
 
         Gate::define('viewAuditLogs', function (User $user) {

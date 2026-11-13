@@ -79,7 +79,7 @@ class ParcelController extends Controller
 
         $user = $request->user();
 
-        $query = Parcel::with(['deliveryArea', 'receivedBy', 'activeAssignment.staff', 'images' => function ($q) {
+        $query = Parcel::with(['receivedBy', 'activeAssignment.staff', 'images' => function ($q) {
             $q->orderBy('sort_order')->limit(1);
         }])
             ->when($request->search, fn($q) => $q->where(function ($sq) use ($request) {
@@ -92,7 +92,6 @@ class ParcelController extends Controller
                     ->orWhereRaw('LOWER(delivery_address) LIKE ?', [$term]);
             }))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->delivery_area_id, fn($q) => $q->where('delivery_area_id', $request->delivery_area_id))
             ->when($request->priority, fn($q) => $q->where('priority', $request->priority))
             ->when($request->date_from, fn($q) => $q->whereDate('received_at', '>=', $request->date_from))
             ->when($request->date_to, fn($q) => $q->whereDate('received_at', '<=', $request->date_to))
@@ -130,7 +129,6 @@ class ParcelController extends Controller
             'recipient_name' => ['required', 'string', 'max:255'],
             'recipient_phone' => ['required', 'string', 'max:30'],
             'delivery_address' => ['required', 'string'],
-            'delivery_area_id' => ['nullable', 'integer', 'exists:delivery_areas,id'],
             'description' => ['nullable', 'string'],
             'quantity' => ['integer', 'min:1'],
             'weight' => ['nullable', 'numeric', 'min:0'],
@@ -175,7 +173,7 @@ class ParcelController extends Controller
             DB::commit();
 
             return response()->json([
-                'data' => $this->formatParcel($parcel->load(['deliveryArea', 'receivedBy'])),
+                'data' => $this->formatParcel($parcel->load(['receivedBy'])),
                 'message' => 'Parcel registered successfully',
             ], 201);
 
@@ -190,7 +188,6 @@ class ParcelController extends Controller
         $this->authorize('view', $parcel);
 
         $parcel->load([
-            'deliveryArea',
             'receivedBy',
             'statusHistories.changedBy',
             'deliveryAssignments.staff',
@@ -220,7 +217,6 @@ class ParcelController extends Controller
             'recipient_name' => ['sometimes', 'string', 'max:255'],
             'recipient_phone' => ['sometimes', 'string', 'max:30'],
             'delivery_address' => ['sometimes', 'string'],
-            'delivery_area_id' => ['nullable', 'integer', 'exists:delivery_areas,id'],
             'description' => ['nullable', 'string'],
             'quantity' => ['sometimes', 'integer', 'min:1'],
             'weight' => ['nullable', 'numeric', 'min:0'],
@@ -240,7 +236,7 @@ class ParcelController extends Controller
         ActivityLog::record('parcel.updated', $parcel, $oldValues, $parcel->fresh()->toArray());
 
         return response()->json([
-            'data' => $this->formatParcel($parcel->fresh(['deliveryArea', 'receivedBy'])),
+            'data' => $this->formatParcel($parcel->fresh(['receivedBy'])),
             'message' => 'Parcel updated successfully',
         ]);
     }
@@ -496,11 +492,6 @@ class ParcelController extends Controller
             'recipient_name' => $parcel->recipient_name,
             'recipient_phone' => $parcel->recipient_phone,
             'delivery_address' => $parcel->delivery_address,
-            'delivery_area' => $parcel->deliveryArea ? [
-                'id' => $parcel->deliveryArea->id,
-                'name' => $parcel->deliveryArea->name,
-                'name_mm' => $parcel->deliveryArea->name_mm,
-            ] : null,
             'description' => $parcel->description,
             'quantity' => $parcel->quantity,
             'weight' => $parcel->weight,

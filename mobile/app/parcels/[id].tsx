@@ -146,7 +146,6 @@ export default function ParcelDetailScreen() {
           <div class="row"><span class="label">လက်ခံသူ</span><span class="value">${parcel.recipient_name}</span></div>
           <div class="row"><span class="label">လက်ခံသူ ဖုန်း</span><span class="value">${parcel.recipient_phone}</span></div>
           <div class="row"><span class="label">လိပ်စာ</span><span class="value">${parcel.delivery_address}</span></div>
-          ${parcel.delivery_area ? `<div class="row"><span class="label">ဒေသ</span><span class="value">${parcel.delivery_area.name_mm || parcel.delivery_area.name}</span></div>` : ''}
           <div class="row"><span class="label">ဦးစားပေးအဆင့်</span><span class="value">${PRIORITY_LABELS_MM[parcel.priority as keyof typeof PRIORITY_LABELS_MM] || parcel.priority}</span></div>
           <div class="row"><span class="label">အရေအတွက်</span><span class="value">${parcel.quantity} ခု</span></div>
           ${parcel.weight ? `<div class="row"><span class="label">အလေးချိန်</span><span class="value">${parcel.weight} kg</span></div>` : ''}
@@ -340,7 +339,6 @@ export default function ParcelDetailScreen() {
           <InfoRow icon="person" label="နာမည်" value={parcel.recipient_name} />
           <InfoRow icon="call" label="ဖုန်းနံပါတ်" value={parcel.recipient_phone} onPress={() => Linking.openURL(`tel:${parcel.recipient_phone}`)} />
           <InfoRow icon="location" label="လိပ်စာ" value={parcel.delivery_address} />
-          {parcel.delivery_area && <InfoRow icon="map-outline" label="ဒေသ" value={parcel.delivery_area.name_mm || parcel.delivery_area.name} />}
         </InfoSection>
 
         <InfoSection title="ငွေကြေး">

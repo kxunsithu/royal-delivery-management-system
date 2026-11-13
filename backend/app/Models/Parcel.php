@@ -18,7 +18,6 @@ class Parcel extends Model
         'recipient_name',
         'recipient_phone',
         'delivery_address',
-        'delivery_area_id',
         'description',
         'quantity',
         'weight',
@@ -48,11 +47,6 @@ class Parcel extends Model
     }
 
     // Relationships
-    public function deliveryArea(): BelongsTo
-    {
-        return $this->belongsTo(DeliveryArea::class);
-    }
-
     public function receivedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'received_by_id');
@@ -87,11 +81,6 @@ class Parcel extends Model
     public function scopeByStatus($query, string $status)
     {
         return $query->where('status', $status);
-    }
-
-    public function scopeByArea($query, int $areaId)
-    {
-        return $query->where('delivery_area_id', $areaId);
     }
 
     // Helpers

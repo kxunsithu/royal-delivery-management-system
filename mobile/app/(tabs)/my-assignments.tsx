@@ -193,12 +193,6 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
             <Ionicons name="location" size={15} color={COLORS.textSecondary} />
             <Text style={styles.infoText} numberOfLines={2}>{parcel?.delivery_address}</Text>
           </View>
-          {parcel?.delivery_area && (
-            <View style={styles.infoRow}>
-              <Ionicons name="map" size={15} color={COLORS.textSecondary} />
-              <Text style={styles.infoText}>{parcel.delivery_area.name}</Text>
-            </View>
-          )}
         </View>
 
         {/* Footer */}

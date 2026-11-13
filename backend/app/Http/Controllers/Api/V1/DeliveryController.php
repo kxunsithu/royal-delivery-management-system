@@ -23,7 +23,7 @@ class DeliveryController extends Controller
     {
         $user = $request->user();
 
-        $query = DeliveryAssignment::with(['parcel.deliveryArea'])
+        $query = DeliveryAssignment::with(['parcel'])
             ->where('staff_id', $user->id)
             ->when($request->status, function ($q) use ($request) {
                 $q->where('status', $request->status);
@@ -59,7 +59,7 @@ class DeliveryController extends Controller
     {
         $this->authorize('viewAny', DeliveryAssignment::class);
 
-        $query = DeliveryAssignment::with(['parcel.deliveryArea', 'staff', 'assignedBy'])
+        $query = DeliveryAssignment::with(['parcel', 'staff', 'assignedBy'])
             ->when($request->staff_id, fn($q) => $q->where('staff_id', $request->staff_id))
             ->when($request->status, function ($q) use ($request) {
                 $q->where('status', $request->status);
@@ -85,7 +85,7 @@ class DeliveryController extends Controller
     {
         $this->authorize('view', $delivery);
 
-        $delivery->load(['parcel.deliveryArea', 'staff', 'assignedBy', 'deliveryAttempts.proofOfDeliveries']);
+        $delivery->load(['parcel', 'staff', 'assignedBy', 'deliveryAttempts.proofOfDeliveries']);
 
         return response()->json([
             'data' => $this->formatAssignment($delivery),
@@ -273,10 +273,6 @@ class DeliveryController extends Controller
                 'recipient_name' => $a->parcel->recipient_name,
                 'recipient_phone' => $a->parcel->recipient_phone,
                 'delivery_address' => $a->parcel->delivery_address,
-                'delivery_area' => $a->parcel->deliveryArea ? [
-                    'id' => $a->parcel->deliveryArea->id,
-                    'name' => $a->parcel->deliveryArea->name,
-                ] : null,
                 'status' => $a->parcel->status,
                 'delivery_fee' => $a->parcel->delivery_fee,
                 'cod_amount' => $a->parcel->cod_amount,

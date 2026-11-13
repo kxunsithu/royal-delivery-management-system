@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('recipient_name');
             $table->string('recipient_phone', 30);
             $table->text('delivery_address');
-            $table->foreignId('delivery_area_id')->nullable()->constrained('delivery_areas')->nullOnDelete();
             $table->string('description')->nullable();
             $table->integer('quantity')->default(1);
             $table->decimal('weight', 8, 3)->nullable()->comment('Weight in kilograms');
@@ -34,7 +33,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['status', 'received_at']);
-            $table->index(['delivery_area_id', 'status']);
         });
     }
 

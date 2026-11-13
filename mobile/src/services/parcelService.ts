@@ -8,7 +8,6 @@ export interface Parcel {
   recipient_name: string;
   recipient_phone: string;
   delivery_address: string;
-  delivery_area?: { id: number; name: string; name_mm?: string };
   description?: string;
   quantity: number;
   weight?: number;
@@ -90,7 +89,6 @@ export interface ParcelFilters {
   search?: string;
   status?: string;
   priority?: string;
-  delivery_area_id?: number;
   date_from?: string;
   date_to?: string;
   page?: number;

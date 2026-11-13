@@ -61,10 +61,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/settings', [SettingsController::class, 'index']);
         Route::post('/settings', [SettingsController::class, 'bulkUpdate']);
         Route::put('/settings/{key}', [SettingsController::class, 'update']);
-        Route::get('/settings/delivery-areas', [SettingsController::class, 'deliveryAreas']);
-        Route::post('/settings/delivery-areas', [SettingsController::class, 'storeDeliveryArea']);
-        Route::put('/settings/delivery-areas/{area}', [SettingsController::class, 'updateDeliveryArea']);
-        Route::delete('/settings/delivery-areas/{area}', [SettingsController::class, 'destroyDeliveryArea']);
         Route::get('/settings/activity-logs', [SettingsController::class, 'activityLogs']);
     });
 });
