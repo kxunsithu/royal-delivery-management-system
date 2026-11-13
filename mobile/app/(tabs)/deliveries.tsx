@@ -19,7 +19,6 @@ import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
   { label: 'ဆောင်ရွက်နေ', value: 'IN_PROGRESS' },
-  { label: 'စောင့်ဆိုင်း', value: 'PENDING' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
@@ -133,7 +132,7 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
   const statusColor = STATUS_COLORS[parcelStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
   const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
   const assignStatus = assignment.status;
-  const isActive = assignStatus === 'IN_PROGRESS' || assignStatus === 'PENDING';
+  const isActive = !['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignStatus ?? '');
 
   return (
     <TouchableOpacity
@@ -189,10 +188,10 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
           />
           <Text style={[styles.assignBadgeText, { color: isActive ? COLORS.primary : COLORS.success }]}>
               {assignStatus === 'IN_PROGRESS' ? 'ဆောင်ရွက်နေ'
-                : assignStatus === 'PENDING' ? 'စောင့်ဆိုင်း'
                 : assignStatus === 'COMPLETED' ? 'ပြီးစီး'
                 : assignStatus === 'FAILED' ? 'မအောင်မြင်'
-                : assignStatus}
+                : assignStatus === 'REASSIGNED' ? 'ပြောင်းလဲ'
+                : 'ဆောင်ရွက်နေ'}
             </Text>
         </View>
         {parcel?.is_cod && (
