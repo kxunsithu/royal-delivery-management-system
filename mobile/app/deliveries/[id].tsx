@@ -68,7 +68,7 @@ export default function DeliveryDetailScreen() {
 
       <ScrollView
         style={styles.scrollArea}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: isActive ? (insets.bottom + 100) : (insets.bottom + 40) }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Status hero */}
@@ -189,8 +189,12 @@ export default function DeliveryDetailScreen() {
           </View>
         )}
 
-        {/* Record attempt button */}
-        {isActive && (
+        {/* Record attempt button — inside scroll (fallback, hidden on active) */}
+      </ScrollView>
+
+      {/* Sticky footer button — always visible when assignment is active */}
+      {isActive && (
+        <View style={[styles.stickyFooter, { paddingBottom: insets.bottom + 12 }]}>
           <TouchableOpacity
             style={styles.recordBtn}
             onPress={() => router.push(`/deliveries/attempt/${id}`)}
@@ -199,8 +203,8 @@ export default function DeliveryDetailScreen() {
             <Ionicons name="add-circle" size={22} color={COLORS.white} />
             <Text style={styles.recordBtnText}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
           </TouchableOpacity>
-        )}
-      </ScrollView>
+        </View>
+      )}
     </View>
   );
 }
@@ -311,9 +315,22 @@ const styles = StyleSheet.create({
   proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   proofThumb: { width: 72, height: 72, borderRadius: 8, backgroundColor: COLORS.border },
 
+  // Sticky footer
+  stickyFooter: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   recordBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: COLORS.primary, borderRadius: 16, padding: 18, marginTop: 8,
+    backgroundColor: COLORS.primary, borderRadius: 16, padding: 18,
     shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5,
   },
   recordBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
