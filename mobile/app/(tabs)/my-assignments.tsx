@@ -41,7 +41,10 @@ export default function MyAssignmentsScreen() {
   const assignments = data?.data ?? [];
   const meta = data?.meta;
 
-  const activeCount = statusFilter === 'IN_PROGRESS' ? (meta?.total ?? 0) : (data?.data ?? []).filter((a: Assignment) => a.status === 'IN_PROGRESS' || a.status === 'PENDING').length;
+  // Use backend-computed counts (accurate across all pages/filters)
+  const activeCount    = meta?.active_count    ?? (data?.data ?? []).filter((a: Assignment) => a.status === 'IN_PROGRESS' || a.status === 'PENDING').length;
+  const completedCount = meta?.completed_count ?? (data?.data ?? []).filter((a: Assignment) => a.status === 'COMPLETED').length;
+  const totalCount     = meta?.total_count     ?? (meta?.total ?? 0);
 
   return (
     <View style={styles.container}>
@@ -53,24 +56,24 @@ export default function MyAssignmentsScreen() {
           </View>
           <View style={styles.headerCountBadge}>
             <Ionicons name="bicycle" size={16} color={COLORS.primary} />
-            <Text style={styles.headerCountText}>{meta?.total ?? 0}</Text>
+            <Text style={styles.headerCountText}>{totalCount}</Text>
           </View>
         </View>
 
         {/* Quick stat strip */}
         <View style={styles.statStrip}>
           <View style={styles.statItem}>
-            <Text style={styles.statNum}>{(data?.data ?? []).filter((a: Assignment) => a.status === 'IN_PROGRESS' || a.status === 'PENDING').length}</Text>
+            <Text style={styles.statNum}>{activeCount}</Text>
             <Text style={styles.statLabel}>ဆောင်ရွက်နေ</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNum}>{(data?.data ?? []).filter((a: Assignment) => a.status === 'COMPLETED').length}</Text>
+            <Text style={styles.statNum}>{completedCount}</Text>
             <Text style={styles.statLabel}>ပြီးစီး</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNum}>{meta?.total ?? 0}</Text>
+            <Text style={styles.statNum}>{totalCount}</Text>
             <Text style={styles.statLabel}>စုစုပေါင်း</Text>
           </View>
         </View>

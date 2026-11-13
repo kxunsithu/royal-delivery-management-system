@@ -48,9 +48,6 @@ export default function DashboardScreen() {
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
           <View style={styles.headerLeft}>
-            <View style={styles.greetingRow}>
-              <Text style={styles.greeting}>မင်္ဂလာပါ 👋</Text>
-            </View>
             <Text style={styles.username} numberOfLines={1}>
               {user?.name ?? 'အသုံးပြုသူ'}
             </Text>

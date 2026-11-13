@@ -32,13 +32,22 @@ class DeliveryController extends Controller
 
         $assignments = $query->paginate($request->per_page ?? 20);
 
+        // Real counts (always from full dataset, not filtered page)
+        $baseQuery = DeliveryAssignment::where('staff_id', $user->id);
+        $activeCount    = (clone $baseQuery)->whereIn('status', ['IN_PROGRESS', 'PENDING'])->count();
+        $completedCount = (clone $baseQuery)->where('status', 'COMPLETED')->count();
+        $totalCount     = (clone $baseQuery)->count();
+
         return response()->json([
             'data' => $assignments->map(fn($a) => $this->formatAssignment($a)),
             'meta' => [
-                'current_page' => $assignments->currentPage(),
-                'last_page' => $assignments->lastPage(),
-                'per_page' => $assignments->perPage(),
-                'total' => $assignments->total(),
+                'current_page'    => $assignments->currentPage(),
+                'last_page'       => $assignments->lastPage(),
+                'per_page'        => $assignments->perPage(),
+                'total'           => $assignments->total(),
+                'active_count'    => $activeCount,
+                'completed_count' => $completedCount,
+                'total_count'     => $totalCount,
             ],
         ]);
     }

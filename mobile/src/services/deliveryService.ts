@@ -39,6 +39,10 @@ export interface AssignmentsResponse {
     last_page: number;
     per_page: number;
     total: number;
+    // Real counts from backend (always from full dataset)
+    active_count?: number;
+    completed_count?: number;
+    total_count?: number;
   };
 }
 
