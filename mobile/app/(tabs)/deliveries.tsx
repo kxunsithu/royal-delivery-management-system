@@ -18,14 +18,15 @@ import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
+  { label: 'ဆောင်ရွက်နေ', value: 'IN_PROGRESS' },
+  { label: 'စောင့်ဆိုင်း', value: 'PENDING' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
-  { label: 'ပြောင်းလဲ', value: 'REASSIGNED' },
+  { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
 
 export default function DeliveriesScreen() {
   const insets = useSafeAreaInsets();
-  const [statusFilter, setStatusFilter] = useState('ACTIVE');
+  const [statusFilter, setStatusFilter] = useState('IN_PROGRESS');
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isFetching, refetch } = useQuery({
@@ -132,7 +133,7 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
   const statusColor = STATUS_COLORS[parcelStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
   const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
   const assignStatus = assignment.status;
-  const isActive = assignStatus === 'ACTIVE';
+  const isActive = assignStatus === 'IN_PROGRESS' || assignStatus === 'PENDING';
 
   return (
     <TouchableOpacity
@@ -187,8 +188,12 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
             color={isActive ? COLORS.primary : COLORS.success}
           />
           <Text style={[styles.assignBadgeText, { color: isActive ? COLORS.primary : COLORS.success }]}>
-            {assignStatus === 'ACTIVE' ? 'ဆောင်ရွက်နေ' : assignStatus === 'COMPLETED' ? 'ပြီးစီး' : 'ပြောင်းလဲ'}
-          </Text>
+              {assignStatus === 'IN_PROGRESS' ? 'ဆောင်ရွက်နေ'
+                : assignStatus === 'PENDING' ? 'စောင့်ဆိုင်း'
+                : assignStatus === 'COMPLETED' ? 'ပြီးစီး'
+                : assignStatus === 'FAILED' ? 'မအောင်မြင်'
+                : assignStatus}
+            </Text>
         </View>
         {parcel?.is_cod && (
           <View style={styles.codBadge}>

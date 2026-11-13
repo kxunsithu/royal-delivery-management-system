@@ -31,7 +31,7 @@ class DeliveryAssignmentPolicy
         // Delivery staff can only record for their own active assignments
         return $user->isDeliveryStaff()
             && $assignment->staff_id === $user->id
-            && $assignment->status === 'ACTIVE';
+            && in_array($assignment->status, ['IN_PROGRESS', 'PENDING']);
     }
 
     public function viewWorkload(User $user): bool

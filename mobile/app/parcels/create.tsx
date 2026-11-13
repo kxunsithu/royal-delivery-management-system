@@ -118,6 +118,8 @@ export default function CreateParcelScreen() {
   // ── Sender autocomplete ──────────────────────────────────────────────────────
   function handleSenderInput(field: 'sender_name' | 'sender_phone', value: string) {
     update(field, value);
+    // Close recipient suggestions when typing in sender section
+    setShowRecipientSug(false);
     clearTimeout(senderDebounce.current);
     if (value.trim().length < 1) { setSenderSuggestions([]); setShowSenderSug(false); return; }
     senderDebounce.current = setTimeout(async () => {
@@ -139,6 +141,8 @@ export default function CreateParcelScreen() {
   // ── Recipient autocomplete ───────────────────────────────────────────────────
   function handleRecipientInput(field: 'recipient_name' | 'recipient_phone', value: string) {
     update(field, value);
+    // Close sender suggestions when typing in recipient section
+    setShowSenderSug(false);
     clearTimeout(recipientDebounce.current);
     if (value.trim().length < 1) { setRecipientSuggestions([]); setShowRecipientSug(false); return; }
     recipientDebounce.current = setTimeout(async () => {
@@ -343,6 +347,7 @@ export default function CreateParcelScreen() {
               style={styles.textInput}
               value={form.sender_phone}
               onChangeText={v => handleSenderInput('sender_phone', v)}
+              onFocus={() => setShowRecipientSug(false)}
               placeholder="09..."
               placeholderTextColor={COLORS.textLight}
               keyboardType="phone-pad"
@@ -356,6 +361,7 @@ export default function CreateParcelScreen() {
               style={styles.textInput}
               value={form.sender_name}
               onChangeText={v => handleSenderInput('sender_name', v)}
+              onFocus={() => setShowRecipientSug(false)}
               placeholder="ပေးပို့သူ နာမည်"
               placeholderTextColor={COLORS.textLight}
             />
@@ -393,6 +399,7 @@ export default function CreateParcelScreen() {
               style={[styles.textInput, !!errors.recipient_phone && styles.inputError]}
               value={form.recipient_phone}
               onChangeText={v => handleRecipientInput('recipient_phone', v)}
+              onFocus={() => setShowSenderSug(false)}
               placeholder="09..."
               placeholderTextColor={COLORS.textLight}
               keyboardType="phone-pad"
@@ -407,6 +414,7 @@ export default function CreateParcelScreen() {
               style={[styles.textInput, !!errors.recipient_name && styles.inputError]}
               value={form.recipient_name}
               onChangeText={v => handleRecipientInput('recipient_name', v)}
+              onFocus={() => setShowSenderSug(false)}
               placeholder="လက်ခံသူ နာမည်"
               placeholderTextColor={COLORS.textLight}
             />
