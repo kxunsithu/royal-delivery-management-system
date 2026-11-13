@@ -26,7 +26,7 @@ const STATUS_FILTERS = [
 
 export default function MyAssignmentsScreen() {
   const insets = useSafeAreaInsets();
-  const [statusFilter, setStatusFilter] = useState('IN_PROGRESS');
+  const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isFetching, refetch } = useQuery({
