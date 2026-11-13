@@ -168,12 +168,12 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
     { label: 'မအောင်မြင်', value: stats?.failed ?? 0, icon: 'close-circle', color: COLORS.error, bg: '#FDE8E8' },
     { label: 'အောင်မြင်မှုနှုန်း', value: `${stats?.delivery_success_rate ?? 0}%`, icon: 'trending-up', color: '#8B5CF6', bg: '#F3F0FF' },
   ] : [
-    { label: 'လက်ခံပြီး', value: stats?.received ?? 0, icon: 'download', color: COLORS.statusReceived, bg: '#E8F4FB' },
+    { label: 'လက်ခံ', value: stats?.received ?? 0, icon: 'download', color: COLORS.statusReceived, bg: '#E8F4FB' },
     { label: 'စစ်ဆေးပြီး', value: stats?.verified ?? 0, icon: 'shield-checkmark', color: COLORS.statusVerified, bg: '#F3E8FB' },
-    { label: 'ပို့ဆောင်နေဆဲ', value: stats?.out_for_delivery ?? 0, icon: 'car', color: COLORS.statusInTransit, bg: '#FEF3E2' },
+    { label: 'ဆောင်ရွက်နေဆဲ', value: stats?.out_for_delivery ?? 0, icon: 'car', color: COLORS.statusInTransit, bg: '#FEF3E2' },
     { label: 'ပို့ဆောင်ပြီး', value: stats?.delivered ?? 0, icon: 'checkmark-circle', color: COLORS.success, bg: '#E8F8EF' },
     { label: 'မအောင်မြင်', value: stats?.failed ?? 0, icon: 'close-circle', color: COLORS.error, bg: '#FDE8E8' },
-    { label: 'ပျက်စီး/ဆုံးရှုံး', value: stats?.damaged ?? 0, icon: 'warning', color: COLORS.statusDamaged, bg: '#FDE8E8' },
+    { label: 'ပျက်ဆီး', value: stats?.damaged ?? 0, icon: 'warning', color: COLORS.statusDamaged, bg: '#FDE8E8' },
   ];
 
   return (

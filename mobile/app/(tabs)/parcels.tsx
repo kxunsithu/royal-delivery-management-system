@@ -25,12 +25,12 @@ import ConfirmModal from '../../src/components/ConfirmModal';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'လက်ခံပြီး', value: 'RECEIVED' },
+  { label: 'လက်ခံ', value: 'RECEIVED' },
   { label: 'စစ်ဆေးပြီး', value: 'VERIFIED' },
-  { label: 'ပို့ဆောင်နေ', value: 'IN_TRANSIT' },
+  { label: 'ဆောင်ရွက်နေဆဲ', value: 'IN_TRANSIT' },
   { label: 'ပို့ဆောင်ပြီး', value: 'DELIVERED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
-  { label: 'ပျက်စီး', value: 'DAMAGED' },
+  { label: 'ပျက်ဆီး', value: 'DAMAGED' },
 ];
 
 export default function ParcelsScreen() {

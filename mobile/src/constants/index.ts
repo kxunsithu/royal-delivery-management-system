@@ -47,12 +47,12 @@ export const PARCEL_STATUSES = {
 };
 
 export const STATUS_LABELS_MM = {
-  RECEIVED: 'လက်ခံပြီး',
-  VERIFIED: 'စစ်ဆေးပြီး',
-  IN_TRANSIT: 'ပို့ဆောင်နေဆဲ',
-  DELIVERED: 'ပို့ဆောင်ပြီး',
-  FAILED: 'မအောင်မြင်',
-  DAMAGED: 'ပျက်စီး/ဆုံးရှုံး',
+  RECEIVED:   'လက်ခံ',
+  VERIFIED:   'စစ်ဆေးပြီး',
+  IN_TRANSIT: 'ဆောင်ရွက်နေဆဲ',
+  DELIVERED:  'ပို့ဆောင်ပြီး',
+  FAILED:     'မအောင်မြင်',
+  DAMAGED:    'ပျက်ဆီး',
 };
 
 export const STATUS_COLORS = {
