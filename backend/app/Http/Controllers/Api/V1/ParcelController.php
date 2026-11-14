@@ -556,7 +556,34 @@ class ParcelController extends Controller
             'failure_reason' => $da->failure_reason,
             'recipient_name' => $da->recipient_name,
             'notes' => $da->notes,
+            'proof_photos' => $da->relationLoaded('proofOfDeliveries')
+                ? $da->proofOfDeliveries->map(fn($p) => [
+                    'id'       => $p->id,
+                    'type'     => $p->type,
+                    'file_url' => $p->file_url,
+                    'notes'    => $p->notes,
+                ])->values()->all()
+                : [],
         ]);
+
+        $base['proof_photos'] = $parcel->deliveryAttempts
+            ->flatMap(function ($da) {
+                if (!$da->relationLoaded('proofOfDeliveries')) {
+                    return [];
+                }
+                return $da->proofOfDeliveries->map(fn($p) => [
+                    'id'             => $p->id,
+                    'type'           => $p->type,
+                    'file_url'       => $p->file_url,
+                    'notes'          => $p->notes,
+                    'attempt_result' => $da->result,
+                    'recipient_name' => $da->recipient_name,
+                    'attempted_at'   => $da->attempted_at?->toISOString(),
+                ]);
+            })
+            ->filter(fn($p) => !empty($p['file_url']))
+            ->values()
+            ->all();
 
         $base['damage_description'] = $parcel->damage_description;
         $base['images'] = $parcel->images->map(fn($img) => $this->formatImage($img))->values()->all();

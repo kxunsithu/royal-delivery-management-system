@@ -29,6 +29,7 @@ export interface Parcel {
   status_histories?: StatusHistory[];
   delivery_assignments?: DeliveryAssignment[];
   delivery_attempts?: DeliveryAttempt[];
+  proof_photos?: ProofPhoto[];
   damage_description?: string;
   images?: ParcelImage[];
   created_at: string;
@@ -63,6 +64,17 @@ export interface DeliveryAttempt {
   failure_reason?: string;
   recipient_name?: string;
   notes?: string;
+  proof_photos?: { id: number; type: string; file_url: string | null; notes?: string }[];
+}
+
+export interface ProofPhoto {
+  id: number;
+  type?: string;
+  file_url: string;
+  notes?: string;
+  attempt_result?: string;
+  recipient_name?: string;
+  attempted_at?: string;
 }
 
 export interface ParcelImage {

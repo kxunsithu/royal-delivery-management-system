@@ -96,11 +96,42 @@ export default function ParcelDetailScreen() {
 
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
+  const [proofPreviewVisible, setProofPreviewVisible] = useState(false);
+  const [proofPreviewIndex, setProofPreviewIndex] = useState(0);
   const [staffSearch, setStaffSearch] = useState('');
   const [targetStatus, setTargetStatus] = useState<string | null>(null);
   const [transitionReason, setTransitionReason] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [assignTarget, setAssignTarget] = useState<{ id: number; name: string } | null>(null);
+
+  // Delivery proof photos (when parcel is delivered or has attempt proofs)
+  const deliveryProofs = React.useMemo(() => {
+    if (!parcel) return [];
+    if (parcel.proof_photos && parcel.proof_photos.length > 0) {
+      return parcel.proof_photos.map((p, idx) => ({
+        id: p.id || `proof-${idx}`,
+        url: p.file_url,
+        notes: p.notes,
+        recipient_name: p.recipient_name,
+        attempted_at: p.attempted_at,
+      }));
+    }
+    const list: { id: number | string; url: string; notes?: string; recipient_name?: string; attempted_at?: string }[] = [];
+    parcel.delivery_attempts?.forEach(da => {
+      da.proof_photos?.forEach((p, idx) => {
+        if (p.file_url) {
+          list.push({
+            id: p.id || `attempt-${da.id}-${idx}`,
+            url: p.file_url,
+            notes: p.notes || da.notes,
+            recipient_name: da.recipient_name,
+            attempted_at: da.attempted_at,
+          });
+        }
+      });
+    });
+    return list;
+  }, [parcel]);
 
   const isTerminal = parcel?.status === 'DELIVERED' || parcel?.status === 'DAMAGED';
 
@@ -153,6 +184,7 @@ export default function ParcelDetailScreen() {
           <div class="row"><span class="label">ပို့ဆောင်ခ</span><span class="value">${Number(parcel.delivery_fee).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>
           ${parcel.is_cod ? `<div class="row"><span class="label">COD ပမာဏ</span><span class="value">${Number(parcel.cod_amount).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>` : ''}
           ${parcel.active_assignment?.staff?.name ? `<div class="row"><span class="label">ချိတ်ဆက်ထားသောဝန်ထမ်း</span><span class="value">${parcel.active_assignment.staff.name}</span></div>` : ''}
+          ${deliveryProofs.length > 0 ? `<div class="row"><span class="label">ပို့ဆောင်မှုသက်သေ</span><span class="value">${deliveryProofs.length} ပုံ</span></div>` : ''}
           <div class="footer">ကျေးဇူးတင်ပါသည်။</div>
         </body>
       </html>
@@ -351,6 +383,84 @@ export default function ParcelDetailScreen() {
           <InfoSection title="ချိတ်ဆက်ထားသောဝန်ထမ်း">
             <InfoRow icon="bicycle" label="ဝန်ထမ်း" value={parcel.active_assignment.staff?.name || '-'} />
           </InfoSection>
+        )}
+
+        {/* Delivery Proof Photos (when parcel has delivery proof photos) */}
+        {deliveryProofs.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.proofHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="shield-checkmark" size={18} color={COLORS.success} />
+                <Text style={styles.sectionTitle}>ပို့ဆောင်ပြီးစီးမှု သက်သေ</Text>
+              </View>
+              <View style={styles.proofBadge}>
+                <Text style={styles.proofBadgeText}>{deliveryProofs.length} ပုံ</Text>
+              </View>
+            </View>
+
+            <View style={styles.proofCard}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.proofScroll}>
+                {deliveryProofs.map((proof, index) => (
+                  <TouchableOpacity
+                    key={proof.id || index}
+                    onPress={() => {
+                      setProofPreviewIndex(index);
+                      setProofPreviewVisible(true);
+                    }}
+                    activeOpacity={0.85}
+                    style={styles.proofThumbWrap}
+                  >
+                    <Image source={{ uri: proof.url }} style={styles.proofThumbImage} />
+                    <View style={styles.proofTapHint}>
+                      <Ionicons name="expand-outline" size={14} color={COLORS.white} />
+                    </View>
+                    {proof.notes ? (
+                      <Text style={styles.proofThumbNote} numberOfLines={1}>{proof.notes}</Text>
+                    ) : null}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              {deliveryProofs.some(p => p.recipient_name || p.notes || p.attempted_at) && (
+                <View style={styles.proofInfoBox}>
+                  {deliveryProofs.find(p => p.recipient_name)?.recipient_name ? (
+                    <View style={styles.proofDetailRow}>
+                      <Ionicons name="person-outline" size={14} color={COLORS.textSecondary} />
+                      <Text style={styles.proofDetailLabel}>လက်ခံသူ:</Text>
+                      <Text style={styles.proofDetailValue}>
+                        {deliveryProofs.find(p => p.recipient_name)?.recipient_name}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {deliveryProofs.find(p => p.attempted_at)?.attempted_at ? (
+                    <View style={styles.proofDetailRow}>
+                      <Ionicons name="time-outline" size={14} color={COLORS.textSecondary} />
+                      <Text style={styles.proofDetailLabel}>အချိန်:</Text>
+                      <Text style={styles.proofDetailValue}>
+                        {new Date(deliveryProofs.find(p => p.attempted_at)!.attempted_at!).toLocaleString('my-MM')}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {deliveryProofs.find(p => p.notes)?.notes ? (
+                    <View style={styles.proofDetailRow}>
+                      <Ionicons name="chatbubble-outline" size={14} color={COLORS.textSecondary} />
+                      <Text style={styles.proofDetailLabel}>မှတ်ချက်:</Text>
+                      <Text style={[styles.proofDetailValue, { fontStyle: 'italic' }]}>
+                        {deliveryProofs.find(p => p.notes)?.notes}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              )}
+            </View>
+
+            <ImagePreviewModal
+              visible={proofPreviewVisible}
+              images={deliveryProofs}
+              initialIndex={proofPreviewIndex}
+              onClose={() => setProofPreviewVisible(false)}
+            />
+          </View>
         )}
 
         {/* Status Transitions */}
@@ -956,5 +1066,86 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     backgroundColor: '#F9FAFB',
     fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+
+  // Proof of delivery section styles
+  proofHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  proofBadge: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  proofBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.success,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  proofCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  proofScroll: {
+    marginBottom: 8,
+  },
+  proofThumbWrap: {
+    marginRight: 10,
+    position: 'relative',
+  },
+  proofThumbImage: {
+    width: 140,
+    height: 110,
+    borderRadius: 10,
+    backgroundColor: COLORS.border,
+  },
+  proofTapHint: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  proofThumbNote: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    maxWidth: 140,
+    marginTop: 4,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  proofInfoBox: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: 8,
+    marginTop: 4,
+    gap: 6,
+  },
+  proofDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  proofDetailLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  proofDetailValue: {
+    fontSize: 13,
+    color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_500Medium',
+    flex: 1,
   },
 });
