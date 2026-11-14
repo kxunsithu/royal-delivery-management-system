@@ -51,12 +51,12 @@ class DeliveryAssignmentSeeder extends Seeder
             $scenario = $index % 5; // 0=DELIVERED, 1=FAILED, 2=IN_TRANSIT(attempted), 3=IN_TRANSIT(fresh), 4=PENDING
 
             if ($scenario === 4) {
-                // ── Assignment (in progress) ───────────────
+                // ── Assignment (active) ───────────────
                 DeliveryAssignment::create([
                     'parcel_id'      => $parcel->id,
                     'staff_id'       => $assignedStaff->id,
                     'assigned_by_id' => $assignedBy->id,
-                    'status'         => 'IN_PROGRESS',
+                    'status'         => 'ACTIVE',
                     'assigned_at'    => $assignedAt,
                     'notes'          => 'ပို့ဆောင်ရန် တာဝန်ပေးထားသည်',
                 ]);
@@ -72,7 +72,7 @@ class DeliveryAssignmentSeeder extends Seeder
                     'parcel_id'      => $parcel->id,
                     'staff_id'       => $assignedStaff->id,
                     'assigned_by_id' => $assignedBy->id,
-                    'status'         => 'IN_PROGRESS',
+                    'status'         => 'ACTIVE',
                     'assigned_at'    => $assignedAt,
                 ]);
 
@@ -87,7 +87,7 @@ class DeliveryAssignmentSeeder extends Seeder
                     'parcel_id'      => $parcel->id,
                     'staff_id'       => $assignedStaff->id,
                     'assigned_by_id' => $assignedBy->id,
-                    'status'         => 'IN_PROGRESS',
+                    'status'         => 'ACTIVE',
                     'assigned_at'    => $assignedAt,
                 ]);
 

@@ -18,7 +18,6 @@ import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'ဆောင်ရွက်နေ', value: 'IN_PROGRESS' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
@@ -187,12 +186,11 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
             color={isActive ? COLORS.primary : COLORS.success}
           />
           <Text style={[styles.assignBadgeText, { color: isActive ? COLORS.primary : COLORS.success }]}>
-              {assignStatus === 'IN_PROGRESS' ? 'ဆောင်ရွက်နေ'
-                : assignStatus === 'COMPLETED' ? 'ပြီးစီး'
-                : assignStatus === 'FAILED' ? 'မအောင်မြင်'
-                : assignStatus === 'REASSIGNED' ? 'ပြောင်းလဲ'
-                : 'ဆောင်ရွက်နေ'}
-            </Text>
+            {assignStatus === 'COMPLETED' ? 'ပြီးစီး'
+              : assignStatus === 'FAILED' ? 'မအောင်မြင်'
+              : assignStatus === 'REASSIGNED' ? 'ပြောင်းလဲ'
+              : 'ဆောင်ရွက်ဆဲ'}
+          </Text>
         </View>
         {parcel?.is_cod && (
           <View style={styles.codBadge}>

@@ -370,7 +370,7 @@ class ParcelController extends Controller
                 'parcel_id' => $parcel->id,
                 'staff_id' => $validated['staff_id'],
                 'assigned_by_id' => $request->user()->id,
-                'status' => 'IN_PROGRESS',
+                'status' => 'ACTIVE',
                 'notes' => $validated['notes'] ?? null,
                 'assigned_at' => now(),
             ]);
