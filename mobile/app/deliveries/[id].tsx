@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { deliveryService } from '../../src/services/deliveryService';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
+import ImagePreviewModal, { PreviewImage } from '../../src/components/ImagePreviewModal';
 
 export default function DeliveryDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  // Proof photo preview state
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewImages, setPreviewImages] = useState<PreviewImage[]>([]);
+  const [previewIndex, setPreviewIndex] = useState(0);
 
   const { data: assignment, isLoading } = useQuery({
     queryKey: ['assignment', id],
@@ -172,8 +178,26 @@ export default function DeliveryDetailScreen() {
                         </Text>
                       </View>
                       <View style={styles.proofGrid}>
-                        {attempt.proof_photos.map((p: any) => (
-                          <Image key={p.id} source={{ uri: p.file_url }} style={styles.proofThumb} />
+                        {attempt.proof_photos.map((p: any, pIdx: number) => (
+                          <TouchableOpacity
+                            key={p.id || pIdx}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                              const imgs: PreviewImage[] = attempt.proof_photos.map((item: any, i: number) => ({
+                                id: item.id || `proof-${i}`,
+                                url: item.file_url,
+                              }));
+                              setPreviewImages(imgs);
+                              setPreviewIndex(pIdx);
+                              setPreviewVisible(true);
+                            }}
+                            style={styles.proofThumbWrap}
+                          >
+                            <Image source={{ uri: p.file_url }} style={styles.proofThumb} />
+                            <View style={styles.proofExpandBadge}>
+                              <Ionicons name="expand-outline" size={12} color={COLORS.white} />
+                            </View>
+                          </TouchableOpacity>
                         ))}
                       </View>
                     </View>
@@ -200,6 +224,14 @@ export default function DeliveryDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        visible={previewVisible}
+        images={previewImages}
+        initialIndex={previewIndex}
+        onClose={() => setPreviewVisible(false)}
+      />
     </View>
   );
 }
@@ -307,8 +339,24 @@ const styles = StyleSheet.create({
   proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary,
     fontFamily: 'NotoSansMyanmar_700Bold',
   },
-  proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  proofThumbWrap: {
+    position: 'relative',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
   proofThumb: { width: 72, height: 72, borderRadius: 8, backgroundColor: COLORS.border },
+  proofExpandBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // Sticky footer
   stickyFooter: {

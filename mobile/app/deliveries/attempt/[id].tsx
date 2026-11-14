@@ -18,6 +18,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { deliveryService } from '../../../src/services/deliveryService';
 import { COLORS } from '../../../src/constants';
+import ImagePreviewModal, { PreviewImage } from '../../../src/components/ImagePreviewModal';
 
 const FAILURE_REASONS = [
   { value: 'RECIPIENT_UNAVAILABLE', label: 'လက်ခံသူ မရှိ' },
@@ -45,6 +46,8 @@ export default function RecordAttemptScreen() {
   // Photo proof state
   const [proofPhotos, setProofPhotos] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const [uploadingProof, setUploadingProof] = useState(false);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
 
   // Hidden web file input ref
   const webFileRef = React.useRef<HTMLInputElement | null>(null);
@@ -371,7 +374,19 @@ export default function RecordAttemptScreen() {
               <View style={styles.photoGrid}>
                 {proofPhotos.map((photo, idx) => (
                   <View key={idx} style={styles.photoThumbWrap}>
-                    <Image source={{ uri: photo.uri }} style={styles.photoThumb} />
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      onPress={() => {
+                        setPreviewIndex(idx);
+                        setPreviewVisible(true);
+                      }}
+                      style={{ flex: 1, width: '100%', height: '100%' }}
+                    >
+                      <Image source={{ uri: photo.uri }} style={styles.photoThumb} />
+                      <View style={styles.photoPreviewHint}>
+                        <Ionicons name="expand-outline" size={13} color={COLORS.white} />
+                      </View>
+                    </TouchableOpacity>
                     <TouchableOpacity style={styles.photoRemoveBtn} onPress={() => removeProofPhoto(idx)}>
                       <Ionicons name="close-circle" size={22} color={COLORS.error} />
                     </TouchableOpacity>
@@ -441,6 +456,18 @@ export default function RecordAttemptScreen() {
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Proof Photo Preview Modal */}
+      <ImagePreviewModal
+        visible={previewVisible}
+        images={proofPhotos.map((p, i) => ({
+          id: i,
+          url: p.uri,
+          original_name: p.fileName || `သက်သေပုံ #${i + 1}`,
+        }))}
+        initialIndex={previewIndex}
+        onClose={() => setPreviewVisible(false)}
+      />
     </View>
   );
 }
@@ -517,6 +544,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2,
   },
   photoIndexText: { fontSize: 11, color: COLORS.white, fontWeight: '700' },
+  photoPreviewHint: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 8,
+    width: 22,
+    height: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   noPhotoBox: {
     alignItems: 'center', paddingVertical: 24, borderRadius: 12,
     borderWidth: 1.5, borderColor: COLORS.border, borderStyle: 'dashed', backgroundColor: COLORS.white,
