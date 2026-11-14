@@ -189,14 +189,14 @@ class DeliveryController extends Controller
      */
     public function uploadProof(Request $request, DeliveryAssignment $delivery): JsonResponse
     {
-        $this->authorize('recordAttempt', $delivery);
+        $this->authorize('uploadProof', $delivery);
 
         $validated = $request->validate([
             'delivery_attempt_id' => ['required', 'integer', 'exists:delivery_attempts,id'],
             'type'                => ['required', 'string', Rule::in(['PHOTO', 'SIGNATURE', 'RECIPIENT_NAME'])],
-            'file'                => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'file'                => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,heic,heif,pdf', 'max:10240'],
             'files'               => ['nullable', 'array', 'max:5'],
-            'files.*'             => ['file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'files.*'             => ['file', 'mimes:jpg,jpeg,png,webp,heic,heif,pdf', 'max:10240'],
             'notes'               => ['nullable', 'string'],
         ]);
 

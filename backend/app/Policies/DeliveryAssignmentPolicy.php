@@ -34,6 +34,17 @@ class DeliveryAssignmentPolicy
             && !in_array($assignment->status, ['COMPLETED', 'FAILED', 'REASSIGNED']);
     }
 
+    public function uploadProof(User $user, DeliveryAssignment $assignment): bool
+    {
+        if ($user->isAdmin() || $user->isManager()) {
+            return true;
+        }
+
+        // Delivery staff can upload proof for their assigned delivery
+        // (even if marked COMPLETED, since recording attempt updates status first)
+        return $user->isDeliveryStaff() && $assignment->staff_id === $user->id;
+    }
+
     public function viewWorkload(User $user): bool
     {
         return $user->isAdmin() || $user->isManager();

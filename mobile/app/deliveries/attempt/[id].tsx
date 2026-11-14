@@ -60,16 +60,39 @@ export default function RecordAttemptScreen() {
           const formData = new FormData();
           formData.append('delivery_attempt_id', String(attemptId));
           formData.append('type', 'PHOTO');
-          proofPhotos.forEach((photo) => {
-            formData.append('files[]', {
-              uri: photo.uri,
-              name: photo.fileName ?? `proof_${Date.now()}.jpg`,
-              type: photo.mimeType ?? 'image/jpeg',
-            } as any);
-          });
+
+          for (const photo of proofPhotos) {
+            if (Platform.OS === 'web') {
+              let blob = (photo as any)._rawFile;
+              if (!blob && photo.uri) {
+                try {
+                  const blobRes = await fetch(photo.uri);
+                  blob = await blobRes.blob();
+                } catch {
+                  // ignore
+                }
+              }
+              if (blob) {
+                formData.append('files[]', blob, photo.fileName || `proof_${Date.now()}.jpg`);
+              }
+            } else {
+              formData.append('files[]', {
+                uri: photo.uri,
+                name: photo.fileName ?? `proof_${Date.now()}.jpg`,
+                type: photo.mimeType ?? 'image/jpeg',
+              } as any);
+            }
+          }
+
           await deliveryService.uploadProof(Number(id), formData);
-        } catch {
-          // Proof upload failed but attempt was recorded - still proceed
+        } catch (uploadError: any) {
+          console.error('Proof photo upload failed:', uploadError?.response?.data || uploadError);
+          const errDetail = uploadError?.response?.data?.message || 'သက်သေဓာတ်ပုံ တင်မရပါ';
+          if (Platform.OS === 'web') {
+            window.alert(`သတိပေးချက်: ပို့ဆောင်မှု မှတ်တမ်းတင်ပြီးသော်လည်း ${errDetail}`);
+          } else {
+            Alert.alert('သတိပေးချက်', `ပို့ဆောင်မှု မှတ်တမ်းတင်ပြီးသော်လည်း ${errDetail}`);
+          }
         } finally {
           setUploadingProof(false);
         }
@@ -143,18 +166,20 @@ export default function RecordAttemptScreen() {
   }
 
   function handleWebFileChange(e: any) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const uri = URL.createObjectURL(file);
-    setProofPhotos(prev => [...prev, {
-      uri,
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const newAssets = Array.from(files).map((file: any) => ({
+      uri: URL.createObjectURL(file),
       fileName: file.name,
-      mimeType: file.type,
+      mimeType: file.type || 'image/jpeg',
       width: 0,
       height: 0,
       fileSize: file.size,
-      type: 'image',
-    } as any].slice(0, 5));
+      type: 'image' as const,
+      _rawFile: file,
+    }));
+    setProofPhotos(prev => [...prev, ...newAssets].slice(0, 5));
+    e.target.value = '';
   }
 
   function handleSubmit() {
@@ -223,6 +248,7 @@ export default function RecordAttemptScreen() {
           ref={webFileRef}
           type="file"
           accept="image/*"
+          multiple
           style={{ display: 'none' }}
           onChange={handleWebFileChange}
         />
