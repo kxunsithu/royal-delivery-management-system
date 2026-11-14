@@ -51,14 +51,14 @@ class DeliveryAssignmentSeeder extends Seeder
             $scenario = $index % 5; // 0=DELIVERED, 1=FAILED, 2=IN_TRANSIT(attempted), 3=IN_TRANSIT(fresh), 4=PENDING
 
             if ($scenario === 4) {
-                // ── PENDING assignment (not yet picked up) ───────────────
+                // ── Assignment (in progress) ───────────────
                 DeliveryAssignment::create([
                     'parcel_id'      => $parcel->id,
                     'staff_id'       => $assignedStaff->id,
                     'assigned_by_id' => $assignedBy->id,
-                    'status'         => 'PENDING',
+                    'status'         => 'IN_PROGRESS',
                     'assigned_at'    => $assignedAt,
-                    'notes'          => 'ပိုဆောင်ရန် စောင့်ဆိုင်းနေသည်',
+                    'notes'          => 'ပို့ဆောင်ရန် တာဝန်ပေးထားသည်',
                 ]);
 
                 $parcel->update(['status' => 'IN_TRANSIT']);
