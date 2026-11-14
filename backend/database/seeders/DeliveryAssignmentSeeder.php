@@ -161,12 +161,11 @@ class DeliveryAssignmentSeeder extends Seeder
             ]);
 
             // Seed proof of delivery photo for delivered parcel
-            $imageFiles = ['p1.jpeg', 'p2.jpeg', 'p3.jpeg', 'p4.webp', 'p5.png'];
-            $imageFile = $imageFiles[($index) % count($imageFiles)];
-            $proofDir = 'proof-of-delivery/' . $parcel->id;
-            $proofPath = $proofDir . '/' . $imageFile;
-            $fullSource = storage_path('app/public/parcel-images/' . $imageFile);
-            $fullDest = storage_path('app/public/' . $proofPath);
+            // Source: bundled asset in repo (always available, even on Render)
+            $proofDir  = 'proof-of-delivery/' . $parcel->id;
+            $proofPath = $proofDir . '/proof-sample.jpeg';
+            $fullSource = database_path('seeders/assets/proof-sample.jpeg');
+            $fullDest   = storage_path('app/public/' . $proofPath);
 
             if (is_file($fullSource)) {
                 if (!is_dir(dirname($fullDest))) {
@@ -187,6 +186,44 @@ class DeliveryAssignmentSeeder extends Seeder
 
             $parcel->update(['status' => 'DELIVERED']);
             $created++;
+        }
+
+        // Ensure all DELIVERED attempts have ProofOfDelivery and physical files exist on disk
+        $sampleSource = database_path('seeders/assets/proof-sample.jpeg');
+        $deliveredAttempts = DeliveryAttempt::where('result', 'DELIVERED')->get();
+        foreach ($deliveredAttempts as $att) {
+            $proof = ProofOfDelivery::firstOrCreate(
+                ['delivery_attempt_id' => $att->id],
+                [
+                    'parcel_id' => $att->parcel_id,
+                    'type'      => 'PHOTO',
+                    'file_path' => 'proof-of-delivery/' . $att->parcel_id . '/proof-sample.jpeg',
+                    'notes'     => 'လက်ခံသူထံ ပို့ဆောင်ပြီးစီးကြောင်း သက်သေဓာတ်ပုံ',
+                ]
+            );
+
+            if (is_file($sampleSource)) {
+                $fullDest = storage_path('app/public/' . $proof->file_path);
+                if (!is_file($fullDest)) {
+                    if (!is_dir(dirname($fullDest))) {
+                        mkdir(dirname($fullDest), 0775, true);
+                    }
+                    copy($sampleSource, $fullDest);
+                }
+            }
+        }
+
+        // Also repair any ProofOfDelivery records whose physical files are missing on disk
+        if (is_file($sampleSource)) {
+            foreach (ProofOfDelivery::all() as $pod) {
+                $dest = storage_path('app/public/' . $pod->file_path);
+                if (!is_file($dest)) {
+                    if (!is_dir(dirname($dest))) {
+                        mkdir(dirname($dest), 0775, true);
+                    }
+                    copy($sampleSource, $dest);
+                }
+            }
         }
 
         $this->command->info("Delivery assignments seeded: {$created} assignments created.");

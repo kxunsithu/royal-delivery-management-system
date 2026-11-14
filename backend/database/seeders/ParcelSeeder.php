@@ -13,6 +13,21 @@ class ParcelSeeder extends Seeder
     {
         $admin = User::where('email', 'admin@gmail.com')->firstOrFail();
 
+        // Ensure sample parcel images exist in storage/app/public/parcel-images
+        $assetsDir = database_path('seeders/assets');
+        $publicParcelImagesDir = storage_path('app/public/parcel-images');
+        if (!is_dir($publicParcelImagesDir)) {
+            mkdir($publicParcelImagesDir, 0775, true);
+        }
+        if (is_dir($assetsDir)) {
+            foreach (glob($assetsDir . '/*') as $assetFile) {
+                $dest = $publicParcelImagesDir . '/' . basename($assetFile);
+                if (!is_file($dest) && is_file($assetFile)) {
+                    copy($assetFile, $dest);
+                }
+            }
+        }
+
         $burmeseNames = [
             'မောင်အောင်ကျော်', 'မသန်းဒါး', 'ကိုဇင်ဖြိုး', 'ဦးကျော်ဝင်း', 'ဒေါ်စုစု',
             'ကိုထွန်းလွင်', 'မခင်မာ', 'ဦးမောင်မောင်', 'ဒေါ်မြင့်မြင့်', 'ကိုသန်းထွန်း',
