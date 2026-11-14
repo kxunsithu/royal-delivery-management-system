@@ -194,6 +194,7 @@ class ParcelController extends Controller
             'deliveryAssignments.assignedBy',
             'deliveryAttempts.staff',
             'deliveryAttempts.proofOfDeliveries',
+            'proofOfDeliveries.deliveryAttempt',
             'activeAssignment.staff',
             'images',
         ]);
@@ -566,22 +567,27 @@ class ParcelController extends Controller
                 : [],
         ]);
 
-        $base['proof_photos'] = $parcel->deliveryAttempts
-            ->flatMap(function ($da) {
-                if (!$da->relationLoaded('proofOfDeliveries')) {
-                    return [];
-                }
-                return $da->proofOfDeliveries->map(fn($p) => [
-                    'id'             => $p->id,
-                    'type'           => $p->type,
-                    'file_url'       => $p->file_url,
-                    'notes'          => $p->notes,
-                    'attempt_result' => $da->result,
-                    'recipient_name' => $da->recipient_name,
-                    'attempted_at'   => $da->attempted_at?->toISOString(),
-                ]);
-            })
-            ->filter(fn($p) => !empty($p['file_url']))
+        $proofs = collect();
+        if ($parcel->relationLoaded('proofOfDeliveries')) {
+            $proofs = $proofs->merge($parcel->proofOfDeliveries);
+        }
+        foreach ($parcel->deliveryAttempts as $da) {
+            if ($da->relationLoaded('proofOfDeliveries')) {
+                $proofs = $proofs->merge($da->proofOfDeliveries);
+            }
+        }
+
+        $base['proof_photos'] = $proofs->unique('id')
+            ->filter(fn($p) => !empty($p->file_url))
+            ->map(fn($p) => [
+                'id'             => $p->id,
+                'type'           => $p->type,
+                'file_url'       => $p->file_url,
+                'notes'          => $p->notes,
+                'attempt_result' => $p->deliveryAttempt?->result,
+                'recipient_name' => $p->deliveryAttempt?->recipient_name,
+                'attempted_at'   => $p->deliveryAttempt?->attempted_at?->toISOString(),
+            ])
             ->values()
             ->all();
 

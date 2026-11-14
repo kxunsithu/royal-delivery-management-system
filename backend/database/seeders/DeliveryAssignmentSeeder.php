@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\DeliveryAssignment;
 use App\Models\DeliveryAttempt;
 use App\Models\Parcel;
+use App\Models\ProofOfDelivery;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -148,7 +149,7 @@ class DeliveryAssignmentSeeder extends Seeder
                 'completed_at'   => $completedAt,
             ]);
 
-            DeliveryAttempt::create([
+            $attempt = DeliveryAttempt::create([
                 'assignment_id'          => $assignment->id,
                 'parcel_id'              => $parcel->id,
                 'staff_id'              => $assignedStaff->id,
@@ -158,6 +159,31 @@ class DeliveryAssignmentSeeder extends Seeder
                 'recipient_confirmation' => $parcel->recipient_name . ' မှ လက်ခံပြီးပါပြီ',
                 'notes'                  => 'အောင်မြင်စွာ ပို့ဆောင်ပြီးပါပြီ',
             ]);
+
+            // Seed proof of delivery photo for delivered parcel
+            $imageFiles = ['p1.jpeg', 'p2.jpeg', 'p3.jpeg', 'p4.webp', 'p5.png'];
+            $imageFile = $imageFiles[($index) % count($imageFiles)];
+            $proofDir = 'proof-of-delivery/' . $parcel->id;
+            $proofPath = $proofDir . '/' . $imageFile;
+            $fullSource = storage_path('app/public/parcel-images/' . $imageFile);
+            $fullDest = storage_path('app/public/' . $proofPath);
+
+            if (is_file($fullSource)) {
+                if (!is_dir(dirname($fullDest))) {
+                    mkdir(dirname($fullDest), 0775, true);
+                }
+                copy($fullSource, $fullDest);
+            }
+
+            if (!ProofOfDelivery::where('delivery_attempt_id', $attempt->id)->exists()) {
+                ProofOfDelivery::create([
+                    'delivery_attempt_id' => $attempt->id,
+                    'parcel_id'           => $parcel->id,
+                    'type'                => 'PHOTO',
+                    'file_path'           => $proofPath,
+                    'notes'               => 'လက်ခံသူထံ ပို့ဆောင်ပြီးစီးကြောင်း သက်သေဓာတ်ပုံ',
+                ]);
+            }
 
             $parcel->update(['status' => 'DELIVERED']);
             $created++;

@@ -72,6 +72,11 @@ class Parcel extends Model
         return $this->hasMany(DeliveryAttempt::class)->orderBy('attempted_at', 'desc');
     }
 
+    public function proofOfDeliveries(): HasMany
+    {
+        return $this->hasMany(ProofOfDelivery::class);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ParcelImage::class)->orderBy('sort_order')->orderBy('created_at');
