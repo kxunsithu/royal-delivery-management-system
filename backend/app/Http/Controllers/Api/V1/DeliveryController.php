@@ -26,7 +26,11 @@ class DeliveryController extends Controller
         $query = DeliveryAssignment::with(['parcel'])
             ->where('staff_id', $user->id)
             ->when($request->status, function ($q) use ($request) {
-                $q->where('status', $request->status);
+                if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
+                    $q->whereNotIn('status', ['COMPLETED', 'FAILED', 'REASSIGNED']);
+                } else {
+                    $q->where('status', $request->status);
+                }
             })
             ->orderBy('assigned_at', 'desc');
 
@@ -62,7 +66,11 @@ class DeliveryController extends Controller
         $query = DeliveryAssignment::with(['parcel', 'staff', 'assignedBy'])
             ->when($request->staff_id, fn($q) => $q->where('staff_id', $request->staff_id))
             ->when($request->status, function ($q) use ($request) {
-                $q->where('status', $request->status);
+                if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
+                    $q->whereNotIn('status', ['COMPLETED', 'FAILED', 'REASSIGNED']);
+                } else {
+                    $q->where('status', $request->status);
+                }
             })
             ->when($request->date_from, fn($q) => $q->whereDate('assigned_at', '>=', $request->date_from))
             ->when($request->date_to, fn($q) => $q->whereDate('assigned_at', '<=', $request->date_to))

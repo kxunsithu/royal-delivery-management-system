@@ -18,6 +18,7 @@ import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
+  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
 ];

@@ -18,6 +18,7 @@ import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABE
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
+  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
@@ -115,7 +116,9 @@ export default function MyAssignmentsScreen() {
                     <Ionicons name="bicycle-outline" size={48} color={COLORS.primary} />
                   </View>
                   <Text style={styles.emptyText}>
-                  {statusFilter === 'COMPLETED'
+                  {statusFilter === 'ACTIVE'
+                    ? 'ဆောင်ရွက်နေသော လုပ်ငန်းမရှိပါ'
+                    : statusFilter === 'COMPLETED'
                     ? 'ပြီးစီးသောလုပ်ငန်း မတွေ့ပါ'
                     : statusFilter === 'FAILED'
                     ? 'မအောင်မြင်သောလုပ်ငန်း မတွေ့ပါ'
