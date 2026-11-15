@@ -73,6 +73,46 @@ class ParcelController extends Controller
         return response()->json(['data' => $results->take($limit)->values()]);
     }
 
+    /**
+     * Daily summary: parcels grouped by received date.
+     * GET /parcels/daily-summary?date_from=&date_to=
+     * Accessible by admin, manager, accountant (viewAny policy).
+     */
+    public function dailySummary(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', Parcel::class);
+
+        // Reject delivery staff from this endpoint
+        $user = $request->user();
+        if ($user->isDeliveryStaff()) {
+            return response()->json(['message' => 'Access denied.'], 403);
+        }
+
+        $query = Parcel::query()
+            ->select([
+                DB::raw('DATE(received_at) as date'),
+                DB::raw('COUNT(*) as parcel_count'),
+                DB::raw('COUNT(DISTINCT recipient_phone) as customer_count'),
+                DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as income_mmk"),
+                DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as income_thb"),
+            ])
+            ->whereNotNull('received_at')
+            ->when($request->date_from, fn($q) => $q->whereDate('received_at', '>=', $request->date_from))
+            ->when($request->date_to,   fn($q) => $q->whereDate('received_at', '<=', $request->date_to))
+            ->groupBy(DB::raw('DATE(received_at)'))
+            ->orderBy('date', 'desc');
+
+        $rows = $query->get()->map(fn($row) => [
+            'date'           => $row->date,
+            'parcel_count'   => (int) $row->parcel_count,
+            'customer_count' => (int) $row->customer_count,
+            'income_mmk'     => (float) $row->income_mmk,
+            'income_thb'     => (float) $row->income_thb,
+        ]);
+
+        return response()->json(['data' => $rows]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Parcel::class);

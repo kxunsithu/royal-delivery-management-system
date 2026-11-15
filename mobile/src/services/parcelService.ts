@@ -116,7 +116,22 @@ export interface ContactSuggestion {
   delivery_address?: string;
 }
 
+export interface DailySummary {
+  date: string;
+  parcel_count: number;
+  customer_count: number;
+  income_mmk: number;
+  income_thb: number;
+}
+
 export const parcelService = {
+  async dailySummary(dateFrom?: string, dateTo?: string): Promise<DailySummary[]> {
+    const response = await apiClient.get('/parcels/daily-summary', {
+      params: { date_from: dateFrom, date_to: dateTo },
+    });
+    return response.data.data;
+  },
+
   async searchContacts(search: string, type: 'sender' | 'recipient' | 'both' = 'both'): Promise<ContactSuggestion[]> {
     if (!search || search.trim().length < 1) return [];
     const response = await apiClient.get('/parcels/contacts', { params: { search, type, limit: 8 } });

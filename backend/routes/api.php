@@ -38,6 +38,7 @@ Route::prefix('v1')->group(function () {
 
         // Parcels
         Route::get('/parcels/contacts', [ParcelController::class, 'contacts']);  // must be before {parcel}
+        Route::get('/parcels/daily-summary', [ParcelController::class, 'dailySummary']); // must be before {parcel}
         Route::get('/parcels', [ParcelController::class, 'index']);
         Route::post('/parcels', [ParcelController::class, 'store']);
         Route::get('/parcels/{parcel}', [ParcelController::class, 'show']);
