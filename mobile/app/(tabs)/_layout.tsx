@@ -117,6 +117,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="customers"
+        options={{
+          title: 'ဖောက်သည်',
+          href: canSeeParcels ? undefined : null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" size={size} color={color as string} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="my-assignments"
         options={{
           title: 'ကျွန်ုပ်၏လုပ်ငန်းများ',
@@ -129,11 +139,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="deliveries"
         options={{
-          title: 'ပို့ဆောင်မှု',
-          href: canSeeParcels ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="car" size={size} color={color as string} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen

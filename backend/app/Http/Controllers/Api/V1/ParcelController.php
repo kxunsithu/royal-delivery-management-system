@@ -74,6 +74,77 @@ class ParcelController extends Controller
     }
 
     /**
+     * Customer list: unique senders or recipients with parcel count.
+     * GET /parcels/customers?type=recipient&search=&page=1&per_page=20
+     */
+    public function customers(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', Parcel::class);
+
+        $user = $request->user();
+        if ($user->isDeliveryStaff()) {
+            return response()->json(['message' => 'Access denied.'], 403);
+        }
+
+        $type    = $request->input('type', 'recipient'); // sender | recipient
+        $search  = trim($request->input('search', ''));
+        $perPage = min((int) $request->input('per_page', 20), 100);
+        $page    = max((int) $request->input('page', 1), 1);
+        $term    = '%' . mb_strtolower($search) . '%';
+
+        if ($type === 'sender') {
+            $query = Parcel::select(
+                    DB::raw('sender_name as name'),
+                    DB::raw('sender_phone as phone'),
+                    DB::raw('COUNT(*) as parcel_count'),
+                    DB::raw('MAX(received_at) as last_parcel_at')
+                )
+                ->whereNotNull('sender_name')
+                ->whereNotNull('sender_phone')
+                ->when($search, fn($q) => $q->where(function ($sq) use ($term) {
+                    $sq->whereRaw('LOWER(sender_name) LIKE ?', [$term])
+                       ->orWhereRaw('LOWER(sender_phone) LIKE ?', [$term]);
+                }))
+                ->groupBy('sender_name', 'sender_phone')
+                ->orderByDesc('last_parcel_at');
+        } else {
+            $query = Parcel::select(
+                    DB::raw('recipient_name as name'),
+                    DB::raw('recipient_phone as phone'),
+                    DB::raw('COUNT(*) as parcel_count'),
+                    DB::raw('MAX(received_at) as last_parcel_at')
+                )
+                ->when($search, fn($q) => $q->where(function ($sq) use ($term) {
+                    $sq->whereRaw('LOWER(recipient_name) LIKE ?', [$term])
+                       ->orWhereRaw('LOWER(recipient_phone) LIKE ?', [$term]);
+                }))
+                ->groupBy('recipient_name', 'recipient_phone')
+                ->orderByDesc('last_parcel_at');
+        }
+
+        $allRows  = $query->get();
+        $total    = $allRows->count();
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $rows     = $allRows->slice(($page - 1) * $perPage, $perPage);
+
+        return response()->json([
+            'data' => $rows->map(fn($r) => [
+                'name'           => $r->name,
+                'phone'          => $r->phone,
+                'parcel_count'   => (int) $r->parcel_count,
+                'last_parcel_at' => $r->last_parcel_at,
+                'type'           => $type,
+            ])->values(),
+            'meta' => [
+                'current_page' => $page,
+                'last_page'    => $lastPage,
+                'per_page'     => $perPage,
+                'total'        => $total,
+            ],
+        ]);
+    }
+
+    /**
      * Daily summary: parcels grouped by received date.
      * GET /parcels/daily-summary?date_from=&date_to=
      * Accessible by admin, manager, accountant (viewAny policy).

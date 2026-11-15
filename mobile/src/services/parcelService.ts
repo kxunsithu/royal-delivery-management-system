@@ -124,12 +124,40 @@ export interface DailySummary {
   income_thb: number;
 }
 
+export interface Customer {
+  name: string;
+  phone: string;
+  parcel_count: number;
+  last_parcel_at?: string;
+  type: 'sender' | 'recipient';
+}
+
+export interface CustomersResponse {
+  data: Customer[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
 export const parcelService = {
   async dailySummary(dateFrom?: string, dateTo?: string): Promise<DailySummary[]> {
     const response = await apiClient.get('/parcels/daily-summary', {
       params: { date_from: dateFrom, date_to: dateTo },
     });
     return response.data.data;
+  },
+
+  async customers(params: {
+    type?: 'sender' | 'recipient';
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<CustomersResponse> {
+    const response = await apiClient.get('/parcels/customers', { params });
+    return response.data;
   },
 
   async searchContacts(search: string, type: 'sender' | 'recipient' | 'both' = 'both'): Promise<ContactSuggestion[]> {

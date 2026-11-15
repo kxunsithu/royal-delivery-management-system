@@ -1,0 +1,413 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useQuery } from '@tanstack/react-query';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import { parcelService, Parcel } from '../../src/services/parcelService';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM } from '../../src/constants';
+
+export default function CustomerDetailScreen() {
+  const insets = useSafeAreaInsets();
+  const { phone, type, name } = useLocalSearchParams<{ phone: string; type: string; name: string }>();
+  const [page, setPage] = useState(1);
+
+  const decodedName = name ? decodeURIComponent(name as string) : (phone as string);
+  const isRecipient = type !== 'sender';
+
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['customer-parcels', phone, page],
+    queryFn: () =>
+      parcelService.list({ search: phone as string, page, per_page: 20 }),
+    enabled: !!phone,
+  });
+
+  const parcels = data?.data ?? [];
+  const meta = data?.meta;
+
+  // Calculate totals
+  const totalMMK = parcels
+    .filter(p => p.currency === 'MMK')
+    .reduce((s, p) => s + Number(p.delivery_fee), 0);
+  const totalTHB = parcels
+    .filter(p => p.currency === 'THB')
+    .reduce((s, p) => s + Number(p.delivery_fee), 0);
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={22} color={COLORS.white} />
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarText}>{decodedName?.[0]?.toUpperCase() || '?'}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerName} numberOfLines={1}>{decodedName}</Text>
+            <View style={styles.headerMeta}>
+              <Ionicons name="call-outline" size={13} color="rgba(255,255,255,0.8)" />
+              <Text style={styles.headerPhone}>{phone}</Text>
+              <View style={styles.typePill}>
+                <Text style={styles.typePillText}>{isRecipient ? 'လက်ခံသူ' : 'ပို့သူ'}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Stats Card */}
+      <View style={styles.statsCard}>
+        <View style={styles.statItem}>
+          <Ionicons name="cube-outline" size={22} color={COLORS.primary} />
+          <Text style={styles.statValue}>{meta?.total ?? parcels.length}</Text>
+          <Text style={styles.statLabel}>ပါဆယ်</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Ionicons name="cash-outline" size={22} color={COLORS.success} />
+          <Text style={styles.statValue}>{totalMMK.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>MMK</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Ionicons name="cash-outline" size={22} color={COLORS.info} />
+          <Text style={styles.statValue}>{totalTHB.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>THB</Text>
+        </View>
+      </View>
+
+      {/* Parcel List */}
+      {isLoading ? (
+        <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
+      ) : (
+        <FlatList
+          data={parcels}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isFetching && !isLoading}
+              onRefresh={() => { setPage(1); refetch(); }}
+              tintColor={COLORS.primary}
+            />
+          }
+          renderItem={({ item }) => <ParcelRow parcel={item} />}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Ionicons name="cube-outline" size={48} color={COLORS.primary + '60'} />
+              <Text style={styles.emptyText}>ပါဆယ် မတွေ့ပါ</Text>
+            </View>
+          }
+          ListFooterComponent={
+            meta && meta.last_page > 1 ? (
+              <View style={styles.pagination}>
+                <TouchableOpacity
+                  style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]}
+                  onPress={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  <Ionicons name="chevron-back" size={16} color={page <= 1 ? COLORS.textLight : COLORS.primary} />
+                  <Text style={[styles.pageBtnText, page <= 1 && { color: COLORS.textLight }]}>နှုတ်</Text>
+                </TouchableOpacity>
+                <View style={styles.pageInfoBox}>
+                  <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
+                </View>
+                <TouchableOpacity
+                  style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]}
+                  onPress={() => setPage(p => Math.min(meta.last_page, p + 1))}
+                  disabled={page >= meta.last_page}
+                >
+                  <Text style={[styles.pageBtnText, page >= meta.last_page && { color: COLORS.textLight }]}>နောက်</Text>
+                  <Ionicons name="chevron-forward" size={16} color={page >= meta.last_page ? COLORS.textLight : COLORS.primary} />
+                </TouchableOpacity>
+              </View>
+            ) : undefined
+          }
+        />
+      )}
+    </View>
+  );
+}
+
+function ParcelRow({ parcel }: { parcel: Parcel }) {
+  const statusColor = STATUS_COLORS[parcel.status as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
+  const statusLabel = STATUS_LABELS_MM[parcel.status as keyof typeof STATUS_LABELS_MM] || parcel.status;
+  const priorityColor = PRIORITY_COLORS[parcel.priority as keyof typeof PRIORITY_COLORS] || COLORS.textSecondary;
+  const priorityLabel = PRIORITY_LABELS_MM[parcel.priority as keyof typeof PRIORITY_LABELS_MM] || parcel.priority;
+
+  return (
+    <TouchableOpacity
+      style={styles.parcelCard}
+      onPress={() => router.push(`/parcels/${parcel.id}`)}
+      activeOpacity={0.85}
+    >
+      {/* Top row */}
+      <View style={styles.cardTop}>
+        <View style={styles.trackingRow}>
+          <View style={styles.trackingIcon}>
+            <Ionicons name="barcode-outline" size={14} color={COLORS.primary} />
+          </View>
+          <Text style={styles.trackingNumber}>{parcel.tracking_number}</Text>
+        </View>
+        <View style={[styles.statusBadge, { backgroundColor: statusColor + '18' }]}>
+          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+          <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
+        </View>
+      </View>
+
+      <View style={styles.divider} />
+
+      {/* Info rows */}
+      <View style={styles.infoGroup}>
+        <View style={styles.infoRow}>
+          <Ionicons name="person-outline" size={13} color={COLORS.textSecondary} />
+          <Text style={styles.infoText} numberOfLines={1}>{parcel.recipient_name}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Ionicons name="call-outline" size={13} color={COLORS.textSecondary} />
+          <Text style={styles.infoText}>{parcel.recipient_phone}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Ionicons name="location-outline" size={13} color={COLORS.textSecondary} />
+          <Text style={styles.infoText} numberOfLines={1}>{parcel.delivery_address}</Text>
+        </View>
+      </View>
+
+      {/* Footer */}
+      <View style={styles.cardFooter}>
+        <View style={styles.footerLeft}>
+          <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '18' }]}>
+            <Text style={[styles.priorityText, { color: priorityColor }]}>{priorityLabel}</Text>
+          </View>
+          {parcel.is_cod && (
+            <View style={styles.codBadge}>
+              <Ionicons name="cash-outline" size={11} color={COLORS.info} />
+              <Text style={styles.codText}>COD</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.feeText}>
+          {Number(parcel.delivery_fee).toLocaleString()} {parcel.currency}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background },
+
+  // Header
+  header: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatarCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  avatarText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  headerName: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  headerMeta: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3, flexWrap: 'wrap' },
+  headerPhone: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.85)',
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  typePill: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginLeft: 2,
+  },
+  typePillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+
+  // Stats
+  statsCard: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.white,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    borderRadius: 16,
+    paddingVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  statItem: { flex: 1, alignItems: 'center', gap: 4 },
+  statDivider: { width: 1, backgroundColor: COLORS.border, marginVertical: 8 },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.text,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+
+  loader: { marginTop: 60 },
+  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10, paddingTop: 4 },
+
+  // Parcel card
+  parcelCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  trackingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  trackingIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#FFF3DC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trackingNumber: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { fontSize: 12, fontWeight: '600', fontFamily: 'NotoSansMyanmar_600SemiBold' },
+  divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
+  infoGroup: { gap: 5 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  infoText: { fontSize: 13, color: COLORS.text, flex: 1, fontFamily: 'NotoSansMyanmar_400Regular' },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  priorityText: { fontSize: 11, fontWeight: '700', fontFamily: 'NotoSansMyanmar_700Bold' },
+  codBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#E8F4FB',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: 'NotoSansMyanmar_700Bold' },
+  feeText: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: 'NotoSansMyanmar_700Bold' },
+
+  // Empty
+  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
+  emptyText: { fontSize: 16, color: COLORS.textSecondary, fontFamily: 'NotoSansMyanmar_400Regular' },
+
+  // Pagination
+  pagination: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 16,
+  },
+  pageBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+  },
+  pageBtnDisabled: { opacity: 0.4 },
+  pageBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  pageInfoBox: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+  },
+  pageInfo: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.white,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
+});
+
