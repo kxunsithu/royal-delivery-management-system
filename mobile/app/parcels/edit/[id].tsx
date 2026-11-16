@@ -114,6 +114,8 @@ export default function EditParcelScreen() {
     setErrors(e => ({ ...e, [field]: undefined as any }));
   }
 
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
+
   // Multi-select categories
   const selectedCategories = form.category
     ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
@@ -130,6 +132,18 @@ export default function EditParcelScreen() {
       next = [...current, catValue];
     }
     update('category', next.join(', '));
+  }
+
+  function handleAddCustomCategory() {
+    const trimmed = customCategoryInput.trim();
+    if (!trimmed) return;
+    const current = form.category
+      ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    if (!current.includes(trimmed)) {
+      update('category', [...current, trimmed].join(', '));
+    }
+    setCustomCategoryInput('');
   }
 
   async function pickImages() {
@@ -268,6 +282,44 @@ export default function EditParcelScreen() {
                   </TouchableOpacity>
                 );
               })}
+
+              {/* Custom categories entered by user */}
+              {selectedCategories
+                .filter((c) => !PARCEL_CATEGORIES.some((p) => p.value === c))
+                .map((customCat) => (
+                  <TouchableOpacity
+                    key={customCat}
+                    style={[styles.categoryChip, styles.categoryChipActive]}
+                    onPress={() => toggleCategory(customCat)}
+                  >
+                    <Ionicons name="pricetag" size={16} color="#fff" />
+                    <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
+                      {customCat}
+                    </Text>
+                    <Ionicons name="close-circle" size={16} color="#fff" />
+                  </TouchableOpacity>
+                ))}
+            </View>
+
+            {/* Custom Category User Input */}
+            <View style={styles.customCategoryRow}>
+              <TextInput
+                style={styles.customCategoryInput}
+                value={customCategoryInput}
+                onChangeText={setCustomCategoryInput}
+                placeholder="အခြား အမျိုးအစား ရိုက်ထည့်ပါ (ဥပမာ - အလှကုန်)..."
+                placeholderTextColor={COLORS.textLight}
+                onSubmitEditing={handleAddCustomCategory}
+                returnKeyType="done"
+              />
+              <TouchableOpacity
+                style={[styles.addCategoryBtn, !customCategoryInput.trim() && { opacity: 0.5 }]}
+                onPress={handleAddCustomCategory}
+                disabled={!customCategoryInput.trim()}
+              >
+                <Ionicons name="add" size={18} color="#fff" />
+                <Text style={styles.addCategoryBtnText}>ထည့်မည်</Text>
+              </TouchableOpacity>
             </View>
             <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
             <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>
@@ -481,6 +533,38 @@ const styles = StyleSheet.create({
   categoryChipText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, fontFamily: 'NotoSansMyanmar_600SemiBold' },
   categoryChipTextActive: { color: '#fff' },
   selectedCountText: { fontSize: 12, color: COLORS.primary, fontWeight: '600', fontFamily: 'NotoSansMyanmar_600SemiBold', marginBottom: 6 },
+  customCategoryRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+    marginBottom: 4,
+  },
+  customCategoryInput: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 14,
+    color: COLORS.text,
+    backgroundColor: COLORS.background,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  addCategoryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    gap: 4,
+  },
+  addCategoryBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   segmented: { flexDirection: 'row', borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border, overflow: 'hidden', marginBottom: 4 },
   segmentItem: { flex: 1, paddingVertical: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: COLORS.primary },

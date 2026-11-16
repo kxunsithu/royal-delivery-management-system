@@ -107,6 +107,8 @@ export default function CreateParcelScreen() {
     setErrors(e => ({ ...e, [field]: undefined as any }));
   }
 
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
+
   // Multi-select categories
   const selectedCategories = form.category
     ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
@@ -123,6 +125,18 @@ export default function CreateParcelScreen() {
       next = [...current, catValue];
     }
     update('category', next.join(', '));
+  }
+
+  function handleAddCustomCategory() {
+    const trimmed = customCategoryInput.trim();
+    if (!trimmed) return;
+    const current = form.category
+      ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    if (!current.includes(trimmed)) {
+      update('category', [...current, trimmed].join(', '));
+    }
+    setCustomCategoryInput('');
   }
 
   // ── Sender autocomplete ──────────────────────────────────────────────────────
@@ -311,6 +325,44 @@ export default function CreateParcelScreen() {
                 </TouchableOpacity>
               );
             })}
+
+            {/* Custom categories entered by user */}
+            {selectedCategories
+              .filter((c) => !PARCEL_CATEGORIES.some((p) => p.value === c))
+              .map((customCat) => (
+                <TouchableOpacity
+                  key={customCat}
+                  style={[styles.categoryChip, styles.categoryChipActive]}
+                  onPress={() => toggleCategory(customCat)}
+                >
+                  <Ionicons name="pricetag" size={16} color={COLORS.white} />
+                  <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
+                    {customCat}
+                  </Text>
+                  <Ionicons name="close-circle" size={16} color={COLORS.white} />
+                </TouchableOpacity>
+              ))}
+          </View>
+
+          {/* Custom Category User Input */}
+          <View style={styles.customCategoryRow}>
+            <TextInput
+              style={styles.customCategoryInput}
+              value={customCategoryInput}
+              onChangeText={setCustomCategoryInput}
+              placeholder="အခြား အမျိုးအစား ရိုက်ထည့်ပါ (ဥပမာ - အလှကုန်)..."
+              placeholderTextColor={COLORS.textLight}
+              onSubmitEditing={handleAddCustomCategory}
+              returnKeyType="done"
+            />
+            <TouchableOpacity
+              style={[styles.addCategoryBtn, !customCategoryInput.trim() && { opacity: 0.5 }]}
+              onPress={handleAddCustomCategory}
+              disabled={!customCategoryInput.trim()}
+            >
+              <Ionicons name="add" size={18} color={COLORS.white} />
+              <Text style={styles.addCategoryBtnText}>ထည့်မည်</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.row}>
@@ -690,6 +742,38 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
   categoryChipTextActive: { color: COLORS.white },
+  customCategoryRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+    marginBottom: 4,
+  },
+  customCategoryInput: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 14,
+    color: COLORS.text,
+    backgroundColor: COLORS.background,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  addCategoryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    gap: 4,
+  },
+  addCategoryBtnText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   selectedCountText: {
     fontSize: 12,
     color: COLORS.primary,
