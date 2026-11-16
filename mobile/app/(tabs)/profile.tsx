@@ -22,7 +22,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../src/context/AuthContext';
 import { userService } from '../../src/services/userService';
-import { COLORS, ROLE_LABELS_MM } from '../../src/constants';
+import { COLORS, FONTS, ROLE_LABELS_MM } from '../../src/constants';
 
 const isWeb = Platform.OS === 'web';
 
@@ -71,9 +71,6 @@ export default function ProfileScreen() {
   });
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
-  /**
-   * Cross-platform alert: use browser alert on web, native Alert on mobile.
-   */
   function showAlert(title: string, message?: string) {
     if (isWeb) {
       window.alert(message ? `${title}\n${message}` : title);
@@ -110,10 +107,8 @@ export default function ProfileScreen() {
   }
 
   // ── Image picking ─────────────────────────────────────────────────────────────
-
   async function pickProfileImage() {
     if (isWeb) {
-      // On web, trigger the hidden <input type="file">
       webFileInputRef.current?.click();
       return;
     }
@@ -134,7 +129,6 @@ export default function ProfileScreen() {
 
   async function takeProfilePhoto() {
     if (isWeb) {
-      // Camera not supported on desktop web — just open file picker
       webFileInputRef.current?.click();
       return;
     }
@@ -152,16 +146,11 @@ export default function ProfileScreen() {
     }
   }
 
-  /**
-   * Handle web <input type="file"> change event.
-   */
   async function handleWebFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Build a blob URL for preview / upload
     const uri = URL.createObjectURL(file);
     await doUploadWebFile(file, uri);
-    // Reset so the same file can be re-selected
     if (webFileInputRef.current) webFileInputRef.current.value = '';
   }
 
@@ -171,9 +160,8 @@ export default function ProfileScreen() {
     try {
       const formData = new FormData();
       formData.append('image', file, file.name);
-      // Use axios directly with FormData on web (no special RN blob trick needed)
       const { default: apiClient } = await import('../../src/services/apiClient');
-      const response = await apiClient.post(`/users/${user.id}/profile-image`, formData, {
+      await apiClient.post(`/users/${user.id}/profile-image`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       await refreshUser();
@@ -269,7 +257,6 @@ export default function ProfileScreen() {
 
   const roleLabel = ROLE_LABELS_MM[user.role as keyof typeof ROLE_LABELS_MM] || user.role;
   const roleColor = user.role === 'admin' ? '#8B5CF6' : user.role === 'manager' ? COLORS.info : user.role === 'accountant' ? '#F59E0B' : COLORS.success;
-  const roleIcon = user.role === 'admin' ? 'shield' : user.role === 'manager' ? 'briefcase' : user.role === 'accountant' ? 'calculator' : 'bicycle';
 
   return (
     <View style={styles.container}>
@@ -284,57 +271,15 @@ export default function ProfileScreen() {
         />
       )}
 
-      {/* ── Hero Header ── */}
-      <View style={[styles.hero, { paddingTop: insets.top + 16 }]}>
-        {/* Top bar */}
-        <View style={styles.heroTopBar}>
-          <Text style={styles.heroTitle}>ပရိုဖိုင်</Text>
-          <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
-            <Ionicons name="create-outline" size={18} color={COLORS.white} />
-            <Text style={styles.editBtnText}>ပြင်ဆင်ရန်</Text>
-          </TouchableOpacity>
+      {/* ── Header ── */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <View>
+          <Text style={styles.headerTitle}>ပရိုဖိုင်</Text>
+          <Text style={styles.headerSub}>{user.name}</Text>
         </View>
-
-        {/* Avatar + name inside hero */}
-        <View style={styles.heroBody}>
-          <TouchableOpacity style={styles.avatarWrap} onPress={showImageOptions} disabled={uploadingImage}>
-            {uploadingImage ? (
-              <View style={styles.avatarRing}>
-                <View style={[styles.avatar, { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
-                  <ActivityIndicator color={COLORS.white} />
-                </View>
-              </View>
-            ) : user.profile_image_url ? (
-              <View style={styles.avatarRing}>
-                <Image source={{ uri: user.profile_image_url }} style={styles.avatarImage} />
-              </View>
-            ) : (
-              <View style={styles.avatarRing}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{user.name[0]?.toUpperCase()}</Text>
-                </View>
-              </View>
-            )}
-            <View style={styles.cameraOverlay}>
-              <Ionicons name="camera" size={12} color={COLORS.white} />
-            </View>
-          </TouchableOpacity>
-
-          <Text style={styles.heroName}>{user.name}</Text>
-
-          <View style={styles.heroBadgeRow}>
-            <View style={styles.heroBadge}>
-              <Ionicons name={roleIcon as any} size={13} color={COLORS.primary} />
-              <Text style={styles.heroBadgeText}>{roleLabel}</Text>
-            </View>
-            <View style={[styles.heroBadge, user.is_active ? styles.activeBadge : styles.inactiveBadge]}>
-              <View style={[styles.statusDot, { backgroundColor: user.is_active ? '#22C55E' : '#EF4444' }]} />
-              <Text style={[styles.heroBadgeText, { color: user.is_active ? '#22C55E' : '#EF4444' }]}>
-                {user.is_active ? 'အသက်ဝင်' : 'ပိတ်ထား'}
-              </Text>
-            </View>
-          </View>
-        </View>
+        <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
+          <Text style={styles.editBtnText}>ပြင်ဆင်ရန်</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -342,20 +287,51 @@ export default function ProfileScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Profile card ── */}
+        <View style={styles.profileCard}>
+          <TouchableOpacity style={styles.avatarWrap} onPress={showImageOptions} disabled={uploadingImage} activeOpacity={0.8}>
+            {uploadingImage ? (
+              <View style={styles.avatar}>
+                <ActivityIndicator color={COLORS.white} />
+              </View>
+            ) : user.profile_image_url ? (
+              <Image source={{ uri: user.profile_image_url }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{user.name[0]?.toUpperCase()}</Text>
+              </View>
+            )}
+            <View style={styles.cameraOverlay}>
+              <Ionicons name="camera" size={12} color={COLORS.white} />
+            </View>
+          </TouchableOpacity>
+
+          <Text style={styles.profileName}>{user.name}</Text>
+
+          <View style={styles.badgeRow}>
+            <View style={styles.roleBadge}>
+              <View style={[styles.roleDot, { backgroundColor: roleColor }]} />
+              <Text style={[styles.roleBadgeText, { color: roleColor }]}>{roleLabel}</Text>
+            </View>
+            <View style={[styles.statusBadge, user.is_active ? styles.statusActive : styles.statusInactive]}>
+              <View style={[styles.statusDot, { backgroundColor: user.is_active ? '#22C55E' : '#EF4444' }]} />
+              <Text style={[styles.statusText, { color: user.is_active ? '#15803D' : '#B91C1C' }]}>
+                {user.is_active ? 'အသက်ဝင်' : 'ပိတ်ထား'}
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.avatarHint}>ဓာတ်ပုံ ပြောင်းရန် နှိပ်ပါ</Text>
+        </View>
+
         {/* ── Account Info ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>အကောင့် အချက်အလက်</Text>
           <View style={styles.card}>
-            <InfoRow icon="person-outline" label="နာမည်" value={user.name} />
-            {user.phone
-              ? <InfoRow icon="call-outline" label="ဖုန်းနံပါတ်" value={user.phone} />
-              : <InfoRow icon="call-outline" label="ဖုန်းနံပါတ်" value="—" muted />
-            }
-            {user.email
-              ? <InfoRow icon="mail-outline" label="အီးမေးလ်" value={user.email} />
-              : <InfoRow icon="mail-outline" label="အီးမေးလ်" value="—" muted />
-            }
-            <InfoRow icon="shield-checkmark-outline" label="အခန်းကဏ္ဍ" value={roleLabel} valueColor={roleColor} last />
+            <InfoRow label="နာမည်" value={user.name} />
+            <InfoRow label="ဖုန်းနံပါတ်" value={user.phone || '—'} muted={!user.phone} />
+            <InfoRow label="အီးမေးလ်" value={user.email || '—'} muted={!user.email} />
+            <InfoRow label="အခန်းကဏ္ဍ" value={roleLabel} valueColor={roleColor} last />
           </View>
         </View>
 
@@ -363,37 +339,27 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>အပလီကေးရှင်း</Text>
           <View style={styles.card}>
-            <InfoRow icon="cube-outline" label="ပရိုဂျက်" value="Royal Myawaddy" />
-            <InfoRow icon="code-slash-outline" label="ဗားရှင်း" value="v1.0.0" />
-            <InfoRow icon="globe-outline" label="ဘာသာစကား" value="မြန်မာဘာသာ" last />
+            <InfoRow label="ပရိုဂျက်" value="Royal Myawaddy" />
+            <InfoRow label="ဗားရှင်း" value="v1.0.0" />
+            <InfoRow label="ဘာသာစကား" value="မြန်မာဘာသာ" last />
           </View>
         </View>
 
         {/* ── Actions ── */}
         <View style={styles.section}>
-          <TouchableOpacity style={styles.actionRow} onPress={openEdit}>
-            <View style={[styles.actionIcon, { backgroundColor: COLORS.primary + '18' }]}>
-              <Ionicons name="create-outline" size={20} color={COLORS.primary} />
-            </View>
-            <Text style={[styles.actionText, { color: COLORS.text }]}>ပရိုဖိုင် ပြင်ဆင်ရန်</Text>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
+          <TouchableOpacity style={styles.actionBtn} onPress={openEdit}>
+            <Text style={styles.actionBtnText}>ပရိုဖိုင် ပြင်ဆင်ရန်</Text>
           </TouchableOpacity>
 
-          <View style={styles.actionDivider} />
-
           <TouchableOpacity
-            style={[styles.actionRow, isLoggingOut && { opacity: 0.6 }]}
+            style={[styles.actionBtn, styles.logoutBtn, isLoggingOut && { opacity: 0.6 }]}
             onPress={handleLogout}
             disabled={isLoggingOut}
           >
-            <View style={[styles.actionIcon, { backgroundColor: '#FEE2E2' }]}>
-              {isLoggingOut
-                ? <ActivityIndicator size="small" color="#EF4444" />
-                : <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-              }
-            </View>
-            <Text style={[styles.actionText, { color: '#EF4444' }]}>အကောင့်မှ ထွက်ရန်</Text>
-            <Ionicons name="chevron-forward" size={18} color="#EF4444" />
+            {isLoggingOut
+              ? <ActivityIndicator size="small" color="#EF4444" />
+              : <Text style={styles.logoutText}>အကောင့်မှ ထွက်ရန်</Text>
+            }
           </TouchableOpacity>
         </View>
 
@@ -496,12 +462,10 @@ export default function ProfileScreen() {
           <View style={styles.dialogContainer}>
             <Text style={styles.dialogTitle}>ပရိုဖိုင် ဓာတ်ပုံ</Text>
             <TouchableOpacity style={styles.dialogBtn} onPress={() => { setImageOptionsVisible(false); pickProfileImage(); }}>
-              <Ionicons name="images-outline" size={20} color={COLORS.text} />
               <Text style={styles.dialogBtnText}>ဓာတ်ပုံ ရွေးရန် (Gallery)</Text>
             </TouchableOpacity>
             {user.profile_image_url && (
               <TouchableOpacity style={styles.dialogBtn} onPress={confirmDeleteImage}>
-                <Ionicons name="trash-outline" size={20} color="#EF4444" />
                 <Text style={[styles.dialogBtnText, { color: '#EF4444' }]}>ဓာတ်ပုံ ဖျက်ရန်</Text>
               </TouchableOpacity>
             )}
@@ -551,7 +515,7 @@ export default function ProfileScreen() {
   );
 }
 
-// ── WebModal: cross-platform modal overlay for web ────────────────────────────
+// ── WebModal ───────────────────────────────────────────────────────────────────
 function WebModal({
   visible,
   onClose,
@@ -694,14 +658,11 @@ function EditFormContent({
   );
 }
 
-function InfoRow({ icon, label, value, valueColor, muted, last }: {
-  icon: string; label: string; value: string; valueColor?: string; muted?: boolean; last?: boolean;
+function InfoRow({ label, value, valueColor, muted, last }: {
+  label: string; value: string; valueColor?: string; muted?: boolean; last?: boolean;
 }) {
   return (
     <View style={[styles.infoRow, last && { borderBottomWidth: 0 }]}>
-      <View style={styles.infoIconWrap}>
-        <Ionicons name={icon as any} size={17} color={COLORS.primary} />
-      </View>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={[styles.infoValue, valueColor ? { color: valueColor, fontWeight: '700' } : {}, muted ? { color: COLORS.textLight } : {}]}>
         {value}
@@ -711,133 +672,150 @@ function InfoRow({ icon, label, value, valueColor, muted, last }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: COLORS.primary },
 
-  // ── Hero ──
-  hero: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingBottom: 32,
-  },
-  heroTopBar: {
+  // ── Header ──
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
-  heroTitle: {
+  headerTitle: {
     fontSize: 22, fontWeight: '800', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
+  },
+  headerSub: {
+    fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2,
+    fontFamily: FONTS.regular,
   },
   editBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.22)',
     paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)',
   },
   editBtnText: {
     fontSize: 13, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.semiBold,
   },
-  heroBody: { alignItems: 'center' },
-  avatarWrap: { position: 'relative', marginBottom: 14 },
-  avatarRing: {
-    width: 108, height: 108, borderRadius: 54,
-    borderWidth: 3, borderColor: 'rgba(255,255,255,0.5)',
-    padding: 3,
+
+  // ── Content ──
+  scrollArea: { flex: 1, backgroundColor: COLORS.background },
+  content: { padding: 16 },
+
+  // Profile card
+  profileCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 16,
   },
+  avatarWrap: { position: 'relative', marginBottom: 12 },
   avatar: {
-    flex: 1, borderRadius: 54,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    width: 96, height: 96, borderRadius: 48,
+    backgroundColor: COLORS.primary,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarImage: { width: '100%', height: '100%', borderRadius: 54 },
+  avatarImage: { width: 96, height: 96, borderRadius: 48 },
   avatarText: {
-    fontSize: 40, fontWeight: '800', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontSize: 36, fontWeight: '800', color: COLORS.white,
+    fontFamily: FONTS.bold,
   },
   cameraOverlay: {
     position: 'absolute', bottom: 2, right: 2,
     width: 26, height: 26, borderRadius: 13,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: COLORS.primaryDark,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: COLORS.white,
   },
-  heroName: {
-    fontSize: 22, fontWeight: '800', color: COLORS.white, marginBottom: 10,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  profileName: {
+    fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 8,
+    fontFamily: FONTS.bold,
   },
-  heroBadgeRow: { flexDirection: 'row', gap: 8 },
-  heroBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    paddingHorizontal: 12, paddingVertical: 5,
+  badgeRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 8 },
+  roleBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 10, paddingVertical: 4,
     borderRadius: 20,
+    backgroundColor: COLORS.background,
+    borderWidth: 1, borderColor: COLORS.border,
   },
-  activeBadge: { backgroundColor: '#DCFCE7' },
-  inactiveBadge: { backgroundColor: '#FEE2E2' },
-  heroBadgeText: {
-    fontSize: 12, fontWeight: '700', color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  roleDot: { width: 7, height: 7, borderRadius: 4 },
+  roleBadgeText: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.semiBold },
+  statusBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
   },
+  statusActive: { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' },
+  statusInactive: { backgroundColor: '#FEE2E2', borderColor: '#FECACA' },
   statusDot: { width: 7, height: 7, borderRadius: 4 },
+  statusText: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.semiBold },
+  avatarHint: {
+    fontSize: 12, color: COLORS.textLight, marginTop: 4,
+    fontFamily: FONTS.regular,
+  },
 
-  // ── Content ──
-  scrollArea: { flex: 1, marginTop: -16, borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: '#F3F4F6' },
-  content: { padding: 16 },
-
+  // ── Section ──
   section: { marginBottom: 16 },
   sectionTitle: {
-    fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 8, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.5,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 8, marginLeft: 4,
+    textTransform: 'uppercase', letterSpacing: 0.5,
+    fontFamily: FONTS.semiBold,
   },
-
-  // Info card
   card: {
-    backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    backgroundColor: COLORS.white, borderRadius: 12, overflow: 'hidden',
+    borderWidth: 1, borderColor: COLORS.border,
   },
   infoRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#E5E7EB',
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border,
     gap: 12,
-  },
-  infoIconWrap: {
-    width: 32, height: 32, borderRadius: 8,
-    backgroundColor: COLORS.primary + '12',
-    alignItems: 'center', justifyContent: 'center',
   },
   infoLabel: {
     fontSize: 13, color: COLORS.textSecondary, width: 90,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   infoValue: {
     flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', textAlign: 'right',
-    fontFamily: 'NotoSansMyanmar_500Medium',
+    fontFamily: FONTS.medium,
   },
 
-  // Action rows
-  actionRow: {
-    flexDirection: 'row', alignItems: 'center',
+  // Actions
+  actionBtn: {
     backgroundColor: COLORS.white,
-    paddingHorizontal: 16, paddingVertical: 15,
-    gap: 14,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 10,
   },
-  actionIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  actionText: {
-    flex: 1, fontSize: 15, fontWeight: '600',
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  actionBtnText: {
+    fontSize: 15, fontWeight: '700', color: COLORS.text,
+    fontFamily: FONTS.semiBold,
   },
-  actionDivider: { height: StyleSheet.hairlineWidth, backgroundColor: '#E5E7EB', marginLeft: 66 },
+  logoutBtn: { borderColor: '#FECACA', backgroundColor: '#FEF2F2' },
+  logoutText: { fontSize: 15, fontWeight: '700', color: '#EF4444', fontFamily: FONTS.semiBold },
 
   versionText: {
     textAlign: 'center', fontSize: 12, color: COLORS.textLight, marginTop: 8,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
 
   // ── Modal ──
-  modalContainer: { flex: 1, backgroundColor: '#F3F4F6' },
+  modalContainer: { flex: 1, backgroundColor: COLORS.background },
   modalHeader: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,
@@ -848,12 +826,12 @@ const styles = StyleSheet.create({
   modalCloseBtn: { padding: 4 },
   modalTitle: {
     flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   modalSaveBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20 },
   modalSaveBtnText: {
     fontSize: 14, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.semiBold,
   },
   modalScroll: { flex: 1 },
   modalContent: { padding: 16, paddingBottom: 40 },
@@ -861,13 +839,13 @@ const styles = StyleSheet.create({
   formGroup: { marginBottom: 14 },
   formLabel: {
     fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 6,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.semiBold,
   },
   formInput: {
     borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 12,
     fontSize: 15, color: COLORS.text, backgroundColor: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   passRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   eyeBtn: { padding: 10 },
@@ -875,7 +853,7 @@ const styles = StyleSheet.create({
   dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.border },
   dividerLabel: {
     fontSize: 12, color: COLORS.textLight, fontWeight: '600',
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
 
   // ── Web Dialogs ──
@@ -888,22 +866,21 @@ const styles = StyleSheet.create({
   },
   dialogTitle: {
     fontSize: 17, fontWeight: '700', color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
     marginBottom: 10,
   },
   dialogMsg: {
     fontSize: 14, color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
     marginBottom: 16,
   },
   dialogBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingVertical: 14, paddingHorizontal: 4,
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E5E7EB',
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border,
   },
   dialogBtnText: {
     fontSize: 15, color: COLORS.text, fontWeight: '500',
-    fontFamily: 'NotoSansMyanmar_500Medium',
+    fontFamily: FONTS.medium,
   },
   dialogCancelBtn: { marginTop: 4 },
   dialogBtnRow: {
@@ -913,17 +890,17 @@ const styles = StyleSheet.create({
     flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
   },
   dialogCancelActionBtn: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: COLORS.background,
   },
   dialogCancelActionText: {
     fontSize: 14, fontWeight: '600', color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   dialogDestructiveBtn: {
     backgroundColor: '#FEE2E2',
   },
   dialogDestructiveText: {
     fontSize: 14, fontWeight: '700', color: '#EF4444',
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
 });

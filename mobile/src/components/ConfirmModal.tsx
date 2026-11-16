@@ -47,22 +47,16 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   if (!visible) return null;
 
+  const resolvedIconColor = iconColor || (isDestructive ? '#EF4444' : confirmColor);
+  const resolvedIconBg = iconBg || (isDestructive ? '#FEE2E2' : confirmColor + '15');
+
   const content = (
     <View style={styles.card}>
-      {icon && (
-        <View
-          style={[
-            styles.iconWrap,
-            { backgroundColor: iconBg || (isDestructive ? '#FEE2E2' : confirmColor + '18') },
-          ]}
-        >
-          <Ionicons
-            name={icon}
-            size={28}
-            color={iconColor || (isDestructive ? '#EF4444' : confirmColor)}
-          />
+      {icon ? (
+        <View style={[styles.iconWrap, { backgroundColor: resolvedIconBg }]}>
+          <Ionicons name={icon} size={22} color={resolvedIconColor} />
         </View>
-      )}
+      ) : null}
 
       <Text style={styles.title}>{title}</Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -83,7 +77,7 @@ export default function ConfirmModal({
           style={[
             styles.confirmBtn,
             { backgroundColor: isDestructive ? '#EF4444' : confirmColor },
-            isLoading && { opacity: 0.7 },
+            isLoading && styles.confirmBtnLoading,
           ]}
           onPress={onConfirm}
           disabled={isLoading}
@@ -147,57 +141,57 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.45)',
   },
   card: {
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 380,
     backgroundColor: COLORS.white,
-    borderRadius: 20,
-    padding: 22,
+    borderRadius: 14,
+    padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
     zIndex: 1,
   },
   iconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '600',
     color: COLORS.text,
     fontFamily: FONTS.bold,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   message: {
     fontSize: 14,
     color: COLORS.textSecondary,
     fontFamily: FONTS.regular,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 16,
+    lineHeight: 20,
+    marginBottom: 14,
   },
   btnRow: {
     flexDirection: 'row',
     width: '100%',
-    gap: 10,
-    marginTop: 8,
+    gap: 8,
+    marginTop: 4,
   },
   cancelBtn: {
     flex: 1,
     backgroundColor: '#F3F4F6',
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 11,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -209,16 +203,18 @@ const styles = StyleSheet.create({
   },
   confirmBtn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 11,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  confirmBtnLoading: {
+    opacity: 0.7,
+  },
   confirmBtnText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: COLORS.white,
     fontFamily: FONTS.bold,
   },
 });
-

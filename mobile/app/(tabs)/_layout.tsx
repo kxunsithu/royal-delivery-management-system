@@ -18,7 +18,7 @@ export default function TabLayout() {
   const isWeb = Platform.OS === 'web';
   const isIos = Platform.OS === 'ios';
   const bottomInset = insets.bottom > 0 ? insets.bottom : (isIos ? 20 : 8);
-  const tabHeight = isWeb ? 72 : ((isIos ? 56 : 58) + bottomInset);
+  const tabHeight = isWeb ? 64 : ((isIos ? 52 : 54) + bottomInset);
 
   return (
     <Tabs
@@ -31,13 +31,12 @@ export default function TabLayout() {
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
           height: tabHeight,
-          paddingBottom: isWeb ? 8 : bottomInset,
-          paddingTop: isWeb ? 6 : 8,
-          elevation: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
+          paddingBottom: isWeb ? 6 : bottomInset,
+          paddingTop: isWeb ? 4 : 6,
+          elevation: 0,
+          shadowOpacity: 0,
+          shadowRadius: 0,
+          shadowOffset: { width: 0, height: 0 },
         },
         tabBarItemStyle: {
           paddingVertical: 2,
@@ -46,18 +45,18 @@ export default function TabLayout() {
         },
         tabBarIconStyle: {
           marginTop: 0,
-          marginBottom: 1,
+          marginBottom: 2,
         },
         tabBarLabel: ({ color, children }) => (
           <Text
             style={{
               color,
-              fontSize: 10.5,
+              fontSize: 10,
               fontWeight: '600',
               fontFamily: FONTS.semiBold,
               textAlign: 'center',
-              lineHeight: 18,
-              paddingBottom: 3,
+              lineHeight: 14,
+              paddingBottom: 2,
               overflow: 'visible',
               textDecorationLine: 'none',
               ...(isWeb ? { userSelect: 'none' } : {}),
@@ -91,8 +90,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'ဒက်ရှ်ဘုတ်',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid" size={size} color={color as string} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="grid" size={20} color={color as string} />
           ),
         }}
       />
@@ -101,8 +100,8 @@ export default function TabLayout() {
         options={{
           title: 'ပါဆယ်များ',
           href: canSeeParcels ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cube" size={size} color={color as string} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="cube" size={20} color={color as string} />
           ),
         }}
       />
@@ -111,8 +110,8 @@ export default function TabLayout() {
         options={{
           title: 'နေ့စဉ်',
           href: canSeeParcels ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color as string} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="calendar" size={20} color={color as string} />
           ),
         }}
       />
@@ -121,8 +120,8 @@ export default function TabLayout() {
         options={{
           title: 'ဖောက်သည်',
           href: canSeeParcels ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color as string} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="people" size={20} color={color as string} />
           ),
         }}
       />
@@ -131,8 +130,8 @@ export default function TabLayout() {
         options={{
           title: 'ကျွန်ုပ်၏လုပ်ငန်းများ',
           href: isStaff ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bicycle" size={size} color={color as string} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="bicycle" size={20} color={color as string} />
           ),
         }}
       />
@@ -147,8 +146,8 @@ export default function TabLayout() {
         options={{
           title: 'အသုံးပြုသူ',
           href: isAdmin ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color as string} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="people" size={20} color={color as string} />
           ),
         }}
       />
@@ -156,8 +155,8 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'ပရိုဖိုင်',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle" size={size} color={color as string} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-circle" size={20} color={color as string} />
           ),
         }}
       />

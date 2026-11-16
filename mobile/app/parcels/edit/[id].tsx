@@ -13,13 +13,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { parcelService, ParcelImage } from '../../../src/services/parcelService';
 import { useAuth } from '../../../src/context/AuthContext';
-import { COLORS } from '../../../src/constants';
-import { PARCEL_CATEGORIES } from '../../../src/constants';
+import { COLORS, PARCEL_CATEGORIES, FONTS } from '../../../src/constants';
+
 export default function EditParcelScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -228,8 +227,8 @@ export default function EditParcelScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-          <Ionicons name="close" size={24} color={COLORS.white} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>ပါဆယ် ပြင်ဆင်မည်</Text>
         <TouchableOpacity
@@ -245,18 +244,17 @@ export default function EditParcelScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ပါဆယ် အချက်အလက်</Text>
-          <View style={styles.card}>
-            <FormField
-              label="ဖော်ပြချက် (ပစ္စည်းအမျိုးအမည်များ / ထပ်ပေါင်းပစ္စည်း)"
-              value={form.description}
-              onChangeText={v => update('description', v)}
-              placeholder="ဥပမာ - အင်္ကျီ ၂ ထည်၊ ဖုန်း ၁ လုံး"
-              multiline
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
+        <FormSection title="ပါဆယ် အချက်အလက်">
+          <FormField
+            label="ဖော်ပြချက် (ပစ္စည်းအမျိုးအမည်များ / ထပ်ပေါင်းပစ္စည်း)"
+            value={form.description}
+            onChangeText={v => update('description', v)}
+            placeholder="ဥပမာ - အင်္ကျီ ၂ ထည်၊ ဖုန်း ၁ လုံး"
+            multiline
+          />
+          <View>
+            <View style={styles.labelRow}>
               <Text style={styles.label}>အမျိုးအစား (တစ်ခုထက်မက ရွေးနိုင်သည်)</Text>
               {selectedCategories.length > 0 && (
                 <Text style={styles.selectedCountText}>{selectedCategories.length} မျိုး ရွေးထားသည်</Text>
@@ -271,11 +269,6 @@ export default function EditParcelScreen() {
                     style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
                     onPress={() => toggleCategory(cat.value)}
                   >
-                    <Ionicons
-                      name={isSelected ? 'checkmark-circle' : (cat.icon as any)}
-                      size={18}
-                      color={isSelected ? '#fff' : COLORS.primary}
-                    />
                     <Text style={[styles.categoryChipText, isSelected && styles.categoryChipTextActive]}>
                       {cat.label}
                     </Text>
@@ -283,7 +276,6 @@ export default function EditParcelScreen() {
                 );
               })}
 
-              {/* Custom categories entered by user */}
               {selectedCategories
                 .filter((c) => !PARCEL_CATEGORIES.some((p) => p.value === c))
                 .map((customCat) => (
@@ -292,36 +284,34 @@ export default function EditParcelScreen() {
                     style={[styles.categoryChip, styles.categoryChipActive]}
                     onPress={() => toggleCategory(customCat)}
                   >
-                    <Ionicons name="pricetag" size={16} color="#fff" />
                     <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
                       {customCat}
                     </Text>
-                    <Ionicons name="close-circle" size={16} color="#fff" />
                   </TouchableOpacity>
                 ))}
             </View>
+          </View>
 
-            {/* Custom Category User Input */}
-            <View style={styles.customCategoryRow}>
-              <TextInput
-                style={styles.customCategoryInput}
-                value={customCategoryInput}
-                onChangeText={setCustomCategoryInput}
-                placeholder="အခြား အမျိုးအစား ရိုက်ထည့်ပါ (ဥပမာ - အလှကုန်)..."
-                placeholderTextColor={COLORS.textLight}
-                onSubmitEditing={handleAddCustomCategory}
-                returnKeyType="done"
-              />
-              <TouchableOpacity
-                style={[styles.addCategoryBtn, !customCategoryInput.trim() && { opacity: 0.5 }]}
-                onPress={handleAddCustomCategory}
-                disabled={!customCategoryInput.trim()}
-              >
-                <Ionicons name="add" size={18} color="#fff" />
-                <Text style={styles.addCategoryBtnText}>ထည့်မည်</Text>
-              </TouchableOpacity>
-            </View>
-            <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
+          <View style={styles.customCategoryRow}>
+            <TextInput
+              style={styles.customCategoryInput}
+              value={customCategoryInput}
+              onChangeText={setCustomCategoryInput}
+              placeholder="အခြား အမျိုးအစား ရိုက်ထည့်ပါ (ဥပမာ - အလှကုန်)..."
+              placeholderTextColor={COLORS.textLight}
+              onSubmitEditing={handleAddCustomCategory}
+              returnKeyType="done"
+            />
+            <TouchableOpacity
+              style={[styles.addCategoryBtn, !customCategoryInput.trim() && { opacity: 0.5 }]}
+              onPress={handleAddCustomCategory}
+              disabled={!customCategoryInput.trim()}
+            >
+              <Text style={styles.addCategoryBtnText}>ထည့်မည်</Text>
+            </TouchableOpacity>
+          </View>
+          <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
+          <View>
             <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>
             <View style={styles.segmented}>
               {priorities.map(p => (
@@ -331,29 +321,21 @@ export default function EditParcelScreen() {
               ))}
             </View>
           </View>
-        </View>
+        </FormSection>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ပေးပို့သူ</Text>
-          <View style={styles.card}>
-            <FormField label="နာမည်" value={form.sender_name} onChangeText={v => update('sender_name', v)} placeholder="ပေးပို့သူ နာမည်" />
-            <FormField label="ဖုန်းနံပါတ်" value={form.sender_phone} onChangeText={v => update('sender_phone', v)} placeholder="09..." keyboardType="phone-pad" />
-          </View>
-        </View>
+        <FormSection title="ပေးပို့သူ">
+          <FormField label="နာမည်" value={form.sender_name} onChangeText={v => update('sender_name', v)} placeholder="ပေးပို့သူ နာမည်" />
+          <FormField label="ဖုန်းနံပါတ်" value={form.sender_phone} onChangeText={v => update('sender_phone', v)} placeholder="09..." keyboardType="phone-pad" />
+        </FormSection>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>လက်ခံသူ *</Text>
-          <View style={styles.card}>
-            <FormField label="နာမည် *" value={form.recipient_name} onChangeText={v => update('recipient_name', v)} error={errors.recipient_name} placeholder="လက်ခံသူ နာမည်" />
-            <FormField label="ဖုန်းနံပါတ် *" value={form.recipient_phone} onChangeText={v => update('recipient_phone', v)} error={errors.recipient_phone} placeholder="09..." keyboardType="phone-pad" />
-            <FormField label="လိပ်စာ *" value={form.delivery_address} onChangeText={v => update('delivery_address', v)} error={errors.delivery_address} placeholder="တိကျသောလိပ်စာ" multiline />
-          </View>
-        </View>
+        <FormSection title="လက်ခံသူ *">
+          <FormField label="နာမည် *" value={form.recipient_name} onChangeText={v => update('recipient_name', v)} error={errors.recipient_name} placeholder="လက်ခံသူ နာမည်" />
+          <FormField label="ဖုန်းနံပါတ် *" value={form.recipient_phone} onChangeText={v => update('recipient_phone', v)} error={errors.recipient_phone} placeholder="09..." keyboardType="phone-pad" />
+          <FormField label="လိပ်စာ *" value={form.delivery_address} onChangeText={v => update('delivery_address', v)} error={errors.delivery_address} placeholder="တိကျသောလိပ်စာ" multiline />
+        </FormSection>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ငွေကြေး</Text>
-          <View style={styles.card}>
-            {/* Currency Selector */}
+        <FormSection title="ငွေကြေး">
+          <View>
             <Text style={styles.label}>ငွေကြေးအမျိုးအစား *</Text>
             <View style={styles.segmented}>
               {(['MMK', 'THB'] as const).map(cur => (
@@ -363,88 +345,78 @@ export default function EditParcelScreen() {
                   onPress={() => update('currency', cur)}
                 >
                   <Text style={[styles.segmentText, form.currency === cur && styles.segmentActiveText]}>
-                    {cur === 'MMK' ? '🇲🇲 ကျပ် (MMK)' : '🇹🇭 ဘတ် (THB)'}
+                    {cur === 'MMK' ? 'ကျပ် (MMK)' : 'ဘတ် (THB)'}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <FormField label={`ပို့ဆောင်ခ (${form.currency}) *`} value={form.delivery_fee} onChangeText={v => update('delivery_fee', v)} error={errors.delivery_fee} keyboardType="numeric" placeholder="0" />
-            <View style={styles.switchRow}>
-              <View>
-                <Text style={styles.switchLabel}>COD (ငွေတောင်းမည်)</Text>
+          </View>
+          <FormField label={`ပို့ဆောင်ခ (${form.currency}) *`} value={form.delivery_fee} onChangeText={v => update('delivery_fee', v)} error={errors.delivery_fee} keyboardType="numeric" placeholder="0" />
+          <View style={styles.switchRow}>
+            <View>
+              <Text style={styles.switchLabel}>COD (ငွေတောင်းမည်)</Text>
+              <Text style={styles.switchSub}>လက်ခံသူထံမှ ငွေကောက်မည်</Text>
+            </View>
+            <Switch value={form.is_cod} onValueChange={v => update('is_cod', v)} trackColor={{ false: COLORS.border, true: COLORS.primary }} thumbColor={COLORS.white} />
+          </View>
+          {form.is_cod && <FormField label={`COD ပမာဏ (${form.currency})`} value={form.cod_amount} onChangeText={v => update('cod_amount', v)} keyboardType="numeric" placeholder="0" />}
+        </FormSection>
+
+        <FormSection title="မှတ်ချက်">
+          <FormField label="မှတ်ချက်" value={form.notes} onChangeText={v => update('notes', v)} multiline placeholder="ချန်ထားနိုင်" />
+        </FormSection>
+
+        <FormSection title="ပါဆယ် ဓာတ်ပုံများ">
+          <View style={styles.imageBtnRow}>
+            <TouchableOpacity style={styles.imagePickBtn} onPress={pickImages}>
+              <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရွေးရန်</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imagePickBtn} onPress={takePhoto}>
+              <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရိုက်ရန်</Text>
+            </TouchableOpacity>
+          </View>
+
+          {existingImages.length > 0 && (
+            <>
+              <Text style={styles.imageGroupLabel}>လက်ရှိ ဓာတ်ပုံများ</Text>
+              <View style={styles.imageGrid}>
+                {existingImages.map((img) => (
+                  <View key={img.id} style={styles.imageThumbWrap}>
+                    <Image source={{ uri: img.url }} style={styles.imageThumb} />
+                    <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => deleteExistingImage(img.id)}>
+                      <Text style={styles.imageRemoveText}>×</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
               </View>
-              <Switch value={form.is_cod} onValueChange={v => update('is_cod', v)} trackColor={{ false: COLORS.border, true: COLORS.primary }} thumbColor={COLORS.white} />
-            </View>
-            {form.is_cod && <FormField label={`COD ပမာဏ (${form.currency})`} value={form.cod_amount} onChangeText={v => update('cod_amount', v)} keyboardType="numeric" placeholder="0" />}
-          </View>
-        </View>
+            </>
+          )}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>မှတ်ချက်</Text>
-          <View style={styles.card}>
-            <FormField label="မှတ်ချက်" value={form.notes} onChangeText={v => update('notes', v)} multiline placeholder="ချန်ထားနိုင်" />
-          </View>
-        </View>
+          {newImages.length > 0 && (
+            <>
+              <Text style={styles.imageGroupLabel}>ထည့်မည့် ဓာတ်ပုံများ</Text>
+              <View style={styles.imageGrid}>
+                {newImages.map((img, i) => (
+                  <View key={i} style={styles.imageThumbWrap}>
+                    <Image source={{ uri: img.uri }} style={styles.imageThumb} />
+                    <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => setNewImages(p => p.filter((_, idx) => idx !== i))}>
+                      <Text style={styles.imageRemoveText}>×</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
 
-        {/* Images Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ပါဆယ် ဓာတ်ပုံများ</Text>
-          <View style={[styles.card, { gap: 12 }]}>
-            <View style={styles.imageBtnRow}>
-              <TouchableOpacity style={styles.imagePickBtn} onPress={pickImages}>
-                <Ionicons name="images-outline" size={18} color={COLORS.primary} />
-                <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရွေးရန်</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.imagePickBtn} onPress={takePhoto}>
-                <Ionicons name="camera-outline" size={18} color={COLORS.primary} />
-                <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရိုက်ရန်</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Existing images */}
-            {existingImages.length > 0 && (
-              <>
-                <Text style={styles.imageGroupLabel}>လက်ရှိ ဓာတ်ပုံများ</Text>
-                <View style={styles.imageGrid}>
-                  {existingImages.map((img) => (
-                    <View key={img.id} style={styles.imageThumbWrap}>
-                      <Image source={{ uri: img.url }} style={styles.imageThumb} />
-                      <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => deleteExistingImage(img.id)}>
-                        <Ionicons name="close-circle" size={20} color={COLORS.error} />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
-              </>
-            )}
-
-            {/* New images to upload */}
-            {newImages.length > 0 && (
-              <>
-                <Text style={styles.imageGroupLabel}>ထည့်မည့် ဓာတ်ပုံများ</Text>
-                <View style={styles.imageGrid}>
-                  {newImages.map((img, i) => (
-                    <View key={i} style={styles.imageThumbWrap}>
-                      <Image source={{ uri: img.uri }} style={styles.imageThumb} />
-                      <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => setNewImages(p => p.filter((_, idx) => idx !== i))}>
-                        <Ionicons name="close-circle" size={20} color={COLORS.error} />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
-              </>
-            )}
-
-            {existingImages.length === 0 && newImages.length === 0 && (
-              <Text style={styles.imageHint}>ဓာတ်ပုံ မရှိသေးပါ</Text>
-            )}
-            <Text style={styles.imageHint}>အများဆုံး 10 ပုံ • JPEG, PNG • 5MB အောက်</Text>
-          </View>
-        </View>
+          {existingImages.length === 0 && newImages.length === 0 && (
+            <Text style={styles.imageHint}>ဓာတ်ပုံ မရှိသေးပါ</Text>
+          )}
+          <Text style={styles.imageHint}>အများဆုံး 10 ပုံ • JPEG, PNG • 5MB အောက်</Text>
+        </FormSection>
 
         <TouchableOpacity style={[styles.submitBtn, (updateMutation.isPending || uploadingImages) && { opacity: 0.6 }]} onPress={handleSubmit} disabled={updateMutation.isPending || uploadingImages}>
           {(updateMutation.isPending || uploadingImages) ? <ActivityIndicator color={COLORS.white} /> : (
-            <><Ionicons name="checkmark-circle" size={22} color={COLORS.white} /><Text style={styles.submitBtnText}>ပြင်ဆင်မှု သိမ်းမည်</Text></>
+            <Text style={styles.submitBtnText}>ပြင်ဆင်မှု သိမ်းမည်</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -452,25 +424,23 @@ export default function EditParcelScreen() {
   );
 }
 
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.formSection}>
+      <Text style={styles.formSectionTitle}>{title}</Text>
+      <View style={styles.formCard}>{children}</View>
+    </View>
+  );
+}
+
 function FormField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  keyboardType,
-  error,
-  multiline,
+  label, value, onChangeText, placeholder, keyboardType, error, multiline,
 }: {
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  placeholder?: string;
-  keyboardType?: any;
-  error?: string;
-  multiline?: boolean;
+  label: string; value: string; onChangeText: (v: string) => void;
+  placeholder?: string; keyboardType?: any; error?: string; multiline?: boolean;
 }) {
   return (
-    <View style={{ marginBottom: 4 }}>
+    <View style={styles.formField}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         style={[styles.textInput, !!error && styles.inputError, multiline ? styles.textArea : undefined]}
@@ -488,115 +458,171 @@ function FormField({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingBottom: 14,
     gap: 12,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
   },
-  closeBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  backBtn: { paddingVertical: 4, paddingRight: 8 },
+  backBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold },
+  headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold, textAlign: 'center' },
+  saveBtn: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
-  saveBtn: { backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
-  saveBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  saveBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   content: { padding: 16, paddingBottom: 40 },
-  section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  formSection: { marginBottom: 16 },
+  formSectionTitle: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
+  formCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    gap: 12,
   },
-  card: { backgroundColor: COLORS.white, borderRadius: 16, padding: 16, gap: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  formField: {},
+  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6, fontFamily: FONTS.semiBold },
+  textInput: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    color: COLORS.text,
+    backgroundColor: COLORS.white,
+    fontFamily: FONTS.regular,
   },
-  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 10, padding: 11, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  textArea: { height: 80, textAlignVertical: 'top' },
+  textArea: { height: 76, textAlignVertical: 'top' },
   inputError: { borderColor: COLORS.error },
-  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4, fontFamily: FONTS.regular },
+  categoryRow: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
   },
-  row: { flexDirection: 'row', gap: 12 },
-  categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
-  categoryChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1.5, borderColor: COLORS.primary, backgroundColor: '#FFF9EE' },
-  categoryChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  categoryChipText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, fontFamily: 'NotoSansMyanmar_600SemiBold' },
-  categoryChipTextActive: { color: '#fff' },
-  selectedCountText: { fontSize: 12, color: COLORS.primary, fontWeight: '600', fontFamily: 'NotoSansMyanmar_600SemiBold', marginBottom: 6 },
+  categoryChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
+  },
+  categoryChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  categoryChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.text,
+    fontFamily: FONTS.semiBold,
+  },
+  categoryChipTextActive: { color: COLORS.white },
   customCategoryRow: {
     flexDirection: 'row',
     gap: 8,
-    marginTop: 6,
-    marginBottom: 4,
   },
   customCategoryInput: {
     flex: 1,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontSize: 14,
     color: COLORS.text,
-    backgroundColor: COLORS.background,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    backgroundColor: COLORS.white,
+    fontFamily: FONTS.regular,
   },
   addCategoryBtn: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 14,
-    borderRadius: 10,
-    gap: 4,
+    borderRadius: 8,
   },
   addCategoryBtnText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 13,
     fontWeight: '700',
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
-  segmented: { flexDirection: 'row', borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border, overflow: 'hidden', marginBottom: 4 },
+  selectedCountText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '600',
+    fontFamily: FONTS.semiBold,
+  },
+  segmented: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    overflow: 'hidden',
+  },
   segmentItem: { flex: 1, paddingVertical: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: COLORS.primary },
-  segmentText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
+  segmentText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, fontFamily: FONTS.semiBold },
   segmentActiveText: { color: COLORS.white },
-  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 4 },
-  switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
   },
-  submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.primary, borderRadius: 16, padding: 18, marginTop: 8, shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 4 },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
+  switchSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
+  submitBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+    padding: 16,
+    marginTop: 8,
   },
+  submitBtnText: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   imageBtnRow: { flexDirection: 'row', gap: 10 },
   imagePickBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5,
-    borderColor: COLORS.primary, backgroundColor: '#FFF9EE',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.background,
   },
-  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
-  imageGroupLabel: { fontSize: 12, fontWeight: '700', color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
-  imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
+  imageGroupLabel: { fontSize: 12, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.semiBold, marginTop: 4 },
+  imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
   imageThumbWrap: { position: 'relative' },
-  imageThumb: { width: 80, height: 80, borderRadius: 10 },
-  imageRemoveBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: COLORS.white, borderRadius: 10 },
-  imageHint: { fontSize: 11, color: COLORS.textLight, textAlign: 'center',
-    fontFamily: 'NotoSansMyanmar_400Regular',
+  imageThumb: { width: 76, height: 76, borderRadius: 8 },
+  imageRemoveBtn: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  imageRemoveText: { fontSize: 14, lineHeight: 16, color: COLORS.error, fontFamily: FONTS.bold },
+  imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center', fontFamily: FONTS.regular },
 });

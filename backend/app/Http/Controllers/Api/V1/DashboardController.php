@@ -42,6 +42,13 @@ class DashboardController extends Controller
             ? round($parcelStats->delivered / ($parcelStats->delivered + $parcelStats->failed) * 100, 1)
             : 0;
 
+        $totals = Parcel::selectRaw("
+            COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
+            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
+        ")->first();
+
         $trends = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
@@ -67,6 +74,12 @@ class DashboardController extends Controller
                 ],
                 'trends'             => $trends,
                 'active_staff_count' => User::active()->deliveryStaff()->count(),
+                'totals' => [
+                    'fee_mmk' => (float) $totals->fee_mmk,
+                    'fee_thb' => (float) $totals->fee_thb,
+                    'cod_mmk' => (float) $totals->cod_mmk,
+                    'cod_thb' => (float) $totals->cod_thb,
+                ],
             ],
         ]);
     }
@@ -82,6 +95,13 @@ class DashboardController extends Controller
             SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered,
             SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed,
             SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged
+        ")->first();
+
+        $totals = Parcel::selectRaw("
+            COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
+            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
         ")->first();
 
         $staffWorkload = DeliveryAssignment::selectRaw("
@@ -111,6 +131,12 @@ class DashboardController extends Controller
                 ],
                 'today_received' => Parcel::whereDate('received_at', $today)->count(),
                 'staff_workload' => $staffWorkload,
+                'totals' => [
+                    'fee_mmk' => (float) $totals->fee_mmk,
+                    'fee_thb' => (float) $totals->fee_thb,
+                    'cod_mmk' => (float) $totals->cod_mmk,
+                    'cod_thb' => (float) $totals->cod_thb,
+                ],
             ],
         ]);
     }
@@ -126,6 +152,13 @@ class DashboardController extends Controller
             SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed
         ")->first();
 
+        $totals = Parcel::selectRaw("
+            COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
+            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
+        ")->first();
+
         return response()->json([
             'data' => [
                 'role' => 'accountant',
@@ -136,6 +169,12 @@ class DashboardController extends Controller
                     'failed'           => (int) $statuses->failed,
                 ],
                 'today_received' => Parcel::whereDate('received_at', $today)->count(),
+                'totals' => [
+                    'fee_mmk' => (float) $totals->fee_mmk,
+                    'fee_thb' => (float) $totals->fee_thb,
+                    'cod_mmk' => (float) $totals->cod_mmk,
+                    'cod_thb' => (float) $totals->cod_thb,
+                ],
             ],
         ]);
     }
@@ -145,6 +184,14 @@ class DashboardController extends Controller
         $today = today();
 
         $myAssignments = DeliveryAssignment::where('staff_id', $user->id);
+
+        $assignedParcelIds = (clone $myAssignments)->pluck('parcel_id');
+        $totals = Parcel::whereIn('id', $assignedParcelIds)->selectRaw("
+            COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
+            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
+        ")->first();
 
         return response()->json([
             'data' => [
@@ -156,6 +203,12 @@ class DashboardController extends Controller
                 ],
                 'attempts_today' => DeliveryAttempt::where('staff_id', $user->id)->whereDate('attempted_at', $today)->count(),
                 'failed_today' => DeliveryAttempt::where('staff_id', $user->id)->whereDate('attempted_at', $today)->where('result', 'FAILED')->count(),
+                'totals' => [
+                    'fee_mmk' => (float) $totals->fee_mmk,
+                    'fee_thb' => (float) $totals->fee_thb,
+                    'cod_mmk' => (float) $totals->cod_mmk,
+                    'cod_thb' => (float) $totals->cod_thb,
+                ],
             ],
         ]);
     }

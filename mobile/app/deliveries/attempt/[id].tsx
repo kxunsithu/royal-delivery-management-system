@@ -17,8 +17,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { deliveryService } from '../../../src/services/deliveryService';
-import { COLORS } from '../../../src/constants';
-import ImagePreviewModal, { PreviewImage } from '../../../src/components/ImagePreviewModal';
+import { COLORS, FONTS } from '../../../src/constants';
+import ImagePreviewModal from '../../../src/components/ImagePreviewModal';
 
 const FAILURE_REASONS = [
   { value: 'RECIPIENT_UNAVAILABLE', label: 'လက်ခံသူ မရှိ' },
@@ -237,8 +237,8 @@ export default function RecordAttemptScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <View style={styles.center}><ActivityIndicator size="large" color={COLORS.primary} /></View>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -257,63 +257,58 @@ export default function RecordAttemptScreen() {
         />
       )}
 
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-          <Ionicons name="close" size={24} color={COLORS.white} />
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
-          {parcel && <Text style={styles.headerSub}>{parcel.tracking_number}</Text>}
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle} numberOfLines={1}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
+          {parcel && <Text style={styles.headerSubtitle} numberOfLines={1}>{parcel.tracking_number}</Text>}
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Parcel Info */}
         {parcel && (
-          <View style={styles.parcelCard}>
-            <View style={styles.parcelHeader}>
-              <Ionicons name="barcode-outline" size={18} color={COLORS.primary} />
-              <Text style={styles.trackingNum}>{parcel.tracking_number}</Text>
-            </View>
-            <Text style={styles.recipientName}>{parcel.recipient_name}</Text>
-            <View style={styles.infoRow}>
-              <Ionicons name="call" size={14} color={COLORS.textSecondary} />
-              <Text style={styles.infoText}>{parcel.recipient_phone}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Ionicons name="location" size={14} color={COLORS.textSecondary} />
-              <Text style={styles.infoText}>{parcel.delivery_address}</Text>
-            </View>
+          <InfoSection title="ပါဆယ် အချက်အလက်">
+            <InfoRow label="ခြေရာခံ" value={parcel.tracking_number} />
+            <InfoRow label="လက်ခံသူ" value={parcel.recipient_name} />
+            <InfoRow label="ဖုန်းနံပါတ်" value={parcel.recipient_phone} />
+            <InfoRow label="လိပ်စာ" value={parcel.delivery_address} />
             {parcel.is_cod && (
-              <View style={styles.codInfo}>
-                <Ionicons name="cash" size={16} color={COLORS.info} />
-                <Text style={styles.codText}>COD ကောက်ရမည် - {Number(parcel.cod_amount).toLocaleString()} ကျပ်</Text>
-              </View>
+              <InfoRow label="COD" value={`${Number(parcel.cod_amount).toLocaleString()} ကျပ်`} valueColor={COLORS.info} />
             )}
-          </View>
+          </InfoSection>
         )}
 
         {/* Result Selection */}
-        <Text style={styles.sectionTitle}>ပို့ဆောင်ရလဒ် *</Text>
-        <View style={styles.resultRow}>
-          <TouchableOpacity
-            style={[styles.resultBtn, result === 'DELIVERED' && styles.resultBtnDelivered]}
-            onPress={() => setResult('DELIVERED')}
-          >
-            <Ionicons name="checkmark-circle" size={28} color={result === 'DELIVERED' ? COLORS.white : COLORS.success} />
-            <Text style={[styles.resultBtnText, result === 'DELIVERED' && { color: COLORS.white }]}>
-              ပို့ဆောင်ပြီး
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.resultBtn, result === 'FAILED' && styles.resultBtnFailed]}
-            onPress={() => setResult('FAILED')}
-          >
-            <Ionicons name="close-circle" size={28} color={result === 'FAILED' ? COLORS.white : COLORS.error} />
-            <Text style={[styles.resultBtnText, result === 'FAILED' && { color: COLORS.white }]}>
-              မအောင်မြင်
-            </Text>
-          </TouchableOpacity>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>ပို့ဆောင်ရလဒ် *</Text>
+          <View style={styles.resultRow}>
+            <TouchableOpacity
+              style={[styles.resultBtn, result === 'DELIVERED' && styles.resultBtnDelivered]}
+              onPress={() => setResult('DELIVERED')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.resultBtnText, result === 'DELIVERED' && { color: COLORS.white }]}>
+                ပို့ဆောင်ပြီး
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.resultBtn, result === 'FAILED' && styles.resultBtnFailed]}
+              onPress={() => setResult('FAILED')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.resultBtnText, result === 'FAILED' && { color: COLORS.white }]}>
+                မအောင်မြင်
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Failure Reason */}
@@ -326,6 +321,7 @@ export default function RecordAttemptScreen() {
                   key={r.value}
                   style={[styles.reasonChip, failureReason === r.value && styles.reasonChipActive]}
                   onPress={() => setFailureReason(r.value)}
+                  activeOpacity={0.8}
                 >
                   <Text style={[styles.reasonChipText, failureReason === r.value && styles.reasonChipTextActive]}>
                     {r.label}
@@ -340,33 +336,32 @@ export default function RecordAttemptScreen() {
         {result === 'DELIVERED' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>လက်ခံသူ နာမည်</Text>
-            <TextInput
-              style={styles.textInput}
-              value={recipientName}
-              onChangeText={setRecipientName}
-              placeholder="လက်ခံသူ၏ နာမည်"
-              placeholderTextColor={COLORS.textLight}
-            />
+            <View style={styles.inputCard}>
+              <TextInput
+                style={styles.textInput}
+                value={recipientName}
+                onChangeText={setRecipientName}
+                placeholder="လက်ခံသူ၏ နာမည်"
+                placeholderTextColor={COLORS.textLight}
+              />
+            </View>
           </View>
         )}
 
-        {/* ===== PROOF PHOTO SECTION ===== */}
+        {/* Proof Photo Section */}
         {result === 'DELIVERED' && (
           <View style={styles.section}>
-            <View style={styles.proofHeader}>
-              <Ionicons name="camera" size={18} color={COLORS.primary} />
-              <Text style={styles.sectionTitle}>သက်သေဓာတ်ပုံ <Text style={styles.recommendedBadge}>(အကြံပြု)</Text></Text>
-            </View>
-            <Text style={styles.proofHint}>ပို့ဆောင်ပြီးကြောင်း သက်သေဓာတ်ပုံ ရိုက်ပါ — လက်ခံသူ၊ ပါဆယ်နဲ့ တစ်ပါတည်း ရိုက်ပေးပါ</Text>
+            <Text style={styles.sectionTitle}>သက်သေဓာတ်ပုံ (အကြံပြု)</Text>
+            <Text style={styles.proofHint}>
+              ပို့ဆောင်ပြီးကြောင်း သက်သေဓာတ်ပုံ ရိုက်ပါ — လက်ခံသူ၊ ပါဆယ်နဲ့ တစ်ပါတည်း ရိုက်ပေးပါ
+            </Text>
 
             <View style={styles.photoBtnRow}>
-              <TouchableOpacity style={styles.photoBtn} onPress={takeProofPhoto}>
-                <Ionicons name="camera-outline" size={20} color={COLORS.primary} />
-                <Text style={styles.photoBtnText}>ကင်မရာ</Text>
+              <TouchableOpacity style={styles.photoBtn} onPress={takeProofPhoto} activeOpacity={0.8}>
+                <Text style={styles.photoBtnText}>ဓာတ်ပုံရိုက်ရန်</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.photoBtn} onPress={pickProofPhoto}>
-                <Ionicons name="images-outline" size={20} color={COLORS.primary} />
-                <Text style={styles.photoBtnText}>ဓာတ်ပုံ ရွေး</Text>
+              <TouchableOpacity style={styles.photoBtn} onPress={pickProofPhoto} activeOpacity={0.8}>
+                <Text style={styles.photoBtnText}>ဓာတ်ပုံရွေးရန်</Text>
               </TouchableOpacity>
             </View>
 
@@ -380,15 +375,12 @@ export default function RecordAttemptScreen() {
                         setPreviewIndex(idx);
                         setPreviewVisible(true);
                       }}
-                      style={{ flex: 1, width: '100%', height: '100%' }}
+                      style={styles.photoThumbTouch}
                     >
                       <Image source={{ uri: photo.uri }} style={styles.photoThumb} />
-                      <View style={styles.photoPreviewHint}>
-                        <Ionicons name="expand-outline" size={13} color={COLORS.white} />
-                      </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.photoRemoveBtn} onPress={() => removeProofPhoto(idx)}>
-                      <Ionicons name="close-circle" size={22} color={COLORS.error} />
+                      <Text style={styles.photoRemoveText}>×</Text>
                     </TouchableOpacity>
                     <View style={styles.photoIndexBadge}>
                       <Text style={styles.photoIndexText}>{idx + 1}</Text>
@@ -400,7 +392,6 @@ export default function RecordAttemptScreen() {
 
             {proofPhotos.length === 0 && (
               <View style={styles.noPhotoBox}>
-                <Ionicons name="camera-outline" size={36} color={COLORS.textLight} />
                 <Text style={styles.noPhotoText}>ဓာတ်ပုံ မရှိသေးပါ</Text>
                 <Text style={styles.noPhotoSubText}>အများဆုံး 5 ပုံ တင်နိုင်သည်</Text>
               </View>
@@ -411,15 +402,17 @@ export default function RecordAttemptScreen() {
         {/* Notes */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>မှတ်ချက် (ချန်ထားနိုင်)</Text>
-          <TextInput
-            style={[styles.textInput, styles.textArea]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="အပိုသတင်းအချက်အလက်..."
-            placeholderTextColor={COLORS.textLight}
-            multiline
-            numberOfLines={3}
-          />
+          <View style={styles.inputCard}>
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="အပိုသတင်းအချက်အလက်..."
+              placeholderTextColor={COLORS.textLight}
+              multiline
+              numberOfLines={3}
+            />
+          </View>
         </View>
 
         {/* Upload status indicator */}
@@ -439,20 +432,14 @@ export default function RecordAttemptScreen() {
           ]}
           onPress={handleSubmit}
           disabled={!result || isPending}
+          activeOpacity={0.85}
         >
           {isPending ? (
             <ActivityIndicator color={COLORS.white} />
           ) : (
-            <>
-              <Ionicons
-                name={result === 'DELIVERED' ? 'checkmark-circle' : 'close-circle'}
-                size={22}
-                color={COLORS.white}
-              />
-              <Text style={styles.submitBtnText}>
-                {result === 'DELIVERED' ? 'ပို့ဆောင်ပြီး အတည်ပြုမည်' : result === 'FAILED' ? 'မအောင်မြင်မှု တင်မည်' : 'ရလဒ် ရွေးပါ'}
-              </Text>
-            </>
+            <Text style={styles.submitBtnText}>
+              {result === 'DELIVERED' ? 'ပို့ဆောင်ပြီး အတည်ပြုမည်' : result === 'FAILED' ? 'မအောင်မြင်မှု တင်မည်' : 'ရလဒ် ရွေးပါ'}
+            </Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -472,104 +459,176 @@ export default function RecordAttemptScreen() {
   );
 }
 
+function InfoSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.infoCard}>{children}</View>
+    </View>
+  );
+}
+
+function InfoRow({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={[styles.infoValue, valueColor ? { color: valueColor, fontWeight: '700' } : {}]} numberOfLines={3}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingBottom: 16,
     gap: 12,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  closeBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 17, fontWeight: '700', color: COLORS.white, fontFamily: 'NotoSansMyanmar_700Bold' },
-  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2, fontFamily: 'NotoSansMyanmar_400Regular' },
+  backBtn: { padding: 4 },
+  headerCenter: { flex: 1 },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
+  headerSubtitle: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   content: { padding: 16, paddingBottom: 40 },
-  parcelCard: {
-    backgroundColor: COLORS.white, borderRadius: 18, padding: 18, marginBottom: 20,
-    borderLeftWidth: 4, borderLeftColor: COLORS.primary,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3,
+
+  section: { marginBottom: 16 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
+  infoCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  parcelHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  trackingNum: { fontSize: 15, fontWeight: '700', color: COLORS.primary, fontFamily: 'NotoSansMyanmar_700Bold' },
-  recipientName: { fontSize: 18, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: 'NotoSansMyanmar_700Bold' },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  infoText: { fontSize: 14, color: COLORS.textSecondary, fontFamily: 'NotoSansMyanmar_400Regular', flex: 1 },
-  codInfo: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#E8F4FB', padding: 10, borderRadius: 10, marginTop: 8 },
-  codText: { fontSize: 14, fontWeight: '700', color: COLORS.info, fontFamily: 'NotoSansMyanmar_700Bold' },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 10, fontFamily: 'NotoSansMyanmar_700Bold' },
-  section: { marginBottom: 18 },
-  resultRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 96, fontFamily: FONTS.regular },
+  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', fontFamily: FONTS.medium },
+
+  resultRow: { flexDirection: 'row', gap: 10 },
   resultBtn: {
-    flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: COLORS.white, borderRadius: 16, padding: 20, borderWidth: 2, borderColor: COLORS.border,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   resultBtnDelivered: { backgroundColor: COLORS.success, borderColor: COLORS.success },
   resultBtnFailed: { backgroundColor: COLORS.error, borderColor: COLORS.error },
-  resultBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: 'NotoSansMyanmar_700Bold' },
-  reasonGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  reasonChip: { paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1.5, borderColor: COLORS.border, backgroundColor: COLORS.white },
-  reasonChipActive: { backgroundColor: COLORS.error, borderColor: COLORS.error },
-  reasonChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, fontFamily: 'NotoSansMyanmar_600SemiBold' },
-  reasonChipTextActive: { color: COLORS.white },
-  textInput: {
-    borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 12, padding: 12,
-    fontSize: 15, color: COLORS.text, backgroundColor: COLORS.white, fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  textArea: { height: 80, textAlignVertical: 'top' },
+  resultBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
 
-  // Proof photo styles
-  proofHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  recommendedBadge: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '400', fontFamily: 'NotoSansMyanmar_400Regular' },
-  proofHint: { fontSize: 12, color: COLORS.textSecondary, marginBottom: 12, fontFamily: 'NotoSansMyanmar_400Regular', lineHeight: 18 },
+  reasonGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  reasonChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
+  },
+  reasonChipActive: { backgroundColor: COLORS.error, borderColor: COLORS.error },
+  reasonChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, fontFamily: FONTS.semiBold },
+  reasonChipTextActive: { color: COLORS.white },
+
+  inputCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 4,
+  },
+  textInput: {
+    borderWidth: 0,
+    padding: 10,
+    fontSize: 15,
+    color: COLORS.text,
+    backgroundColor: COLORS.white,
+    fontFamily: FONTS.regular,
+  },
+  textArea: { height: 76, textAlignVertical: 'top' },
+
+  proofHint: { fontSize: 12, color: COLORS.textSecondary, marginBottom: 12, fontFamily: FONTS.regular, lineHeight: 18 },
   photoBtnRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   photoBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, paddingVertical: 12, borderRadius: 12, borderWidth: 1.5,
-    borderColor: COLORS.primary, backgroundColor: '#FFF9EE',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
   },
-  photoBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, fontFamily: 'NotoSansMyanmar_600SemiBold' },
+  photoBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
   photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   photoThumbWrap: { position: 'relative' },
-  photoThumb: { width: 90, height: 90, borderRadius: 12 },
-  photoRemoveBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: COLORS.white, borderRadius: 12 },
-  photoIndexBadge: {
-    position: 'absolute', bottom: 4, left: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2,
-  },
-  photoIndexText: { fontSize: 11, color: COLORS.white, fontWeight: '700' },
-  photoPreviewHint: {
+  photoThumbTouch: { flex: 1, width: '100%', height: '100%' },
+  photoThumb: { width: 80, height: 80, borderRadius: 8, backgroundColor: COLORS.border },
+  photoRemoveBtn: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 8,
-    width: 22,
-    height: 22,
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  noPhotoBox: {
-    alignItems: 'center', paddingVertical: 24, borderRadius: 12,
-    borderWidth: 1.5, borderColor: COLORS.border, borderStyle: 'dashed', backgroundColor: COLORS.white,
+  photoRemoveText: { fontSize: 14, lineHeight: 16, color: COLORS.error, fontFamily: FONTS.bold },
+  photoIndexBadge: {
+    position: 'absolute',
+    bottom: 4,
+    left: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
-  noPhotoText: { fontSize: 14, color: COLORS.textSecondary, marginTop: 8, fontFamily: 'NotoSansMyanmar_400Regular' },
-  noPhotoSubText: { fontSize: 12, color: COLORS.textLight, marginTop: 4, fontFamily: 'NotoSansMyanmar_400Regular' },
+  photoIndexText: { fontSize: 11, color: COLORS.white, fontWeight: '700' },
+  noPhotoBox: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderStyle: 'dashed',
+    backgroundColor: COLORS.white,
+  },
+  noPhotoText: { fontSize: 14, color: COLORS.textSecondary, fontFamily: FONTS.regular },
+  noPhotoSubText: { fontSize: 12, color: COLORS.textLight, marginTop: 4, fontFamily: FONTS.regular },
   uploadingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12, justifyContent: 'center' },
-  uploadingText: { fontSize: 14, color: COLORS.primary, fontFamily: 'NotoSansMyanmar_400Regular' },
+  uploadingText: { fontSize: 14, color: COLORS.primary, fontFamily: FONTS.regular },
 
   submitBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 10, borderRadius: 16, padding: 18, marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    padding: 16,
+    marginTop: 8,
   },
-  submitDelivered: { backgroundColor: COLORS.success, shadowColor: COLORS.success, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5 },
-  submitFailed: { backgroundColor: COLORS.error, shadowColor: COLORS.error, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5 },
+  submitDelivered: { backgroundColor: COLORS.success },
+  submitFailed: { backgroundColor: COLORS.error },
   submitDisabled: { backgroundColor: COLORS.textLight },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white, fontFamily: 'NotoSansMyanmar_700Bold' },
+  submitBtnText: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 });

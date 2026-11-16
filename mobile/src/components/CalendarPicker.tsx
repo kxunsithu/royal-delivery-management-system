@@ -11,8 +11,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../constants';
+import { COLORS, FONTS } from '../constants';
 
 interface Props {
   visible: boolean;
@@ -24,7 +23,6 @@ interface Props {
   maxDate?: string;       // 'YYYY-MM-DD'
 }
 
-const DAYS_MM = ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ'];
 const DAYS_SHORT = ['တ', 'တ', 'အ', 'ဗ', 'ကြ', 'သ', 'စ'];
 const MONTHS_MM = [
   'ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်',
@@ -125,12 +123,12 @@ export default function CalendarPicker({ visible, value, onConfirm, onCancel, ti
 
       {/* Month navigation */}
       <View style={styles.nav}>
-        <TouchableOpacity style={styles.navBtn} onPress={prevMonth}>
-          <Ionicons name="chevron-back" size={20} color={COLORS.primary} />
+        <TouchableOpacity style={styles.navBtn} onPress={prevMonth} activeOpacity={0.7}>
+          <Text style={styles.navArrow}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.navLabel}>{MONTHS_MM[viewMonth]} {viewYear}</Text>
-        <TouchableOpacity style={styles.navBtn} onPress={nextMonth}>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.primary} />
+        <TouchableOpacity style={styles.navBtn} onPress={nextMonth} activeOpacity={0.7}>
+          <Text style={styles.navArrow}>›</Text>
         </TouchableOpacity>
       </View>
 
@@ -138,7 +136,7 @@ export default function CalendarPicker({ visible, value, onConfirm, onCancel, ti
       <View style={styles.grid}>
         {DAYS_SHORT.map((d, i) => (
           <View key={i} style={styles.cell}>
-            <Text style={[styles.dowText, i === 0 && styles.sunText]}>{d}</Text>
+            <Text style={styles.dowText}>{d}</Text>
           </View>
         ))}
 
@@ -148,13 +146,13 @@ export default function CalendarPicker({ visible, value, onConfirm, onCancel, ti
           const disabled = isDisabled(day);
           const sel = isSelected(day);
           const tod = isToday(day);
-          const isSun = (firstDow + day - 1) % 7 === 0;
           return (
             <TouchableOpacity
               key={day}
               style={styles.cell}
               onPress={() => !disabled && setSelected(new Date(viewYear, viewMonth, day))}
               disabled={disabled}
+              activeOpacity={0.7}
             >
               <View style={[
                 styles.dayCircle,
@@ -165,7 +163,6 @@ export default function CalendarPicker({ visible, value, onConfirm, onCancel, ti
                   styles.dayText,
                   sel && styles.dayTextSel,
                   !sel && tod && styles.dayTextToday,
-                  !sel && !tod && isSun && styles.sunText,
                   disabled && styles.dayTextDisabled,
                 ]}>
                   {day}
@@ -179,18 +176,16 @@ export default function CalendarPicker({ visible, value, onConfirm, onCancel, ti
       {/* Selected date display */}
       {selected && (
         <View style={styles.selectedRow}>
-          <Ionicons name="calendar" size={14} color={COLORS.primary} />
           <Text style={styles.selectedText}>{formatDate(selected)}</Text>
         </View>
       )}
 
       {/* Actions */}
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
+        <TouchableOpacity style={styles.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
           <Text style={styles.cancelBtnText}>ပိတ်မည်</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
-          <Ionicons name="checkmark" size={16} color={COLORS.white} />
+        <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm} activeOpacity={0.8}>
           <Text style={styles.confirmBtnText}>ရွေးချယ်မည်</Text>
         </TouchableOpacity>
       </View>
@@ -221,7 +216,7 @@ export default function CalendarPicker({ visible, value, onConfirm, onCancel, ti
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
@@ -235,19 +230,21 @@ const styles = StyleSheet.create({
   },
   webBackdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 16,
     width: 320,
     maxWidth: '90%' as any,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 20,
-    elevation: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 6,
     zIndex: 1,
   },
   title: {
@@ -256,7 +253,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     textAlign: 'center',
     marginBottom: 12,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   nav: {
     flexDirection: 'row',
@@ -265,15 +262,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   navBtn: {
-    padding: 6,
+    width: 32,
+    height: 32,
     borderRadius: 8,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  navArrow: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    lineHeight: 20,
   },
   navLabel: {
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   grid: {
     flexDirection: 'row',
@@ -284,19 +292,17 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 2,
   },
   dowText: {
     fontSize: 11,
     fontWeight: '600',
     color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
-  sunText: { color: '#E53935' },
   dayCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -306,59 +312,56 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     color: COLORS.text,
+    fontFamily: FONTS.regular,
   },
-  dayTextSel: { color: '#FFFFFF', fontWeight: '700' },
-  dayTextToday: { color: COLORS.primary, fontWeight: '700' },
-  dayTextDisabled: { color: COLORS.textLight, opacity: 0.5 },
+  dayTextSel: { color: COLORS.white, fontWeight: '700', fontFamily: FONTS.bold },
+  dayTextToday: { color: COLORS.primary, fontWeight: '700', fontFamily: FONTS.bold },
+  dayTextDisabled: { color: COLORS.textLight, opacity: 0.4 },
   selectedRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    justifyContent: 'center',
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: COLORS.border,
   },
   selectedText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   actions: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 14,
+    gap: 8,
+    marginTop: 12,
   },
   cancelBtn: {
     flex: 1,
-    paddingVertical: 11,
-    borderRadius: 10,
-    borderWidth: 1.5,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
   cancelBtnText: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   confirmBtn: {
     flex: 1,
-    flexDirection: 'row',
+    paddingVertical: 10,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 11,
-    borderRadius: 10,
     backgroundColor: COLORS.primary,
   },
   confirmBtnText: {
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
 });

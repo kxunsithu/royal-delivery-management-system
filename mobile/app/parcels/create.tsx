@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,23 +10,20 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  FlatList,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { parcelService, ContactSuggestion } from '../../src/services/parcelService';
 import { useAuth } from '../../src/context/AuthContext';
-import { COLORS, PARCEL_CATEGORIES } from '../../src/constants';
+import { COLORS, PARCEL_CATEGORIES, FONTS } from '../../src/constants';
 
 export default function CreateParcelScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Pre-fill params from customer detail page
   const params = useLocalSearchParams<{
     sender_name?: string;
     sender_phone?: string;
@@ -34,7 +31,6 @@ export default function CreateParcelScreen() {
     recipient_phone?: string;
   }>();
 
-  // Guard: only admin and manager can create parcels — redirect accountant away
   const canCreate = !user || user.role === 'admin' || user.role === 'manager';
   useEffect(() => {
     if (user && !canCreate) {
@@ -63,7 +59,6 @@ export default function CreateParcelScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [localImages, setLocalImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
-  // ── Autocomplete state ──────────────────────────────────────────────────────
   const [senderSuggestions, setSenderSuggestions] = useState<any[]>([]);
   const [recipientSuggestions, setRecipientSuggestions] = useState<any[]>([]);
   const [showSenderSug, setShowSenderSug] = useState(false);
@@ -74,7 +69,6 @@ export default function CreateParcelScreen() {
   const createMutation = useMutation({
     mutationFn: (data: any) => parcelService.create(data),
     onSuccess: async (createdParcel) => {
-      // Upload images after parcel creation
       if (localImages.length > 0) {
         try {
           const formData = new FormData();
@@ -87,7 +81,7 @@ export default function CreateParcelScreen() {
           });
           await parcelService.uploadImages(createdParcel.id, formData);
         } catch {
-          // Image upload failed but parcel was created — still proceed
+          // ignore
         }
       }
       queryClient.invalidateQueries({ queryKey: ['parcels'] });
@@ -109,7 +103,6 @@ export default function CreateParcelScreen() {
 
   const [customCategoryInput, setCustomCategoryInput] = useState('');
 
-  // Multi-select categories
   const selectedCategories = form.category
     ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
     : [];
@@ -139,10 +132,8 @@ export default function CreateParcelScreen() {
     setCustomCategoryInput('');
   }
 
-  // ── Sender autocomplete ──────────────────────────────────────────────────────
   function handleSenderInput(field: 'sender_name' | 'sender_phone', value: string) {
     update(field, value);
-    // Close recipient suggestions when typing in sender section
     setShowRecipientSug(false);
     clearTimeout(senderDebounce.current);
     if (value.trim().length < 1) { setSenderSuggestions([]); setShowSenderSug(false); return; }
@@ -162,10 +153,8 @@ export default function CreateParcelScreen() {
     setShowSenderSug(false);
   }
 
-  // ── Recipient autocomplete ───────────────────────────────────────────────────
   function handleRecipientInput(field: 'recipient_name' | 'recipient_phone', value: string) {
     update(field, value);
-    // Close sender suggestions when typing in recipient section
     setShowSenderSug(false);
     clearTimeout(recipientDebounce.current);
     if (value.trim().length < 1) { setRecipientSuggestions([]); setShowRecipientSug(false); return; }
@@ -263,10 +252,9 @@ export default function CreateParcelScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-          <Ionicons name="close" size={24} color={COLORS.white} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>ပါဆယ်အသစ် မှတ်ပုံတင်မည်</Text>
         <TouchableOpacity
@@ -283,7 +271,6 @@ export default function CreateParcelScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
-        {/* Tracking number */}
         <FormSection title="ပါဆယ် အချက်အလက်">
           <FormField
             label="ခြေရာခံနံပါတ် (ဖောင်ချပါ အလိုအလျောက်)"
@@ -298,59 +285,51 @@ export default function CreateParcelScreen() {
             placeholder="အပိုဆောင်း မှတ်ချက်"
           />
 
-          {/* Category Picker (Multi-select) */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={styles.label}>အမျိုးအစား (တစ်ခုထက်မက ရွေးနိုင်သည်)</Text>
-            {selectedCategories.length > 0 && (
-              <Text style={styles.selectedCountText}>{selectedCategories.length} မျိုး ရွေးထားသည်</Text>
-            )}
-          </View>
-          <View style={styles.categoryRow}>
-            {PARCEL_CATEGORIES.map((cat) => {
-              const isSelected = selectedCategories.includes(cat.value);
-              return (
-                <TouchableOpacity
-                  key={cat.value}
-                  style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
-                  onPress={() => toggleCategory(cat.value)}
-                >
-                  <Ionicons
-                    name={isSelected ? 'checkmark-circle' : (cat.icon as any)}
-                    size={18}
-                    color={isSelected ? COLORS.white : COLORS.primary}
-                  />
-                  <Text style={[styles.categoryChipText, isSelected && styles.categoryChipTextActive]}>
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+          <View>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>အမျိုးအစား (တစ်ခုထက်မက ရွေးနိုင်သည်)</Text>
+              {selectedCategories.length > 0 && (
+                <Text style={styles.selectedCountText}>{selectedCategories.length} မျိုး ရွေးထားသည်</Text>
+              )}
+            </View>
+            <View style={styles.categoryRow}>
+              {PARCEL_CATEGORIES.map((cat) => {
+                const isSelected = selectedCategories.includes(cat.value);
+                return (
+                  <TouchableOpacity
+                    key={cat.value}
+                    style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
+                    onPress={() => toggleCategory(cat.value)}
+                  >
+                    <Text style={[styles.categoryChipText, isSelected && styles.categoryChipTextActive]}>
+                      {cat.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
 
-            {/* Custom categories entered by user */}
-            {selectedCategories
-              .filter((c) => !PARCEL_CATEGORIES.some((p) => p.value === c))
-              .map((customCat) => (
-                <TouchableOpacity
-                  key={customCat}
-                  style={[styles.categoryChip, styles.categoryChipActive]}
-                  onPress={() => toggleCategory(customCat)}
-                >
-                  <Ionicons name="pricetag" size={16} color={COLORS.white} />
-                  <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
-                    {customCat}
-                  </Text>
-                  <Ionicons name="close-circle" size={16} color={COLORS.white} />
-                </TouchableOpacity>
-              ))}
+              {selectedCategories
+                .filter((c) => !PARCEL_CATEGORIES.some((p) => p.value === c))
+                .map((customCat) => (
+                  <TouchableOpacity
+                    key={customCat}
+                    style={[styles.categoryChip, styles.categoryChipActive]}
+                    onPress={() => toggleCategory(customCat)}
+                  >
+                    <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
+                      {customCat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+            </View>
           </View>
 
-          {/* Custom Category User Input */}
           <View style={styles.customCategoryRow}>
             <TextInput
               style={styles.customCategoryInput}
               value={customCategoryInput}
               onChangeText={setCustomCategoryInput}
-              placeholder="အခြား အမျိုးအစား ရိုက်ထည့်ပါ (ဥပမာ - အလှကုန်)..."
+              placeholder="အခြား အမျိုးအစား ရိုက်ထည့်ပါ"
               placeholderTextColor={COLORS.textLight}
               onSubmitEditing={handleAddCustomCategory}
               returnKeyType="done"
@@ -360,43 +339,37 @@ export default function CreateParcelScreen() {
               onPress={handleAddCustomCategory}
               disabled={!customCategoryInput.trim()}
             >
-              <Ionicons name="add" size={18} color={COLORS.white} />
               <Text style={styles.addCategoryBtnText}>ထည့်မည်</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <FormField
-                label="အလေးချိန် (kg)"
-                value={form.weight}
-                onChangeText={(v) => update('weight', v)}
-                keyboardType="numeric"
-                placeholder="ချန်ထားနိုင်"
-              />
+          <FormField
+            label="အလေးချိန် (kg)"
+            value={form.weight}
+            onChangeText={(v) => update('weight', v)}
+            keyboardType="numeric"
+            placeholder="ချန်ထားနိုင်"
+          />
+
+          <View>
+            <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>
+            <View style={styles.segmented}>
+              {priorities.map(p => (
+                <TouchableOpacity
+                  key={p.value}
+                  style={[styles.segmentItem, form.priority === p.value && styles.segmentActive]}
+                  onPress={() => update('priority', p.value)}
+                >
+                  <Text style={[styles.segmentText, form.priority === p.value && styles.segmentActiveText]}>
+                    {p.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
-
-          {/* Priority */}
-          <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>
-          <View style={styles.segmented}>
-            {priorities.map(p => (
-              <TouchableOpacity
-                key={p.value}
-                style={[styles.segmentItem, form.priority === p.value && styles.segmentActive]}
-                onPress={() => update('priority', p.value)}
-              >
-                <Text style={[styles.segmentText, form.priority === p.value && styles.segmentActiveText]}>
-                  {p.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
         </FormSection>
 
         <FormSection title="ပေးပို့သူ">
-          {/* Sender Phone — first */}
           <View style={styles.acField}>
             <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
             <TextInput
@@ -410,7 +383,6 @@ export default function CreateParcelScreen() {
             />
           </View>
 
-          {/* Sender Name — second */}
           <View style={styles.acField}>
             <Text style={styles.label}>နာမည်</Text>
             <TextInput
@@ -423,24 +395,20 @@ export default function CreateParcelScreen() {
             />
           </View>
 
-          {/* Sender suggestions — inline */}
           {showSenderSug && senderSuggestions.length > 0 && (
             <View style={styles.inlineSugBox}>
               <View style={styles.inlineSugHeader}>
-                <Ionicons name="search-outline" size={12} color={COLORS.primary} />
                 <Text style={styles.inlineSugHeaderText}>ရှိပြီးသား ဖောက်သည်များ</Text>
                 <TouchableOpacity onPress={() => setShowSenderSug(false)}>
-                  <Ionicons name="close" size={14} color={COLORS.textLight} />
+                  <Text style={styles.closeText}>×</Text>
                 </TouchableOpacity>
               </View>
               {senderSuggestions.map((s, i) => (
                 <TouchableOpacity key={i} style={styles.inlineSugItem} onPress={() => applySenderSuggestion(s)}>
-                  <Ionicons name="person-circle-outline" size={28} color={COLORS.primary} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.suggestionName}>{s.name}</Text>
                     <Text style={styles.suggestionPhone}>{s.phone}</Text>
                   </View>
-                  <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.primary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -448,7 +416,6 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <FormSection title="လက်ခံသူ *">
-          {/* Recipient Phone — first */}
           <View style={styles.acField}>
             <Text style={styles.label}>ဖုန်းနံပါတ် *</Text>
             <TextInput
@@ -463,7 +430,6 @@ export default function CreateParcelScreen() {
             {errors.recipient_phone && <Text style={styles.errorText}>{errors.recipient_phone}</Text>}
           </View>
 
-          {/* Recipient Name — second */}
           <View style={styles.acField}>
             <Text style={styles.label}>နာမည် *</Text>
             <TextInput
@@ -477,19 +443,16 @@ export default function CreateParcelScreen() {
             {errors.recipient_name && <Text style={styles.errorText}>{errors.recipient_name}</Text>}
           </View>
 
-          {/* Recipient suggestions — inline */}
           {showRecipientSug && recipientSuggestions.length > 0 && (
             <View style={styles.inlineSugBox}>
               <View style={styles.inlineSugHeader}>
-                <Ionicons name="search-outline" size={12} color={COLORS.primary} />
                 <Text style={styles.inlineSugHeaderText}>ရှိပြီးသား ဖောက်သည်များ</Text>
                 <TouchableOpacity onPress={() => setShowRecipientSug(false)}>
-                  <Ionicons name="close" size={14} color={COLORS.textLight} />
+                  <Text style={styles.closeText}>×</Text>
                 </TouchableOpacity>
               </View>
               {recipientSuggestions.map((s, i) => (
                 <TouchableOpacity key={i} style={styles.inlineSugItem} onPress={() => applyRecipientSuggestion(s)}>
-                  <Ionicons name="person-circle-outline" size={28} color={COLORS.primary} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.suggestionName}>{s.name}</Text>
                     <Text style={styles.suggestionPhone}>{s.phone}</Text>
@@ -497,7 +460,6 @@ export default function CreateParcelScreen() {
                       <Text style={styles.suggestionAddr} numberOfLines={1}>{s.delivery_address}</Text>
                     ) : null}
                   </View>
-                  <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.primary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -514,20 +476,21 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <FormSection title="ငွေကြေး">
-          {/* Currency Selector */}
-          <Text style={styles.label}>ငွေကြေးအမျိုးအစား *</Text>
-          <View style={styles.segmented}>
-            {(['MMK', 'THB'] as const).map(cur => (
-              <TouchableOpacity
-                key={cur}
-                style={[styles.segmentItem, form.currency === cur && styles.segmentActive]}
-                onPress={() => update('currency', cur)}
-              >
-                <Text style={[styles.segmentText, form.currency === cur && styles.segmentActiveText]}>
-                  {cur === 'MMK' ? '🇲🇲 ကျပ် (MMK)' : '🇹🇭 ဘတ် (THB)'}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View>
+            <Text style={styles.label}>ငွေကြေးအမျိုးအစား *</Text>
+            <View style={styles.segmented}>
+              {(['MMK', 'THB'] as const).map(cur => (
+                <TouchableOpacity
+                  key={cur}
+                  style={[styles.segmentItem, form.currency === cur && styles.segmentActive]}
+                  onPress={() => update('currency', cur)}
+                >
+                  <Text style={[styles.segmentText, form.currency === cur && styles.segmentActiveText]}>
+                    {cur === 'MMK' ? 'ကျပ် (MMK)' : 'ဘတ် (THB)'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <FormField
@@ -573,15 +536,12 @@ export default function CreateParcelScreen() {
           />
         </FormSection>
 
-        {/* Images Section */}
         <FormSection title="ပါဆယ် ဓာတ်ပုံများ">
           <View style={styles.imageBtnRow}>
             <TouchableOpacity style={styles.imagePickBtn} onPress={pickImages}>
-              <Ionicons name="images-outline" size={20} color={COLORS.primary} />
               <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရွေးရန်</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.imagePickBtn} onPress={takePhoto}>
-              <Ionicons name="camera-outline" size={20} color={COLORS.primary} />
               <Text style={styles.imagePickBtnText}>ဓာတ်ပုံရိုက်ရန်</Text>
             </TouchableOpacity>
           </View>
@@ -591,13 +551,13 @@ export default function CreateParcelScreen() {
                 <View key={index} style={styles.imageThumbWrap}>
                   <Image source={{ uri: img.uri }} style={styles.imageThumb} />
                   <TouchableOpacity style={styles.imageRemoveBtn} onPress={() => removeLocalImage(index)}>
-                    <Ionicons name="close-circle" size={20} color={COLORS.error} />
+                    <Text style={styles.imageRemoveText}>×</Text>
                   </TouchableOpacity>
                 </View>
               ))}
             </View>
           )}
-          <Text style={styles.imageHint}>အများဆုံး 10 ပုံ • JPEG, PNG • 5MB အောက်</Text>
+          <Text style={styles.imageHint}>အများဆုံး 10 ပုံ</Text>
         </FormSection>
 
         <TouchableOpacity
@@ -608,10 +568,7 @@ export default function CreateParcelScreen() {
           {createMutation.isPending ? (
             <ActivityIndicator color={COLORS.white} />
           ) : (
-            <>
-              <Ionicons name="checkmark-circle" size={22} color={COLORS.white} />
-              <Text style={styles.submitBtnText}>ပါဆယ် မှတ်ပုံတင်မည်</Text>
-            </>
+            <Text style={styles.submitBtnText}>ပါဆယ် မှတ်ပုံတင်မည်</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -653,147 +610,123 @@ function FormField({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingBottom: 14,
     gap: 12,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
   },
-  closeBtn: { padding: 4 },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  backBtn: { paddingVertical: 4, paddingRight: 8 },
+  backBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold },
+  headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold, textAlign: 'center' },
   saveBtn: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
-  saveBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  saveBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   content: { padding: 16, paddingBottom: 40 },
   formSection: { marginBottom: 16 },
-  formSectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  formSectionTitle: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
   formCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     gap: 12,
-    overflow: 'visible',
   },
   formField: {},
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
+  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6, fontFamily: FONTS.semiBold },
   textInput: {
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 10,
-    padding: 11,
+    borderRadius: 8,
+    padding: 10,
     fontSize: 15,
     color: COLORS.text,
-    backgroundColor: COLORS.background,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    backgroundColor: COLORS.white,
+    fontFamily: FONTS.regular,
   },
-  textArea: { height: 80, textAlignVertical: 'top' },
+  textArea: { height: 76, textAlignVertical: 'top' },
   inputError: { borderColor: COLORS.error },
-  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  row: { flexDirection: 'row', gap: 12 },
+  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4, fontFamily: FONTS.regular },
   categoryRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 12,
     flexWrap: 'wrap',
   },
   categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     backgroundColor: COLORS.white,
   },
   categoryChipActive: {
     backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   categoryChipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    color: COLORS.text,
+    fontFamily: FONTS.semiBold,
   },
   categoryChipTextActive: { color: COLORS.white },
   customCategoryRow: {
     flexDirection: 'row',
     gap: 8,
-    marginTop: 6,
-    marginBottom: 4,
   },
   customCategoryInput: {
     flex: 1,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontSize: 14,
     color: COLORS.text,
-    backgroundColor: COLORS.background,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    backgroundColor: COLORS.white,
+    fontFamily: FONTS.regular,
   },
   addCategoryBtn: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 14,
-    borderRadius: 10,
-    gap: 4,
+    borderRadius: 8,
   },
   addCategoryBtnText: {
     color: COLORS.white,
     fontSize: 13,
     fontWeight: '700',
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   selectedCountText: {
     fontSize: 12,
     color: COLORS.primary,
     fontWeight: '600',
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-    marginBottom: 6,
+    fontFamily: FONTS.semiBold,
   },
   segmented: {
     flexDirection: 'row',
-    borderRadius: 10,
-    borderWidth: 1.5,
+    borderRadius: 8,
+    borderWidth: 1,
     borderColor: COLORS.border,
     overflow: 'hidden',
-    marginBottom: 4,
   },
   segmentItem: { flex: 1, paddingVertical: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: COLORS.primary },
-  segmentText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
+  segmentText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, fontFamily: FONTS.semiBold },
   segmentActiveText: { color: COLORS.white },
   switchRow: {
     flexDirection: 'row',
@@ -801,102 +734,81 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 4,
   },
-  switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
-  switchSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
+  switchLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
+  switchSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   submitBtn: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
     backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 10,
+    padding: 16,
     marginTop: 8,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 4,
   },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  submitBtnText: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   imageBtnRow: { flexDirection: 'row', gap: 10 },
   imagePickBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, paddingVertical: 12, borderRadius: 10, borderWidth: 1.5,
-    borderColor: COLORS.primary, backgroundColor: '#FFF9EE',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.background,
   },
-  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
+  imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
   imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
   imageThumbWrap: { position: 'relative' },
-  imageThumb: { width: 80, height: 80, borderRadius: 10 },
-  imageRemoveBtn: { position: 'absolute', top: -8, right: -8, backgroundColor: COLORS.white, borderRadius: 10 },
-  imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center',
-    fontFamily: 'NotoSansMyanmar_400Regular',
+  imageThumb: { width: 76, height: 76, borderRadius: 8 },
+  imageRemoveBtn: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  // ── Autocomplete ────────────────────────────────────────────────────────────
-  acField: {},
-  autocompleteWrap: {},
-  // Inline suggestion box — no absolute positioning, pushes content down
+  imageRemoveText: { fontSize: 14, lineHeight: 16, color: COLORS.error, fontFamily: FONTS.bold },
+  imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center', fontFamily: FONTS.regular },
+  acField: { gap: 2 },
   inlineSugBox: {
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: COLORS.primary + '40',
-    backgroundColor: COLORS.primary + '08',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
     overflow: 'hidden',
-    marginTop: 2,
   },
   inlineSugHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'space-between',
     paddingHorizontal: 12,
-    paddingVertical: 7,
-    backgroundColor: COLORS.primary + '15',
+    paddingVertical: 8,
+    backgroundColor: COLORS.background,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.primary + '25',
+    borderBottomColor: COLORS.border,
   },
   inlineSugHeaderText: {
-    flex: 1,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
-    color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.semiBold,
   },
   inlineSugItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 11,
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.primary + '15',
-    backgroundColor: '#FFFFFF',
-  },
-  // Keep these for backward compat (unused now but avoids TS errors)
-  suggestionBox: { display: 'none' as any },
-  suggestionBoxAbove: { display: 'none' as any },
-  suggestionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
     paddingVertical: 10,
-    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  suggestionName: { fontSize: 14, fontWeight: '600', color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
-  },
-  suggestionPhone: { fontSize: 12, color: COLORS.textSecondary, marginTop: 1,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  suggestionAddr: { fontSize: 11, color: COLORS.textLight, marginTop: 1,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
+  closeText: { fontSize: 18, color: COLORS.textLight, fontFamily: FONTS.bold, lineHeight: 20 },
+  suggestionName: { fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
+  suggestionPhone: { fontSize: 12, color: COLORS.textSecondary, marginTop: 1, fontFamily: FONTS.regular },
+  suggestionAddr: { fontSize: 11, color: COLORS.textLight, marginTop: 1, fontFamily: FONTS.regular },
 });

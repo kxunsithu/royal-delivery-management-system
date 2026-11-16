@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,8 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/context/AuthContext';
-import { COLORS } from '../src/constants';
-import { Ionicons } from '@expo/vector-icons';
+import { COLORS, FONTS } from '../src/constants';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -66,11 +64,6 @@ export default function LoginScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <View style={styles.logoCircle}>
-                <Ionicons name="cube" size={48} color={COLORS.white} />
-              </View>
-            </View>
             <Text style={styles.appName}>Royal Myawaddy</Text>
             <Text style={styles.appSubtitle}>ပို့ဆောင်ရေး စီမံခန့်ခွဲမှုစနစ်</Text>
           </View>
@@ -84,7 +77,6 @@ export default function LoginScreen() {
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
               <View style={[styles.inputWrapper, errors.phone ? styles.inputError : null]}>
-                <Ionicons name="call-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="၀၉၉၄၄၀၇၄၉၈၁ (09...)"
@@ -104,7 +96,6 @@ export default function LoginScreen() {
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>စကားဝှက်</Text>
               <View style={[styles.inputWrapper, errors.password ? styles.inputError : null]}>
-                <Ionicons name="lock-closed-outline" size={20} color={COLORS.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="••••••••"
@@ -114,12 +105,8 @@ export default function LoginScreen() {
                   secureTextEntry={!showPassword}
                   editable={!isLoading}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
-                  <Ionicons
-                    name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                    size={20}
-                    color={COLORS.textSecondary}
-                  />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.toggleButton}>
+                  <Text style={styles.toggleText}>{showPassword ? 'Hide' : 'Show'}</Text>
                 </TouchableOpacity>
               </View>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
@@ -148,7 +135,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.primary },
+  safe: { flex: 1, backgroundColor: COLORS.background },
   flex: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
@@ -156,117 +143,101 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     justifyContent: 'center',
   },
-  header: { alignItems: 'center', marginBottom: 32 },
-  logoContainer: { marginBottom: 16 },
-  logoCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.4)',
-  },
+  header: { alignItems: 'center', marginBottom: 24 },
   appName: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: COLORS.white,
-    letterSpacing: 0.5,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text,
+    letterSpacing: 0.3,
+    fontFamily: FONTS.bold,
   },
   appSubtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.85)',
+    color: COLORS.textSecondary,
     marginTop: 4,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   card: {
-    paddingHorizontal: 4,
-    paddingVertical: 8,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: COLORS.white,
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
     textAlign: 'center',
     marginBottom: 4,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   subtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.85)',
+    color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   fieldGroup: { marginBottom: 16 },
   label: {
     fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.white,
+    fontWeight: '600',
+    color: COLORS.text,
     marginBottom: 8,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.semiBold,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.4)',
-    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 10,
     backgroundColor: COLORS.white,
-    paddingHorizontal: 14,
-    height: 52,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
+    paddingHorizontal: 12,
+    height: 48,
   },
-  inputError: { borderColor: COLORS.error, borderWidth: 2 },
-  inputIcon: { marginRight: 10 },
+  inputError: { borderColor: COLORS.error },
   input: {
     flex: 1,
     fontSize: 15,
     color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
-  eyeButton: { padding: 4 },
+  toggleButton: { padding: 4, marginLeft: 8 },
+  toggleText: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontFamily: FONTS.medium,
+  },
   errorText: {
     fontSize: 12,
-    color: '#FFECEC',
+    color: COLORS.error,
     fontWeight: '600',
     marginTop: 4,
     marginLeft: 4,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   loginBtn: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
-    borderWidth: 2,
-    borderColor: COLORS.white,
-    borderRadius: 14,
-    height: 54,
-    marginTop: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 2,
+    borderRadius: 10,
+    height: 48,
+    marginTop: 8,
   },
   loginBtnDisabled: { opacity: 0.7 },
   loginBtnText: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
     color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   footer: {
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.6)',
+    color: COLORS.textLight,
     fontSize: 12,
     marginTop: 24,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
 });

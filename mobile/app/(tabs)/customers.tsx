@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { parcelService, Customer } from '../../src/services/parcelService';
-import { COLORS, FONTS } from '../../src/constants';
+import { COLORS } from '../../src/constants';
 
 type CustomerType = 'recipient' | 'sender';
 
@@ -66,11 +66,6 @@ export default function CustomersScreen() {
             style={[styles.typeTab, type === 'recipient' && styles.typeTabActive]}
             onPress={() => handleTypeChange('recipient')}
           >
-            <Ionicons
-              name="person"
-              size={15}
-              color={type === 'recipient' ? COLORS.white : COLORS.textSecondary}
-            />
             <Text style={[styles.typeTabText, type === 'recipient' && styles.typeTabTextActive]}>
               လက်ခံသူ
             </Text>
@@ -79,11 +74,6 @@ export default function CustomersScreen() {
             style={[styles.typeTab, type === 'sender' && styles.typeTabActive]}
             onPress={() => handleTypeChange('sender')}
           >
-            <Ionicons
-              name="arrow-up-circle"
-              size={15}
-              color={type === 'sender' ? COLORS.white : COLORS.textSecondary}
-            />
             <Text style={[styles.typeTabText, type === 'sender' && styles.typeTabTextActive]}>
               ပို့သူ
             </Text>
@@ -127,9 +117,6 @@ export default function CustomersScreen() {
               }
               ListEmptyComponent={
                 <View style={styles.empty}>
-                  <View style={styles.emptyIcon}>
-                    <Ionicons name="people-outline" size={48} color={COLORS.primary} />
-                  </View>
                   <Text style={styles.emptyTitle}>ဖောက်သည် မတွေ့ပါ</Text>
                   <Text style={styles.emptySub}>
                     {search ? `"${search}" နှင့် မကိုက်ညီပါ` : 'ဖောက်သည် မရှိသေးပါ'}
@@ -185,10 +172,7 @@ function CustomerCard({ customer, type }: { customer: Customer; type: CustomerTy
       </View>
       <View style={styles.cardInfo}>
         <Text style={styles.cardName} numberOfLines={1}>{customer.name}</Text>
-        <View style={styles.phoneRow}>
-          <Ionicons name="call-outline" size={13} color={COLORS.textSecondary} />
-          <Text style={styles.cardPhone}>{customer.phone}</Text>
-        </View>
+        <Text style={styles.cardPhone}>{customer.phone}</Text>
         {customer.last_parcel_at && (
           <Text style={styles.lastDate}>
             နောက်ဆုံး:{' '}
@@ -202,10 +186,8 @@ function CustomerCard({ customer, type }: { customer: Customer; type: CustomerTy
       </View>
       <View style={styles.cardRight}>
         <View style={styles.countBadge}>
-          <Ionicons name="cube-outline" size={13} color={COLORS.primary} />
           <Text style={styles.countText}>{customer.parcel_count} ခု</Text>
         </View>
-        <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} style={{ marginTop: 6 }} />
       </View>
     </TouchableOpacity>
   );
@@ -256,10 +238,8 @@ const styles = StyleSheet.create({
   },
   typeTab: {
     flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
     paddingVertical: 10,
     borderRadius: 10,
   },
@@ -282,7 +262,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 8,
     borderRadius: 14,
-    paddingHorizontal: 10,
+    paddingHorizontal: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -316,28 +296,27 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.primary + '20',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.primary + '18',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
   avatarText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: COLORS.primary,
     fontFamily: 'NotoSansMyanmar_700Bold',
   },
-  cardInfo: { flex: 1, gap: 3 },
+  cardInfo: { flex: 1, gap: 2 },
   cardName: {
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.text,
     fontFamily: 'NotoSansMyanmar_700Bold',
   },
-  phoneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   cardPhone: {
     fontSize: 13,
     color: COLORS.textSecondary,
@@ -350,9 +329,6 @@ const styles = StyleSheet.create({
   },
   cardRight: { alignItems: 'flex-end' },
   countBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
     backgroundColor: COLORS.primary + '15',
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -366,21 +342,11 @@ const styles = StyleSheet.create({
   },
 
   // Empty
-  empty: { alignItems: 'center', paddingTop: 80 },
-  emptyIcon: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: COLORS.primary + '12',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
+  empty: { alignItems: 'center', paddingTop: 80, gap: 6 },
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 6,
     fontFamily: 'NotoSansMyanmar_700Bold',
   },
   emptySub: {
@@ -429,4 +395,3 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_700Bold',
   },
 });
-

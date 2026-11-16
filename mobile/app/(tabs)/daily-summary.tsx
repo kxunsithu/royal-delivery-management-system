@@ -75,7 +75,7 @@ export default function DailySummaryScreen() {
         </View>
         <TouchableOpacity
           style={[styles.calendarBtn, hasActiveDateFilter && styles.calendarBtnActive]}
-          onPress={() => setShowDateFilter(v => !v)}
+          onPress={() => setShowDateFilter((v) => !v)}
         >
           <Ionicons
             name="calendar-outline"
@@ -90,57 +90,72 @@ export default function DailySummaryScreen() {
         {showDateFilter && (
           <View style={styles.dateFilterBox}>
             <View style={styles.dateFilterRow}>
-              {/* From date button */}
+              {/* From date */}
               <View style={styles.dateInputWrap}>
                 <Text style={styles.dateLabel}>မှ ရက်စွဲ</Text>
                 <TouchableOpacity
                   style={styles.datePressable}
                   onPress={() => setShowFromPicker(true)}
                 >
-                  <Ionicons name="calendar-outline" size={15} color={COLORS.primary} />
-                  <Text style={[styles.datePressableText, !dateFromInput && styles.datePressablePlaceholder]}>
+                  <Text
+                    style={[
+                      styles.datePressableText,
+                      !dateFromInput && styles.datePressablePlaceholder,
+                    ]}
+                  >
                     {dateFromInput || 'ရက်စွဲ ရွေးမည်'}
                   </Text>
                 </TouchableOpacity>
                 {dateFromInput ? (
-                  <TouchableOpacity style={styles.dateClearX} onPress={() => setDateFromInput('')}>
+                  <TouchableOpacity
+                    style={styles.dateClearX}
+                    onPress={() => setDateFromInput('')}
+                  >
                     <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
                   </TouchableOpacity>
                 ) : null}
               </View>
-              <Ionicons name="arrow-forward" size={16} color={COLORS.textLight} style={styles.dateArrow} />
-              {/* To date button */}
+
+              <Text style={styles.dateArrow}>→</Text>
+
+              {/* To date */}
               <View style={styles.dateInputWrap}>
                 <Text style={styles.dateLabel}>ထိ ရက်စွဲ</Text>
                 <TouchableOpacity
                   style={styles.datePressable}
                   onPress={() => setShowToPicker(true)}
                 >
-                  <Ionicons name="calendar-outline" size={15} color={COLORS.primary} />
-                  <Text style={[styles.datePressableText, !dateToInput && styles.datePressablePlaceholder]}>
+                  <Text
+                    style={[
+                      styles.datePressableText,
+                      !dateToInput && styles.datePressablePlaceholder,
+                    ]}
+                  >
                     {dateToInput || 'ရက်စွဲ ရွေးမည်'}
                   </Text>
                 </TouchableOpacity>
                 {dateToInput ? (
-                  <TouchableOpacity style={styles.dateClearX} onPress={() => setDateToInput('')}>
+                  <TouchableOpacity
+                    style={styles.dateClearX}
+                    onPress={() => setDateToInput('')}
+                  >
                     <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
                   </TouchableOpacity>
                 ) : null}
               </View>
             </View>
+
             <View style={styles.dateFilterActions}>
               <TouchableOpacity style={styles.dateApplyBtn} onPress={handleApplyDateFilter}>
-                <Ionicons name="search" size={14} color={COLORS.white} />
                 <Text style={styles.dateApplyBtnText}>ရှာဖွေမည်</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.dateClearBtn} onPress={handleClearDateFilter}>
-                <Ionicons name="close" size={14} color={COLORS.textSecondary} />
                 <Text style={styles.dateClearBtnText}>ဖျက်မည်</Text>
               </TouchableOpacity>
             </View>
+
             {hasActiveDateFilter && (
               <View style={styles.dateActiveIndicator}>
-                <Ionicons name="checkmark-circle" size={13} color={COLORS.primary} />
                 <Text style={styles.dateActiveText}>
                   {dateFrom && dateTo
                     ? `${dateFrom} မှ ${dateTo} ထိ`
@@ -159,7 +174,10 @@ export default function DailySummaryScreen() {
           value={dateFromInput}
           title="မှ ရက်စွဲ ရွေးချယ်ပါ"
           maxDate={dateToInput || undefined}
-          onConfirm={(d) => { setDateFromInput(d); setShowFromPicker(false); }}
+          onConfirm={(d) => {
+            setDateFromInput(d);
+            setShowFromPicker(false);
+          }}
           onCancel={() => setShowFromPicker(false)}
         />
         <CalendarPicker
@@ -167,7 +185,10 @@ export default function DailySummaryScreen() {
           value={dateToInput}
           title="ထိ ရက်စွဲ ရွေးချယ်ပါ"
           minDate={dateFromInput || undefined}
-          onConfirm={(d) => { setDateToInput(d); setShowToPicker(false); }}
+          onConfirm={(d) => {
+            setDateToInput(d);
+            setShowToPicker(false);
+          }}
           onCancel={() => setShowToPicker(false)}
         />
 
@@ -184,15 +205,14 @@ export default function DailySummaryScreen() {
             refreshControl={
               <RefreshControl
                 refreshing={isFetching && !isLoading}
-                onRefresh={() => { refetch(); }}
+                onRefresh={() => {
+                  refetch();
+                }}
                 tintColor={COLORS.primary}
               />
             }
             ListEmptyComponent={
               <View style={styles.empty}>
-                <View style={styles.emptyIcon}>
-                  <Ionicons name="calendar-outline" size={48} color={COLORS.primary} />
-                </View>
                 <Text style={styles.emptyTitle}>မှတ်တမ်း မတွေ့ပါ</Text>
                 <Text style={styles.emptySub}>
                   {hasActiveDateFilter
@@ -209,94 +229,70 @@ export default function DailySummaryScreen() {
 }
 
 function DaySummaryCard({ summary }: { summary: DailySummary }) {
+  const feeStats: { value: number; label: string; color: string }[] = [];
+  if (summary.fee_mmk > 0) {
+    feeStats.push({ value: summary.fee_mmk, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
+  }
+  if (summary.cod_mmk > 0) {
+    feeStats.push({ value: summary.cod_mmk, label: 'COD (K)', color: COLORS.warning });
+  }
+  if (summary.fee_thb > 0) {
+    feeStats.push({ value: summary.fee_thb, label: 'ပို့ဆောင်ခ (฿)', color: COLORS.success });
+  }
+  if (summary.cod_thb > 0) {
+    feeStats.push({ value: summary.cod_thb, label: 'COD (฿)', color: COLORS.warning });
+  }
+
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() => router.push(`/daily-summary/${summary.date}`)}
       activeOpacity={0.85}
     >
-      {/* Date Header */}
+      {/* Date header */}
       <View style={styles.cardHeader}>
-        <View style={styles.dateRow}>
-          <View style={styles.dateIcon}>
-            <Ionicons name="calendar" size={16} color={COLORS.primary} />
-          </View>
-          <Text style={styles.dateText}>{formatDate(summary.date)}</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
+        <Text style={styles.dateText}>{formatDate(summary.date)}</Text>
       </View>
 
       <View style={styles.divider} />
 
-      {/* Stats Grid */}
-      <View style={styles.statsGrid}>
-        {/* Row 1: Parcel | Sender | Recipient */}
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Ionicons name="cube-outline" size={16} color={COLORS.primary} />
-            <Text style={styles.statValue}>{summary.parcel_count.toLocaleString()}</Text>
-            <Text style={styles.statLabel}>ပါဆယ် ခု</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Ionicons name="arrow-up-circle-outline" size={16} color={COLORS.textSecondary} />
-            <Text style={styles.statValue}>{summary.sender_count.toLocaleString()}</Text>
-            <Text style={styles.statLabel}>ပို့သူ ဦး</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Ionicons name="person-outline" size={16} color={COLORS.info} />
-            <Text style={[styles.statValue, { color: COLORS.info }]}>{summary.recipient_count.toLocaleString()}</Text>
-            <Text style={styles.statLabel}>လက်ခံသူ ဦး</Text>
-          </View>
+      {/* Primary stats */}
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{summary.parcel_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပါဆယ် ခု</Text>
         </View>
-
-        {/* Row 2: Fee MMK | COD MMK | Fee THB | COD THB — only show if >0 */}
-        {(summary.fee_mmk > 0 || summary.cod_mmk > 0 || summary.fee_thb > 0 || summary.cod_thb > 0) && (
-          <>
-            <View style={styles.rowDivider} />
-            <View style={styles.statsRow}>
-              {summary.fee_mmk > 0 && (
-                <>
-                  <View style={styles.statItem}>
-                    <Ionicons name="car-outline" size={16} color={COLORS.success} />
-                    <Text style={[styles.statValue, { color: COLORS.success }]}>{summary.fee_mmk.toLocaleString()}</Text>
-                    <Text style={styles.statLabel}>ပို့ဆောင်ခ (K)</Text>
-                  </View>
-                  {(summary.cod_mmk > 0 || summary.fee_thb > 0 || summary.cod_thb > 0) && <View style={styles.statDivider} />}
-                </>
-              )}
-              {summary.cod_mmk > 0 && (
-                <>
-                  <View style={styles.statItem}>
-                    <Ionicons name="cash-outline" size={16} color={COLORS.warning} />
-                    <Text style={[styles.statValue, { color: COLORS.warning }]}>{summary.cod_mmk.toLocaleString()}</Text>
-                    <Text style={styles.statLabel}>COD (K)</Text>
-                  </View>
-                  {(summary.fee_thb > 0 || summary.cod_thb > 0) && <View style={styles.statDivider} />}
-                </>
-              )}
-              {summary.fee_thb > 0 && (
-                <>
-                  <View style={styles.statItem}>
-                    <Ionicons name="car-outline" size={16} color={COLORS.success} />
-                    <Text style={[styles.statValue, { color: COLORS.success }]}>{summary.fee_thb.toLocaleString()}</Text>
-                    <Text style={styles.statLabel}>ပို့ဆောင်ခ (฿)</Text>
-                  </View>
-                  {summary.cod_thb > 0 && <View style={styles.statDivider} />}
-                </>
-              )}
-              {summary.cod_thb > 0 && (
-                <View style={styles.statItem}>
-                  <Ionicons name="cash-outline" size={16} color={COLORS.warning} />
-                  <Text style={[styles.statValue, { color: COLORS.warning }]}>{summary.cod_thb.toLocaleString()}</Text>
-                  <Text style={styles.statLabel}>COD (฿)</Text>
-                </View>
-              )}
-            </View>
-          </>
-        )}
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{summary.sender_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပို့သူ ဦး</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: COLORS.info }]}>{summary.recipient_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>လက်ခံသူ ဦး</Text>
+        </View>
       </View>
+
+      {/* Fee / COD stats */}
+      {feeStats.length > 0 && (
+        <>
+          <View style={styles.rowDivider} />
+          <View style={styles.statsRow}>
+            {feeStats.map((stat, index) => (
+              <React.Fragment key={stat.label}>
+                {index > 0 && <View style={styles.statDivider} />}
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: stat.color }]}>
+                    {stat.value.toLocaleString()}
+                  </Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                </View>
+              </React.Fragment>
+            ))}
+          </View>
+        </>
+      )}
     </TouchableOpacity>
   );
 }
@@ -313,8 +309,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   headerTitle: {
     fontSize: 22,
@@ -329,29 +325,26 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.regular,
   },
   calendarBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   calendarBtnActive: {
     backgroundColor: COLORS.primary,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: COLORS.white,
   },
 
-  // Date Filter
+  // Date filter
   dateFilterBox: {
     marginHorizontal: 16,
     marginTop: 12,
-    marginBottom: 4,
+    marginBottom: 8,
     backgroundColor: COLORS.white,
     borderRadius: 14,
     padding: 14,
@@ -366,7 +359,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: 8,
   },
-  dateInputWrap: { flex: 1 },
+  dateInputWrap: {
+    flex: 1,
+  },
   dateLabel: {
     fontSize: 12,
     color: COLORS.textSecondary,
@@ -391,14 +386,21 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: FONTS.regular,
   },
-  datePressablePlaceholder: { color: COLORS.textLight },
+  datePressablePlaceholder: {
+    color: COLORS.textLight,
+  },
   dateClearX: {
     position: 'absolute',
     right: 8,
     top: '50%' as any,
     marginTop: -8,
   },
-  dateArrow: { marginBottom: 10 },
+  dateArrow: {
+    marginBottom: 10,
+    fontSize: 16,
+    color: COLORS.textLight,
+    fontWeight: '600',
+  },
   dateFilterActions: {
     flexDirection: 'row',
     gap: 8,
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
   },
 
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 24, gap: 10 },
+  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
   listEmpty: { flex: 1, justifyContent: 'center' },
 
   // Card
@@ -474,15 +476,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
-  dateIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: '#FFF3DC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   dateText: {
     fontSize: 14,
     fontWeight: '700',
@@ -491,28 +484,15 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
   },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
-  statsGrid: {
-    gap: 0,
-  },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
   },
-  rowDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 10,
-  },
   statItem: {
     alignItems: 'center',
     gap: 2,
     flex: 1,
-  },
-  statDivider: {
-    width: 1,
-    height: 36,
-    backgroundColor: COLORS.border,
   },
   statValue: {
     fontSize: 15,
@@ -526,21 +506,21 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontFamily: FONTS.regular,
   },
+  statDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: COLORS.border,
+  },
+  rowDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 10,
+  },
 
-  // Empty state
+  // Empty
   empty: {
     alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: 60,
-  },
-  emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#FFF3DC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 17,

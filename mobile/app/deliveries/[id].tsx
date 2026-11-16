@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { deliveryService } from '../../src/services/deliveryService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM} from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, FONTS } from '../../src/constants';
 import ImagePreviewModal, { PreviewImage } from '../../src/components/ImagePreviewModal';
 
 export default function DeliveryDetailScreen() {
@@ -45,28 +45,29 @@ export default function DeliveryDetailScreen() {
   const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
   const isActive = !['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignment?.status ?? '');
 
+  const assignmentStatusLabel =
+    assignment?.status === 'COMPLETED' ? 'ပြီးစီး'
+    : assignment?.status === 'FAILED' ? 'မအောင်မြင်'
+    : assignment?.status === 'REASSIGNED' ? 'ပြောင်းလဲ'
+    : 'ဆောင်ရွက်နေ';
+
   return (
-    <View style={[styles.container, { backgroundColor: statusColor }]}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: statusColor, paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.white} />
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
+        <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {parcel?.tracking_number || 'ချိတ်ဆက်မှု'}
           </Text>
           {assignment?.staff && (
-            <Text style={styles.headerSub}>🚲 {assignment.staff.name}</Text>
+            <Text style={styles.headerSubtitle} numberOfLines={1}>{assignment.staff.name}</Text>
           )}
         </View>
-        <View style={styles.assignStatusPill}>
-          <Text style={styles.assignStatusText}>
-            {assignment?.status === 'COMPLETED' ? 'ပြီးစီး'
-              : assignment?.status === 'FAILED' ? 'မအောင်မြင်'
-              : assignment?.status === 'REASSIGNED' ? 'ပြောင်းလဲ'
-              : 'ဆောင်ရွက်နေ'}
-          </Text>
+        <View style={[styles.headerStatusBadge, { backgroundColor: statusColor + '18' }]}>
+          <Text style={[styles.headerStatusText, { color: statusColor }]}>{statusLabel}</Text>
         </View>
       </View>
 
@@ -75,39 +76,30 @@ export default function DeliveryDetailScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: isActive ? (insets.bottom + 100) : (insets.bottom + 40) }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Status hero */}
-        <View style={[styles.statusHero, { backgroundColor: statusColor + '18', borderColor: statusColor + '40' }]}>
-          <View style={[styles.statusDotLg, { backgroundColor: statusColor }]} />
-          <Text style={[styles.statusHeroLabel, { color: statusColor }]}>{statusLabel}</Text>
-        </View>
-
         {/* Parcel info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ပါဆယ် အချက်အလက်</Text>
-          <View style={styles.card}>
-            <InfoRow icon="barcode-outline"   label="ခြေရာခံ"    value={parcel?.tracking_number || '—'} />
-            <InfoRow icon="person-outline"    label="လက်ခံသူ"   value={parcel?.recipient_name  || '—'} />
+        <InfoSection title="ပါဆယ် အချက်အလက်">
+          <InfoRow label="ခြေရာခံ" value={parcel?.tracking_number || '—'} />
+          <InfoRow label="လက်ခံသူ" value={parcel?.recipient_name || '—'} />
+          <InfoRow
+            label="ဖုန်းနံပါတ်"
+            value={parcel?.recipient_phone || '—'}
+            onPress={parcel?.recipient_phone ? () => Linking.openURL(`tel:${parcel.recipient_phone}`) : undefined}
+          />
+          <InfoRow label="လိပ်စာ" value={parcel?.delivery_address || '—'} />
+          {parcel?.category && (
+            <InfoRow label="အမျိုးအစား" value={parcel.category} />
+          )}
+          {parcel?.description && (
+            <InfoRow label="ဖော်ပြချက်" value={parcel.description} />
+          )}
+          {parcel?.is_cod && (
             <InfoRow
-              icon="call-outline" label="ဖုန်းနံပါတ်"
-              value={parcel?.recipient_phone || '—'}
-              onPress={parcel?.recipient_phone ? () => Linking.openURL(`tel:${parcel.recipient_phone}`) : undefined}
+              label="COD"
+              value={`${Number(parcel.cod_amount).toLocaleString()} ကျပ်`}
+              valueColor={COLORS.info}
             />
-            <InfoRow icon="location-outline"  label="လိပ်စာ"     value={parcel?.delivery_address || '—'} />
-            {parcel?.category && (
-              <InfoRow icon="pricetag-outline" label="အမျိုးအစား" value={parcel.category} />
-            )}
-            {parcel?.description && (
-              <InfoRow icon="document-text-outline" label="ဖော်ပြချက်" value={parcel.description} />
-            )}
-            {parcel?.is_cod && (
-              <InfoRow
-                icon="cash-outline" label="COD"
-                value={`${Number(parcel.cod_amount).toLocaleString()} ကျပ်`}
-                valueColor={COLORS.info}
-              />
-            )}
-          </View>
-        </View>
+          )}
+        </InfoSection>
 
         {/* Parcel images (admin-uploaded) */}
         {parcel?.images && parcel.images.length > 0 && (
@@ -130,10 +122,6 @@ export default function DeliveryDetailScreen() {
                   }}
                 >
                   <Image source={{ uri: img.url }} style={styles.parcelImgThumb} />
-                  <View style={styles.proofExpandBadge}>
-                    <Ionicons name="expand-outline" size={12} color="#fff" />
-                  </View>
-
                 </TouchableOpacity>
               ))}
             </View>
@@ -141,26 +129,26 @@ export default function DeliveryDetailScreen() {
         )}
 
         {/* Assignment info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ချိတ်ဆက်မှု အချက်အလက်</Text>
-          <View style={styles.card}>
-            {assignment?.staff && (
-              <InfoRow icon="bicycle-outline" label="ဝန်ထမ်း" value={assignment.staff.name} />
-            )}
-            {assignment?.assigned_by && (
-              <InfoRow icon="person-circle-outline" label="ချိတ်ဆက်သူ" value={assignment.assigned_by.name} />
-            )}
-            {assignment?.assigned_at && (
-              <InfoRow
-                icon="calendar-outline" label="ချိတ်ဆက်ရက်"
-                value={new Date(assignment.assigned_at).toLocaleString('my-MM')}
-              />
-            )}
-            {assignment?.notes && (
-              <InfoRow icon="document-text-outline" label="မှတ်ချက်" value={assignment.notes} />
-            )}
-          </View>
-        </View>
+        <InfoSection title="ချိတ်ဆက်မှု အချက်အလက်">
+          {assignment?.staff && (
+            <InfoRow label="ဝန်ထမ်း" value={assignment.staff.name} />
+          )}
+          {assignment?.assigned_by && (
+            <InfoRow label="ချိတ်ဆက်သူ" value={assignment.assigned_by.name} />
+          )}
+          {assignment?.assigned_at && (
+            <InfoRow
+              label="ချိတ်ဆက်ရက်"
+              value={new Date(assignment.assigned_at).toLocaleString('my-MM')}
+            />
+          )}
+          {assignment?.notes && (
+            <InfoRow label="မှတ်ချက်" value={assignment.notes} />
+          )}
+          {assignment?.status && (
+            <InfoRow label="အခြေအနေ" value={assignmentStatusLabel} />
+          )}
+        </InfoSection>
 
         {/* Delivery attempts */}
         {assignment?.delivery_attempts && assignment.delivery_attempts.length > 0 && (
@@ -174,11 +162,6 @@ export default function DeliveryDetailScreen() {
                 <View key={attempt.id ?? i} style={styles.attemptCard}>
                   <View style={styles.attemptHeader}>
                     <View style={[styles.attemptBadge, delivered ? styles.attemptDelivered : styles.attemptFailed]}>
-                      <Ionicons
-                        name={delivered ? 'checkmark-circle' : 'close-circle'}
-                        size={14}
-                        color={delivered ? COLORS.success : COLORS.error}
-                      />
                       <Text style={[styles.attemptBadgeText, { color: delivered ? COLORS.success : COLORS.error }]}>
                         {delivered ? 'ပို့ဆောင်ပြီး' : 'မအောင်မြင်'}
                       </Text>
@@ -188,32 +171,20 @@ export default function DeliveryDetailScreen() {
                     </Text>
                   </View>
                   {attempt.failure_reason && (
-                    <View style={styles.attemptDetailRow}>
-                      <Ionicons name="alert-circle-outline" size={13} color={COLORS.error} />
-                      <Text style={styles.attemptDetailText}>{attempt.failure_reason}</Text>
-                    </View>
+                    <Text style={styles.attemptDetail}>{attempt.failure_reason}</Text>
                   )}
                   {attempt.recipient_name && (
-                    <View style={styles.attemptDetailRow}>
-                      <Ionicons name="person-outline" size={13} color={COLORS.textSecondary} />
-                      <Text style={styles.attemptDetailText}>{attempt.recipient_name}</Text>
-                    </View>
+                    <Text style={styles.attemptDetail}>{attempt.recipient_name}</Text>
                   )}
                   {attempt.notes && (
-                    <View style={styles.attemptDetailRow}>
-                      <Ionicons name="chatbubble-outline" size={13} color={COLORS.textSecondary} />
-                      <Text style={[styles.attemptDetailText, { fontStyle: 'italic' }]}>{attempt.notes}</Text>
-                    </View>
+                    <Text style={[styles.attemptDetail, { fontStyle: 'italic' }]}>{attempt.notes}</Text>
                   )}
                   {/* Proof Photos */}
                   {attempt.proof_photos && attempt.proof_photos.length > 0 && (
                     <View style={styles.proofSection}>
-                      <View style={styles.proofSectionHeader}>
-                        <Ionicons name="camera-outline" size={13} color={COLORS.primary} />
-                        <Text style={styles.proofSectionTitle}>
-                          သက်သေဓာတ်ပုံ ({attempt.proof_photos.length})
-                        </Text>
-                      </View>
+                      <Text style={styles.proofSectionTitle}>
+                        သက်သေဓာတ်ပုံ ({attempt.proof_photos.length})
+                      </Text>
                       <View style={styles.proofGrid}>
                         {attempt.proof_photos.map((p: any, pIdx: number) => (
                           <TouchableOpacity
@@ -231,9 +202,6 @@ export default function DeliveryDetailScreen() {
                             style={styles.proofThumbWrap}
                           >
                             <Image source={{ uri: p.file_url }} style={styles.proofThumb} />
-                            <View style={styles.proofExpandBadge}>
-                              <Ionicons name="expand-outline" size={12} color={COLORS.white} />
-                            </View>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -244,8 +212,6 @@ export default function DeliveryDetailScreen() {
             })}
           </View>
         )}
-
-        {/* Record attempt button — inside scroll (fallback, hidden on active) */}
       </ScrollView>
 
       {/* Sticky footer button — always visible when assignment is active */}
@@ -256,7 +222,6 @@ export default function DeliveryDetailScreen() {
             onPress={() => router.push(`/deliveries/attempt/${id}`)}
             activeOpacity={0.85}
           >
-            <Ionicons name="add-circle" size={22} color={COLORS.white} />
             <Text style={styles.recordBtnText}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
           </TouchableOpacity>
         </View>
@@ -273,14 +238,20 @@ export default function DeliveryDetailScreen() {
   );
 }
 
-function InfoRow({ icon, label, value, valueColor, onPress }: {
-  icon: string; label: string; value: string; valueColor?: string; onPress?: () => void;
+function InfoSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.infoCard}>{children}</View>
+    </View>
+  );
+}
+
+function InfoRow({ label, value, valueColor, onPress }: {
+  label: string; value: string; valueColor?: string; onPress?: () => void;
 }) {
   const content = (
     <View style={styles.infoRow}>
-      <View style={styles.infoIconBox}>
-        <Ionicons name={icon as any} size={16} color={COLORS.primary} />
-      </View>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text
         style={[styles.infoValue, valueColor ? { color: valueColor, fontWeight: '700' } : {}]}
@@ -288,118 +259,66 @@ function InfoRow({ icon, label, value, valueColor, onPress }: {
       >
         {value}
       </Text>
-      {onPress && <Ionicons name="chevron-forward" size={14} color={COLORS.textLight} />}
     </View>
   );
-  return onPress ? <TouchableOpacity onPress={onPress}>{content}</TouchableOpacity> : content;
+  return onPress ? <TouchableOpacity onPress={onPress} activeOpacity={0.7}>{content}</TouchableOpacity> : content;
 }
 
 const styles = StyleSheet.create({
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
-    paddingBottom: 20, gap: 12, borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
+    paddingBottom: 16, gap: 12,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  iconBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center',
-  },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
-  headerSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 2,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  assignStatusPill: { backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
-  assignStatusText: { fontSize: 12, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  backBtn: { padding: 4 },
+  headerCenter: { flex: 1 },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
+  headerSubtitle: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
+  headerStatusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20, alignSelf: 'flex-start' },
+  headerStatusText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
   content: { padding: 16, paddingBottom: 32 },
 
-  statusHero: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1.5,
-  },
-  statusDotLg: { width: 14, height: 14, borderRadius: 7 },
-  statusHeroLabel: { fontSize: 17, fontWeight: '800',
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
-
   section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
-  card: {
-    backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
+  infoCard: {
+    backgroundColor: COLORS.white, borderRadius: 12, overflow: 'hidden',
+    borderWidth: 1, borderColor: COLORS.border,
   },
   infoRow: {
     flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 14, paddingVertical: 12, gap: 10,
+    paddingHorizontal: 14, paddingVertical: 11, gap: 10,
     borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  infoIconBox: {
-    width: 32, height: 32, borderRadius: 8,
-    backgroundColor: COLORS.primary + '15', alignItems: 'center', justifyContent: 'center',
-  },
-  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 86,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500',
-    fontFamily: 'NotoSansMyanmar_500Medium',
-  },
-
-  attemptCard: {
-    backgroundColor: COLORS.white, borderRadius: 14, padding: 14, marginBottom: 10,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
-  },
-  attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  attemptDelivered: { backgroundColor: '#E8F8EF' },
-  attemptFailed: { backgroundColor: '#FDE8E8' },
-  attemptBadgeText: { fontSize: 13, fontWeight: '700',
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
-  attemptTime: { fontSize: 12, color: COLORS.textLight,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  attemptDetailRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, marginTop: 5 },
-  attemptDetailText: { flex: 1, fontSize: 13, color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
+  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 96, fontFamily: FONTS.regular },
+  infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', fontFamily: FONTS.medium },
 
   // Parcel (admin-uploaded) images
   parcelImgGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  parcelImgWrap: { position: 'relative', borderRadius: 10, overflow: 'hidden' },
-  parcelImgThumb: { width: 90, height: 90, borderRadius: 10, backgroundColor: '#eee' },
-  parcelImgCaption: { fontSize: 10, color: '#fff', backgroundColor: 'rgba(0,0,0,0.45)', paddingHorizontal: 4, paddingVertical: 2, position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center' },
+  parcelImgWrap: { borderRadius: 10, overflow: 'hidden' },
+  parcelImgThumb: { width: 90, height: 90, borderRadius: 10, backgroundColor: COLORS.border },
+
+  attemptCard: {
+    backgroundColor: COLORS.white, borderRadius: 12, padding: 14, marginBottom: 10,
+    borderWidth: 1, borderColor: COLORS.border,
+  },
+  attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  attemptBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  attemptDelivered: { backgroundColor: '#E8F8EF' },
+  attemptFailed: { backgroundColor: '#FDE8E8' },
+  attemptBadgeText: { fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
+  attemptTime: { fontSize: 12, color: COLORS.textLight, fontFamily: FONTS.regular },
+  attemptDetail: { fontSize: 13, color: COLORS.textSecondary, marginTop: 4, fontFamily: FONTS.regular },
 
   // Proof photo section inside attempt card
   proofSection: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
-  proofSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 },
-  proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginBottom: 8, fontFamily: FONTS.bold },
   proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  proofThumbWrap: {
-    position: 'relative',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
+  proofThumbWrap: { borderRadius: 8, overflow: 'hidden' },
   proofThumb: { width: 72, height: 72, borderRadius: 8, backgroundColor: COLORS.border },
-  proofExpandBadge: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 
   // Sticky footer
   stickyFooter: {
@@ -408,18 +327,10 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 8,
   },
   recordBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: COLORS.primary, borderRadius: 16, padding: 18,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5,
+    backgroundColor: COLORS.primary, borderRadius: 10, paddingVertical: 14,
+    alignItems: 'center', justifyContent: 'center',
   },
-  recordBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  recordBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700', fontFamily: FONTS.bold },
 });

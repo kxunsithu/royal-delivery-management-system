@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { parcelService, Parcel } from '../../src/services/parcelService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM } from '../../src/constants';
+import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
 
 export default function CustomerDetailScreen() {
@@ -63,47 +63,35 @@ export default function CustomerDetailScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color={COLORS.white} />
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{decodedName?.[0]?.toUpperCase() || '?'}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerName} numberOfLines={1}>{decodedName}</Text>
-            <View style={styles.headerMeta}>
-              <Ionicons name="call-outline" size={13} color="rgba(255,255,255,0.8)" />
-              <Text style={styles.headerPhone}>{phone}</Text>
-              <View style={styles.typePill}>
-                <Text style={styles.typePillText}>{isRecipient ? 'လက်ခံသူ' : 'ပို့သူ'}</Text>
-              </View>
-            </View>
-          </View>
+        <View style={styles.headerInfo}>
+          <Text style={styles.headerName} numberOfLines={1}>{decodedName}</Text>
+          <Text style={styles.headerSub} numberOfLines={1}>
+            {phone}  ·  {isRecipient ? 'လက်ခံသူ' : 'ပို့သူ'}
+          </Text>
         </View>
         {canCreateParcel && (
-          <TouchableOpacity style={styles.addBtn} onPress={handleAddParcel}>
-            <Ionicons name="add" size={22} color={COLORS.primary} />
+          <TouchableOpacity style={styles.addBtn} onPress={handleAddParcel} activeOpacity={0.8}>
+            <Text style={styles.addBtnText}>ထည့်မည်</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Stats Card */}
-      <View style={styles.statsCard}>
+      {/* Stats */}
+      <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Ionicons name="cube-outline" size={22} color={COLORS.primary} />
           <Text style={styles.statValue}>{meta?.total ?? parcels.length}</Text>
           <Text style={styles.statLabel}>ပါဆယ်</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Ionicons name="cash-outline" size={22} color={COLORS.success} />
           <Text style={styles.statValue}>{totalMMK.toLocaleString()}</Text>
           <Text style={styles.statLabel}>MMK</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Ionicons name="cash-outline" size={22} color={COLORS.info} />
           <Text style={styles.statValue}>{totalTHB.toLocaleString()}</Text>
           <Text style={styles.statLabel}>THB</Text>
         </View>
@@ -128,7 +116,6 @@ export default function CustomerDetailScreen() {
           renderItem={({ item }) => <ParcelRow parcel={item} />}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="cube-outline" size={48} color={COLORS.primary + '60'} />
               <Text style={styles.emptyText}>ပါဆယ် မတွေ့ပါ</Text>
             </View>
           }
@@ -139,8 +126,8 @@ export default function CustomerDetailScreen() {
                   style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]}
                   onPress={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page <= 1}
+                  activeOpacity={0.7}
                 >
-                  <Ionicons name="chevron-back" size={16} color={page <= 1 ? COLORS.textLight : COLORS.primary} />
                   <Text style={[styles.pageBtnText, page <= 1 && { color: COLORS.textLight }]}>နှုတ်</Text>
                 </TouchableOpacity>
                 <View style={styles.pageInfoBox}>
@@ -150,9 +137,9 @@ export default function CustomerDetailScreen() {
                   style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]}
                   onPress={() => setPage(p => Math.min(meta.last_page, p + 1))}
                   disabled={page >= meta.last_page}
+                  activeOpacity={0.7}
                 >
                   <Text style={[styles.pageBtnText, page >= meta.last_page && { color: COLORS.textLight }]}>နောက်</Text>
-                  <Ionicons name="chevron-forward" size={16} color={page >= meta.last_page ? COLORS.textLight : COLORS.primary} />
                 </TouchableOpacity>
               </View>
             ) : undefined
@@ -177,34 +164,19 @@ function ParcelRow({ parcel }: { parcel: Parcel }) {
     >
       {/* Top row */}
       <View style={styles.cardTop}>
-        <View style={styles.trackingRow}>
-          <View style={styles.trackingIcon}>
-            <Ionicons name="barcode-outline" size={14} color={COLORS.primary} />
-          </View>
-          <Text style={styles.trackingNumber}>{parcel.tracking_number}</Text>
-        </View>
+        <Text style={styles.trackingNumber}>{parcel.tracking_number}</Text>
         <View style={[styles.statusBadge, { backgroundColor: statusColor + '18' }]}>
-          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
         </View>
       </View>
 
       <View style={styles.divider} />
 
-      {/* Info rows */}
+      {/* Info */}
       <View style={styles.infoGroup}>
-        <View style={styles.infoRow}>
-          <Ionicons name="person-outline" size={13} color={COLORS.textSecondary} />
-          <Text style={styles.infoText} numberOfLines={1}>{parcel.recipient_name}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Ionicons name="call-outline" size={13} color={COLORS.textSecondary} />
-          <Text style={styles.infoText}>{parcel.recipient_phone}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Ionicons name="location-outline" size={13} color={COLORS.textSecondary} />
-          <Text style={styles.infoText} numberOfLines={1}>{parcel.delivery_address}</Text>
-        </View>
+        <Text style={styles.infoText} numberOfLines={1}>{parcel.recipient_name}</Text>
+        <Text style={styles.infoText}>{parcel.recipient_phone}</Text>
+        <Text style={styles.infoText} numberOfLines={1}>{parcel.delivery_address}</Text>
       </View>
 
       {/* Footer */}
@@ -215,7 +187,6 @@ function ParcelRow({ parcel }: { parcel: Parcel }) {
           </View>
           {parcel.is_cod && (
             <View style={styles.codBadge}>
-              <Ionicons name="cash-outline" size={11} color={COLORS.info} />
               <Text style={styles.codText}>COD</Text>
             </View>
           )}
@@ -233,107 +204,67 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 16,
-    paddingBottom: 24,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  addBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
     backgroundColor: COLORS.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatarCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  avatarText: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
-  },
+  backBtn: { padding: 4 },
+  headerInfo: { flex: 1 },
   headerName: {
     fontSize: 17,
-    fontWeight: '800',
-    color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontWeight: '700',
+    color: COLORS.text,
+    fontFamily: FONTS.bold,
   },
-  headerMeta: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3, flexWrap: 'wrap' },
-  headerPhone: {
+  headerSub: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.85)',
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    color: COLORS.textSecondary,
+    marginTop: 2,
+    fontFamily: FONTS.regular,
   },
-  typePill: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginLeft: 2,
+  addBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: COLORS.primary,
   },
-  typePillText: {
-    fontSize: 11,
-    fontWeight: '600',
+  addBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
     color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.bold,
   },
 
   // Stats
-  statsCard: {
+  statsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
-    borderRadius: 16,
-    paddingVertical: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 2,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingVertical: 14,
   },
-  statItem: { flex: 1, alignItems: 'center', gap: 4 },
-  statDivider: { width: 1, backgroundColor: COLORS.border, marginVertical: 8 },
+  statItem: { flex: 1, alignItems: 'center', gap: 2 },
+  statDivider: { width: 1, height: 32, backgroundColor: COLORS.border },
   statValue: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 16,
+    fontWeight: '700',
     color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   statLabel: {
     fontSize: 12,
     color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
 
   loader: { marginTop: 60 },
@@ -342,44 +273,27 @@ const styles = StyleSheet.create({
   // Parcel card
   parcelCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  trackingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  trackingIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: '#FFF3DC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   trackingNumber: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
   },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 12, fontWeight: '600', fontFamily: 'NotoSansMyanmar_600SemiBold' },
+  statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
-  infoGroup: { gap: 5 },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { fontSize: 13, color: COLORS.text, flex: 1, fontFamily: 'NotoSansMyanmar_400Regular' },
+  infoGroup: { gap: 4 },
+  infoText: { fontSize: 13, color: COLORS.text, fontFamily: FONTS.regular },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -391,22 +305,19 @@ const styles = StyleSheet.create({
   },
   footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  priorityText: { fontSize: 11, fontWeight: '700', fontFamily: 'NotoSansMyanmar_700Bold' },
+  priorityText: { fontSize: 11, fontWeight: '700', fontFamily: FONTS.bold },
   codBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
     backgroundColor: '#E8F4FB',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
   },
-  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: 'NotoSansMyanmar_700Bold' },
-  feeText: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: 'NotoSansMyanmar_700Bold' },
+  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
+  feeText: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
 
   // Empty
-  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
-  emptyText: { fontSize: 16, color: COLORS.textSecondary, fontFamily: 'NotoSansMyanmar_400Regular' },
+  empty: { alignItems: 'center', paddingTop: 80 },
+  emptyText: { fontSize: 15, color: COLORS.textSecondary, fontFamily: FONTS.regular },
 
   // Pagination
   pagination: {
@@ -432,7 +343,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   pageInfoBox: {
     paddingHorizontal: 16,
@@ -444,7 +355,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
 });
-

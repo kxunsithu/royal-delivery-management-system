@@ -14,6 +14,7 @@ import {
 import { Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FONTS } from '../constants';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -74,6 +75,11 @@ export default function ImagePreviewModal({ visible, images, initialIndex = 0, o
 
   if (images.length === 0) return null;
 
+  const goTo = (index: number) => {
+    flatRef.current?.scrollToIndex({ index, animated: true });
+    setCurrentIndex(index);
+  };
+
   return (
     <Modal
       visible={visible}
@@ -85,23 +91,29 @@ export default function ImagePreviewModal({ visible, images, initialIndex = 0, o
     >
       <StatusBar hidden={!showUI} barStyle="light-content" />
       <View style={styles.backdrop}>
-
         {/* Top Bar */}
         {showUI && (
           <View style={[styles.topBar, { paddingTop: insets.top + (Platform.OS === 'android' ? 8 : 4) }]}>
-            <TouchableOpacity style={styles.iconBtn} onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="close" size={26} color="#fff" />
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={onClose}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="close" size={22} color="#fff" />
             </TouchableOpacity>
 
             <View style={styles.counterWrap}>
-              <Ionicons name="images-outline" size={14} color="rgba(255,255,255,0.7)" />
               <Text style={styles.counterText}>
                 {currentIndex + 1} / {images.length}
               </Text>
             </View>
 
-            <TouchableOpacity style={styles.iconBtn} onPress={handleShare} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="share-outline" size={24} color="#fff" />
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={handleShare}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="share-outline" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
         )}
@@ -126,7 +138,6 @@ export default function ImagePreviewModal({ visible, images, initialIndex = 0, o
         {/* Bottom filename bar */}
         {showUI && images[currentIndex]?.original_name && (
           <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
-            <Ionicons name="document-outline" size={14} color="rgba(255,255,255,0.6)" />
             <Text style={styles.filename} numberOfLines={1}>
               {images[currentIndex].original_name}
             </Text>
@@ -135,7 +146,15 @@ export default function ImagePreviewModal({ visible, images, initialIndex = 0, o
 
         {/* Dot indicators */}
         {showUI && images.length > 1 && (
-          <View style={[styles.dots, { bottom: (images[currentIndex]?.original_name ? 60 : 20) + insets.bottom }]}>
+          <View
+            style={[
+              styles.dots,
+              {
+                bottom:
+                  (images[currentIndex]?.original_name ? 52 : 16) + insets.bottom,
+              },
+            ]}
+          >
             {images.map((_, i) => (
               <View
                 key={i}
@@ -151,25 +170,19 @@ export default function ImagePreviewModal({ visible, images, initialIndex = 0, o
             {currentIndex > 0 && (
               <TouchableOpacity
                 style={[styles.navBtn, styles.navLeft]}
-                onPress={() => {
-                  const next = currentIndex - 1;
-                  flatRef.current?.scrollToIndex({ index: next, animated: true });
-                  setCurrentIndex(next);
-                }}
+                onPress={() => goTo(currentIndex - 1)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons name="chevron-back" size={28} color="#fff" />
+                <Ionicons name="chevron-back" size={24} color="#fff" />
               </TouchableOpacity>
             )}
             {currentIndex < images.length - 1 && (
               <TouchableOpacity
                 style={[styles.navBtn, styles.navRight]}
-                onPress={() => {
-                  const next = currentIndex + 1;
-                  flatRef.current?.scrollToIndex({ index: next, animated: true });
-                  setCurrentIndex(next);
-                }}
+                onPress={() => goTo(currentIndex + 1)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons name="chevron-forward" size={28} color="#fff" />
+                <Ionicons name="chevron-forward" size={24} color="#fff" />
               </TouchableOpacity>
             )}
           </>
@@ -193,32 +206,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingBottom: 10,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   iconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.12)',
   },
   counterWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.14)',
     paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   counterText: {
     color: '#fff',
     fontSize: 13,
     fontWeight: '600',
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   slide: {
     width: SCREEN_W,
@@ -236,19 +243,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingTop: 10,
     paddingHorizontal: 24,
+    paddingTop: 10,
   },
   filename: {
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.72)',
     fontSize: 12,
-    flexShrink: 1,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    textAlign: 'center',
+    fontFamily: FONTS.regular,
   },
   dots: {
     position: 'absolute',
@@ -256,31 +259,29 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
+    gap: 5,
     zIndex: 10,
   },
   dot: {
-    width: 6,
-    height: 6,
+    width: 5,
+    height: 5,
     borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.35)',
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   dotActive: {
     backgroundColor: '#fff',
-    width: 18,
+    width: 16,
     borderRadius: 3,
   },
   navBtn: {
     position: 'absolute',
     top: '50%',
-    marginTop: -26,
+    marginTop: -20,
     zIndex: 10,
-    width: 44,
-    height: 52,
+    width: 36,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    borderRadius: 10,
   },
   navLeft: { left: 8 },
   navRight: { right: 8 },

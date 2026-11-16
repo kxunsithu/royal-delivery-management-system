@@ -26,6 +26,12 @@ export interface DashboardData {
   }[];
   active_staff_count?: number;
   today_received?: number;
+  totals?: {
+    fee_mmk?: number;
+    fee_thb?: number;
+    cod_mmk?: number;
+    cod_thb?: number;
+  };
   staff_workload?: { staff_name: string; active_count: number }[];
   // Staff dashboard
   assignments?: {

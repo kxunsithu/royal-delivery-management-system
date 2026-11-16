@@ -11,16 +11,15 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { userService } from '../../src/services/userService';
-import { COLORS} from '../../src/constants';
+import { COLORS, FONTS } from '../../src/constants';
 
 const ROLES = [
-  { value: 'admin', label: 'အက်ဒ်မင်', icon: 'shield', color: '#8B5CF6' },
-  { value: 'manager', label: 'မန်နေဂျာ', icon: 'briefcase', color: '#3B82F6' },
-  { value: 'accountant', label: 'စာရင်းကိုင်', icon: 'calculator', color: '#F59E0B' },
-  { value: 'delivery_staff', label: 'ပို့ဆောင်ရေးဝန်ထမ်း', icon: 'bicycle', color: '#10B981' },
+  { value: 'admin', label: 'အက်ဒ်မင်' },
+  { value: 'manager', label: 'မန်နေဂျာ' },
+  { value: 'accountant', label: 'စာရင်းကိုင်' },
+  { value: 'delivery_staff', label: 'ပို့ဆောင်ရေးဝန်ထမ်း' },
 ];
 
 export default function CreateUserScreen() {
@@ -74,54 +73,100 @@ export default function CreateUserScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-          <Ionicons name="close" size={24} color={COLORS.white} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>အသုံးပြုသူ အသစ်ဖန်တီးမည်</Text>
+        <TouchableOpacity
+          style={[styles.saveBtn, createMutation.isPending && { opacity: 0.6 }]}
+          onPress={handleSubmit}
+          disabled={createMutation.isPending}
+        >
+          {createMutation.isPending ? (
+            <ActivityIndicator size="small" color={COLORS.white} />
+          ) : (
+            <Text style={styles.saveBtnText}>သိမ်းမည်</Text>
+          )}
+        </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
-        <View style={styles.card}>
-          <FormField label="နာမည် *" value={form.name} onChangeText={v => update('name', v)} error={errors.name} placeholder="အမည်" />
-          <FormField label="ဖုန်းနံပါတ် *" value={form.phone} onChangeText={v => update('phone', v)} error={errors.phone} placeholder="၀၉... (09...)" keyboardType="phone-pad" />
-          <FormField label="စကားဝှက် *" value={form.password} onChangeText={v => update('password', v)} error={errors.password} placeholder="••••••••" secureTextEntry />
-          <FormField label="အီးမေးလ် (ရွေးချယ်ရန်)" value={form.email} onChangeText={v => update('email', v)} error={errors.email} placeholder="name@example.com" keyboardType="email-address" />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        style={styles.scrollArea}
+      >
+        <FormSection title="အသုံးပြုသူ အချက်အလက်">
+          <FormField
+            label="နာမည် *"
+            value={form.name}
+            onChangeText={v => update('name', v)}
+            error={errors.name}
+            placeholder="အမည်"
+          />
+          <FormField
+            label="ဖုန်းနံပါတ် *"
+            value={form.phone}
+            onChangeText={v => update('phone', v)}
+            error={errors.phone}
+            placeholder="၀၉... (09...)"
+            keyboardType="phone-pad"
+          />
+          <FormField
+            label="စကားဝှက် *"
+            value={form.password}
+            onChangeText={v => update('password', v)}
+            error={errors.password}
+            placeholder="••••••••"
+            secureTextEntry
+          />
+          <FormField
+            label="အီးမေးလ် (ရွေးချယ်ရန်)"
+            value={form.email}
+            onChangeText={v => update('email', v)}
+            error={errors.email}
+            placeholder="name@example.com"
+            keyboardType="email-address"
+          />
+        </FormSection>
 
-          <Text style={styles.label}>အခန်းကဏ္ဍ</Text>
+        <FormSection title="အခန်းကဏ္ဍ">
           <View style={styles.roleList}>
             {ROLES.map(r => (
               <TouchableOpacity
                 key={r.value}
-                style={[styles.roleItem, form.role === r.value && { borderColor: r.color, backgroundColor: r.color + '12' }]}
+                style={[styles.roleItem, form.role === r.value && styles.roleItemActive]}
                 onPress={() => update('role', r.value)}
               >
-                <View style={[styles.roleIconWrap, { backgroundColor: r.color + '20' }]}>
-                  <Ionicons name={r.icon as any} size={18} color={r.color} />
-                </View>
-                <Text style={[styles.roleItemText, form.role === r.value && { color: r.color, fontWeight: '700' }]}>
+                <Text style={[styles.roleItemText, form.role === r.value && styles.roleItemTextActive]}>
                   {r.label}
                 </Text>
-                <Ionicons
-                  name={form.role === r.value ? 'radio-button-on' : 'radio-button-off'}
-                  size={20}
-                  color={form.role === r.value ? r.color : COLORS.textLight}
-                  style={{ marginLeft: 'auto' }}
-                />
               </TouchableOpacity>
             ))}
           </View>
-        </View>
+        </FormSection>
 
         <TouchableOpacity
           style={[styles.submitBtn, createMutation.isPending && { opacity: 0.6 }]}
           onPress={handleSubmit}
           disabled={createMutation.isPending}
         >
-          {createMutation.isPending ? <ActivityIndicator color={COLORS.white} /> : (
-            <><Ionicons name="person-add" size={22} color={COLORS.white} /><Text style={styles.submitBtnText}>ဖန်တီးမည်</Text></>
+          {createMutation.isPending ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <Text style={styles.submitBtnText}>အသုံးပြုသူ ဖန်တီးမည်</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
+    </View>
+  );
+}
+
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.formSection}>
+      <Text style={styles.formSectionTitle}>{title}</Text>
+      <View style={styles.formCard}>{children}</View>
     </View>
   );
 }
@@ -144,7 +189,7 @@ function FormField({
   secureTextEntry?: boolean;
 }) {
   return (
-    <View style={styles.field}>
+    <View style={styles.formField}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         style={[styles.textInput, !!error && styles.inputError]}
@@ -162,36 +207,86 @@ function FormField({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background },
-  header: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingBottom: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, gap: 12 },
-  closeBtn: { padding: 4 },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    gap: 12,
   },
+  backBtn: { paddingVertical: 4, paddingRight: 8 },
+  backBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold },
+  headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold, textAlign: 'center' },
+  saveBtn: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  saveBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   content: { padding: 16, paddingBottom: 40 },
-  card: { backgroundColor: COLORS.white, borderRadius: 16, padding: 16, gap: 12, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
-  field: {},
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  formSection: { marginBottom: 16 },
+  formSectionTitle: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
+  formCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    gap: 12,
   },
-  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 10, padding: 12, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+  formField: {},
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6, fontFamily: FONTS.semiBold },
+  textInput: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 15,
+    color: COLORS.text,
+    backgroundColor: COLORS.white,
+    fontFamily: FONTS.regular,
   },
+  textArea: { height: 76, textAlignVertical: 'top' },
   inputError: { borderColor: COLORS.error },
-  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
+  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4, fontFamily: FONTS.regular },
   roleList: { gap: 8 },
-  roleItem: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border },
-  roleItemActive: { borderColor: COLORS.primary, backgroundColor: COLORS.primaryBg },
-  roleItemText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500',
-    fontFamily: 'NotoSansMyanmar_500Medium',
+  roleItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
   },
-  roleItemTextActive: { color: COLORS.primary, fontWeight: '700' },
-  roleIconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  submitBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.primary, borderRadius: 16, padding: 18 },
-  submitBtnText: { fontSize: 17, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  roleItemActive: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primaryBg,
   },
+  roleItemText: {
+    fontSize: 15,
+    color: COLORS.text,
+    fontWeight: '500',
+    fontFamily: FONTS.medium,
+  },
+  roleItemTextActive: {
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
+  },
+  submitBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: 10,
+    padding: 16,
+    marginTop: 8,
+  },
+  submitBtnText: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 });

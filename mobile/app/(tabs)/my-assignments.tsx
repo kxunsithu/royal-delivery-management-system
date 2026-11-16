@@ -11,10 +11,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { deliveryService, Assignment } from '../../src/services/deliveryService';
-import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM, ASSIGNMENT_STATUS_LABELS_MM, ASSIGNMENT_STATUS_COLORS} from '../../src/constants';
+import { COLORS, PRIORITY_COLORS, PRIORITY_LABELS_MM, ASSIGNMENT_STATUS_LABELS_MM, ASSIGNMENT_STATUS_COLORS, FONTS } from '../../src/constants';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
@@ -47,17 +46,9 @@ export default function MyAssignmentsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
-            <Text style={styles.headerSub}>ပို့ဆောင်ရေး လုပ်ငန်းစဉ်များ</Text>
-          </View>
-          <View style={styles.headerCountBadge}>
-            <Ionicons name="bicycle" size={16} color={COLORS.primary} />
-            <Text style={styles.headerCountText}>{totalCount}</Text>
-          </View>
-        </View>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
+        <Text style={styles.headerSub}>ပို့ဆောင်ရေး လုပ်ငန်းစဉ်များ</Text>
 
         {/* Quick stat strip */}
         <View style={styles.statStrip}>
@@ -88,10 +79,10 @@ export default function MyAssignmentsScreen() {
             {STATUS_FILTERS.map((item) => (
               <TouchableOpacity
                 key={item.value}
-                style={[styles.filterTab, statusFilter === item.value && styles.filterTabActive]}
+                style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
                 onPress={() => { setStatusFilter(item.value); setPage(1); }}
               >
-                <Text style={[styles.filterTabText, statusFilter === item.value && styles.filterTabTextActive]}>
+                <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
                   {item.label}
                 </Text>
               </TouchableOpacity>
@@ -112,17 +103,14 @@ export default function MyAssignmentsScreen() {
               renderItem={({ item }) => <MyAssignmentCard assignment={item} />}
               ListEmptyComponent={
                 <View style={styles.empty}>
-                  <View style={styles.emptyIconWrap}>
-                    <Ionicons name="bicycle-outline" size={48} color={COLORS.primary} />
-                  </View>
                   <Text style={styles.emptyText}>
-                  {statusFilter === 'ACTIVE'
-                    ? 'ဆောင်ရွက်နေသော လုပ်ငန်းမရှိပါ'
-                    : statusFilter === 'COMPLETED'
-                    ? 'ပြီးစီးသောလုပ်ငန်း မတွေ့ပါ'
-                    : statusFilter === 'FAILED'
-                    ? 'မအောင်မြင်သောလုပ်ငန်း မတွေ့ပါ'
-                    : 'လုပ်ငန်းများ မတွေ့ပါ'}
+                    {statusFilter === 'ACTIVE'
+                      ? 'ဆောင်ရွက်နေသော လုပ်ငန်းမရှိပါ'
+                      : statusFilter === 'COMPLETED'
+                      ? 'ပြီးစီးသောလုပ်ငန်း မတွေ့ပါ'
+                      : statusFilter === 'FAILED'
+                      ? 'မအောင်မြင်သောလုပ်ငန်း မတွေ့ပါ'
+                      : 'လုပ်ငန်းများ မတွေ့ပါ'}
                   </Text>
                   <Text style={styles.emptySubText}>ပါဆယ် ချိတ်ဆက်မှုများ ဤနေရာတွင် ပေါ်ပါမည်</Text>
                 </View>
@@ -131,11 +119,13 @@ export default function MyAssignmentsScreen() {
                 meta && meta.last_page > 1 ? (
                   <View style={styles.pagination}>
                     <TouchableOpacity style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>
-                      <Ionicons name="chevron-back" size={18} color={page <= 1 ? COLORS.textLight : COLORS.primary} />
+                      <Text style={[styles.pageBtnText, page <= 1 && { color: COLORS.textLight }]}>နှုတ်</Text>
                     </TouchableOpacity>
-                    <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
+                    <View style={styles.pageInfoBox}>
+                      <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
+                    </View>
                     <TouchableOpacity style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]} onPress={() => setPage(p => Math.min(meta.last_page, p + 1))} disabled={page >= meta.last_page}>
-                      <Ionicons name="chevron-forward" size={18} color={page >= meta.last_page ? COLORS.textLight : COLORS.primary} />
+                      <Text style={[styles.pageBtnText, page >= meta.last_page && { color: COLORS.textLight }]}>နောက်</Text>
                     </TouchableOpacity>
                   </View>
                 ) : undefined
@@ -150,15 +140,13 @@ export default function MyAssignmentsScreen() {
 
 function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
   const parcel = assignment.parcel;
-  const parcelStatus = parcel?.status ?? '';
-  const statusColor = STATUS_COLORS[parcelStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
-  const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
   const priority = parcel?.priority ?? 'NORMAL';
   const priorityColor = PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS] || COLORS.success;
   const priorityLabel = PRIORITY_LABELS_MM[priority as keyof typeof PRIORITY_LABELS_MM] || priority;
   const assignStatus = assignment.status ?? '';
   const assignColor = ASSIGNMENT_STATUS_COLORS[assignStatus] || COLORS.textSecondary;
   const assignLabel = ASSIGNMENT_STATUS_LABELS_MM[assignStatus] || assignStatus;
+  const isTerminal = ['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignStatus);
 
   return (
     <TouchableOpacity
@@ -166,64 +154,40 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
       onPress={() => router.push(`/deliveries/${assignment.id}`)}
       activeOpacity={0.85}
     >
-      {/* Top accent bar colored by priority */}
-      <View style={[styles.cardAccent, { backgroundColor: priorityColor }]} />
-      <View style={styles.cardBody}>
-        {/* Header row */}
-        <View style={styles.cardHeader}>
-          <View style={styles.trackingRow}>
-            <View style={styles.trackingIcon}>
-              <Ionicons name="barcode-outline" size={14} color={COLORS.primary} />
-            </View>
-            <Text style={styles.trackingNumber}>{parcel?.tracking_number}</Text>
-          </View>
-          <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '20' }]}>
-            <Text style={[styles.priorityText, { color: priorityColor }]}>{priorityLabel}</Text>
-          </View>
+      <View style={styles.cardHeader}>
+        <Text style={styles.trackingNumber}>{parcel?.tracking_number}</Text>
+        <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '18' }]}>
+          <Text style={[styles.priorityText, { color: priorityColor }]}>{priorityLabel}</Text>
         </View>
+      </View>
 
-        {/* Info rows */}
-        <View style={styles.infoSection}>
-          <View style={styles.infoRow}>
-            <Ionicons name="person" size={15} color={COLORS.textSecondary} />
-            <Text style={styles.infoName}>{parcel?.recipient_name}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="call" size={15} color={COLORS.textSecondary} />
-            <Text style={styles.infoText}>{parcel?.recipient_phone}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="location" size={15} color={COLORS.textSecondary} />
-            <Text style={styles.infoText} numberOfLines={2}>{parcel?.delivery_address}</Text>
-          </View>
+      <View style={styles.divider} />
+
+      <View style={styles.infoSection}>
+        <Text style={styles.recipientName} numberOfLines={1}>{parcel?.recipient_name}</Text>
+        <Text style={styles.infoText}>{parcel?.recipient_phone}</Text>
+        <Text style={styles.infoText} numberOfLines={2}>{parcel?.delivery_address}</Text>
+      </View>
+
+      <View style={styles.cardFooter}>
+        <View style={[styles.statusBadge, { backgroundColor: assignColor + '18' }]}>
+          <View style={[styles.statusDot, { backgroundColor: assignColor }]} />
+          <Text style={[styles.statusText, { color: assignColor }]}>{assignLabel}</Text>
         </View>
-
-        {/* Footer */}
-        <View style={styles.cardFooter}>
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {/* Assignment status */}
-            <View style={[styles.statusBadge, { backgroundColor: assignColor + '20' }]}>
-              <Text style={[styles.statusText, { color: assignColor }]}>{assignLabel}</Text>
+        <View style={styles.footerRight}>
+          {parcel?.is_cod && (
+            <View style={styles.codBadge}>
+              <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()}</Text>
             </View>
-          </View>
-          <View style={styles.footerRight}>
-            {parcel?.is_cod && (
-              <View style={styles.codBadge}>
-                <Ionicons name="cash" size={12} color={COLORS.info} />
-                <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()}</Text>
-              </View>
-            )}
-            {/* Only show attempt button for non-terminal assignments */}
-            {!['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignStatus) && (
-              <TouchableOpacity
-                style={styles.attemptBtn}
-                onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
-              >
-                <Ionicons name="add-circle-outline" size={14} color={COLORS.white} />
-                <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          )}
+          {!isTerminal && (
+            <TouchableOpacity
+              style={styles.attemptBtn}
+              onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
+            >
+              <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -232,104 +196,108 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
-  contentArea: { flex: 1, backgroundColor: '#F3F4F6', marginTop: -16, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
   header: {
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 28,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
-  headerTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2,
-    fontFamily: 'NotoSansMyanmar_400Regular',
-  },
-  headerCountBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-  },
-  headerCountText: { fontSize: 15, fontWeight: '800', color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.regular,
   },
   statStrip: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 14, padding: 12,
+    borderRadius: 12, padding: 12, marginTop: 14,
   },
   statItem: { flex: 1, alignItems: 'center' },
   statNum: { fontSize: 20, fontWeight: '800', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 2,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   statDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.3)' },
-  filterRow: { height: 64 },
-  filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
+  filterRow: { height: 56 },
+  filterList: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
   listArea: { flex: 1 },
-  filterTab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 40, justifyContent: 'center', alignSelf: 'center' },
-  filterTabActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  filterTabText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600',
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  filterChip: {
+    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
+    backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border,
+    height: 36, justifyContent: 'center', alignSelf: 'center',
   },
-  filterTabTextActive: { color: COLORS.white },
+  filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600',
+    fontFamily: FONTS.semiBold,
+  },
+  filterChipTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
+  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
+
   card: {
-    backgroundColor: COLORS.white, borderRadius: 18, overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 10, elevation: 3,
+    backgroundColor: COLORS.white, borderRadius: 12, padding: 12,
+    borderWidth: 1, borderColor: COLORS.border,
   },
-  cardAccent: { height: 4, backgroundColor: COLORS.primary },
-  cardBody: { padding: 16 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  trackingRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  trackingIcon: { width: 28, height: 28, borderRadius: 8, backgroundColor: '#FFF3DC', alignItems: 'center', justifyContent: 'center' },
-  trackingNumber: { fontSize: 14, fontWeight: '700', color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary,
+    fontFamily: FONTS.bold,
   },
-  priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  priorityText: { fontSize: 12, fontWeight: '700',
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  priorityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  priorityText: { fontSize: 11, fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
-  infoSection: { gap: 7, marginBottom: 12 },
-  infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  infoName: { fontSize: 16, fontWeight: '700', color: COLORS.text, flex: 1,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+  divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
+  infoSection: { gap: 4, marginBottom: 4 },
+  recipientName: { fontSize: 15, fontWeight: '700', color: COLORS.text,
+    fontFamily: FONTS.bold,
   },
-  infoText: { fontSize: 14, color: COLORS.textSecondary, flex: 1,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+  infoText: { fontSize: 13, color: COLORS.textSecondary,
+    fontFamily: FONTS.regular,
   },
-  cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E5E7EB' },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  cardFooter: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border,
+  },
+  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontSize: 12, fontWeight: '600',
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   footerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  codBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#E8F4FB', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
+  codBadge: {
+    backgroundColor: '#E8F4FB', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8,
+  },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   attemptBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: COLORS.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8,
   },
   attemptBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
+
   empty: { alignItems: 'center', paddingVertical: 60 },
-  emptyIconWrap: { width: 88, height: 88, borderRadius: 44, backgroundColor: '#FFF3DC', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   emptyText: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
-  emptySubText: { fontSize: 13, color: COLORS.textLight,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+  emptySubText: { fontSize: 13, color: COLORS.textLight, textAlign: 'center',
+    fontFamily: FONTS.regular,
   },
-  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20, padding: 16 },
-  pageBtn: { padding: 8 },
+
+  pagination: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
+  pageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
-  pageInfo: { fontSize: 14, color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+  pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary,
+    fontFamily: FONTS.semiBold,
+  },
+  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: COLORS.border },
+  pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600',
+    fontFamily: FONTS.semiBold,
   },
 });
