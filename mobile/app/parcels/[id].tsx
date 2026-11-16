@@ -178,7 +178,7 @@ export default function ParcelDetailScreen() {
           <div class="row"><span class="label">လက်ခံသူ ဖုန်း</span><span class="value">${parcel.recipient_phone}</span></div>
           <div class="row"><span class="label">လိပ်စာ</span><span class="value">${parcel.delivery_address}</span></div>
           <div class="row"><span class="label">ဦးစားပေးအဆင့်</span><span class="value">${PRIORITY_LABELS_MM[parcel.priority as keyof typeof PRIORITY_LABELS_MM] || parcel.priority}</span></div>
-          <div class="row"><span class="label">အရေအတွက်</span><span class="value">${parcel.quantity} ခု</span></div>
+          <div class="row"><span class="label">အမျိုးအစား</span><span class="value">${parcel.category || '-'}</span></div>
           ${parcel.weight ? `<div class="row"><span class="label">အလေးချိန်</span><span class="value">${parcel.weight} kg</span></div>` : ''}
           ${parcel.description ? `<div class="row"><span class="label">ဖော်ပြချက်</span><span class="value">${parcel.description}</span></div>` : ''}
           <div class="row"><span class="label">ပို့ဆောင်ခ</span><span class="value">${Number(parcel.delivery_fee).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>
@@ -358,7 +358,7 @@ export default function ParcelDetailScreen() {
             valueColor={PRIORITY_COLORS[parcel.priority as keyof typeof PRIORITY_COLORS]}
           />
           {parcel.description && <InfoRow icon="document-text-outline" label="ဖော်ပြချက်" value={parcel.description} />}
-          <InfoRow icon="layers-outline" label="အရေအတွက်" value={`${parcel.quantity} ခု`} />
+          {parcel.category && <InfoRow icon="pricetag-outline" label="အမျိုးအစား" value={parcel.category} />}
           {parcel.weight && <InfoRow icon="scale-outline" label="အလေးချိန်" value={`${parcel.weight} kg`} />}
         </InfoSection>
 

@@ -19,6 +19,7 @@ class Parcel extends Model
         'recipient_phone',
         'delivery_address',
         'description',
+        'category',
         'quantity',
         'weight',
         'notes',

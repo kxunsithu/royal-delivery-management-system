@@ -18,8 +18,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { parcelService, ParcelImage } from '../../../src/services/parcelService';
 import { useAuth } from '../../../src/context/AuthContext';
-import { COLORS} from '../../../src/constants';
-
+import { COLORS } from '../../../src/constants';
+import { PARCEL_CATEGORIES } from '../../../src/constants';
 export default function EditParcelScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -43,7 +43,7 @@ export default function EditParcelScreen() {
     sender_name: '', sender_phone: '',
     recipient_name: '', recipient_phone: '',
     delivery_address: '',
-    description: '', quantity: '1', weight: '', notes: '',
+    description: '', category: '', weight: '', notes: '',
     delivery_fee: '', cod_amount: '0', is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
     priority: 'NORMAL',
@@ -62,7 +62,7 @@ export default function EditParcelScreen() {
         recipient_phone: parcel.recipient_phone || '',
         delivery_address: parcel.delivery_address || '',
         description: parcel.description || '',
-        quantity: String(parcel.quantity || 1),
+        category: parcel.category || '',
         weight: parcel.weight ? String(parcel.weight) : '',
         notes: parcel.notes || '',
         delivery_fee: String(parcel.delivery_fee || 0),
@@ -168,7 +168,7 @@ export default function EditParcelScreen() {
       recipient_phone: form.recipient_phone,
       delivery_address: form.delivery_address,
       description: form.description || undefined,
-      quantity: Number(form.quantity) || 1,
+      category: form.category || undefined,
       weight: form.weight ? Number(form.weight) : undefined,
       notes: form.notes || undefined,
       delivery_fee: Number(form.delivery_fee),
@@ -218,14 +218,26 @@ export default function EditParcelScreen() {
           <Text style={styles.sectionTitle}>ပါဆယ် အချက်အလက်</Text>
           <View style={styles.card}>
             <FormField label="ဖော်ပြချက်" value={form.description} onChangeText={v => update('description', v)} placeholder="ပစ္စည်းအမျိုးအစား" />
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <FormField label="အရေအတွက်" value={form.quantity} onChangeText={v => update('quantity', v)} keyboardType="numeric" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
-              </View>
+            <Text style={styles.label}>အမျိုးအစား</Text>
+            <View style={styles.categoryRow}>
+              {PARCEL_CATEGORIES.map(cat => (
+                <TouchableOpacity
+                  key={cat.value}
+                  style={[styles.categoryChip, form.category === cat.value && styles.categoryChipActive]}
+                  onPress={() => update('category', form.category === cat.value ? '' : cat.value)}
+                >
+                  <Ionicons
+                    name={cat.icon as any}
+                    size={18}
+                    color={form.category === cat.value ? '#fff' : COLORS.primary}
+                  />
+                  <Text style={[styles.categoryChipText, form.category === cat.value && styles.categoryChipTextActive]}>
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
+            <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
             <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>
             <View style={styles.segmented}>
               {priorities.map(p => (
@@ -431,6 +443,11 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
   row: { flexDirection: 'row', gap: 12 },
+  categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
+  categoryChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1.5, borderColor: COLORS.primary, backgroundColor: '#FFF9EE' },
+  categoryChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  categoryChipText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, fontFamily: 'NotoSansMyanmar_600SemiBold' },
+  categoryChipTextActive: { color: '#fff' },
   segmented: { flexDirection: 'row', borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border, overflow: 'hidden', marginBottom: 4 },
   segmentItem: { flex: 1, paddingVertical: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: COLORS.primary },

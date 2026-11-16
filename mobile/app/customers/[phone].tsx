@@ -14,14 +14,32 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { parcelService, Parcel } from '../../src/services/parcelService';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM } from '../../src/constants';
+import { useAuth } from '../../src/context/AuthContext';
 
 export default function CustomerDetailScreen() {
   const insets = useSafeAreaInsets();
   const { phone, type, name } = useLocalSearchParams<{ phone: string; type: string; name: string }>();
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
 
   const decodedName = name ? decodeURIComponent(name as string) : (phone as string);
   const isRecipient = type !== 'sender';
+
+  // Only admin and manager can create parcels
+  const canCreateParcel = user?.role === 'admin' || user?.role === 'manager';
+
+  // Build the create URL with pre-filled fields based on customer type
+  const handleAddParcel = () => {
+    const params = new URLSearchParams();
+    if (isRecipient) {
+      params.set('recipient_name', encodeURIComponent(decodedName));
+      params.set('recipient_phone', encodeURIComponent(phone as string));
+    } else {
+      params.set('sender_name', encodeURIComponent(decodedName));
+      params.set('sender_phone', encodeURIComponent(phone as string));
+    }
+    router.push(`/parcels/create?${params.toString()}`);
+  };
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['customer-parcels', phone, page],
@@ -63,6 +81,11 @@ export default function CustomerDetailScreen() {
             </View>
           </View>
         </View>
+        {canCreateParcel && (
+          <TouchableOpacity style={styles.addBtn} onPress={handleAddParcel}>
+            <Ionicons name="add" size={22} color={COLORS.primary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Stats Card */}
@@ -227,6 +250,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+  },
+  addBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatarCircle: {

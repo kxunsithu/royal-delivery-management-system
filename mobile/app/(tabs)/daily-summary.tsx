@@ -230,38 +230,69 @@ function DaySummaryCard({ summary }: { summary: DailySummary }) {
 
       {/* Stats Grid */}
       <View style={styles.statsGrid}>
-        <View style={styles.statItem}>
-          <Ionicons name="cube-outline" size={16} color={COLORS.primary} />
-          <Text style={styles.statValue}>{summary.parcel_count.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>ပါဆယ် ခု</Text>
+        {/* Row 1: Parcel | Sender | Recipient */}
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Ionicons name="cube-outline" size={16} color={COLORS.primary} />
+            <Text style={styles.statValue}>{summary.parcel_count.toLocaleString()}</Text>
+            <Text style={styles.statLabel}>ပါဆယ် ခု</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Ionicons name="arrow-up-circle-outline" size={16} color={COLORS.textSecondary} />
+            <Text style={styles.statValue}>{summary.sender_count.toLocaleString()}</Text>
+            <Text style={styles.statLabel}>ပို့သူ ဦး</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Ionicons name="person-outline" size={16} color={COLORS.info} />
+            <Text style={[styles.statValue, { color: COLORS.info }]}>{summary.recipient_count.toLocaleString()}</Text>
+            <Text style={styles.statLabel}>လက်ခံသူ ဦး</Text>
+          </View>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Ionicons name="people-outline" size={16} color={COLORS.info} />
-          <Text style={[styles.statValue, { color: COLORS.info }]}>{summary.customer_count.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>ဖောက်သည် ဦး</Text>
-        </View>
-        {summary.income_mmk > 0 && (
+
+        {/* Row 2: Fee MMK | COD MMK | Fee THB | COD THB — only show if >0 */}
+        {(summary.fee_mmk > 0 || summary.cod_mmk > 0 || summary.fee_thb > 0 || summary.cod_thb > 0) && (
           <>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Ionicons name="cash-outline" size={16} color={COLORS.success} />
-              <Text style={[styles.statValue, { color: COLORS.success }]}>
-                {summary.income_mmk.toLocaleString()}
-              </Text>
-              <Text style={styles.statLabel}>MMK</Text>
-            </View>
-          </>
-        )}
-        {summary.income_thb > 0 && (
-          <>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Ionicons name="cash-outline" size={16} color={COLORS.warning} />
-              <Text style={[styles.statValue, { color: COLORS.warning }]}>
-                {summary.income_thb.toLocaleString()}
-              </Text>
-              <Text style={styles.statLabel}>THB</Text>
+            <View style={styles.rowDivider} />
+            <View style={styles.statsRow}>
+              {summary.fee_mmk > 0 && (
+                <>
+                  <View style={styles.statItem}>
+                    <Ionicons name="car-outline" size={16} color={COLORS.success} />
+                    <Text style={[styles.statValue, { color: COLORS.success }]}>{summary.fee_mmk.toLocaleString()}</Text>
+                    <Text style={styles.statLabel}>ပို့ဆောင်ခ (K)</Text>
+                  </View>
+                  {(summary.cod_mmk > 0 || summary.fee_thb > 0 || summary.cod_thb > 0) && <View style={styles.statDivider} />}
+                </>
+              )}
+              {summary.cod_mmk > 0 && (
+                <>
+                  <View style={styles.statItem}>
+                    <Ionicons name="cash-outline" size={16} color={COLORS.warning} />
+                    <Text style={[styles.statValue, { color: COLORS.warning }]}>{summary.cod_mmk.toLocaleString()}</Text>
+                    <Text style={styles.statLabel}>COD (K)</Text>
+                  </View>
+                  {(summary.fee_thb > 0 || summary.cod_thb > 0) && <View style={styles.statDivider} />}
+                </>
+              )}
+              {summary.fee_thb > 0 && (
+                <>
+                  <View style={styles.statItem}>
+                    <Ionicons name="car-outline" size={16} color={COLORS.success} />
+                    <Text style={[styles.statValue, { color: COLORS.success }]}>{summary.fee_thb.toLocaleString()}</Text>
+                    <Text style={styles.statLabel}>ပို့ဆောင်ခ (฿)</Text>
+                  </View>
+                  {summary.cod_thb > 0 && <View style={styles.statDivider} />}
+                </>
+              )}
+              {summary.cod_thb > 0 && (
+                <View style={styles.statItem}>
+                  <Ionicons name="cash-outline" size={16} color={COLORS.warning} />
+                  <Text style={[styles.statValue, { color: COLORS.warning }]}>{summary.cod_thb.toLocaleString()}</Text>
+                  <Text style={styles.statLabel}>COD (฿)</Text>
+                </View>
+              )}
             </View>
           </>
         )}
@@ -461,9 +492,17 @@ const styles = StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
   statsGrid: {
+    gap: 0,
+  },
+  statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+  },
+  rowDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 10,
   },
   statItem: {
     alignItems: 'center',
@@ -476,14 +515,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     color: COLORS.primary,
     fontFamily: FONTS.bold,
     marginTop: 2,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textSecondary,
     fontFamily: FONTS.regular,
   },

@@ -45,14 +45,13 @@ export default function DailySummaryDetailScreen() {
   const parcels = data?.data ?? [];
   const meta = data?.meta;
 
-  // Calculate summary stats from loaded parcels (all pages will have per_page=50 so usually one page)
-  const incomeMmk = parcels
-    .filter((p) => p.currency === 'MMK')
-    .reduce((sum, p) => sum + Number(p.delivery_fee), 0);
-  const incomeThb = parcels
-    .filter((p) => p.currency === 'THB')
-    .reduce((sum, p) => sum + Number(p.delivery_fee), 0);
-  const uniqueCustomers = new Set(parcels.map((p) => p.recipient_phone)).size;
+  // Calculate summary stats from loaded parcels
+  const feeMmk = parcels.filter(p => p.currency === 'MMK').reduce((s, p) => s + Number(p.delivery_fee), 0);
+  const feeThb = parcels.filter(p => p.currency === 'THB').reduce((s, p) => s + Number(p.delivery_fee), 0);
+  const codMmk = parcels.filter(p => p.currency === 'MMK' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
+  const codThb = parcels.filter(p => p.currency === 'THB' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
+  const uniqueSenders = new Set(parcels.map(p => p.sender_phone).filter(Boolean)).size;
+  const uniqueRecipients = new Set(parcels.map(p => p.recipient_phone)).size;
 
   return (
     <View style={styles.container}>
@@ -72,6 +71,7 @@ export default function DailySummaryDetailScreen() {
         {/* Summary Stats Card */}
         {!isLoading && parcels.length > 0 && (
           <View style={styles.summaryCard}>
+            {/* Row 1: Parcel | Sender | Recipient */}
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Ionicons name="cube-outline" size={18} color={COLORS.primary} />
@@ -80,35 +80,63 @@ export default function DailySummaryDetailScreen() {
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryItem}>
-                <Ionicons name="people-outline" size={18} color={COLORS.info} />
-                <Text style={[styles.summaryValue, { color: COLORS.info }]}>{uniqueCustomers}</Text>
-                <Text style={styles.summaryLabel}>ဖောက်သည် ဦး</Text>
+                <Ionicons name="arrow-up-circle-outline" size={18} color={COLORS.textSecondary} />
+                <Text style={styles.summaryValue}>{uniqueSenders}</Text>
+                <Text style={styles.summaryLabel}>ပို့သူ ဦး</Text>
               </View>
-              {incomeMmk > 0 && (
-                <>
-                  <View style={styles.summaryDivider} />
-                  <View style={styles.summaryItem}>
-                    <Ionicons name="cash-outline" size={18} color={COLORS.success} />
-                    <Text style={[styles.summaryValue, { color: COLORS.success }]}>
-                      {incomeMmk.toLocaleString()}
-                    </Text>
-                    <Text style={styles.summaryLabel}>MMK</Text>
-                  </View>
-                </>
-              )}
-              {incomeThb > 0 && (
-                <>
-                  <View style={styles.summaryDivider} />
-                  <View style={styles.summaryItem}>
-                    <Ionicons name="cash-outline" size={18} color={COLORS.warning} />
-                    <Text style={[styles.summaryValue, { color: COLORS.warning }]}>
-                      {incomeThb.toLocaleString()}
-                    </Text>
-                    <Text style={styles.summaryLabel}>THB</Text>
-                  </View>
-                </>
-              )}
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Ionicons name="person-outline" size={18} color={COLORS.info} />
+                <Text style={[styles.summaryValue, { color: COLORS.info }]}>{uniqueRecipients}</Text>
+                <Text style={styles.summaryLabel}>လက်ခံသူ ဦး</Text>
+              </View>
             </View>
+
+            {/* Row 2: Fee + COD breakdown — only if any amount > 0 */}
+            {(feeMmk > 0 || codMmk > 0 || feeThb > 0 || codThb > 0) && (
+              <>
+                <View style={styles.rowDivider} />
+                <View style={styles.summaryRow}>
+                  {feeMmk > 0 && (
+                    <>
+                      <View style={styles.summaryItem}>
+                        <Ionicons name="car-outline" size={18} color={COLORS.success} />
+                        <Text style={[styles.summaryValue, { color: COLORS.success }]}>{feeMmk.toLocaleString()}</Text>
+                        <Text style={styles.summaryLabel}>ပို့ဆောင်ခ (K)</Text>
+                      </View>
+                      {(codMmk > 0 || feeThb > 0 || codThb > 0) && <View style={styles.summaryDivider} />}
+                    </>
+                  )}
+                  {codMmk > 0 && (
+                    <>
+                      <View style={styles.summaryItem}>
+                        <Ionicons name="cash-outline" size={18} color={COLORS.warning} />
+                        <Text style={[styles.summaryValue, { color: COLORS.warning }]}>{codMmk.toLocaleString()}</Text>
+                        <Text style={styles.summaryLabel}>COD (K)</Text>
+                      </View>
+                      {(feeThb > 0 || codThb > 0) && <View style={styles.summaryDivider} />}
+                    </>
+                  )}
+                  {feeThb > 0 && (
+                    <>
+                      <View style={styles.summaryItem}>
+                        <Ionicons name="car-outline" size={18} color={COLORS.success} />
+                        <Text style={[styles.summaryValue, { color: COLORS.success }]}>{feeThb.toLocaleString()}</Text>
+                        <Text style={styles.summaryLabel}>ပို့ဆောင်ခ (฿)</Text>
+                      </View>
+                      {codThb > 0 && <View style={styles.summaryDivider} />}
+                    </>
+                  )}
+                  {codThb > 0 && (
+                    <View style={styles.summaryItem}>
+                      <Ionicons name="cash-outline" size={18} color={COLORS.warning} />
+                      <Text style={[styles.summaryValue, { color: COLORS.warning }]}>{codThb.toLocaleString()}</Text>
+                      <Text style={styles.summaryLabel}>COD (฿)</Text>
+                    </View>
+                  )}
+                </View>
+              </>
+            )}
           </View>
         )}
 
@@ -278,6 +306,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
   },
+  rowDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 10,
+  },
   summaryItem: {
     alignItems: 'center',
     gap: 2,
@@ -289,14 +322,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   summaryValue: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '800',
     color: COLORS.primary,
     fontFamily: FONTS.bold,
     marginTop: 2,
   },
   summaryLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textSecondary,
     fontFamily: FONTS.regular,
   },

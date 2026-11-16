@@ -9,7 +9,7 @@ export interface Parcel {
   recipient_phone: string;
   delivery_address: string;
   description?: string;
-  quantity: number;
+  category?: string;
   weight?: number;
   notes?: string;
   delivery_fee: number;
@@ -119,9 +119,12 @@ export interface ContactSuggestion {
 export interface DailySummary {
   date: string;
   parcel_count: number;
-  customer_count: number;
-  income_mmk: number;
-  income_thb: number;
+  sender_count: number;
+  recipient_count: number;
+  fee_mmk: number;
+  fee_thb: number;
+  cod_mmk: number;
+  cod_thb: number;
 }
 
 export interface Customer {

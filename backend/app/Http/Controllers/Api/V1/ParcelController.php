@@ -163,9 +163,12 @@ class ParcelController extends Controller
             ->select([
                 DB::raw('DATE(received_at) as date'),
                 DB::raw('COUNT(*) as parcel_count'),
-                DB::raw('COUNT(DISTINCT recipient_phone) as customer_count'),
-                DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as income_mmk"),
-                DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as income_thb"),
+                DB::raw('COUNT(DISTINCT sender_phone) as sender_count'),
+                DB::raw('COUNT(DISTINCT recipient_phone) as recipient_count'),
+                DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as fee_mmk"),
+                DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as fee_thb"),
+                DB::raw("SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
             ])
             ->whereNotNull('received_at')
             ->when($request->date_from, fn($q) => $q->whereDate('received_at', '>=', $request->date_from))
@@ -174,11 +177,14 @@ class ParcelController extends Controller
             ->orderBy('date', 'desc');
 
         $rows = $query->get()->map(fn($row) => [
-            'date'           => $row->date,
-            'parcel_count'   => (int) $row->parcel_count,
-            'customer_count' => (int) $row->customer_count,
-            'income_mmk'     => (float) $row->income_mmk,
-            'income_thb'     => (float) $row->income_thb,
+            'date'             => $row->date,
+            'parcel_count'     => (int) $row->parcel_count,
+            'sender_count'     => (int) $row->sender_count,
+            'recipient_count'  => (int) $row->recipient_count,
+            'fee_mmk'          => (float) $row->fee_mmk,
+            'fee_thb'          => (float) $row->fee_thb,
+            'cod_mmk'          => (float) $row->cod_mmk,
+            'cod_thb'          => (float) $row->cod_thb,
         ]);
 
         return response()->json(['data' => $rows]);
@@ -241,7 +247,7 @@ class ParcelController extends Controller
             'recipient_phone' => ['required', 'string', 'max:30'],
             'delivery_address' => ['required', 'string'],
             'description' => ['nullable', 'string'],
-            'quantity' => ['integer', 'min:1'],
+            'category' => ['nullable', 'string', 'max:100'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'delivery_fee' => ['required', 'numeric', 'min:0'],
@@ -262,7 +268,6 @@ class ParcelController extends Controller
                 'status' => 'RECEIVED',
                 'received_by_id' => $request->user()->id,
                 'received_at' => $validated['received_at'] ?? now(),
-                'quantity' => $validated['quantity'] ?? 1,
                 'delivery_fee' => $validated['delivery_fee'] ?? 0,
                 'cod_amount' => $validated['cod_amount'] ?? 0,
                 'is_cod' => $validated['is_cod'] ?? false,
@@ -330,7 +335,7 @@ class ParcelController extends Controller
             'recipient_phone' => ['sometimes', 'string', 'max:30'],
             'delivery_address' => ['sometimes', 'string'],
             'description' => ['nullable', 'string'],
-            'quantity' => ['sometimes', 'integer', 'min:1'],
+            'category' => ['nullable', 'string', 'max:100'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'delivery_fee' => ['sometimes', 'numeric', 'min:0'],
@@ -605,7 +610,7 @@ class ParcelController extends Controller
             'recipient_phone' => $parcel->recipient_phone,
             'delivery_address' => $parcel->delivery_address,
             'description' => $parcel->description,
-            'quantity' => $parcel->quantity,
+            'category' => $parcel->category,
             'weight' => $parcel->weight,
             'notes' => $parcel->notes,
             'delivery_fee' => $parcel->delivery_fee,

@@ -15,16 +15,24 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { parcelService, ContactSuggestion } from '../../src/services/parcelService';
 import { useAuth } from '../../src/context/AuthContext';
-import { COLORS} from '../../src/constants';
+import { COLORS, PARCEL_CATEGORIES } from '../../src/constants';
 
 export default function CreateParcelScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Pre-fill params from customer detail page
+  const params = useLocalSearchParams<{
+    sender_name?: string;
+    sender_phone?: string;
+    recipient_name?: string;
+    recipient_phone?: string;
+  }>();
 
   // Guard: only admin and manager can create parcels — redirect accountant away
   const canCreate = !user || user.role === 'admin' || user.role === 'manager';
@@ -36,13 +44,13 @@ export default function CreateParcelScreen() {
 
   const [form, setForm] = useState({
     tracking_number: '',
-    sender_name: '',
-    sender_phone: '',
-    recipient_name: '',
-    recipient_phone: '',
+    sender_name: params.sender_name ? decodeURIComponent(params.sender_name) : '',
+    sender_phone: params.sender_phone ? decodeURIComponent(params.sender_phone) : '',
+    recipient_name: params.recipient_name ? decodeURIComponent(params.recipient_name) : '',
+    recipient_phone: params.recipient_phone ? decodeURIComponent(params.recipient_phone) : '',
     delivery_address: '',
     description: '',
-    quantity: '1',
+    category: '',
     weight: '',
     notes: '',
     delivery_fee: '',
@@ -201,7 +209,7 @@ export default function CreateParcelScreen() {
       recipient_phone: form.recipient_phone,
       delivery_address: form.delivery_address,
       description: form.description || undefined,
-      quantity: Number(form.quantity) || 1,
+      category: form.category || undefined,
       weight: form.weight ? Number(form.weight) : undefined,
       notes: form.notes || undefined,
       delivery_fee: Number(form.delivery_fee),
@@ -255,17 +263,31 @@ export default function CreateParcelScreen() {
             label="ဖော်ပြချက်"
             value={form.description}
             onChangeText={(v) => update('description', v)}
-            placeholder="ပစ္စည်းအမျိုးအစား"
+            placeholder="အပိုဆောင်း မှတ်ချက်"
           />
+
+          {/* Category Picker */}
+          <Text style={styles.label}>အမျိုးအစား</Text>
+          <View style={styles.categoryRow}>
+            {PARCEL_CATEGORIES.map((cat) => (
+              <TouchableOpacity
+                key={cat.value}
+                style={[styles.categoryChip, form.category === cat.value && styles.categoryChipActive]}
+                onPress={() => update('category', form.category === cat.value ? '' : cat.value)}
+              >
+                <Ionicons
+                  name={cat.icon as any}
+                  size={18}
+                  color={form.category === cat.value ? COLORS.white : COLORS.primary}
+                />
+                <Text style={[styles.categoryChipText, form.category === cat.value && styles.categoryChipTextActive]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <FormField
-                label="အရေအတွက်"
-                value={form.quantity}
-                onChangeText={(v) => update('quantity', v)}
-                keyboardType="numeric"
-              />
-            </View>
             <View style={{ flex: 1 }}>
               <FormField
                 label="အလေးချိန် (kg)"
@@ -615,6 +637,33 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
   row: { flexDirection: 'row', gap: 12 },
+  categoryRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+  },
+  categoryChipActive: {
+    backgroundColor: COLORS.primary,
+  },
+  categoryChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+  },
+  categoryChipTextActive: { color: COLORS.white },
   segmented: {
     flexDirection: 'row',
     borderRadius: 10,

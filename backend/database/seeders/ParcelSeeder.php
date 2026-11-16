@@ -63,6 +63,11 @@ class ParcelSeeder extends Seeder
             'Electronic accessories',
         ];
         $priorities = ['NORMAL', 'NORMAL', 'NORMAL', 'HIGH', 'URGENT'];
+        $currencies = ['MMK', 'MMK', 'MMK', 'THB', 'MMK']; // 80% MMK, 20% THB
+        $deliveryFeesMmk = [3000, 5000, 7000, 10000, 15000, 8000, 6000, 12000, 4000, 9000];
+        $deliveryFeesThb = [100, 150, 200, 250, 120, 180, 300, 80];
+        $codAmountsMmk   = [15000, 25000, 50000, 80000, 100000, 35000, 60000, 45000, 20000, 75000];
+        $codAmountsThb   = [500, 800, 1200, 2000, 1500, 600];
         $senders = [
             ['မဲဆောက် ဆိုင် A', '09944074981'],
             ['မဲဆောက် ဖက်ရှင်ဆိုင်', '09944074981'],
@@ -81,6 +86,19 @@ class ParcelSeeder extends Seeder
             $description = $descriptions[($i - 1) % count($descriptions)];
             $priority = $priorities[($i - 1) % count($priorities)];
             $quantity = ($i % 5) + 1;
+            $categories = ['အဝတ်အစား', 'ဖုန်း', 'Laptop'];
+            $category = $categories[($i - 1) % count($categories)];
+
+            // Currency, fee, COD
+            $currency = $currencies[($i - 1) % count($currencies)];
+            $isCod    = ($i % 3 === 0); // every 3rd parcel is COD
+            if ($currency === 'THB') {
+                $deliveryFee = $deliveryFeesThb[($i - 1) % count($deliveryFeesThb)];
+                $codAmount   = $isCod ? $codAmountsThb[($i - 1) % count($codAmountsThb)] : 0;
+            } else {
+                $deliveryFee = $deliveryFeesMmk[($i - 1) % count($deliveryFeesMmk)];
+                $codAmount   = $isCod ? $codAmountsMmk[($i - 1) % count($codAmountsMmk)] : 0;
+            }
 
             $parcel = [
                 'tracking_number' => sprintf('RMD-202411%02d-%05d', ($i % 28) + 1, $i),
@@ -90,9 +108,15 @@ class ParcelSeeder extends Seeder
                 'recipient_phone' => sprintf('09%09d', 944074981 + $i),
                 'delivery_address'=> $deliveryAddress,
                 'description'     => $description,
+                'category'        => $category,
                 'quantity'        => $quantity,
                 'status'          => 'RECEIVED',
                 'priority'        => $priority,
+                'delivery_fee'    => $deliveryFee,
+                'cod_amount'      => $codAmount,
+                'is_cod'          => $isCod,
+                'currency'        => $currency,
+                'condition'       => 'GOOD',
                 'received_at'     => now()->subDays(($i - 1) % 30)->subHours($i % 24),
                 'received_by_id'  => $admin->id,
             ];

@@ -94,3 +94,9 @@ export const ASSIGNMENT_STATUS_COLORS: Record<string, string> = {
   FAILED:      COLORS.statusFailed,
   REASSIGNED:  COLORS.textSecondary,
 };
+
+export const PARCEL_CATEGORIES = [
+  { label: 'အဝတ်အစား', value: 'အဝတ်အစား', icon: 'shirt-outline' },
+  { label: 'ဖုန်း / Electronics', value: 'ဖုန်း', icon: 'phone-portrait-outline' },
+  { label: 'Laptop / ကွန်ပျူတာ', value: 'Laptop', icon: 'laptop-outline' },
+];
