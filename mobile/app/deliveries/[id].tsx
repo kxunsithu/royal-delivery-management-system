@@ -103,6 +103,37 @@ export default function DeliveryDetailScreen() {
           </View>
         </View>
 
+        {/* Parcel images (admin-uploaded) */}
+        {parcel?.images && parcel.images.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>ပါဆယ် ဓာတ်ပုံများ ({parcel.images.length})</Text>
+            <View style={styles.parcelImgGrid}>
+              {parcel.images.map((img: any, idx: number) => (
+                <TouchableOpacity
+                  key={img.id || idx}
+                  activeOpacity={0.85}
+                  style={styles.parcelImgWrap}
+                  onPress={() => {
+                    const imgs: PreviewImage[] = parcel.images!.map((item: any, i: number) => ({
+                      id: item.id || `img-${i}`,
+                      url: item.url,
+                    }));
+                    setPreviewImages(imgs);
+                    setPreviewIndex(idx);
+                    setPreviewVisible(true);
+                  }}
+                >
+                  <Image source={{ uri: img.url }} style={styles.parcelImgThumb} />
+                  <View style={styles.proofExpandBadge}>
+                    <Ionicons name="expand-outline" size={12} color="#fff" />
+                  </View>
+
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Assignment info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ချိတ်ဆက်မှု အချက်အလက်</Text>
@@ -332,6 +363,12 @@ const styles = StyleSheet.create({
   attemptDetailText: { flex: 1, fontSize: 13, color: COLORS.textSecondary,
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
+
+  // Parcel (admin-uploaded) images
+  parcelImgGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  parcelImgWrap: { position: 'relative', borderRadius: 10, overflow: 'hidden' },
+  parcelImgThumb: { width: 90, height: 90, borderRadius: 10, backgroundColor: '#eee' },
+  parcelImgCaption: { fontSize: 10, color: '#fff', backgroundColor: 'rgba(0,0,0,0.45)', paddingHorizontal: 4, paddingVertical: 2, position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center' },
 
   // Proof photo section inside attempt card
   proofSection: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },

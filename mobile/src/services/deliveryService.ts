@@ -13,6 +13,7 @@ export interface Assignment {
     cod_amount: number;
     is_cod: boolean;
     priority: string;
+    images?: { id: number; url: string }[];
   };
   staff?: { id: number; name: string; phone?: string };
   assigned_by?: { id: number; name: string };

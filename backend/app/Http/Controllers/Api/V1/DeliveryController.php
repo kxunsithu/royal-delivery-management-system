@@ -93,7 +93,7 @@ class DeliveryController extends Controller
     {
         $this->authorize('view', $delivery);
 
-        $delivery->load(['parcel', 'staff', 'assignedBy', 'deliveryAttempts.proofOfDeliveries']);
+        $delivery->load(['parcel.images', 'staff', 'assignedBy', 'deliveryAttempts.proofOfDeliveries']);
 
         return response()->json([
             'data' => $this->formatAssignment($delivery),
@@ -286,6 +286,12 @@ class DeliveryController extends Controller
                 'cod_amount' => $a->parcel->cod_amount,
                 'is_cod' => $a->parcel->is_cod,
                 'priority' => $a->parcel->priority,
+                'images' => $a->parcel->relationLoaded('images')
+                    ? $a->parcel->images->map(fn($img) => [
+                        'id'  => $img->id,
+                        'url' => $img->url,
+                    ])->values()->all()
+                    : [],
             ] : null,
             'staff' => $a->relationLoaded('staff') && $a->staff ? [
                 'id' => $a->staff->id,
