@@ -114,6 +114,24 @@ export default function EditParcelScreen() {
     setErrors(e => ({ ...e, [field]: undefined as any }));
   }
 
+  // Multi-select categories
+  const selectedCategories = form.category
+    ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  function toggleCategory(catValue: string) {
+    const current = form.category
+      ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    let next: string[];
+    if (current.includes(catValue)) {
+      next = current.filter((c) => c !== catValue);
+    } else {
+      next = [...current, catValue];
+    }
+    update('category', next.join(', '));
+  }
+
   async function pickImages() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') { Alert.alert('ခွင့်မပြု', 'ဓာတ်ပုံ တင်ရန် ခွင့်ပြုချက် လိုအပ်သည်'); return; }
@@ -217,25 +235,39 @@ export default function EditParcelScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ပါဆယ် အချက်အလက်</Text>
           <View style={styles.card}>
-            <FormField label="ဖော်ပြချက်" value={form.description} onChangeText={v => update('description', v)} placeholder="ပစ္စည်းအမျိုးအစား" />
-            <Text style={styles.label}>အမျိုးအစား</Text>
+            <FormField
+              label="ဖော်ပြချက် (ပစ္စည်းအမျိုးအမည်များ / ထပ်ပေါင်းပစ္စည်း)"
+              value={form.description}
+              onChangeText={v => update('description', v)}
+              placeholder="ဥပမာ - အင်္ကျီ ၂ ထည်၊ ဖုန်း ၁ လုံး"
+              multiline
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.label}>အမျိုးအစား (တစ်ခုထက်မက ရွေးနိုင်သည်)</Text>
+              {selectedCategories.length > 0 && (
+                <Text style={styles.selectedCountText}>{selectedCategories.length} မျိုး ရွေးထားသည်</Text>
+              )}
+            </View>
             <View style={styles.categoryRow}>
-              {PARCEL_CATEGORIES.map(cat => (
-                <TouchableOpacity
-                  key={cat.value}
-                  style={[styles.categoryChip, form.category === cat.value && styles.categoryChipActive]}
-                  onPress={() => update('category', form.category === cat.value ? '' : cat.value)}
-                >
-                  <Ionicons
-                    name={cat.icon as any}
-                    size={18}
-                    color={form.category === cat.value ? '#fff' : COLORS.primary}
-                  />
-                  <Text style={[styles.categoryChipText, form.category === cat.value && styles.categoryChipTextActive]}>
-                    {cat.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {PARCEL_CATEGORIES.map(cat => {
+                const isSelected = selectedCategories.includes(cat.value);
+                return (
+                  <TouchableOpacity
+                    key={cat.value}
+                    style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
+                    onPress={() => toggleCategory(cat.value)}
+                  >
+                    <Ionicons
+                      name={isSelected ? 'checkmark-circle' : (cat.icon as any)}
+                      size={18}
+                      color={isSelected ? '#fff' : COLORS.primary}
+                    />
+                    <Text style={[styles.categoryChipText, isSelected && styles.categoryChipTextActive]}>
+                      {cat.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
             <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
             <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>
@@ -448,6 +480,7 @@ const styles = StyleSheet.create({
   categoryChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   categoryChipText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, fontFamily: 'NotoSansMyanmar_600SemiBold' },
   categoryChipTextActive: { color: '#fff' },
+  selectedCountText: { fontSize: 12, color: COLORS.primary, fontWeight: '600', fontFamily: 'NotoSansMyanmar_600SemiBold', marginBottom: 6 },
   segmented: { flexDirection: 'row', borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border, overflow: 'hidden', marginBottom: 4 },
   segmentItem: { flex: 1, paddingVertical: 10, alignItems: 'center' },
   segmentActive: { backgroundColor: COLORS.primary },

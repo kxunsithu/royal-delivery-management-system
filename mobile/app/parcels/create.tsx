@@ -107,6 +107,24 @@ export default function CreateParcelScreen() {
     setErrors(e => ({ ...e, [field]: undefined as any }));
   }
 
+  // Multi-select categories
+  const selectedCategories = form.category
+    ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  function toggleCategory(catValue: string) {
+    const current = form.category
+      ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    let next: string[];
+    if (current.includes(catValue)) {
+      next = current.filter((c) => c !== catValue);
+    } else {
+      next = [...current, catValue];
+    }
+    update('category', next.join(', '));
+  }
+
   // ── Sender autocomplete ──────────────────────────────────────────────────────
   function handleSenderInput(field: 'sender_name' | 'sender_phone', value: string) {
     update(field, value);
@@ -266,25 +284,33 @@ export default function CreateParcelScreen() {
             placeholder="အပိုဆောင်း မှတ်ချက်"
           />
 
-          {/* Category Picker */}
-          <Text style={styles.label}>အမျိုးအစား</Text>
+          {/* Category Picker (Multi-select) */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={styles.label}>အမျိုးအစား (တစ်ခုထက်မက ရွေးနိုင်သည်)</Text>
+            {selectedCategories.length > 0 && (
+              <Text style={styles.selectedCountText}>{selectedCategories.length} မျိုး ရွေးထားသည်</Text>
+            )}
+          </View>
           <View style={styles.categoryRow}>
-            {PARCEL_CATEGORIES.map((cat) => (
-              <TouchableOpacity
-                key={cat.value}
-                style={[styles.categoryChip, form.category === cat.value && styles.categoryChipActive]}
-                onPress={() => update('category', form.category === cat.value ? '' : cat.value)}
-              >
-                <Ionicons
-                  name={cat.icon as any}
-                  size={18}
-                  color={form.category === cat.value ? COLORS.white : COLORS.primary}
-                />
-                <Text style={[styles.categoryChipText, form.category === cat.value && styles.categoryChipTextActive]}>
-                  {cat.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {PARCEL_CATEGORIES.map((cat) => {
+              const isSelected = selectedCategories.includes(cat.value);
+              return (
+                <TouchableOpacity
+                  key={cat.value}
+                  style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
+                  onPress={() => toggleCategory(cat.value)}
+                >
+                  <Ionicons
+                    name={isSelected ? 'checkmark-circle' : (cat.icon as any)}
+                    size={18}
+                    color={isSelected ? COLORS.white : COLORS.primary}
+                  />
+                  <Text style={[styles.categoryChipText, isSelected && styles.categoryChipTextActive]}>
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           <View style={styles.row}>
@@ -664,6 +690,13 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
   categoryChipTextActive: { color: COLORS.white },
+  selectedCountText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '600',
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    marginBottom: 6,
+  },
   segmented: {
     flexDirection: 'row',
     borderRadius: 10,

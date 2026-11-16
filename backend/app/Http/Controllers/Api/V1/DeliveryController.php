@@ -286,6 +286,8 @@ class DeliveryController extends Controller
                 'cod_amount' => $a->parcel->cod_amount,
                 'is_cod' => $a->parcel->is_cod,
                 'priority' => $a->parcel->priority,
+                'category' => $a->parcel->category,
+                'description' => $a->parcel->description,
                 'images' => $a->parcel->relationLoaded('images')
                     ? $a->parcel->images->map(fn($img) => [
                         'id'  => $img->id,

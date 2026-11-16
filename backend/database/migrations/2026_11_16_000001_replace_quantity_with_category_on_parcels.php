@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('parcels', function (Blueprint $table) {
             // Add category column (nullable so existing rows are unaffected)
-            $table->string('category', 100)->nullable()->after('description');
+            $table->string('category', 255)->nullable()->after('description');
         });
     }
 

@@ -93,6 +93,12 @@ export default function DeliveryDetailScreen() {
               onPress={parcel?.recipient_phone ? () => Linking.openURL(`tel:${parcel.recipient_phone}`) : undefined}
             />
             <InfoRow icon="location-outline"  label="လိပ်စာ"     value={parcel?.delivery_address || '—'} />
+            {parcel?.category && (
+              <InfoRow icon="pricetag-outline" label="အမျိုးအစား" value={parcel.category} />
+            )}
+            {parcel?.description && (
+              <InfoRow icon="document-text-outline" label="ဖော်ပြချက်" value={parcel.description} />
+            )}
             {parcel?.is_cod && (
               <InfoRow
                 icon="cash-outline" label="COD"

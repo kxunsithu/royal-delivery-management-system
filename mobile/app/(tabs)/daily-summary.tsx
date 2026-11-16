@@ -184,7 +184,7 @@ export default function DailySummaryScreen() {
             refreshControl={
               <RefreshControl
                 refreshing={isFetching && !isLoading}
-                onRefresh={() => refetch()}
+                onRefresh={() => { refetch(); }}
                 tintColor={COLORS.primary}
               />
             }

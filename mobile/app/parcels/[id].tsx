@@ -360,6 +360,17 @@ export default function ParcelDetailScreen() {
           {parcel.description && <InfoRow icon="document-text-outline" label="ဖော်ပြချက်" value={parcel.description} />}
           {parcel.category && <InfoRow icon="pricetag-outline" label="အမျိုးအစား" value={parcel.category} />}
           {parcel.weight && <InfoRow icon="scale-outline" label="အလေးချိန်" value={`${parcel.weight} kg`} />}
+          {canEditParcel && !isTerminal && (
+            <TouchableOpacity
+              style={styles.addItemsBtn}
+              onPress={() => router.push(`/parcels/edit/${id}`)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="add-circle" size={18} color={COLORS.primary} />
+              <Text style={styles.addItemsBtnText}>ပစ္စည်း ထပ်ပေါင်းထည့်မည် / ပြင်ဆင်မည်</Text>
+              <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} />
+            </TouchableOpacity>
+          )}
         </InfoSection>
 
         <InfoSection title="ပေးပို့သူ">
@@ -809,6 +820,23 @@ function InfoRow({ icon, label, value, valueColor, onPress }: {
 }
 
 const styles = StyleSheet.create({
+  addItemsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: '#FFF9EE',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  addItemsBtnText: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
+    fontFamily: 'NotoSansMyanmar_700Bold',
+  },
   container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
