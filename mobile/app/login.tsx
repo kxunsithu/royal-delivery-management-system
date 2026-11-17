@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/context/AuthContext';
 import { COLORS, FONTS } from '../src/constants';
@@ -22,6 +23,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ phone?: string; password?: string }>({});
+  const [focused, setFocused] = useState<'phone' | 'password' | null>(null);
 
   function validate() {
     const newErrors: { phone?: string; password?: string } = {};
@@ -62,57 +64,106 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header */}
-          <View style={styles.header}>
+          {/* Brand */}
+          <View style={styles.brand}>
+            <View style={styles.brandMark}>
+              <MaterialCommunityIcons name="package-variant-closed" size={34} color={COLORS.primary} />
+            </View>
             <Text style={styles.appName}>Royal Myawaddy</Text>
             <Text style={styles.appSubtitle}>ပို့ဆောင်ရေး စီမံခန့်ခွဲမှုစနစ်</Text>
           </View>
 
-          {/* Form Card */}
-          <View style={styles.card}>
+          {/* Form */}
+          <View style={styles.form}>
             <Text style={styles.title}>အကောင့်ဝင်ရောက်ရန်</Text>
             <Text style={styles.subtitle}>သင်၏ အကောင့်အချက်အလက် ထည့်သွင်းပါ</Text>
 
-            {/* Phone Field */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
-              <View style={[styles.inputWrapper, errors.phone ? styles.inputError : null]}>
+              <View
+                style={[
+                  styles.inputWrapper,
+                  focused === 'phone' && styles.inputFocused,
+                  errors.phone ? styles.inputError : null,
+                ]}
+              >
+                <View style={styles.iconWrap}>
+                  <MaterialCommunityIcons
+                    name="phone-outline"
+                    size={20}
+                    color={errors.phone ? COLORS.error : focused === 'phone' ? COLORS.primary : COLORS.textLight}
+                  />
+                </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="၀၉၉၄၄၀၇၄၉၈၁ (09...)"
+                  placeholder="09..."
                   placeholderTextColor={COLORS.textLight}
                   value={phone}
-                  onChangeText={(t) => { setPhone(t); setErrors(e => ({ ...e, phone: undefined })); }}
+                  onChangeText={(t) => {
+                    setPhone(t);
+                    setErrors((e) => ({ ...e, phone: undefined }));
+                  }}
+                  onFocus={() => setFocused('phone')}
+                  onBlur={() => setFocused(null)}
                   keyboardType="phone-pad"
                   autoCapitalize="none"
                   autoCorrect={false}
                   editable={!isLoading}
+                  returnKeyType="next"
                 />
               </View>
               {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
             </View>
 
-            {/* Password Field */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>စကားဝှက်</Text>
-              <View style={[styles.inputWrapper, errors.password ? styles.inputError : null]}>
+              <View
+                style={[
+                  styles.inputWrapper,
+                  focused === 'password' && styles.inputFocused,
+                  errors.password ? styles.inputError : null,
+                ]}
+              >
+                <View style={styles.iconWrap}>
+                  <MaterialCommunityIcons
+                    name="lock-outline"
+                    size={20}
+                    color={errors.password ? COLORS.error : focused === 'password' ? COLORS.primary : COLORS.textLight}
+                  />
+                </View>
                 <TextInput
                   style={styles.input}
                   placeholder="••••••••"
                   placeholderTextColor={COLORS.textLight}
                   value={password}
-                  onChangeText={(t) => { setPassword(t); setErrors(e => ({ ...e, password: undefined })); }}
+                  onChangeText={(t) => {
+                    setPassword(t);
+                    setErrors((e) => ({ ...e, password: undefined }));
+                  }}
+                  onFocus={() => setFocused('password')}
+                  onBlur={() => setFocused(null)}
                   secureTextEntry={!showPassword}
                   editable={!isLoading}
+                  returnKeyType="done"
+                  onSubmitEditing={handleLogin}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.toggleButton}>
-                  <Text style={styles.toggleText}>{showPassword ? 'Hide' : 'Show'}</Text>
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.toggleButton}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'စကားဝှက် ဖျောက်ရန်' : 'စကားဝှက် ဖော်ပြရန်'}
+                >
+                  <MaterialCommunityIcons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={COLORS.textSecondary}
+                  />
                 </TouchableOpacity>
               </View>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
 
-            {/* Login Button */}
             <TouchableOpacity
               style={[styles.loginBtn, isLoading && styles.loginBtnDisabled]}
               onPress={handleLogin}
@@ -135,81 +186,100 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.background },
+  safe: { flex: 1, backgroundColor: COLORS.white },
   flex: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'center',
     paddingHorizontal: 24,
     paddingVertical: 32,
-    justifyContent: 'center',
   },
-  header: { alignItems: 'center', marginBottom: 24 },
+  brand: {
+    alignItems: 'center',
+    marginBottom: 36,
+  },
+  brandMark: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primaryBg,
+    borderWidth: 1,
+    borderColor: COLORS.primaryLight,
+    marginBottom: 14,
+  },
   appName: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     color: COLORS.text,
-    letterSpacing: 0.3,
     fontFamily: FONTS.bold,
+    letterSpacing: 0.3,
   },
   appSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 4,
     fontFamily: FONTS.regular,
   },
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  form: {
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
     color: COLORS.text,
-    textAlign: 'center',
     marginBottom: 4,
     fontFamily: FONTS.bold,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 22,
     fontFamily: FONTS.regular,
   },
   fieldGroup: { marginBottom: 16 },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: COLORS.text,
-    marginBottom: 8,
+    marginBottom: 6,
     fontFamily: FONTS.semiBold,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.border,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: COLORS.white,
-    paddingHorizontal: 12,
-    height: 48,
+    paddingHorizontal: 14,
+    height: 50,
+    gap: 10,
   },
-  inputError: { borderColor: COLORS.error },
+  inputFocused: {
+    borderColor: COLORS.primary,
+  },
+  inputError: {
+    borderColor: COLORS.error,
+  },
   input: {
     flex: 1,
     fontSize: 15,
     color: COLORS.text,
     fontFamily: FONTS.regular,
+    paddingVertical: 0,
+    textAlignVertical: 'center',
   },
-  toggleButton: { padding: 4, marginLeft: 8 },
-  toggleText: {
-    fontSize: 13,
-    color: COLORS.primary,
-    fontFamily: FONTS.medium,
+  iconWrap: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  toggleButton: { padding: 4 },
   errorText: {
     fontSize: 12,
     color: COLORS.error,
@@ -222,8 +292,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
-    height: 48,
+    borderRadius: 12,
+    height: 50,
     marginTop: 8,
   },
   loginBtnDisabled: { opacity: 0.7 },
@@ -237,7 +307,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.textLight,
     fontSize: 12,
-    marginTop: 24,
+    marginTop: 40,
     fontFamily: FONTS.regular,
   },
 });

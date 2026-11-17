@@ -99,7 +99,8 @@ export default function TabLayout() {
         name="parcels"
         options={{
           title: 'ပါဆယ်များ',
-          href: canSeeParcels ? undefined : null,
+          tabBarButton: canSeeParcels ? undefined : () => null,
+          tabBarItemStyle: canSeeParcels ? undefined : { display: 'none' },
           tabBarIcon: ({ color }) => (
             <Ionicons name="cube" size={20} color={color as string} />
           ),
@@ -109,17 +110,24 @@ export default function TabLayout() {
         name="daily-summary"
         options={{
           title: 'နေ့စဉ်',
-          href: canSeeParcels ? undefined : null,
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="calendar" size={20} color={color as string} />
-          ),
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
+        }}
+      />
+      <Tabs.Screen
+        name="monthly-summary"
+        options={{
+          title: 'လစဉ်',
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="customers"
         options={{
           title: 'ဖောက်သည်',
-          href: canSeeParcels ? undefined : null,
+          tabBarButton: canSeeParcels ? undefined : () => null,
+          tabBarItemStyle: canSeeParcels ? undefined : { display: 'none' },
           tabBarIcon: ({ color }) => (
             <Ionicons name="people" size={20} color={color as string} />
           ),
@@ -129,34 +137,39 @@ export default function TabLayout() {
         name="my-assignments"
         options={{
           title: 'ကျွန်ုပ်၏လုပ်ငန်းများ',
-          href: isStaff ? undefined : null,
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="bicycle" size={20} color={color as string} />
-          ),
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="deliveries"
         options={{
-          href: null,
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="users"
         options={{
           title: 'အသုံးပြုသူ',
-          href: isAdmin ? undefined : null,
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="people" size={20} color={color as string} />
-          ),
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'ပရိုဖိုင်',
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: 'မီနူး',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="person-circle" size={20} color={color as string} />
+            <Ionicons name="menu" size={20} color={color as string} />
           ),
         }}
       />

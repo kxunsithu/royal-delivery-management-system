@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { deliveryService, Assignment } from '../../src/services/deliveryService';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, FONTS } from '../../src/constants';
 
@@ -43,9 +44,18 @@ export default function DeliveriesScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View>
-          <Text style={styles.headerTitle}>ပို့ဆောင်မှုများ</Text>
-          <Text style={styles.headerSubtitle}>စုစုပေါင်း {meta?.total ?? 0} ခု</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.navigate('/(tabs)/more')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>ပို့ဆောင်မှုများ</Text>
+            <Text style={styles.headerSubtitle}>စုစုပေါင်း {meta?.total ?? 0} ခု</Text>
+          </View>
         </View>
       </View>
 
@@ -196,6 +206,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
     paddingBottom: 16,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 22,

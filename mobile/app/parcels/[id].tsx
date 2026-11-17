@@ -303,10 +303,10 @@ export default function ParcelDetailScreen() {
         {canEditParcel && !isTerminal && (
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.headerActionBtn} onPress={() => router.push(`/parcels/edit/${id}`)} activeOpacity={0.7}>
-              <Text style={styles.headerActionText}>ပြင်ဆင်</Text>
+              <Ionicons name="create-outline" size={22} color={COLORS.primary} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.headerActionBtn} onPress={handleDelete} activeOpacity={0.7}>
-              <Text style={[styles.headerActionText, { color: COLORS.error }]}>ဖျက်</Text>
+              <Ionicons name="trash-outline" size={22} color={COLORS.error} />
             </TouchableOpacity>
           </View>
         )}

@@ -58,7 +58,7 @@ export default function DashboardScreen() {
           <TouchableOpacity
             style={styles.avatarButton}
             activeOpacity={0.8}
-            onPress={() => router.push('/(tabs)/profile')}
+            onPress={() => router.navigate('/(tabs)/profile')}
           >
             <View style={styles.avatarWrapper}>
               {user?.profile_image_url ? (
@@ -151,7 +151,7 @@ function StaffDashboard({ data }: { data: any }) {
 
       <TouchableOpacity
         style={styles.actionBtn}
-        onPress={() => router.push('/(tabs)/my-assignments')}
+        onPress={() => router.navigate('/(tabs)/my-assignments')}
       >
         <Text style={styles.actionBtnText}>ကျွန်ုပ်၏ လုပ်ငန်းများ ကြည့်ရှုမည်</Text>
       </TouchableOpacity>
@@ -217,26 +217,6 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
         </View>
       </View>
 
-      {/* Quick Actions */}
-      <Text style={styles.sectionTitle}>အမြန်လုပ်ဆောင်မှုများ</Text>
-      <View style={styles.quickActions}>
-        {canCreateParcel && (
-          <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/parcels/create')}>
-            <Text style={styles.quickLabel}>ပါဆယ်အသစ်</Text>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/(tabs)/parcels')}>
-          <Text style={styles.quickLabel}>ပါဆယ်ရှာ</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/(tabs)/deliveries')}>
-          <Text style={styles.quickLabel}>ပို့ဆောင်မှု</Text>
-        </TouchableOpacity>
-        {isAdmin && (
-          <TouchableOpacity style={styles.quickBtn} onPress={() => router.push('/(tabs)/users')}>
-            <Text style={styles.quickLabel}>ဝန်ထမ်းများ</Text>
-          </TouchableOpacity>
-        )}
-      </View>
     </View>
   );
 }

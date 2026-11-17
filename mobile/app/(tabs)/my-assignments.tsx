@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { deliveryService, Assignment } from '../../src/services/deliveryService';
 import { COLORS, PRIORITY_COLORS, PRIORITY_LABELS_MM, ASSIGNMENT_STATUS_LABELS_MM, ASSIGNMENT_STATUS_COLORS, FONTS } from '../../src/constants';
 
@@ -47,8 +48,19 @@ export default function MyAssignmentsScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
-        <Text style={styles.headerSub}>ပို့ဆောင်ရေး လုပ်ငန်းစဉ်များ</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.navigate('/(tabs)/more')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
+            <Text style={styles.headerSub}>ပို့ဆောင်ရေး လုပ်ငန်းစဉ်များ</Text>
+          </View>
+        </View>
 
         {/* Quick stat strip */}
         <View style={styles.statStrip}>
@@ -202,6 +214,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
     fontFamily: FONTS.bold,

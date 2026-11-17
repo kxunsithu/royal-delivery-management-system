@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { parcelService, ParcelImage } from '../../../src/services/parcelService';
 import { useAuth } from '../../../src/context/AuthContext';
@@ -227,8 +228,8 @@ export default function EditParcelScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>Back</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>ပါဆယ် ပြင်ဆင်မည်</Text>
         <TouchableOpacity
@@ -239,7 +240,7 @@ export default function EditParcelScreen() {
           {updateMutation.isPending ? (
             <ActivityIndicator size="small" color={COLORS.white} />
           ) : (
-            <Text style={styles.saveBtnText}>သိမ်းမည်</Text>
+            <Ionicons name="save-outline" size={20} color={COLORS.white} />
           )}
         </TouchableOpacity>
       </View>
@@ -470,7 +471,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     gap: 12,
   },
-  backBtn: { paddingVertical: 4, paddingRight: 8 },
+  backBtn: { padding: 4 },
   backBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold },
   headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold, textAlign: 'center' },
   saveBtn: {

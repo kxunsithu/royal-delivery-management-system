@@ -12,7 +12,7 @@ import CalendarPicker from '../../src/components/CalendarPicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { parcelService, DailySummary } from '../../src/services/parcelService';
 import { COLORS, FONTS } from '../../src/constants';
 
@@ -34,10 +34,11 @@ export default function DailySummaryScreen() {
   const insets = useSafeAreaInsets();
 
   const [showDateFilter, setShowDateFilter] = useState(false);
-  const [dateFromInput, setDateFromInput] = useState('');
-  const [dateToInput, setDateToInput] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const params = useLocalSearchParams<{ date_from?: string; date_to?: string }>();
+  const [dateFromInput, setDateFromInput] = useState(params.date_from ?? '');
+  const [dateToInput, setDateToInput] = useState(params.date_to ?? '');
+  const [dateFrom, setDateFrom] = useState(params.date_from ?? '');
+  const [dateTo, setDateTo] = useState(params.date_to ?? '');
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
 
@@ -67,22 +68,51 @@ export default function DailySummaryScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View>
-          <Text style={styles.headerTitle}>နေ့စဉ် မှတ်တမ်း</Text>
-          {summaries.length > 0 && (
-            <Text style={styles.headerSub}>{summaries.length} ရက် မှတ်တမ်း</Text>
-          )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.navigate('/(tabs)/more')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle} numberOfLines={1}>နေ့စဉ် မှတ်တမ်း</Text>
+            {summaries.length > 0 && (
+              <Text style={styles.headerSub}>{summaries.length} ရက် မှတ်တမ်း</Text>
+            )}
+          </View>
         </View>
-        <TouchableOpacity
-          style={[styles.calendarBtn, hasActiveDateFilter && styles.calendarBtnActive]}
-          onPress={() => setShowDateFilter((v) => !v)}
-        >
-          <Ionicons
-            name="calendar-outline"
-            size={20}
-            color={hasActiveDateFilter ? COLORS.white : COLORS.primary}
-          />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <TouchableOpacity
+            style={styles.pageSwitchBtn}
+            onPress={() => router.navigate('/(tabs)/monthly-summary')}
+          >
+            <Ionicons name="calendar-outline" size={18} color={COLORS.primary} />
+            <Text style={styles.pageSwitchText}>လစဉ်</Text>
+          </TouchableOpacity>
+          {hasActiveDateFilter && (
+            <TouchableOpacity
+              style={styles.clearFilterBtn}
+              onPress={() => {
+                handleClearDateFilter();
+                setShowDateFilter(false);
+              }}
+            >
+              <Ionicons name="close-circle" size={20} color={COLORS.error} />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={[styles.calendarBtn, hasActiveDateFilter && styles.calendarBtnActive]}
+            onPress={() => setShowDateFilter((v) => !v)}
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={20}
+              color={hasActiveDateFilter ? COLORS.white : COLORS.primary}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.contentArea}>
@@ -251,7 +281,11 @@ function DaySummaryCard({ summary }: { summary: DailySummary }) {
     >
       {/* Date header */}
       <View style={styles.cardHeader}>
+        <View style={styles.dateIconWrap}>
+          <Ionicons name="calendar" size={16} color={COLORS.primary} />
+        </View>
         <Text style={styles.dateText}>{formatDate(summary.date)}</Text>
+        <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
       </View>
 
       <View style={styles.divider} />
@@ -297,9 +331,107 @@ function DaySummaryCard({ summary }: { summary: DailySummary }) {
   );
 }
 
+const MONTHS_MM = [
+  'ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်',
+  'ဇူလိုင်', 'သြဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ',
+];
+
+function MonthSummaryCard({ group, onPress }: { group: {
+  key: string; year: number; month: number; parcel_count: number; sender_count: number;
+  recipient_count: number; fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
+}; onPress: () => void }) {
+  const feeStats: { value: number; label: string; color: string }[] = [];
+  if (group.fee_mmk > 0) feeStats.push({ value: group.fee_mmk, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
+  if (group.cod_mmk > 0) feeStats.push({ value: group.cod_mmk, label: 'COD (K)', color: COLORS.warning });
+  if (group.fee_thb > 0) feeStats.push({ value: group.fee_thb, label: 'ပို့ဆောင်ခ (฿)', color: COLORS.success });
+  if (group.cod_thb > 0) feeStats.push({ value: group.cod_thb, label: 'COD (฿)', color: COLORS.warning });
+
+  return (
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.dateText}>{MONTHS_MM[group.month]} {group.year}</Text>
+        <Text style={styles.monthDayCount}>{group.day_count} ရက်</Text>
+      </View>
+
+      <View style={styles.divider} />
+
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{group.parcel_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပါဆယ် ခု</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statValue}>{group.sender_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပို့သူ ဦး</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: COLORS.info }]}>{group.recipient_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>လက်ခံသူ ဦး</Text>
+        </View>
+      </View>
+
+      {feeStats.length > 0 && (
+        <>
+          <View style={styles.rowDivider} />
+          <View style={styles.statsRow}>
+            {feeStats.map((stat, index) => (
+              <React.Fragment key={stat.label}>
+                {index > 0 && <View style={styles.statDivider} />}
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: stat.color }]}>
+                    {stat.value.toLocaleString()}
+                  </Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                </View>
+              </React.Fragment>
+            ))}
+          </View>
+        </>
+      )}
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
   contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
+  viewToggle: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 4,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 3,
+  },
+  viewToggleBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  viewToggleBtnActive: {
+    backgroundColor: COLORS.primary,
+  },
+  viewToggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.semiBold,
+  },
+  viewToggleTextActive: {
+    color: COLORS.white,
+  },
+  monthDayCount: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.regular,
+  },
 
   // Header
   header: {
@@ -311,6 +443,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 22,
@@ -338,6 +478,35 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderWidth: 1,
     borderColor: COLORS.white,
+  },
+  clearFilterBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginRight: 8,
+  },
+  pageSwitchBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 40,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginRight: 8,
+  },
+  pageSwitchText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.primary,
+    fontFamily: FONTS.semiBold,
   },
 
   // Date filter
@@ -473,8 +642,16 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
+  },
+  dateIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: COLORS.primaryBg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dateText: {
     fontSize: 14,

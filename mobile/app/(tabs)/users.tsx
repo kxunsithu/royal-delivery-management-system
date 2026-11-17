@@ -69,9 +69,18 @@ export default function UsersScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View>
-          <Text style={styles.headerTitle}>အသုံးပြုသူများ</Text>
-          <Text style={styles.headerSub}>စုစုပေါင်း {meta?.total ?? 0} ဦး</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.navigate('/(tabs)/more')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>အသုံးပြုသူများ</Text>
+            <Text style={styles.headerSub}>စုစုပေါင်း {meta?.total ?? 0} ဦး</Text>
+          </View>
         </View>
         <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/users/create')}>
           <Text style={styles.addBtnText}>+</Text>
@@ -225,6 +234,14 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
   headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },

@@ -273,9 +273,18 @@ export default function ProfileScreen() {
 
       {/* ── Header ── */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View>
-          <Text style={styles.headerTitle}>ပရိုဖိုင်</Text>
-          <Text style={styles.headerSub}>{user.name}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.navigate('/(tabs)/more')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>ပရိုဖိုင်</Text>
+            <Text style={styles.headerSub}>{user.name}</Text>
+          </View>
         </View>
         <TouchableOpacity style={styles.editBtn} onPress={openEdit}>
           <Text style={styles.editBtnText}>ပြင်ဆင်ရန်</Text>
@@ -671,6 +680,24 @@ function InfoRow({ label, value, valueColor, muted, last }: {
   );
 }
 
+function MenuRow({ label, icon, onPress, last }: {
+  label: string; icon: any; onPress: () => void; last?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.menuRow, last && { borderBottomWidth: 0 }]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.menuIconWrap}>
+        <Ionicons name={icon} size={18} color={COLORS.primary} />
+      </View>
+      <Text style={styles.menuLabel}>{label}</Text>
+      <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
 
@@ -684,6 +711,14 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 22, fontWeight: '800', color: COLORS.white,
@@ -789,6 +824,30 @@ const styles = StyleSheet.create({
   infoValue: {
     flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', textAlign: 'right',
     fontFamily: FONTS.medium,
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.border,
+    gap: 12,
+  },
+  menuIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: COLORS.primaryBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    fontFamily: FONTS.semiBold,
   },
 
   // Actions

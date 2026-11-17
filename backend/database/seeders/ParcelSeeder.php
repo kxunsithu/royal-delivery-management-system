@@ -69,11 +69,11 @@ class ParcelSeeder extends Seeder
         $codAmountsMmk   = [15000, 25000, 50000, 80000, 100000, 35000, 60000, 45000, 20000, 75000];
         $codAmountsThb   = [500, 800, 1200, 2000, 1500, 600];
         $senders = [
-            ['မဲဆောက် ဆိုင် A', '09944074981'],
-            ['မဲဆောက် ဖက်ရှင်ဆိုင်', '09944074981'],
-            ['Mae Sot Electronics Shop', '09944074981'],
-            ['Mae Sot Fashion Store', '09944074981'],
-            ['Mae Sot Pharmacy', '09944074981'],
+            ['မဲဆောက် ဆိုင် A', '09944074992'],
+            ['မဲဆောက် ဖက်ရှင်ဆိုင်', '09944074993'],
+            ['Mae Sot Electronics Shop', '09944074994'],
+            ['Mae Sot Fashion Store', '09944074995'],
+            ['Mae Sot Pharmacy', '09944074996'],
         ];
 
         for ($i = 1; $i <= 30; $i++) {
@@ -103,9 +103,9 @@ class ParcelSeeder extends Seeder
             $parcel = [
                 'tracking_number' => sprintf('RMD-202411%02d-%05d', ($i % 28) + 1, $i),
                 'sender_name'     => $sender[0],
-                'sender_phone'    => sprintf('09%09d', 944074981 + $i + 1000),
+                'sender_phone'    => $sender[1],
                 'recipient_name'  => $recipientName,
-                'recipient_phone' => sprintf('09%09d', 944074981 + $i),
+                'recipient_phone' => sprintf('09%09d', 944074981 + (($i - 1) % count($namePool)) + 1),
                 'delivery_address'=> $deliveryAddress,
                 'description'     => $description,
                 'category'        => $category,
