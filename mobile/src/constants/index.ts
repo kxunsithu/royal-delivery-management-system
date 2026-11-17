@@ -11,7 +11,7 @@ export const FONTS = {
 
 // Colors - Yellow/Parcel theme
 export const COLORS = {
-  primary: '#D97706',
+  primary: '#E67701',
   primaryDark: '#B45309',
   primaryLight: '#FDE68A',
   primaryBg: '#FFFBEB',

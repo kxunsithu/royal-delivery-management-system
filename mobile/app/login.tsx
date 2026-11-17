@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -67,7 +68,7 @@ export default function LoginScreen() {
           {/* Brand */}
           <View style={styles.brand}>
             <View style={styles.brandMark}>
-              <MaterialCommunityIcons name="package-variant-closed" size={34} color={COLORS.primary} />
+              <Image source={require('../assets/icon.png')} style={styles.brandMarkImage} resizeMode="contain" />
             </View>
             <Text style={styles.appName}>Royal Myawaddy</Text>
             <Text style={styles.appSubtitle}>ပို့ဆောင်ရေး စီမံခန့်ခွဲမှုစနစ်</Text>
@@ -91,7 +92,7 @@ export default function LoginScreen() {
                   <MaterialCommunityIcons
                     name="phone-outline"
                     size={20}
-                    color={errors.phone ? COLORS.error : focused === 'phone' ? COLORS.primary : COLORS.textLight}
+                    color={errors.phone ? COLORS.error : focused === 'phone' ? COLORS.primary : COLORS.primaryDark}
                   />
                 </View>
                 <TextInput
@@ -128,7 +129,7 @@ export default function LoginScreen() {
                   <MaterialCommunityIcons
                     name="lock-outline"
                     size={20}
-                    color={errors.password ? COLORS.error : focused === 'password' ? COLORS.primary : COLORS.textLight}
+                    color={errors.password ? COLORS.error : focused === 'password' ? COLORS.primary : COLORS.primaryDark}
                   />
                 </View>
                 <TextInput
@@ -157,7 +158,7 @@ export default function LoginScreen() {
                   <MaterialCommunityIcons
                     name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                     size={20}
-                    color={COLORS.textSecondary}
+                    color={COLORS.primaryDark}
                   />
                 </TouchableOpacity>
               </View>
@@ -186,7 +187,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.white },
+  safe: { flex: 1, backgroundColor: COLORS.primary },
   flex: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
@@ -199,26 +200,25 @@ const styles = StyleSheet.create({
     marginBottom: 36,
   },
   brandMark: {
-    width: 72,
-    height: 72,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.primaryBg,
-    borderWidth: 1,
-    borderColor: COLORS.primaryLight,
-    marginBottom: 14,
+    overflow: 'hidden',
+  },
+  brandMarkImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 16,
   },
   appName: {
     fontSize: 22,
     fontWeight: '800',
-    color: COLORS.text,
+    color: COLORS.white,
     fontFamily: FONTS.bold,
     letterSpacing: 0.3,
   },
   appSubtitle: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: COLORS.white,
     marginTop: 4,
     fontFamily: FONTS.regular,
   },
@@ -230,13 +230,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: COLORS.text,
+    color: COLORS.white,
     marginBottom: 4,
     fontFamily: FONTS.bold,
   },
   subtitle: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: COLORS.white,
     marginBottom: 22,
     fontFamily: FONTS.regular,
   },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: COLORS.text,
+    color: COLORS.white,
     marginBottom: 6,
     fontFamily: FONTS.semiBold,
   },
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
-    color: COLORS.text,
+    color: COLORS.primaryDark,
     fontFamily: FONTS.regular,
     paddingVertical: 0,
     textAlignVertical: 'center',
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   loginBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     height: 50,
     marginTop: 8,
@@ -300,12 +300,12 @@ const styles = StyleSheet.create({
   loginBtnText: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.white,
+    color: COLORS.primaryDark,
     fontFamily: FONTS.bold,
   },
   footer: {
     textAlign: 'center',
-    color: COLORS.textLight,
+    color: COLORS.white,
     fontSize: 12,
     marginTop: 40,
     fontFamily: FONTS.regular,

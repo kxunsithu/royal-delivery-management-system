@@ -65,9 +65,7 @@ export default function DashboardScreen() {
                 <Image source={{ uri: user.profile_image_url }} style={styles.avatarImage} />
               ) : (
                 <View style={styles.avatarFallback}>
-                  <Text style={styles.avatarInitial}>
-                    {user?.name ? user.name[0]?.toUpperCase() : 'U'}
-                  </Text>
+                  <Image source={require('../../assets/icon.png')} style={styles.avatarFallbackImage} resizeMode="contain" />
                 </View>
               )}
             </View>
@@ -325,6 +323,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.primary,
     fontFamily: FONTS.bold,
+  },
+  avatarFallbackImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   content: { padding: 16 },
   loadingContainer: { padding: 16 },
