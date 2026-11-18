@@ -20,6 +20,7 @@ export default function MoreScreen() {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   const canSeeParcels = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'accountant';
+  const canAssign = user?.role === 'admin' || user?.role === 'accountant';
   const isStaff = user?.role === 'delivery_staff';
   const isAdmin = user?.role === 'admin';
 
@@ -67,6 +68,14 @@ export default function MoreScreen() {
       label: 'မှတ်တမ်း',
       icon: 'document-text-outline',
       onPress: () => router.navigate('/(tabs)/daily-summary'),
+    });
+  }
+
+  if (canAssign) {
+    items.push({
+      label: 'ဝန်ထမ်း ချိတ်ဆက်မည်',
+      icon: 'person-add-outline',
+      onPress: () => router.navigate('/(tabs)/assign-staff'),
     });
   }
 
