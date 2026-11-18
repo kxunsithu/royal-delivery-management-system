@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   parcelDetails: { marginTop: 8, gap: 2 },
   detailText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
+  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   // Card
   card: {

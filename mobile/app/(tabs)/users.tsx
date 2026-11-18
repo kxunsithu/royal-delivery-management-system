@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   filterList: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
   listArea: { flex: 1 },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
+  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   filterChip: {
     paddingHorizontal: 14,

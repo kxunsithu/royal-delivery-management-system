@@ -195,10 +195,10 @@ export default function MyAssignmentsScreen() {
           </View>
           <View style={styles.togglePill}>
             <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'day' && styles.togglePillBtnActive]} onPress={() => setGroupBy('day')} activeOpacity={0.8}>
-              <Text style={[styles.togglePillText, groupBy === 'day' && styles.togglePillTextActive]}>နေ့စဉ်</Text>
+              <Text style={[styles.togglePillText, groupBy === 'day' && styles.togglePillTextActive]}>နေ့</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'month' && styles.togglePillBtnActive]} onPress={() => setGroupBy('month')} activeOpacity={0.8}>
-              <Text style={[styles.togglePillText, groupBy === 'month' && styles.togglePillTextActive]}>လစဉ်</Text>
+              <Text style={[styles.togglePillText, groupBy === 'month' && styles.togglePillTextActive]}>လ</Text>
             </TouchableOpacity>
           </View>
         </View>

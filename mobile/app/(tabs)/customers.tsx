@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
 
   listArea: { flex: 1 },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
+  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   // Card
   card: {
