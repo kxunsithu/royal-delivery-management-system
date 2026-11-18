@@ -19,7 +19,6 @@ import { useAuth } from '../../src/context/AuthContext';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
@@ -262,11 +261,6 @@ export default function DeliveriesScreen() {
                     <View style={styles.statItem}>
                       <Text style={[styles.statValue, { color: COLORS.success }]}>{item.completed_count}</Text>
                       <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                      <Text style={[styles.statValue, { color: COLORS.primary }]}>{item.in_transit_count}</Text>
-                      <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>

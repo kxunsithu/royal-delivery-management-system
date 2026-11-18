@@ -76,7 +76,6 @@ function buildSummaries(assignments: Assignment[], groupBy: GroupBy): PeriodSumm
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
   { label: 'ပြီးစီး', value: 'COMPLETED' },
   { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
@@ -121,9 +120,7 @@ export default function MyAssignmentsScreen() {
 
   // ── LIST VIEW ───────────────────────────────────────────────
   if (view === 'list' && selected) {
-    const listAssignments = statusFilter === 'ACTIVE'
-      ? selected.assignments.filter((a) => !['COMPLETED', 'FAILED'].includes(a.status))
-      : statusFilter === 'COMPLETED'
+    const listAssignments = statusFilter === 'COMPLETED'
       ? selected.assignments.filter((a) => a.status === 'COMPLETED')
       : statusFilter === 'FAILED'
       ? selected.assignments.filter((a) => a.status === 'FAILED')
@@ -243,11 +240,6 @@ export default function MyAssignmentsScreen() {
                     <View style={styles.statItem}>
                       <Text style={styles.statValue}>{item.total_count}</Text>
                       <Text style={styles.statLabel}>စုစုပေါင်း</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                      <Text style={[styles.statValue, { color: COLORS.primary }]}>{item.active_count}</Text>
-                      <Text style={styles.statLabel}>ဆောင်ရွက်နေ</Text>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
