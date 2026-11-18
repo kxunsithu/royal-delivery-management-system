@@ -80,6 +80,12 @@ export default function CustomerDetailScreen() {
   const totalTHB = parcels
     .filter(p => p.currency === 'THB')
     .reduce((s, p) => s + Number(p.delivery_fee), 0);
+  const codMMK = parcels
+    .filter(p => p.currency === 'MMK' && p.is_cod)
+    .reduce((s, p) => s + Number(p.cod_amount), 0);
+  const codTHB = parcels
+    .filter(p => p.currency === 'THB' && p.is_cod)
+    .reduce((s, p) => s + Number(p.cod_amount), 0);
 
   return (
     <View style={styles.container}>
@@ -119,14 +125,32 @@ export default function CustomerDetailScreen() {
         </View>
       </View>
 
+      {(codMMK > 0 || codTHB > 0) && (
+        <View style={styles.statsRow}>
+          {codMMK > 0 && (
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: COLORS.warning }]}>{codMMK.toLocaleString()}</Text>
+              <Text style={styles.statLabel}>COD (K)</Text>
+            </View>
+          )}
+          {codMMK > 0 && codTHB > 0 && <View style={styles.statDivider} />}
+          {codTHB > 0 && (
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, { color: COLORS.warning }]}>{codTHB.toLocaleString()}</Text>
+              <Text style={styles.statLabel}>COD (฿)</Text>
+            </View>
+          )}
+        </View>
+      )}
+
       {/* Status counts */}
       <View style={styles.statusCountRow}>
-        <Text style={styles.statusCountText}>လက်ခံ {receivedCount}</Text>
-        <Text style={styles.statusCountText}>စစ်ဆေး {verifiedCount}</Text>
-        <Text style={styles.statusCountText}>ဆောင်ရွက် {inTransitCount}</Text>
-        <Text style={styles.statusCountText}>ပို့ပြီး {deliveredCount}</Text>
-        <Text style={styles.statusCountText}>မအောင် {failedCount}</Text>
-        <Text style={styles.statusCountText}>ပျက် {damagedCount}</Text>
+        <Text style={styles.statusCountBadge}>လက်ခံ {receivedCount}</Text>
+        <Text style={styles.statusCountBadge}>စစ်ဆေး {verifiedCount}</Text>
+        <Text style={styles.statusCountBadge}>ဆောင်ရွက် {inTransitCount}</Text>
+        <Text style={styles.statusCountBadge}>ပို့ပြီး {deliveredCount}</Text>
+        <Text style={styles.statusCountBadge}>မအောင် {failedCount}</Text>
+        <Text style={styles.statusCountBadge}>ပျက် {damagedCount}</Text>
       </View>
 
       {/* Status Filter */}
@@ -259,7 +283,10 @@ function ParcelRow({ parcel }: { parcel: Parcel }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   statusCountRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
-  statusCountText: { fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.semiBold },
+  statusCountBadge: {
+    fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.semiBold,
+    backgroundColor: COLORS.background, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
+  },
   filterRow: { height: 48 },
   filterList: { paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' },
   filterChip: {

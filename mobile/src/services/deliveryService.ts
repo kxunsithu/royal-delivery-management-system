@@ -64,6 +64,15 @@ export interface AssignmentsResponse {
   };
 }
 
+export interface DeliverySummary {
+  period: string;
+  date_from: string;
+  date_to: string;
+  total_count: number;
+  completed_count: number;
+  failed_count: number;
+}
+
 export interface StaffWorkload {
   staff?: { id: number; name: string };
   total_assignments: number;
@@ -72,12 +81,16 @@ export interface StaffWorkload {
 }
 
 export const deliveryService = {
+  async summary(params?: { group_by?: 'day' | 'month'; date_from?: string; date_to?: string }): Promise<DeliverySummary[]> {
+    const response = await apiClient.get('/deliveries/summary', { params });
+    return response.data.data;
+  },
   async myAssignments(params?: { status?: string; page?: number; per_page?: number }): Promise<AssignmentsResponse> {
     const response = await apiClient.get('/deliveries/my-assignments', { params });
     return response.data;
   },
 
-  async allAssignments(params?: { staff_id?: number; status?: string; page?: number; per_page?: number }): Promise<AssignmentsResponse> {
+  async allAssignments(params?: { staff_id?: number; status?: string; date_from?: string; date_to?: string; page?: number; per_page?: number }): Promise<AssignmentsResponse> {
     const response = await apiClient.get('/deliveries/assignments', { params });
     return response.data;
   },

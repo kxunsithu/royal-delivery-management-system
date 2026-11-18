@@ -190,30 +190,34 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
         ))}
       </View>
 
-      {/* Totals */}
-      <Text style={styles.sectionTitle}>ငွေကြေးစုစုပေါင်း</Text>
-      <View style={styles.totalsCard}>
-        <View style={styles.totalsRow}>
-          <View style={styles.totalItem}>
-            <Text style={styles.totalItemLabel}>ပို့ဆောင်ခ (MMK)</Text>
-            <Text style={styles.totalItemValue}>{(data?.totals?.fee_mmk ?? 0).toLocaleString()}</Text>
+      {isAdmin && (
+        <>
+          {/* Totals */}
+          <Text style={styles.sectionTitle}>ငွေကြေးစုစုပေါင်း</Text>
+          <View style={styles.totalsCard}>
+            <View style={styles.totalsRow}>
+              <View style={styles.totalItem}>
+                <Text style={styles.totalItemLabel}>ပို့ဆောင်ခ (MMK)</Text>
+                <Text style={styles.totalItemValue}>{(data?.totals?.fee_mmk ?? 0).toLocaleString()}</Text>
+              </View>
+              <View style={styles.totalItem}>
+                <Text style={styles.totalItemLabel}>ပို့ဆောင်ခ (THB)</Text>
+                <Text style={styles.totalItemValue}>{(data?.totals?.fee_thb ?? 0).toLocaleString()}</Text>
+              </View>
+            </View>
+            <View style={styles.totalsRow}>
+              <View style={styles.totalItem}>
+                <Text style={styles.totalItemLabel}>COD (MMK)</Text>
+                <Text style={styles.totalItemValue}>{(data?.totals?.cod_mmk ?? 0).toLocaleString()}</Text>
+              </View>
+              <View style={styles.totalItem}>
+                <Text style={styles.totalItemLabel}>COD (THB)</Text>
+                <Text style={styles.totalItemValue}>{(data?.totals?.cod_thb ?? 0).toLocaleString()}</Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.totalItem}>
-            <Text style={styles.totalItemLabel}>ပို့ဆောင်ခ (THB)</Text>
-            <Text style={styles.totalItemValue}>{(data?.totals?.fee_thb ?? 0).toLocaleString()}</Text>
-          </View>
-        </View>
-        <View style={styles.totalsRow}>
-          <View style={styles.totalItem}>
-            <Text style={styles.totalItemLabel}>COD (MMK)</Text>
-            <Text style={styles.totalItemValue}>{(data?.totals?.cod_mmk ?? 0).toLocaleString()}</Text>
-          </View>
-          <View style={styles.totalItem}>
-            <Text style={styles.totalItemLabel}>COD (THB)</Text>
-            <Text style={styles.totalItemValue}>{(data?.totals?.cod_thb ?? 0).toLocaleString()}</Text>
-          </View>
-        </View>
-      </View>
+        </>
+      )}
 
     </View>
   );

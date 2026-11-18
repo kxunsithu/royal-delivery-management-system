@@ -57,6 +57,57 @@ class DeliveryController extends Controller
     }
 
     /**
+     * Delivery summary grouped by day or month.
+     * GET /deliveries/summary?group_by=day|month&date_from=&date_to=
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', DeliveryAssignment::class);
+
+        $groupBy = $request->input('group_by', 'day'); // day | month
+
+        if ($groupBy === 'month') {
+            $periodExpr = "strftime('%Y-%m', assigned_at)";
+        } else {
+            $periodExpr = "DATE(assigned_at)";
+        }
+
+        $query = DeliveryAssignment::query()
+            ->select([
+                DB::raw("$periodExpr as period"),
+                DB::raw('COUNT(*) as total_count'),
+                DB::raw("SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_count"),
+                DB::raw("SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
+            ])
+            ->when($request->date_from, fn($q) => $q->whereDate('assigned_at', '>=', $request->date_from))
+            ->when($request->date_to, fn($q) => $q->whereDate('assigned_at', '<=', $request->date_to))
+            ->groupBy(DB::raw($periodExpr))
+            ->orderBy('period', 'desc');
+
+        $rows = $query->get()->map(function ($row) use ($groupBy) {
+            $period = $row->period;
+            if ($groupBy === 'month') {
+                $firstDay = $period . '-01';
+                $lastDayDate = (new \DateTime($firstDay))->modify('last day of this month');
+                $lastDay = $lastDayDate->format('Y-m-d');
+            } else {
+                $firstDay = $period;
+                $lastDay = $period;
+            }
+            return [
+                'period'          => $period,
+                'date_from'       => $firstDay,
+                'date_to'         => $lastDay,
+                'total_count'     => (int) $row->total_count,
+                'completed_count' => (int) $row->completed_count,
+                'failed_count'     => (int) $row->failed_count,
+            ];
+        });
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /**
      * All assignments (manager/admin view)
      */
     public function index(Request $request): JsonResponse

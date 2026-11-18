@@ -55,6 +55,7 @@ Route::prefix('v1')->group(function () {
         // Deliveries
         Route::get('/deliveries/my-assignments', [DeliveryController::class, 'myAssignments']);
         Route::get('/deliveries/assignments', [DeliveryController::class, 'index']);
+        Route::get('/deliveries/summary', [DeliveryController::class, 'summary']);
         Route::get('/deliveries/staff-workload', [DeliveryController::class, 'staffWorkload']);
         Route::get('/deliveries/{delivery}', [DeliveryController::class, 'show']);
         Route::post('/deliveries/{delivery}/attempts', [DeliveryController::class, 'recordAttempt']);

@@ -159,7 +159,7 @@ export default function CustomersScreen() {
 function CustomerCard({ customer, type }: { customer: Customer; type: CustomerType }) {
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, (customer.parcel_count > 0 && customer.delivered_count === customer.parcel_count) && styles.cardHighlighted]}
       onPress={() =>
         router.push({
           pathname: '/customers/[phone]',
@@ -184,9 +184,14 @@ function CustomerCard({ customer, type }: { customer: Customer; type: CustomerTy
       <View style={styles.cardInfo}>
         <Text style={styles.cardName} numberOfLines={1}>{customer.name}</Text>
         <Text style={styles.cardPhone}>{customer.phone}</Text>
-        <Text style={styles.statusTextSmall}>
-          လက်ခံ {(customer.received_count ?? 0)} · စစ်ဆေး {(customer.verified_count ?? 0)} · ဆောင်ရွက် {(customer.in_transit_count ?? 0)} · ပို့ပြီး {(customer.delivered_count ?? 0)} · မအောင် {(customer.failed_count ?? 0)} · ပျက် {(customer.damaged_count ?? 0)}
-        </Text>
+        <View style={styles.statusGrid}>
+          <Text style={styles.statusGridItem}>လက်ခံ {customer.received_count ?? 0}</Text>
+          <Text style={styles.statusGridItem}>စစ်ဆေး {customer.verified_count ?? 0}</Text>
+          <Text style={styles.statusGridItem}>ဆောင်ရွက် {customer.in_transit_count ?? 0}</Text>
+          <Text style={styles.statusGridItem}>ပို့ပြီး {customer.delivered_count ?? 0}</Text>
+          <Text style={styles.statusGridItem}>မအောင် {customer.failed_count ?? 0}</Text>
+          <Text style={styles.statusGridItem}>ပျက် {customer.damaged_count ?? 0}</Text>
+        </View>
         {customer.last_parcel_at && (
           <Text style={styles.lastDate}>
             နောက်ဆုံး:{' '}
@@ -309,6 +314,11 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
+  cardHighlighted: {
+    borderWidth: 1.5,
+    borderColor: COLORS.success,
+    backgroundColor: '#E8F8EF',
+  },
   avatarCircle: {
     width: 44,
     height: 44,
@@ -341,9 +351,19 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
-  statusTextSmall: {
+  statusGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 4,
+  },
+  statusGridItem: {
     fontSize: 10,
     color: COLORS.textSecondary,
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
   cardRight: { alignItems: 'flex-end' },
