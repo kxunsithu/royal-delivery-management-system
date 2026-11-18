@@ -300,9 +300,22 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
         <View style={[styles.assignBadge, { backgroundColor: isActive ? '#FFF3DC' : '#E8F8EF' }]}>
           <Text style={[styles.assignBadgeText, { color: assignColor }]}>{assignLabel}</Text>
         </View>
+        {parcel && Number(parcel.delivery_fee) > 0 && (
+          <View style={styles.feeBadge}>
+            <Text style={styles.feeText}>
+              {parcel.currency === 'THB'
+                ? `ပို့ဆောင်ခ ${Number(parcel.delivery_fee).toLocaleString()} ฿`
+                : `ပို့ဆောင်ခ ${Number(parcel.delivery_fee).toLocaleString()} K`}
+            </Text>
+          </View>
+        )}
         {parcel?.is_cod && (
           <View style={styles.codBadge}>
-            <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()} ကျပ်</Text>
+            <Text style={styles.codText}>
+              {parcel.currency === 'THB'
+                ? `COD ${Number(parcel.cod_amount).toLocaleString()} ฿`
+                : `COD ${Number(parcel.cod_amount).toLocaleString()} K`}
+            </Text>
           </View>
         )}
       </View>
@@ -372,6 +385,8 @@ const styles = StyleSheet.create({
   assignBadgeText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, backgroundColor: '#E8F4FB' },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
+  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, backgroundColor: '#E8F8EF' },
+  feeText: { fontSize: 11, fontWeight: '700', color: COLORS.success, fontFamily: FONTS.bold },
   parcelDetails: { marginTop: 8, gap: 2 },
   detailText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
 
