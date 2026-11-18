@@ -149,6 +149,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="assign-staff"
+        options={{
+          title: 'ချိတ်ဆက်ထားသောဝန်ထမ်း',
+          tabBarButton: () => null,
+          tabBarItemStyle: { display: 'none' },
+        }}
+      />
+      <Tabs.Screen
         name="users"
         options={{
           title: 'အသုံးပြုသူ',
