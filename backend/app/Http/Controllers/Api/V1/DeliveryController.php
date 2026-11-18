@@ -103,12 +103,12 @@ class DeliveryController extends Controller
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status NOT IN ('COMPLETED','FAILED','REASSIGNED') THEN 1 ELSE 0 END) as in_transit_count"),
-                // Delivery fee totals by currency
-                DB::raw("SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') AND delivery_assignments.status = 'COMPLETED' THEN parcels.delivery_fee ELSE 0 END) as fee_mmk"),
-                DB::raw("SUM(CASE WHEN parcels.currency = 'THB' AND delivery_assignments.status = 'COMPLETED' THEN parcels.delivery_fee ELSE 0 END) as fee_thb"),
-                // COD totals by currency (completed only)
-                DB::raw("SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') AND parcels.is_cod = 1 AND delivery_assignments.status = 'COMPLETED' THEN parcels.cod_amount ELSE 0 END) as cod_mmk"),
-                DB::raw("SUM(CASE WHEN parcels.currency = 'THB' AND parcels.is_cod = 1 AND delivery_assignments.status = 'COMPLETED' THEN parcels.cod_amount ELSE 0 END) as cod_thb"),
+                // Delivery fee totals by currency (all assignments)
+                DB::raw("SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') THEN parcels.delivery_fee ELSE 0 END) as fee_mmk"),
+                DB::raw("SUM(CASE WHEN parcels.currency = 'THB' THEN parcels.delivery_fee ELSE 0 END) as fee_thb"),
+                // COD totals by currency (all assignments with COD)
+                DB::raw("SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN parcels.currency = 'THB' AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_thb"),
             ])
             ->when($request->date_from, fn($q) => $q->whereRaw("$filterExpr >= ?", [$request->date_from]))
             ->when($request->date_to, fn($q) => $q->whereRaw("$filterExpr <= ?", [$request->date_to]))
