@@ -117,18 +117,22 @@ class DeliveryController extends Controller
     {
         $this->authorize('viewAny', DeliveryAssignment::class);
 
+        $dateExpr = "COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes')))";
+
         $query = DeliveryAssignment::with(['parcel.receivedBy', 'parcel.activeAssignment.staff', 'parcel.images', 'staff', 'assignedBy'])
-            ->when($request->staff_id, fn($q) => $q->where('staff_id', $request->staff_id))
+            ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
+            ->select('delivery_assignments.*')
+            ->when($request->staff_id, fn($q) => $q->where('delivery_assignments.staff_id', $request->staff_id))
             ->when($request->status, function ($q) use ($request) {
                 if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
-                    $q->whereNotIn('status', ['COMPLETED', 'FAILED', 'REASSIGNED']);
+                    $q->whereNotIn('delivery_assignments.status', ['COMPLETED', 'FAILED', 'REASSIGNED']);
                 } else {
-                    $q->where('status', $request->status);
+                    $q->where('delivery_assignments.status', $request->status);
                 }
             })
-            ->when($request->date_from, fn($q) => $q->whereDate('assigned_at', '>=', $request->date_from))
-            ->when($request->date_to, fn($q) => $q->whereDate('assigned_at', '<=', $request->date_to))
-            ->orderBy('assigned_at', 'desc');
+            ->when($request->date_from, fn($q) => $q->whereRaw("$dateExpr >= ?", [$request->date_from]))
+            ->when($request->date_to, fn($q) => $q->whereRaw("$dateExpr <= ?", [$request->date_to]))
+            ->orderByRaw("$dateExpr desc");
 
         $assignments = $query->paginate($request->per_page ?? 20);
 
