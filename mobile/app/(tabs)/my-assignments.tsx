@@ -69,7 +69,7 @@ function buildSummaries(assignments: Assignment[], groupBy: GroupBy): PeriodSumm
       total_count: list.length,
       completed_count: list.filter((a) => a.status === 'COMPLETED').length,
       failed_count: list.filter((a) => a.status === 'FAILED').length,
-      active_count: list.filter((a) => !['COMPLETED','FAILED','REASSIGNED'].includes(a.status)).length,
+      active_count: list.filter((a) => a.parcel?.status === 'IN_TRANSIT').length,
       assignments: list,
     }));
 }
