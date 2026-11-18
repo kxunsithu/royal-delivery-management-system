@@ -76,9 +76,6 @@ function buildSummaries(assignments: Assignment[], groupBy: GroupBy): PeriodSumm
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
-  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
-  { label: 'ပြီးစီး', value: 'COMPLETED' },
-  { label: 'မအောင်မြင်', value: 'FAILED' },
 ];
 
 export default function MyAssignmentsScreen() {
@@ -93,9 +90,12 @@ export default function MyAssignmentsScreen() {
     queryFn: () => deliveryService.myAssignments({ per_page: 500 }),
   });
 
-  const allAssignments = data?.data ?? [];
+  // Only show assignments that are still active (not completed/failed/reassigned)
+  const allAssignments = (data?.data ?? []).filter(
+    (a) => !['COMPLETED', 'FAILED', 'REASSIGNED'].includes(a.status)
+  );
   const meta = data?.meta;
-  const totalCount = meta?.total_count ?? (meta?.total ?? allAssignments.length);
+  const totalCount = allAssignments.length;
 
   const summaries = buildSummaries(allAssignments, groupBy);
 
@@ -118,13 +118,7 @@ export default function MyAssignmentsScreen() {
 
   // ── LIST VIEW ───────────────────────────────────────────────
   if (view === 'list' && selected) {
-    const listAssignments = statusFilter === 'ACTIVE'
-      ? selected.assignments.filter((a) => !['COMPLETED','FAILED','REASSIGNED'].includes(a.status))
-      : statusFilter === 'COMPLETED'
-      ? selected.assignments.filter((a) => a.status === 'COMPLETED')
-      : statusFilter === 'FAILED'
-      ? selected.assignments.filter((a) => a.status === 'FAILED')
-      : selected.assignments;
+    const listAssignments = selected.assignments;
 
     return (
       <View style={styles.container}>
@@ -239,22 +233,7 @@ export default function MyAssignmentsScreen() {
                   <View style={styles.statsRow}>
                     <View style={styles.statItem}>
                       <Text style={styles.statValue}>{item.total_count}</Text>
-                      <Text style={styles.statLabel}>စုစုပေါင်း</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                      <Text style={[styles.statValue, { color: COLORS.success }]}>{item.completed_count}</Text>
-                      <Text style={styles.statLabel}>ပြီးစီး</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                      <Text style={[styles.statValue, { color: COLORS.primary }]}>{item.active_count}</Text>
-                      <Text style={styles.statLabel}>ဆောင်ရွက်နေ</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                      <Text style={[styles.statValue, { color: COLORS.error }]}>{item.failed_count}</Text>
-                      <Text style={styles.statLabel}>မအောင်မြင်</Text>
+                      <Text style={styles.statLabel}>ပါဆယ်</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
