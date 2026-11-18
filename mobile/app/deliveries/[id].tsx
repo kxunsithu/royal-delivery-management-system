@@ -181,9 +181,6 @@ export default function DeliveryDetailScreen() {
               value={new Date(assignment.assigned_at).toLocaleString('my-MM')}
             />
           )}
-          {assignment?.notes && (
-            <InfoRow label="မှတ်ချက်" value={assignment.notes} />
-          )}
           {assignment?.status && (
             <InfoRow label="အခြေအနေ" value={assignmentStatusLabel} />
           )}
