@@ -179,20 +179,12 @@ function ParcelRow({ parcel }: { parcel: Parcel }) {
         <Text style={styles.infoText} numberOfLines={1}>{parcel.delivery_address}</Text>
       </View>
 
-      {/* Full parcel data */}
+      {/* Parcel create & complete dates */}
       <View style={styles.parcelDetails}>
-        {parcel.sender_name || parcel.sender_phone ? (
-          <Text style={styles.detailText}>ပေးပို့သူ: {parcel.sender_name || ''}{parcel.sender_name && parcel.sender_phone ? ' · ' : ''}{parcel.sender_phone || ''}</Text>
+        <Text style={styles.detailText}>လက်ခံရက်စွဲ: {new Date(parcel.received_at || parcel.created_at).toLocaleString()}</Text>
+        {parcel.status === 'DELIVERED' && parcel.delivered_at ? (
+          <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date(parcel.delivered_at).toLocaleString()}</Text>
         ) : null}
-        {parcel.priority ? <Text style={styles.detailText}>ဦးစားပေး: {parcel.priority}</Text> : null}
-        {parcel.category ? <Text style={styles.detailText}>အမျိုးအစား: {parcel.category}</Text> : null}
-        {parcel.weight ? <Text style={styles.detailText}>အလေးချိန်: {parcel.weight} kg</Text> : null}
-        {parcel.description ? <Text style={styles.detailText}>ဖော်ပြချက်: {parcel.description}</Text> : null}
-        {parcel.condition ? <Text style={styles.detailText}>အခြေအနေ: {parcel.condition}</Text> : null}
-        {parcel.notes ? <Text style={styles.detailText}>မှတ်ချက်: {parcel.notes}</Text> : null}
-        {parcel.received_at ? <Text style={styles.detailText}>လက်ခံချိန်: {new Date(parcel.received_at).toLocaleString()}</Text> : null}
-        {parcel.received_by?.name ? <Text style={styles.detailText}>လက်ခံသူ: {parcel.received_by.name}</Text> : null}
-        {parcel.is_cod ? <Text style={styles.detailText}>COD: {Number(parcel.cod_amount).toLocaleString()} {parcel.currency === 'THB' ? 'THB' : 'MMK'}</Text> : null}
       </View>
 
       {/* Footer */}

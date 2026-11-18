@@ -376,18 +376,12 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
           </View>
         </View>
 
-        {/* Full parcel data */}
+        {/* Parcel create & complete dates */}
         <View style={styles.parcelDetails}>
-          {parcel.description ? <Text style={styles.detailText}>ဖော်ပြချက်: {parcel.description}</Text> : null}
-          {parcel.category ? <Text style={styles.detailText}>အမျိုးအစား: {parcel.category}</Text> : null}
-          {parcel.weight ? <Text style={styles.detailText}>အလေးချိန်: {parcel.weight} kg</Text> : null}
-          {parcel.condition ? <Text style={styles.detailText}>အခြေအနေ: {parcel.condition}</Text> : null}
-          {parcel.notes ? <Text style={styles.detailText}>မှတ်ချက်: {parcel.notes}</Text> : null}
-          {parcel.received_at ? <Text style={styles.detailText}>လက်ခံချိန်: {new Date(parcel.received_at).toLocaleString()}</Text> : null}
-          {parcel.received_by?.name ? <Text style={styles.detailText}>လက်ခံသူ: {parcel.received_by.name}</Text> : null}
-          {parcel.active_assignment?.staff?.name ? <Text style={styles.detailText}>ချိတ်ဆက်ထားသောဝန်ထမ်း: {parcel.active_assignment.staff.name}</Text> : null}
-          {parcel.created_at ? <Text style={styles.detailText}>ဖန်တီးချိန်: {new Date(parcel.created_at).toLocaleString()}</Text> : null}
-          {parcel.updated_at ? <Text style={styles.detailText}>ပြင်ဆင်ချိန်: {new Date(parcel.updated_at).toLocaleString()}</Text> : null}
+          <Text style={styles.detailText}>လက်ခံရက်စွဲ: {new Date(parcel.received_at || parcel.created_at).toLocaleString()}</Text>
+          {parcel.status === 'DELIVERED' && parcel.delivered_at ? (
+            <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date(parcel.delivered_at).toLocaleString()}</Text>
+          ) : null}
         </View>
 
         {/* Quick Verify Button — shown only for RECEIVED parcels with permission */}

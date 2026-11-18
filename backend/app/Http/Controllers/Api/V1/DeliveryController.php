@@ -142,7 +142,11 @@ class DeliveryController extends Controller
             // Update parcel status
             $oldStatus = $parcel->status;
             $newStatus = $validated['result'] === 'DELIVERED' ? 'DELIVERED' : 'FAILED';
-            $parcel->update(['status' => $newStatus]);
+            $updateData = ['status' => $newStatus];
+            if ($validated['result'] === 'DELIVERED') {
+                $updateData['delivered_at'] = $validated['attempted_at'] ?? now();
+            }
+            $parcel->update($updateData);
 
             ParcelStatusHistory::create([
                 'parcel_id' => $parcel->id,
@@ -307,6 +311,9 @@ class DeliveryController extends Controller
                     ] : null,
                     'assigned_at' => $a->parcel->activeAssignment->assigned_at->toISOString(),
                 ] : null,
+                'created_at' => $a->parcel->created_at?->toISOString(),
+                'updated_at' => $a->parcel->updated_at?->toISOString(),
+                'delivered_at' => $a->parcel->delivered_at?->toISOString(),
                 'images' => $a->parcel->relationLoaded('images')
                     ? $a->parcel->images->map(fn($img) => [
                         'id'  => $img->id,

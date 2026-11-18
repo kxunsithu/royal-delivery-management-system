@@ -22,12 +22,15 @@ export interface Assignment {
     condition?: string;
     priority: string;
     received_at?: string;
+    delivered_at?: string;
     received_by?: { id: number; name: string };
     active_assignment?: {
       id: number;
       staff?: { id: number; name: string };
       assigned_at: string;
     };
+    created_at?: string;
+    updated_at?: string;
     images?: { id: number; url: string }[];
   };
   staff?: { id: number; name: string; phone?: string };

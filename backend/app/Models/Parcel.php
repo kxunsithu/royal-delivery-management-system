@@ -31,6 +31,7 @@ class Parcel extends Model
         'condition',
         'priority',
         'received_at',
+        'delivered_at',
         'received_by_id',
         'damage_description',
     ];
@@ -43,6 +44,7 @@ class Parcel extends Model
         'cod_amount' => 'decimal:2',
         'weight' => 'decimal:3',
             'received_at' => 'datetime',
+            'delivered_at' => 'datetime',
             'quantity' => 'integer',
         ];
     }

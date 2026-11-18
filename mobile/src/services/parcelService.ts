@@ -20,6 +20,7 @@ export interface Parcel {
   condition: string;
   priority: string;
   received_at?: string;
+  delivered_at?: string;
   received_by?: { id: number; name: string };
   active_assignment?: {
     id: number;
