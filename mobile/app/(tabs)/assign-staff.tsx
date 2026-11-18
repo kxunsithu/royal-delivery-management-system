@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
+  SectionList,
   StyleSheet,
   TouchableOpacity,
   TextInput,
@@ -10,6 +11,7 @@ import {
   Image,
   Modal,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,7 +26,6 @@ import {
   STATUS_COLORS,
   STATUS_LABELS_MM,
 } from '../../src/constants';
-import ConfirmModal from '../../src/components/ConfirmModal';
 
 const ASSIGNABLE_STATUSES = ['VERIFIED', 'IN_TRANSIT', 'FAILED'];
 
@@ -33,70 +34,68 @@ export default function AssignStaffScreen() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Permission guard
   const canAssign = user?.role === 'admin' || user?.role === 'accountant';
 
-  // --- State ---
-  const [parcelSearch, setParcelSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [page, setPage] = useState(1);
+  // Selected staff to view
+  const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
 
-  // Staff selector modal state
-  const [staffModalVisible, setStaffModalVisible] = useState(false);
+  // Reassign modal state
+  const [reassignModalVisible, setReassignModalVisible] = useState(false);
   const [selectedParcel, setSelectedParcel] = useState<Parcel | null>(null);
   const [staffSearch, setStaffSearch] = useState('');
   const [assignTarget, setAssignTarget] = useState<{ id: number; name: string } | null>(null);
 
-  // --- Queries ---
+  // --- Fetch delivery staff ---
+  const { data: staffList, isLoading: staffLoading, refetch: refetchStaff } = useQuery({
+    queryKey: ['delivery-staff'],
+    queryFn: () => userService.getDeliveryStaff(),
+    enabled: canAssign,
+  });
+
+  // --- Fetch parcels assigned to selected staff ---
   const {
     data: parcelsData,
     isLoading: parcelsLoading,
     refetch: refetchParcels,
     isRefetching,
   } = useQuery({
-    queryKey: ['assignable-parcels', parcelSearch, statusFilter, page],
+    queryKey: ['assigned-parcels', selectedStaffId],
     queryFn: () =>
       parcelService.list({
-        search: parcelSearch || undefined,
-        status: statusFilter !== 'ALL' ? statusFilter : undefined,
-        per_page: 30,
-        page,
+        per_page: 100,
         sort_by: 'updated_at',
         sort_dir: 'desc',
       }),
-    enabled: canAssign,
+    enabled: canAssign && selectedStaffId !== null,
+    select: (data) => ({
+      ...data,
+      data: data.data.filter(
+        (p) =>
+          ASSIGNABLE_STATUSES.includes(p.status) &&
+          p.active_assignment?.staff?.id === selectedStaffId
+      ),
+    }),
   });
 
-  const { data: staffList, isLoading: staffLoading } = useQuery({
-    queryKey: ['delivery-staff'],
-    queryFn: () => userService.getDeliveryStaff(),
-    enabled: canAssign,
-  });
-
-  // --- Assign Mutation ---
+  // --- Assign / Reassign Mutation ---
   const assignMutation = useMutation({
     mutationFn: ({ parcelId, staffId }: { parcelId: number; staffId: number }) =>
       parcelService.assign(parcelId, staffId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assignable-parcels'] });
+      queryClient.invalidateQueries({ queryKey: ['assigned-parcels'] });
       queryClient.invalidateQueries({ queryKey: ['parcels'] });
-      setStaffModalVisible(false);
+      setReassignModalVisible(false);
       setSelectedParcel(null);
       setAssignTarget(null);
       setStaffSearch('');
     },
   });
 
-  // --- Handlers ---
-  function openStaffModal(parcel: Parcel) {
+  function openReassignModal(parcel: Parcel) {
     setSelectedParcel(parcel);
     setStaffSearch('');
     setAssignTarget(null);
-    setStaffModalVisible(true);
-  }
-
-  function handleSelectStaff(s: User) {
-    setAssignTarget({ id: s.id, name: s.name });
+    setReassignModalVisible(true);
   }
 
   function handleConfirmAssign() {
@@ -104,22 +103,13 @@ export default function AssignStaffScreen() {
     assignMutation.mutate({ parcelId: selectedParcel.id, staffId: assignTarget.id });
   }
 
-  // Filter parcels by assignable statuses on client side if status = ALL
-  const parcels: Parcel[] = (parcelsData?.data ?? []).filter(p =>
-    ASSIGNABLE_STATUSES.includes(p.status)
+  const activeStaff = (staffList ?? []).filter((s) => s.is_active);
+  const filteredModalStaff = (staffList ?? []).filter(
+    (s) => s.is_active && s.name.toLowerCase().includes(staffSearch.toLowerCase())
   );
 
-  const filteredStaff = (staffList ?? []).filter(s =>
-    s.is_active && s.name.toLowerCase().includes(staffSearch.toLowerCase())
-  );
-
-  // --- Status filter chips ---
-  const STATUS_CHIPS = [
-    { label: 'အားလုံး', value: 'ALL' },
-    { label: 'စစ်ဆေးပြီး', value: 'VERIFIED' },
-    { label: 'ဆောင်ရွက်နေဆဲ', value: 'IN_TRANSIT' },
-    { label: 'မအောင်မြင်', value: 'FAILED' },
-  ];
+  const selectedStaff = activeStaff.find((s) => s.id === selectedStaffId);
+  const assignedParcels = parcelsData?.data ?? [];
 
   if (!canAssign) {
     return (
@@ -132,48 +122,63 @@ export default function AssignStaffScreen() {
     );
   }
 
-  // --- Parcel card ---
+  // --- Staff card ---
+  function renderStaffCard({ item: s }: { item: User }) {
+    const isSelected = s.id === selectedStaffId;
+    return (
+      <TouchableOpacity
+        style={[styles.staffCard, isSelected && styles.staffCardActive]}
+        onPress={() => setSelectedStaffId(isSelected ? null : s.id)}
+        activeOpacity={0.8}
+      >
+        {s.profile_image_url ? (
+          <Image
+            source={{ uri: s.profile_image_url }}
+            style={[styles.staffAvatar, isSelected && { borderColor: COLORS.primary, borderWidth: 2 }]}
+          />
+        ) : (
+          <View style={[styles.staffAvatarPlaceholder, isSelected && { backgroundColor: COLORS.primary }]}>
+            <Text style={[styles.staffAvatarLetter, isSelected && { color: COLORS.white }]}>
+              {s.name[0].toUpperCase()}
+            </Text>
+          </View>
+        )}
+        <Text
+          style={[styles.staffCardName, isSelected && { color: COLORS.primary }]}
+          numberOfLines={1}
+        >
+          {s.name}
+        </Text>
+        {isSelected && (
+          <View style={styles.selectedDot} />
+        )}
+      </TouchableOpacity>
+    );
+  }
+
+  // --- Parcel row ---
   function renderParcel({ item }: { item: Parcel }) {
     const statusColor = STATUS_COLORS[item.status as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
     const statusLabel = STATUS_LABELS_MM[item.status as keyof typeof STATUS_LABELS_MM] || item.status;
-    const assignedStaff = item.active_assignment?.staff;
 
     return (
       <TouchableOpacity
         style={styles.parcelCard}
         activeOpacity={0.85}
-        onPress={() => openStaffModal(item)}
+        onPress={() => openReassignModal(item)}
       >
-        {/* Top row: tracking + status */}
         <View style={styles.cardTopRow}>
           <Text style={styles.trackingNum} numberOfLines={1}>{item.tracking_number}</Text>
           <View style={[styles.statusPill, { backgroundColor: statusColor + '20' }]}>
             <Text style={[styles.statusPillText, { color: statusColor }]}>{statusLabel}</Text>
           </View>
         </View>
-
-        {/* Recipient */}
         <Text style={styles.recipientName} numberOfLines={1}>{item.recipient_name}</Text>
         <Text style={styles.addressText} numberOfLines={1}>{item.delivery_address}</Text>
-
-        {/* Current assignment */}
-        <View style={styles.cardBottomRow}>
-          {assignedStaff ? (
-            <View style={styles.assignedBadge}>
-              <Ionicons name="person-circle" size={14} color={COLORS.primary} />
-              <Text style={styles.assignedName} numberOfLines={1}>{assignedStaff.name}</Text>
-            </View>
-          ) : (
-            <View style={styles.unassignedBadge}>
-              <Ionicons name="person-add-outline" size={13} color={COLORS.textSecondary} />
-              <Text style={styles.unassignedText}>မချိတ်ဆက်ရသေး</Text>
-            </View>
-          )}
-          <View style={styles.assignBtn}>
-            <Ionicons name="swap-horizontal-outline" size={13} color={COLORS.white} />
-            <Text style={styles.assignBtnText}>
-              {assignedStaff ? 'ပြောင်းမည်' : 'ချိတ်ဆက်မည်'}
-            </Text>
+        <View style={styles.cardFooter}>
+          <View style={styles.reassignBtn}>
+            <Ionicons name="swap-horizontal-outline" size={12} color={COLORS.white} />
+            <Text style={styles.reassignBtnText}>ပြောင်းမည်</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -189,96 +194,89 @@ export default function AssignStaffScreen() {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>ချိတ်ဆက်ထားသောဝန်ထမ်း</Text>
-          {parcelsData && (
-            <Text style={styles.headerSub}>
-              ပါဆယ် {parcels.length} ခု
-            </Text>
+          {selectedStaff && (
+            <Text style={styles.headerSub}>{selectedStaff.name} · {assignedParcels.length} ခု</Text>
           )}
         </View>
         <View style={{ width: 36 }} />
       </View>
 
-      {/* Search bar */}
-      <View style={styles.searchBar}>
-        <Ionicons name="search-outline" size={16} color={COLORS.textLight} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="ခြေရာခံနံပါတ် / လက်ခံသူ ရှာမည်..."
-          placeholderTextColor={COLORS.textLight}
-          value={parcelSearch}
-          onChangeText={v => { setParcelSearch(v); setPage(1); }}
-          returnKeyType="search"
-        />
-        {parcelSearch.length > 0 && (
-          <TouchableOpacity onPress={() => { setParcelSearch(''); setPage(1); }}>
-            <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
-          </TouchableOpacity>
+      {/* Staff horizontal list */}
+      <View style={styles.staffSection}>
+        {staffLoading ? (
+          <ActivityIndicator size="small" color={COLORS.primary} style={{ margin: 16 }} />
+        ) : activeStaff.length === 0 ? (
+          <Text style={styles.noStaffText}>ဝန်ထမ်း မတွေ့ပါ</Text>
+        ) : (
+          <FlatList
+            data={activeStaff}
+            keyExtractor={(s) => String(s.id)}
+            renderItem={renderStaffCard}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.staffList}
+          />
         )}
       </View>
 
-      {/* Status filter chips */}
-      <View style={styles.chipRow}>
-        {STATUS_CHIPS.map(chip => (
-          <TouchableOpacity
-            key={chip.value}
-            style={[styles.chip, statusFilter === chip.value && styles.chipActive]}
-            onPress={() => { setStatusFilter(chip.value); setPage(1); }}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.chipText, statusFilter === chip.value && styles.chipTextActive]}>
-              {chip.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Parcel list */}
-      {parcelsLoading ? (
+      {/* Parcel list for selected staff */}
+      {selectedStaffId === null ? (
+        <View style={styles.emptyBox}>
+          <Ionicons name="person-outline" size={40} color={COLORS.textLight} />
+          <Text style={styles.emptyText}>ဝန်ထမ်းတစ်ဦး ရွေးချယ်ပါ</Text>
+        </View>
+      ) : parcelsLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 40 }} />
+      ) : assignedParcels.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <Ionicons name="cube-outline" size={40} color={COLORS.textLight} />
+          <Text style={styles.emptyText}>ချိတ်ဆက်ထားသော ပါဆယ် မတွေ့ပါ</Text>
+        </View>
       ) : (
         <FlatList
-          data={parcels}
-          keyExtractor={item => String(item.id)}
+          data={assignedParcels}
+          keyExtractor={(item) => String(item.id)}
           renderItem={renderParcel}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetchParcels} tintColor={COLORS.primary} />
-          }
-          ListEmptyComponent={
-            <View style={styles.emptyBox}>
-              <Ionicons name="cube-outline" size={40} color={COLORS.textLight} />
-              <Text style={styles.emptyText}>ချိတ်ဆက်ရမည့် ပါဆယ် မတွေ့ပါ</Text>
-            </View>
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetchParcels}
+              tintColor={COLORS.primary}
+            />
           }
         />
       )}
 
-      {/* Staff selector modal */}
+      {/* Reassign Modal */}
       <Modal
-        visible={staffModalVisible}
+        visible={reassignModalVisible}
         animationType="slide"
         transparent
-        onRequestClose={() => setStaffModalVisible(false)}
+        onRequestClose={() => setReassignModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
             {/* Modal header */}
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>ဝန်ထမ်းရွေးချယ်မည်</Text>
+                <Text style={styles.modalTitle}>ဝန်ထမ်း ပြောင်းချိတ်မည်</Text>
                 {selectedParcel && (
                   <Text style={styles.modalSub} numberOfLines={1}>
                     {selectedParcel.tracking_number} · {selectedParcel.recipient_name}
                   </Text>
                 )}
               </View>
-              <TouchableOpacity onPress={() => setStaffModalVisible(false)} style={styles.closeBtn}>
+              <TouchableOpacity
+                onPress={() => setReassignModalVisible(false)}
+                style={styles.closeBtn}
+              >
                 <Ionicons name="close" size={20} color={COLORS.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            {/* Current assignment info */}
+            {/* Current assignment */}
             {selectedParcel?.active_assignment?.staff && (
               <View style={styles.currentAssignRow}>
                 <Ionicons name="person-circle" size={16} color={COLORS.primary} />
@@ -306,16 +304,14 @@ export default function AssignStaffScreen() {
             </View>
 
             {/* Staff list */}
-            {staffLoading ? (
-              <ActivityIndicator size="small" color={COLORS.primary} style={{ margin: 16 }} />
-            ) : filteredStaff.length === 0 ? (
+            {filteredModalStaff.length === 0 ? (
               <View style={styles.staffEmpty}>
                 <Text style={styles.staffEmptyText}>ဝန်ထမ်း မတွေ့ပါ</Text>
               </View>
             ) : (
               <FlatList
-                data={filteredStaff}
-                keyExtractor={s => String(s.id)}
+                data={filteredModalStaff}
+                keyExtractor={(s) => String(s.id)}
                 style={styles.staffFlatList}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item: s }) => {
@@ -325,32 +321,37 @@ export default function AssignStaffScreen() {
                     <TouchableOpacity
                       style={[
                         styles.staffItem,
-                        isCurrentStaff && styles.staffItemCurrent,
-                        isSelected && styles.staffItemSelected,
+                        (isCurrentStaff || isSelected) && styles.staffItemActive,
                       ]}
-                      onPress={() => handleSelectStaff(s)}
+                      onPress={() => setAssignTarget({ id: s.id, name: s.name })}
                       activeOpacity={0.7}
                     >
                       {s.profile_image_url ? (
-                        <Image source={{ uri: s.profile_image_url }} style={styles.staffAvatar} />
+                        <Image source={{ uri: s.profile_image_url }} style={styles.staffAvatarSm} />
                       ) : (
-                        <View style={[
-                          styles.staffAvatarPlaceholder,
-                          (isSelected || isCurrentStaff) && { backgroundColor: COLORS.primary },
-                        ]}>
-                          <Text style={[
-                            styles.staffAvatarLetter,
-                            (isSelected || isCurrentStaff) && { color: COLORS.white },
-                          ]}>
+                        <View
+                          style={[
+                            styles.staffAvatarSmPlaceholder,
+                            (isSelected || isCurrentStaff) && { backgroundColor: COLORS.primary },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.staffAvatarSmLetter,
+                              (isSelected || isCurrentStaff) && { color: COLORS.white },
+                            ]}
+                          >
                             {s.name[0].toUpperCase()}
                           </Text>
                         </View>
                       )}
                       <View style={{ flex: 1 }}>
-                        <Text style={[
-                          styles.staffName,
-                          (isSelected || isCurrentStaff) && { color: COLORS.primary },
-                        ]}>
+                        <Text
+                          style={[
+                            styles.staffName,
+                            (isSelected || isCurrentStaff) && { color: COLORS.primary },
+                          ]}
+                        >
                           {s.name}
                         </Text>
                         {isCurrentStaff && (
@@ -383,9 +384,9 @@ export default function AssignStaffScreen() {
                 <ActivityIndicator size="small" color={COLORS.white} />
               ) : (
                 <>
-                  <Ionicons name="person-add-outline" size={16} color={COLORS.white} />
+                  <Ionicons name="swap-horizontal-outline" size={16} color={COLORS.white} />
                   <Text style={styles.confirmBtnText}>
-                    {assignTarget ? `${assignTarget.name} ကို ချိတ်ဆက်မည်` : 'ဝန်ထမ်းရွေးချယ်ပါ'}
+                    {assignTarget ? `${assignTarget.name} သို့ ပြောင်းမည်` : 'ဝန်ထမ်းရွေးချယ်ပါ'}
                   </Text>
                 </>
               )}
@@ -417,78 +418,91 @@ const styles = StyleSheet.create({
   },
   headerCenter: { flex: 1, alignItems: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
-  headerSub: { fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 1, fontFamily: FONTS.regular },
+  headerSub: { fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 1, fontFamily: FONTS.regular },
 
-  // Search
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: COLORS.white, margin: 12, marginBottom: 8,
-    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9,
-    borderWidth: 1, borderColor: COLORS.border,
+  // Staff horizontal section
+  staffSection: {
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    paddingVertical: 12,
   },
-  searchInput: {
-    flex: 1, fontSize: 13, color: COLORS.text,
-    fontFamily: FONTS.regular, paddingVertical: 0,
+  staffList: { paddingHorizontal: 12, gap: 10 },
+  staffCard: {
+    alignItems: 'center', width: 72,
+    paddingVertical: 8, paddingHorizontal: 4,
+    borderRadius: 12, backgroundColor: COLORS.background,
+    borderWidth: 1.5, borderColor: 'transparent',
   },
-
-  // Status chips
-  chipRow: {
-    flexDirection: 'row', gap: 8, paddingHorizontal: 12, paddingBottom: 10,
+  staffCardActive: {
+    backgroundColor: COLORS.primaryBg,
+    borderColor: COLORS.primary,
   },
-  chip: {
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-    backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border,
+  staffAvatar: { width: 44, height: 44, borderRadius: 22, marginBottom: 6 },
+  staffAvatarPlaceholder: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: COLORS.border,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 6,
   },
-  chipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  chipText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.medium },
-  chipTextActive: { color: COLORS.white },
+  staffAvatarLetter: { fontSize: 18, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.bold },
+  staffCardName: {
+    fontSize: 11, color: COLORS.text, fontFamily: FONTS.medium,
+    textAlign: 'center', lineHeight: 14,
+  },
+  selectedDot: {
+    width: 6, height: 6, borderRadius: 3,
+    backgroundColor: COLORS.primary, marginTop: 4,
+  },
+  noStaffText: {
+    fontSize: 13, color: COLORS.textSecondary,
+    fontFamily: FONTS.regular, padding: 16,
+  },
 
   // Parcel list
-  listContent: { paddingHorizontal: 12, paddingBottom: 24, gap: 10 },
-
-  // Parcel card
+  listContent: { padding: 12, gap: 10 },
   parcelCard: {
     backgroundColor: COLORS.white, borderRadius: 12,
     padding: 14, borderWidth: 1, borderColor: COLORS.border,
-    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
-  cardTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  trackingNum: { fontSize: 13, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold, flex: 1, marginRight: 8 },
+  cardTopRow: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', marginBottom: 4,
+  },
+  trackingNum: {
+    fontSize: 13, fontWeight: '700', color: COLORS.primary,
+    fontFamily: FONTS.bold, flex: 1, marginRight: 8,
+  },
   statusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
   statusPillText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
-  recipientName: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, marginBottom: 2 },
-  addressText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular, marginBottom: 10 },
-
-  cardBottomRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, paddingTop: 10,
+  recipientName: {
+    fontSize: 14, fontWeight: '700', color: COLORS.text,
+    fontFamily: FONTS.bold, marginBottom: 2,
   },
-  assignedBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: COLORS.primaryBg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
-    flex: 1, marginRight: 8,
+  addressText: {
+    fontSize: 12, color: COLORS.textSecondary,
+    fontFamily: FONTS.regular, marginBottom: 10,
   },
-  assignedName: { fontSize: 12, color: COLORS.primary, fontFamily: FONTS.semiBold, flex: 1 },
-  unassignedBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: COLORS.background, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
-    flex: 1, marginRight: 8,
+  cardFooter: {
+    flexDirection: 'row', justifyContent: 'flex-end',
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, paddingTop: 8,
   },
-  unassignedText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
-  assignBtn: {
+  reassignBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
+    backgroundColor: COLORS.primary, paddingHorizontal: 12,
+    paddingVertical: 5, borderRadius: 20,
   },
-  assignBtnText: { fontSize: 12, color: COLORS.white, fontFamily: FONTS.semiBold },
+  reassignBtnText: { fontSize: 12, color: COLORS.white, fontFamily: FONTS.semiBold },
 
   // Empty / permission
-  emptyBox: { alignItems: 'center', marginTop: 60, gap: 10 },
+  emptyBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
   emptyText: { fontSize: 14, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   permissionBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   permissionText: { fontSize: 15, color: COLORS.textSecondary, fontFamily: FONTS.regular },
 
-  // Staff modal
+  // Reassign modal
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end',
   },
@@ -526,15 +540,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border,
   },
-  staffItemCurrent: { backgroundColor: COLORS.primaryBg },
-  staffItemSelected: { backgroundColor: COLORS.primaryBg },
-  staffAvatar: { width: 38, height: 38, borderRadius: 19 },
-  staffAvatarPlaceholder: {
-    width: 38, height: 38, borderRadius: 19,
+  staffItemActive: { backgroundColor: COLORS.primaryBg },
+  staffAvatarSm: { width: 36, height: 36, borderRadius: 18 },
+  staffAvatarSmPlaceholder: {
+    width: 36, height: 36, borderRadius: 18,
     backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: COLORS.border,
   },
-  staffAvatarLetter: { fontSize: 15, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.bold },
+  staffAvatarSmLetter: {
+    fontSize: 14, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.bold,
+  },
   staffName: { fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
   staffCurrentBadge: { fontSize: 11, color: COLORS.primary, fontFamily: FONTS.regular, marginTop: 1 },
   staffEmpty: { padding: 24, alignItems: 'center' },
@@ -548,4 +563,3 @@ const styles = StyleSheet.create({
   },
   confirmBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 });
-
