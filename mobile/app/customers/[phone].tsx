@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -16,11 +17,32 @@ import { parcelService, Parcel } from '../../src/services/parcelService';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
 
+const STATUS_FILTERS = [
+  { label: 'အားလုံး', value: '' },
+  { label: 'လက်ခံ', value: 'RECEIVED' },
+  { label: 'စစ်ဆေးပြီး', value: 'VERIFIED' },
+  { label: 'ဆောင်ရွက်နေဆဲ', value: 'IN_TRANSIT' },
+  { label: 'ပို့ဆောင်ပြီး', value: 'DELIVERED' },
+  { label: 'မအောင်မြင်', value: 'FAILED' },
+  { label: 'ပျက်ဆီး', value: 'DAMAGED' },
+];
+
 export default function CustomerDetailScreen() {
   const insets = useSafeAreaInsets();
-  const { phone, type, name } = useLocalSearchParams<{ phone: string; type: string; name: string }>();
+  const { phone, type, name, rc, vc, ic, dc, fc, dam } = useLocalSearchParams<{
+    phone: string; type: string; name: string;
+    rc?: string; vc?: string; ic?: string; dc?: string; fc?: string; dam?: string;
+  }>();
   const { user } = useAuth();
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const receivedCount = Number(rc ?? 0);
+  const verifiedCount = Number(vc ?? 0);
+  const inTransitCount = Number(ic ?? 0);
+  const deliveredCount = Number(dc ?? 0);
+  const failedCount = Number(fc ?? 0);
+  const damagedCount = Number(dam ?? 0);
 
   const decodedName = name ? decodeURIComponent(name as string) : (phone as string);
   const isRecipient = type !== 'sender';
@@ -42,9 +64,9 @@ export default function CustomerDetailScreen() {
   };
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['customer-parcels', phone, page],
+    queryKey: ['customer-parcels', phone, statusFilter, page],
     queryFn: () =>
-      parcelService.list({ search: phone as string, page, per_page: 20 }),
+      parcelService.list({ search: phone as string, status: statusFilter || undefined, page, per_page: 20 }),
     enabled: !!phone,
   });
 
@@ -95,6 +117,33 @@ export default function CustomerDetailScreen() {
           <Text style={styles.statValue}>{totalTHB.toLocaleString()}</Text>
           <Text style={styles.statLabel}>THB</Text>
         </View>
+      </View>
+
+      {/* Status counts */}
+      <View style={styles.statusCountRow}>
+        <Text style={styles.statusCountText}>လက်ခံ {receivedCount}</Text>
+        <Text style={styles.statusCountText}>စစ်ဆေး {verifiedCount}</Text>
+        <Text style={styles.statusCountText}>ဆောင်ရွက် {inTransitCount}</Text>
+        <Text style={styles.statusCountText}>ပို့ပြီး {deliveredCount}</Text>
+        <Text style={styles.statusCountText}>မအောင် {failedCount}</Text>
+        <Text style={styles.statusCountText}>ပျက် {damagedCount}</Text>
+      </View>
+
+      {/* Status Filter */}
+      <View style={styles.filterRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterList}>
+          {STATUS_FILTERS.map((item) => (
+            <TouchableOpacity
+              key={item.value}
+              style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
+              onPress={() => { setStatusFilter(item.value); setPage(1); }}
+            >
+              <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Parcel List */}
@@ -209,6 +258,18 @@ function ParcelRow({ parcel }: { parcel: Parcel }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  statusCountRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
+  statusCountText: { fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.semiBold },
+  filterRow: { height: 48 },
+  filterList: { paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' },
+  filterChip: {
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16,
+    backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border,
+    height: 30, justifyContent: 'center', alignSelf: 'center',
+  },
+  filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  filterChipText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
+  filterChipTextActive: { color: COLORS.white },
 
   // Header
   header: {

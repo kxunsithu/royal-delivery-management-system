@@ -97,7 +97,13 @@ class ParcelController extends Controller
                     DB::raw('sender_name as name'),
                     DB::raw('sender_phone as phone'),
                     DB::raw('COUNT(*) as parcel_count'),
-                    DB::raw('MAX(received_at) as last_parcel_at')
+                    DB::raw('MAX(received_at) as last_parcel_at'),
+                    DB::raw("SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received_count"),
+                    DB::raw("SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified_count"),
+                    DB::raw("SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as in_transit_count"),
+                    DB::raw("SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered_count"),
+                    DB::raw("SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
+                    DB::raw("SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged_count")
                 )
                 ->whereNotNull('sender_name')
                 ->whereNotNull('sender_phone')
@@ -112,7 +118,13 @@ class ParcelController extends Controller
                     DB::raw('recipient_name as name'),
                     DB::raw('recipient_phone as phone'),
                     DB::raw('COUNT(*) as parcel_count'),
-                    DB::raw('MAX(received_at) as last_parcel_at')
+                    DB::raw('MAX(received_at) as last_parcel_at'),
+                    DB::raw("SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received_count"),
+                    DB::raw("SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified_count"),
+                    DB::raw("SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as in_transit_count"),
+                    DB::raw("SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered_count"),
+                    DB::raw("SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
+                    DB::raw("SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged_count")
                 )
                 ->when($search, fn($q) => $q->where(function ($sq) use ($term) {
                     $sq->whereRaw('LOWER(recipient_name) LIKE ?', [$term])
@@ -132,6 +144,12 @@ class ParcelController extends Controller
                 'name'           => $r->name,
                 'phone'          => $r->phone,
                 'parcel_count'   => (int) $r->parcel_count,
+                'received_count' => (int) $r->received_count,
+                'verified_count' => (int) $r->verified_count,
+                'in_transit_count' => (int) $r->in_transit_count,
+                'delivered_count' => (int) $r->delivered_count,
+                'failed_count'   => (int) $r->failed_count,
+                'damaged_count'  => (int) $r->damaged_count,
                 'last_parcel_at' => $r->last_parcel_at,
                 'type'           => $type,
             ])->values(),

@@ -156,6 +156,12 @@ export interface Customer {
   name: string;
   phone: string;
   parcel_count: number;
+  received_count?: number;
+  verified_count?: number;
+  in_transit_count?: number;
+  delivered_count?: number;
+  failed_count?: number;
+  damaged_count?: number;
   last_parcel_at?: string;
   type: 'sender' | 'recipient';
 }

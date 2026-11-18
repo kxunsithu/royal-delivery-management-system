@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { parcelService, Customer } from '../../src/services/parcelService';
-import { COLORS } from '../../src/constants';
+import { COLORS, STATUS_COLORS } from '../../src/constants';
 
 type CustomerType = 'recipient' | 'sender';
 
@@ -161,9 +161,20 @@ function CustomerCard({ customer, type }: { customer: Customer; type: CustomerTy
     <TouchableOpacity
       style={styles.card}
       onPress={() =>
-        router.push(
-          `/customers/${encodeURIComponent(customer.phone)}?type=${type}&name=${encodeURIComponent(customer.name)}`
-        )
+        router.push({
+          pathname: '/customers/[phone]',
+          params: {
+            phone: customer.phone,
+            type,
+            name: customer.name,
+            rc: String(customer.received_count ?? 0),
+            vc: String(customer.verified_count ?? 0),
+            ic: String(customer.in_transit_count ?? 0),
+            dc: String(customer.delivered_count ?? 0),
+            fc: String(customer.failed_count ?? 0),
+            dam: String(customer.damaged_count ?? 0),
+          },
+        })
       }
       activeOpacity={0.85}
     >
@@ -173,6 +184,9 @@ function CustomerCard({ customer, type }: { customer: Customer; type: CustomerTy
       <View style={styles.cardInfo}>
         <Text style={styles.cardName} numberOfLines={1}>{customer.name}</Text>
         <Text style={styles.cardPhone}>{customer.phone}</Text>
+        <Text style={styles.statusTextSmall}>
+          လက်ခံ {(customer.received_count ?? 0)} · စစ်ဆေး {(customer.verified_count ?? 0)} · ဆောင်ရွက် {(customer.in_transit_count ?? 0)} · ပို့ပြီး {(customer.delivered_count ?? 0)} · မအောင် {(customer.failed_count ?? 0)} · ပျက် {(customer.damaged_count ?? 0)}
+        </Text>
         {customer.last_parcel_at && (
           <Text style={styles.lastDate}>
             နောက်ဆုံး:{' '}
@@ -325,6 +339,11 @@ const styles = StyleSheet.create({
   lastDate: {
     fontSize: 11,
     color: COLORS.textLight,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+  },
+  statusTextSmall: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
   cardRight: { alignItems: 'flex-end' },
