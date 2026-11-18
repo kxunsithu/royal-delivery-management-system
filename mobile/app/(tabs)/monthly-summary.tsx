@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { parcelService, DailySummary } from '../../src/services/parcelService';
-import { COLORS, FONTS } from '../../src/constants';
+import { COLORS, FONTS, STATUS_COLORS } from '../../src/constants';
 
 const MONTHS_MM = [
   'ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်',
@@ -58,6 +58,7 @@ export default function MonthlySummaryScreen() {
     const map = new Map<string, {
       key: string; year: number; month: number;
       parcel_count: number; sender_count: number; recipient_count: number;
+      received_count: number; in_transit_count: number; delivered_count: number; failed_count: number;
       fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
     }>();
     for (const s of summaries) {
@@ -68,6 +69,10 @@ export default function MonthlySummaryScreen() {
         existing.parcel_count += s.parcel_count;
         existing.sender_count += s.sender_count;
         existing.recipient_count += s.recipient_count;
+        existing.received_count += s.received_count;
+        existing.in_transit_count += s.in_transit_count;
+        existing.delivered_count += s.delivered_count;
+        existing.failed_count += s.failed_count;
         existing.fee_mmk += s.fee_mmk;
         existing.fee_thb += s.fee_thb;
         existing.cod_mmk += s.cod_mmk;
@@ -77,8 +82,10 @@ export default function MonthlySummaryScreen() {
         map.set(key, {
           key, year: d.getFullYear(), month: d.getMonth(),
           parcel_count: s.parcel_count, sender_count: s.sender_count,
-          recipient_count: s.recipient_count, fee_mmk: s.fee_mmk,
-          fee_thb: s.fee_thb, cod_mmk: s.cod_mmk, cod_thb: s.cod_thb, day_count: 1,
+          recipient_count: s.recipient_count,
+          received_count: s.received_count, in_transit_count: s.in_transit_count,
+          delivered_count: s.delivered_count, failed_count: s.failed_count,
+          fee_mmk: s.fee_mmk, fee_thb: s.fee_thb, cod_mmk: s.cod_mmk, cod_thb: s.cod_thb, day_count: 1,
         });
       }
     }
@@ -247,7 +254,8 @@ export default function MonthlySummaryScreen() {
 
 function MonthSummaryCard({ group, onPress }: { group: {
   key: string; year: number; month: number; parcel_count: number; sender_count: number;
-  recipient_count: number; fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
+  recipient_count: number; received_count: number; in_transit_count: number; delivered_count: number; failed_count: number;
+  fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
 }; onPress: () => void }) {
   const feeStats: { value: number; label: string; color: string }[] = [];
   if (group.fee_mmk > 0) feeStats.push({ value: group.fee_mmk, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
@@ -284,6 +292,31 @@ function MonthSummaryCard({ group, onPress }: { group: {
           <Text style={styles.statLabel}>လက်ခံသူ ဦး</Text>
         </View>
       </View>
+
+      {/* Status counts */}
+      <View style={styles.rowDivider} />
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.RECEIVED || COLORS.text }]}>{group.received_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>လက်ခံ</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.IN_TRANSIT || COLORS.text }]}>{group.in_transit_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DELIVERED || COLORS.text }]}>{group.delivered_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.FAILED || COLORS.text }]}>{group.failed_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>မအောင်မြင်</Text>
+        </View>
+      </View>
+
       {feeStats.length > 0 && (
         <>
           <View style={styles.rowDivider} />

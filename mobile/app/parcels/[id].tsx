@@ -362,8 +362,8 @@ export default function ParcelDetailScreen() {
 
         <InfoSection title="ရက်စွဲများ">
           <InfoRow label="လက်ခံရက်စွဲ" value={new Date(parcel.received_at || parcel.created_at).toLocaleString()} />
-          {parcel.status === 'DELIVERED' && parcel.delivered_at ? (
-            <InfoRow label="ပို့ဆောင်ပြီးရက်စွဲ" value={new Date(parcel.delivered_at).toLocaleString()} />
+          {parcel.status === 'DELIVERED' && (parcel.delivered_at || parcel.updated_at) ? (
+            <InfoRow label="ပို့ဆောင်ပြီးရက်စွဲ" value={new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString()} />
           ) : null}
         </InfoSection>
 

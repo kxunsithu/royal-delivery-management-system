@@ -122,6 +122,12 @@ export interface DailySummary {
   parcel_count: number;
   sender_count: number;
   recipient_count: number;
+  received_count: number;
+  verified_count: number;
+  in_transit_count: number;
+  delivered_count: number;
+  failed_count: number;
+  damaged_count: number;
   fee_mmk: number;
   fee_thb: number;
   cod_mmk: number;

@@ -178,8 +178,8 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
       {/* Parcel create & complete dates */}
       <View style={styles.parcelDetails}>
         <Text style={styles.detailText}>လက်ခံရက်စွဲ: {parcel?.received_at ? new Date(parcel.received_at).toLocaleString() : (parcel?.created_at ? new Date(parcel.created_at).toLocaleString() : '-')}</Text>
-        {parcel?.status === 'DELIVERED' && parcel?.delivered_at ? (
-          <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date(parcel.delivered_at).toLocaleString()}</Text>
+        {parcel?.status === 'DELIVERED' && (parcel?.delivered_at || parcel?.updated_at) ? (
+          <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString()}</Text>
         ) : null}
       </View>
 

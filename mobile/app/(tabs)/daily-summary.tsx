@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { parcelService, DailySummary } from '../../src/services/parcelService';
-import { COLORS, FONTS } from '../../src/constants';
+import { COLORS, FONTS, STATUS_COLORS } from '../../src/constants';
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
@@ -305,6 +305,30 @@ function DaySummaryCard({ summary }: { summary: DailySummary }) {
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: COLORS.info }]}>{summary.recipient_count.toLocaleString()}</Text>
           <Text style={styles.statLabel}>လက်ခံသူ ဦး</Text>
+        </View>
+      </View>
+
+      {/* Status counts */}
+      <View style={styles.rowDivider} />
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.RECEIVED || COLORS.text }]}>{summary.received_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>လက်ခံ</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.IN_TRANSIT || COLORS.text }]}>{summary.in_transit_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DELIVERED || COLORS.text }]}>{summary.delivered_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.FAILED || COLORS.text }]}>{summary.failed_count.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>မအောင်မြင်</Text>
         </View>
       </View>
 
