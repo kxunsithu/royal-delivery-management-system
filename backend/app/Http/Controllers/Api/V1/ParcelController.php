@@ -202,6 +202,64 @@ class ParcelController extends Controller
         return response()->json(['data' => $rows]);
     }
 
+    /**
+     * Monthly summary: parcels grouped by received month.
+     * GET /parcels/monthly-summary?date_from=&date_to=
+     */
+    public function monthlySummary(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', Parcel::class);
+
+        $user = $request->user();
+        if ($user->isDeliveryStaff()) {
+            return response()->json(['message' => 'Access denied.'], 403);
+        }
+
+        $query = Parcel::query()
+            ->select([
+                DB::raw("strftime('%Y-%m', received_at) as month"),
+                DB::raw('COUNT(*) as parcel_count'),
+                DB::raw('COUNT(DISTINCT sender_phone) as sender_count'),
+                DB::raw('COUNT(DISTINCT recipient_phone) as recipient_count'),
+                DB::raw("SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received_count"),
+                DB::raw("SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified_count"),
+                DB::raw("SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as in_transit_count"),
+                DB::raw("SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered_count"),
+                DB::raw("SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
+                DB::raw("SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged_count"),
+                DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as fee_mmk"),
+                DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as fee_thb"),
+                DB::raw("SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
+                DB::raw('COUNT(DISTINCT DATE(received_at)) as day_count'),
+            ])
+            ->whereNotNull('received_at')
+            ->when($request->date_from, fn($q) => $q->whereDate('received_at', '>=', $request->date_from))
+            ->when($request->date_to,   fn($q) => $q->whereDate('received_at', '<=', $request->date_to))
+            ->groupBy(DB::raw("strftime('%Y-%m', received_at)"))
+            ->orderBy('month', 'desc');
+
+        $rows = $query->get()->map(fn($row) => [
+            'month'            => $row->month,
+            'parcel_count'     => (int) $row->parcel_count,
+            'sender_count'     => (int) $row->sender_count,
+            'recipient_count'  => (int) $row->recipient_count,
+            'received_count'   => (int) $row->received_count,
+            'verified_count'   => (int) $row->verified_count,
+            'in_transit_count' => (int) $row->in_transit_count,
+            'delivered_count'  => (int) $row->delivered_count,
+            'failed_count'     => (int) $row->failed_count,
+            'damaged_count'    => (int) $row->damaged_count,
+            'fee_mmk'          => (float) $row->fee_mmk,
+            'fee_thb'          => (float) $row->fee_thb,
+            'cod_mmk'          => (float) $row->cod_mmk,
+            'cod_thb'          => (float) $row->cod_thb,
+            'day_count'        => (int) $row->day_count,
+        ]);
+
+        return response()->json(['data' => $rows]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Parcel::class);

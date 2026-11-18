@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { parcelService, DailySummary } from '../../src/services/parcelService';
+import { parcelService, MonthlySummary } from '../../src/services/parcelService';
 import { COLORS, FONTS, STATUS_COLORS } from '../../src/constants';
 
 const MONTHS_MM = [
@@ -48,48 +48,35 @@ export default function MonthlySummaryScreen() {
   };
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['daily-summary', dateFrom, dateTo],
-    queryFn: () => parcelService.dailySummary(dateFrom || undefined, dateTo || undefined),
+    queryKey: ['monthly-summary', dateFrom, dateTo],
+    queryFn: () => parcelService.monthlySummary(dateFrom || undefined, dateTo || undefined),
   });
 
   const summaries = data ?? [];
 
   const monthlyGroups = useMemo(() => {
-    const map = new Map<string, {
-      key: string; year: number; month: number;
-      parcel_count: number; sender_count: number; recipient_count: number;
-      received_count: number; in_transit_count: number; delivered_count: number; failed_count: number;
-      fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
-    }>();
-    for (const s of summaries) {
-      const d = new Date(s.date + 'T00:00:00');
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const existing = map.get(key);
-      if (existing) {
-        existing.parcel_count += s.parcel_count;
-        existing.sender_count += s.sender_count;
-        existing.recipient_count += s.recipient_count;
-        existing.received_count += s.received_count;
-        existing.in_transit_count += s.in_transit_count;
-        existing.delivered_count += s.delivered_count;
-        existing.failed_count += s.failed_count;
-        existing.fee_mmk += s.fee_mmk;
-        existing.fee_thb += s.fee_thb;
-        existing.cod_mmk += s.cod_mmk;
-        existing.cod_thb += s.cod_thb;
-        existing.day_count += 1;
-      } else {
-        map.set(key, {
-          key, year: d.getFullYear(), month: d.getMonth(),
-          parcel_count: s.parcel_count, sender_count: s.sender_count,
-          recipient_count: s.recipient_count,
-          received_count: s.received_count, in_transit_count: s.in_transit_count,
-          delivered_count: s.delivered_count, failed_count: s.failed_count,
-          fee_mmk: s.fee_mmk, fee_thb: s.fee_thb, cod_mmk: s.cod_mmk, cod_thb: s.cod_thb, day_count: 1,
-        });
-      }
-    }
-    return Array.from(map.values()).sort((a, b) => (a.key < b.key ? 1 : -1));
+    return (summaries as MonthlySummary[]).map((s) => {
+      const [y, m] = s.month.split('-');
+      return {
+        key: s.month,
+        year: Number(y),
+        month: Number(m) - 1,
+        parcel_count: s.parcel_count,
+        sender_count: s.sender_count,
+        recipient_count: s.recipient_count,
+        received_count: s.received_count ?? 0,
+        verified_count: s.verified_count ?? 0,
+        in_transit_count: s.in_transit_count ?? 0,
+        delivered_count: s.delivered_count ?? 0,
+        failed_count: s.failed_count ?? 0,
+        damaged_count: s.damaged_count ?? 0,
+        fee_mmk: s.fee_mmk,
+        fee_thb: s.fee_thb,
+        cod_mmk: s.cod_mmk,
+        cod_thb: s.cod_thb,
+        day_count: s.day_count,
+      };
+    }).sort((a, b) => (a.key < b.key ? 1 : -1));
   }, [summaries]);
 
   const handleMonthPress = (g: typeof monthlyGroups[number]) => {
@@ -254,7 +241,7 @@ export default function MonthlySummaryScreen() {
 
 function MonthSummaryCard({ group, onPress }: { group: {
   key: string; year: number; month: number; parcel_count: number; sender_count: number;
-  recipient_count: number; received_count: number; in_transit_count: number; delivered_count: number; failed_count: number;
+  recipient_count: number; received_count: number; verified_count: number; in_transit_count: number; delivered_count: number; failed_count: number; damaged_count: number;
   fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
 }; onPress: () => void }) {
   const feeStats: { value: number; label: string; color: string }[] = [];
@@ -264,7 +251,7 @@ function MonthSummaryCard({ group, onPress }: { group: {
   if (group.cod_thb > 0) feeStats.push({ value: group.cod_thb, label: 'COD (฿)', color: COLORS.warning });
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+    <TouchableOpacity style={[styles.card, (group.parcel_count > 0 && group.delivered_count === group.parcel_count) && styles.cardHighlighted]} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardHeader}>
         <View style={styles.dateIconWrap}>
           <Ionicons name="calendar-outline" size={16} color={COLORS.primary} />
@@ -297,23 +284,35 @@ function MonthSummaryCard({ group, onPress }: { group: {
       <View style={styles.rowDivider} />
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.RECEIVED || COLORS.text }]}>{group.received_count.toLocaleString()}</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.RECEIVED || COLORS.text }]}>{(group.received_count ?? 0).toLocaleString()}</Text>
           <Text style={styles.statLabel}>လက်ခံ</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.IN_TRANSIT || COLORS.text }]}>{group.in_transit_count.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.VERIFIED || COLORS.text }]}>{(group.verified_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>စစ်ဆေးပြီး</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.DELIVERED || COLORS.text }]}>{group.delivered_count.toLocaleString()}</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.IN_TRANSIT || COLORS.text }]}>{(group.in_transit_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+        </View>
+      </View>
+      <View style={styles.rowDivider} />
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DELIVERED || COLORS.text }]}>{(group.delivered_count ?? 0).toLocaleString()}</Text>
           <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.FAILED || COLORS.text }]}>{group.failed_count.toLocaleString()}</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.FAILED || COLORS.text }]}>{(group.failed_count ?? 0).toLocaleString()}</Text>
           <Text style={styles.statLabel}>မအောင်မြင်</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DAMAGED || COLORS.text }]}>{(group.damaged_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပျက်ဆီး</Text>
         </View>
       </View>
 
@@ -413,6 +412,9 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white, borderRadius: 16, padding: 14,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 2,
+  },
+  cardHighlighted: {
+    borderWidth: 1.5, borderColor: COLORS.success, backgroundColor: '#E8F8EF',
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dateIconWrap: { width: 28, height: 28, borderRadius: 8, backgroundColor: COLORS.primaryBg, alignItems: 'center', justifyContent: 'center' },

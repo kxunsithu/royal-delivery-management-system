@@ -275,7 +275,7 @@ function DaySummaryCard({ summary }: { summary: DailySummary }) {
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, (summary.parcel_count > 0 && summary.delivered_count === summary.parcel_count) && styles.cardHighlighted]}
       onPress={() => router.push(`/daily-summary/${summary.date}`)}
       activeOpacity={0.85}
     >
@@ -312,23 +312,35 @@ function DaySummaryCard({ summary }: { summary: DailySummary }) {
       <View style={styles.rowDivider} />
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.RECEIVED || COLORS.text }]}>{summary.received_count.toLocaleString()}</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.RECEIVED || COLORS.text }]}>{(summary.received_count ?? 0).toLocaleString()}</Text>
           <Text style={styles.statLabel}>လက်ခံ</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.IN_TRANSIT || COLORS.text }]}>{summary.in_transit_count.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.VERIFIED || COLORS.text }]}>{(summary.verified_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>စစ်ဆေးပြီး</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.DELIVERED || COLORS.text }]}>{summary.delivered_count.toLocaleString()}</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.IN_TRANSIT || COLORS.text }]}>{(summary.in_transit_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+        </View>
+      </View>
+      <View style={styles.rowDivider} />
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DELIVERED || COLORS.text }]}>{(summary.delivered_count ?? 0).toLocaleString()}</Text>
           <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: STATUS_COLORS.FAILED || COLORS.text }]}>{summary.failed_count.toLocaleString()}</Text>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.FAILED || COLORS.text }]}>{(summary.failed_count ?? 0).toLocaleString()}</Text>
           <Text style={styles.statLabel}>မအောင်မြင်</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DAMAGED || COLORS.text }]}>{(summary.damaged_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပျက်ဆီး</Text>
         </View>
       </View>
 
@@ -663,6 +675,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 10,
     elevation: 2,
+  },
+  cardHighlighted: {
+    borderWidth: 1.5,
+    borderColor: COLORS.success,
+    backgroundColor: '#E8F8EF',
   },
   cardHeader: {
     flexDirection: 'row',

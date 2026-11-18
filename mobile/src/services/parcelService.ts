@@ -134,6 +134,24 @@ export interface DailySummary {
   cod_thb: number;
 }
 
+export interface MonthlySummary {
+  month: string;
+  parcel_count: number;
+  sender_count: number;
+  recipient_count: number;
+  received_count: number;
+  verified_count: number;
+  in_transit_count: number;
+  delivered_count: number;
+  failed_count: number;
+  damaged_count: number;
+  fee_mmk: number;
+  fee_thb: number;
+  cod_mmk: number;
+  cod_thb: number;
+  day_count: number;
+}
+
 export interface Customer {
   name: string;
   phone: string;
@@ -155,6 +173,13 @@ export interface CustomersResponse {
 export const parcelService = {
   async dailySummary(dateFrom?: string, dateTo?: string): Promise<DailySummary[]> {
     const response = await apiClient.get('/parcels/daily-summary', {
+      params: { date_from: dateFrom, date_to: dateTo },
+    });
+    return response.data.data;
+  },
+
+  async monthlySummary(dateFrom?: string, dateTo?: string): Promise<MonthlySummary[]> {
+    const response = await apiClient.get('/parcels/monthly-summary', {
       params: { date_from: dateFrom, date_to: dateTo },
     });
     return response.data.data;

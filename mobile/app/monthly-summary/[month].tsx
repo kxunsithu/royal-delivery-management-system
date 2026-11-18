@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -31,19 +32,31 @@ function parseMonth(monthStr: string): { firstDay: string; lastDay: string; labe
   return { firstDay, lastDay, label };
 }
 
+const STATUS_FILTERS = [
+  { label: 'အားလုံး', value: '' },
+  { label: 'လက်ခံ', value: 'RECEIVED' },
+  { label: 'စစ်ဆေးပြီး', value: 'VERIFIED' },
+  { label: 'ဆောင်ရွက်နေဆဲ', value: 'IN_TRANSIT' },
+  { label: 'ပို့ဆောင်ပြီး', value: 'DELIVERED' },
+  { label: 'မအောင်မြင်', value: 'FAILED' },
+  { label: 'ပျက်ဆီး', value: 'DAMAGED' },
+];
+
 export default function MonthlySummaryDetailScreen() {
   const insets = useSafeAreaInsets();
   const { month } = useLocalSearchParams<{ month: string }>();
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('');
 
   const { firstDay, lastDay, label } = parseMonth(month ?? '');
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['parcels-monthly-detail', month, page],
+    queryKey: ['parcels-monthly-detail', month, statusFilter, page],
     queryFn: () =>
       parcelService.list({
         date_from: firstDay,
         date_to: lastDay,
+        status: statusFilter || undefined,
         page,
         per_page: 50,
       }),
@@ -134,6 +147,23 @@ export default function MonthlySummaryDetailScreen() {
         </View>
       )}
 
+      {/* Status Filter */}
+      <View style={styles.filterRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterList}>
+          {STATUS_FILTERS.map((item) => (
+            <TouchableOpacity
+              key={item.value}
+              style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
+              onPress={() => { setStatusFilter(item.value); setPage(1); }}
+            >
+              <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       {isLoading ? (
         <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
       ) : (
@@ -212,8 +242,8 @@ function ParcelCard({ parcel }: { parcel: Parcel }) {
       {/* Parcel create & complete dates */}
       <View style={styles.parcelDetails}>
         <Text style={styles.detailText}>လက်ခံရက်စွဲ: {new Date(parcel.received_at || parcel.created_at).toLocaleString()}</Text>
-        {parcel.status === 'DELIVERED' && parcel.delivered_at ? (
-          <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date(parcel.delivered_at).toLocaleString()}</Text>
+        {(parcel.delivered_at || (parcel.status === 'DELIVERED' && parcel.updated_at)) ? (
+          <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString()}</Text>
         ) : null}
       </View>
 
@@ -228,6 +258,16 @@ function ParcelCard({ parcel }: { parcel: Parcel }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  filterRow: { height: 52, backgroundColor: COLORS.background },
+  filterList: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
+  filterChip: {
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16,
+    backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border,
+    height: 32, justifyContent: 'center', alignSelf: 'center',
+  },
+  filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  filterChipText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
+  filterChipTextActive: { color: COLORS.white },
   header: {
     flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingBottom: 14,
     backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.border,
