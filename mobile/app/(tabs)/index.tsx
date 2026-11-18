@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { dashboardService } from '../../src/services/dashboardService';
 import { useAuth } from '../../src/context/AuthContext';
 import { COLORS, FONTS, ROLE_LABELS_MM } from '../../src/constants';
@@ -135,6 +136,7 @@ function StaffDashboard({ data }: { data: any }) {
 
 function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; isAdmin: boolean; canCreateParcel: boolean }) {
   const stats = data?.parcel_stats;
+  const isAccountant = !isAdmin && !canCreateParcel;
 
   const statItems = isAdmin ? [
     { label: 'စုစုပေါင်း ပါဆယ်', value: stats?.total ?? 0, color: COLORS.primary },
@@ -191,6 +193,39 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
                 <Text style={styles.totalItemValue}>{(data?.totals?.cod_thb ?? 0).toLocaleString()}</Text>
               </View>
             </View>
+          </View>
+        </>
+      )}
+
+      {/* Quick Actions for manager/accountant */}
+      {!isAdmin && (
+        <>
+          <Text style={styles.sectionTitle}>အမြန်ဆောင်ရွက်မည်</Text>
+          <View style={styles.quickActionsGrid}>
+            <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/parcels')} activeOpacity={0.8}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#EEF2FF' }]}>
+                <Ionicons name="cube-outline" size={24} color={COLORS.primary} />
+              </View>
+              <Text style={styles.quickActionLabel}>ပါဆယ်များ</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/deliveries')} activeOpacity={0.8}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#E8F8EF' }]}>
+                <Ionicons name="car-outline" size={24} color={COLORS.success} />
+              </View>
+              <Text style={styles.quickActionLabel}>ပို့ဆောင်မှုများ</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/assign-staff')} activeOpacity={0.8}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#FFF3E0' }]}>
+                <Ionicons name="people-outline" size={24} color={COLORS.warning} />
+              </View>
+              <Text style={styles.quickActionLabel}>ဝန်ထမ်းချိတ်ဆက်</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/daily-summary')} activeOpacity={0.8}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#EFF6FF' }]}>
+                <Ionicons name="bar-chart-outline" size={24} color={COLORS.info} />
+              </View>
+              <Text style={styles.quickActionLabel}>မှတ်တမ်း</Text>
+            </TouchableOpacity>
           </View>
         </>
       )}
@@ -426,5 +461,40 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
     opacity: 0.5,
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+  quickAction: {
+    width: '47%',
+    backgroundColor: COLORS.white,
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  quickActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickActionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.text,
+    fontFamily: FONTS.semiBold,
+    textAlign: 'center',
   },
 });
