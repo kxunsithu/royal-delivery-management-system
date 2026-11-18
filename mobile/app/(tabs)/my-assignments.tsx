@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
+  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
   listArea: { flex: 1 },
   empty: { alignItems: 'center', paddingVertical: 60 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6, fontFamily: FONTS.bold },
