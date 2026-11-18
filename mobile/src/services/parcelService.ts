@@ -26,6 +26,7 @@ export interface Parcel {
   active_assignment?: {
     id: number;
     staff: { id: number; name: string };
+    assigned_by?: { id: number; name: string };
     assigned_at: string;
   };
   status_histories?: StatusHistory[];
@@ -109,6 +110,7 @@ export interface ParcelFilters {
   per_page?: number;
   sort_by?: string;
   sort_dir?: string;
+  assigned_by_id?: number;
 }
 
 export interface ContactSuggestion {

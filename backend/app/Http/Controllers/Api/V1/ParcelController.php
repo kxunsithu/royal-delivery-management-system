@@ -284,7 +284,7 @@ class ParcelController extends Controller
 
         $user = $request->user();
 
-        $query = Parcel::with(['receivedBy', 'activeAssignment.staff', 'images' => function ($q) {
+        $query = Parcel::with(['receivedBy', 'activeAssignment.staff', 'activeAssignment.assignedBy', 'images' => function ($q) {
             $q->orderBy('sort_order')->limit(1);
         }])
             ->when($request->search, fn($q) => $q->where(function ($sq) use ($request) {
@@ -301,6 +301,7 @@ class ParcelController extends Controller
             ->when($request->date_from, fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) >= ?", [$request->date_from]))
             ->when($request->date_to, fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) <= ?", [$request->date_to]))
             ->when($request->assigned_to, fn($q) => $q->whereHas('activeAssignment', fn($aq) => $aq->where('staff_id', $request->assigned_to)))
+            ->when($request->assigned_by_id, fn($q) => $q->whereHas('activeAssignment', fn($aq) => $aq->where('assigned_by_id', $request->assigned_by_id)))
             ->orderBy($request->sort_by ?? 'received_at', $request->sort_dir ?? 'desc');
 
         // Delivery staff can only see their own assigned parcels
@@ -720,6 +721,10 @@ class ParcelController extends Controller
                 'staff' => $parcel->activeAssignment->staff ? [
                     'id' => $parcel->activeAssignment->staff->id,
                     'name' => $parcel->activeAssignment->staff->name,
+                ] : null,
+                'assigned_by' => $parcel->activeAssignment->relationLoaded('assignedBy') && $parcel->activeAssignment->assignedBy ? [
+                    'id' => $parcel->activeAssignment->assignedBy->id,
+                    'name' => $parcel->activeAssignment->assignedBy->name,
                 ] : null,
                 'assigned_at' => $parcel->activeAssignment->assigned_at->toISOString(),
             ] : null,
