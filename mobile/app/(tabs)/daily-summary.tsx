@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { parcelService, DailySummary } from '../../src/services/parcelService';
+import { parcelService, DailySummary, MonthlySummary } from '../../src/services/parcelService';
 import { COLORS, FONTS, STATUS_COLORS } from '../../src/constants';
 
 function formatDate(dateStr: string): string {
@@ -30,8 +30,15 @@ function formatDate(dateStr: string): string {
   return `${day} ${month} ${year}၊ ${dayName}`;
 }
 
+const MONTHS_MM = [
+  'ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်',
+  'ဇူလိုင်', 'သြဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ',
+];
+
 export default function DailySummaryScreen() {
   const insets = useSafeAreaInsets();
+
+  const [viewMode, setViewMode] = useState<'day' | 'month'>('day');
 
   const [showDateFilter, setShowDateFilter] = useState(false);
   const params = useLocalSearchParams<{ date_from?: string; date_to?: string }>();
@@ -57,12 +64,62 @@ export default function DailySummaryScreen() {
     setDateTo('');
   };
 
-  const { data, isLoading, isFetching, refetch } = useQuery({
+  const handleSwitchMode = (mode: 'day' | 'month') => {
+    setViewMode(mode);
+    // Reset date filter when switching modes
+    handleClearDateFilter();
+    setShowDateFilter(false);
+  };
+
+  // Daily summary query
+  const dailyQuery = useQuery({
     queryKey: ['daily-summary', dateFrom, dateTo],
     queryFn: () => parcelService.dailySummary(dateFrom || undefined, dateTo || undefined),
+    enabled: viewMode === 'day',
   });
 
-  const summaries = data ?? [];
+  // Monthly summary query
+  const monthlyQuery = useQuery({
+    queryKey: ['monthly-summary', dateFrom, dateTo],
+    queryFn: () => parcelService.monthlySummary(dateFrom || undefined, dateTo || undefined),
+    enabled: viewMode === 'month',
+  });
+
+  const dailySummaries = dailyQuery.data ?? [];
+
+  const monthlyGroups = useMemo(() => {
+    return ((monthlyQuery.data ?? []) as MonthlySummary[]).map((s) => {
+      const [y, m] = s.month.split('-');
+      return {
+        key: s.month,
+        year: Number(y),
+        month: Number(m) - 1,
+        parcel_count: s.parcel_count,
+        sender_count: s.sender_count,
+        recipient_count: s.recipient_count,
+        received_count: s.received_count ?? 0,
+        verified_count: s.verified_count ?? 0,
+        in_transit_count: s.in_transit_count ?? 0,
+        delivered_count: s.delivered_count ?? 0,
+        failed_count: s.failed_count ?? 0,
+        damaged_count: s.damaged_count ?? 0,
+        fee_mmk: s.fee_mmk,
+        fee_thb: s.fee_thb,
+        cod_mmk: s.cod_mmk,
+        cod_thb: s.cod_thb,
+        day_count: s.day_count,
+      };
+    }).sort((a, b) => (a.key < b.key ? 1 : -1));
+  }, [monthlyQuery.data]);
+
+  const isLoading = viewMode === 'day' ? dailyQuery.isLoading : monthlyQuery.isLoading;
+  const isFetching = viewMode === 'day' ? dailyQuery.isFetching : monthlyQuery.isFetching;
+  const refetch = viewMode === 'day' ? dailyQuery.refetch : monthlyQuery.refetch;
+
+  const itemCount = viewMode === 'day' ? dailySummaries.length : monthlyGroups.length;
+  const countLabel = viewMode === 'day'
+    ? `${itemCount} ရက် မှတ်တမ်း`
+    : `${itemCount} လ မှတ်တမ်း`;
 
   return (
     <View style={styles.container}>
@@ -77,20 +134,31 @@ export default function DailySummaryScreen() {
             <Ionicons name="chevron-back" size={22} color={COLORS.white} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle} numberOfLines={1}>နေ့စဉ် မှတ်တမ်း</Text>
-            {summaries.length > 0 && (
-              <Text style={styles.headerSub}>{summaries.length} ရက် မှတ်တမ်း</Text>
+            <Text style={styles.headerTitle} numberOfLines={1}>မှတ်တမ်း</Text>
+            {itemCount > 0 && (
+              <Text style={styles.headerSub}>{countLabel}</Text>
             )}
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <TouchableOpacity
-            style={styles.pageSwitchBtn}
-            onPress={() => router.navigate('/(tabs)/monthly-summary')}
-          >
-            <Ionicons name="calendar-outline" size={18} color={COLORS.primary} />
-            <Text style={styles.pageSwitchText}>လစဉ်</Text>
-          </TouchableOpacity>
+          {/* Day/Month toggle pills */}
+          <View style={styles.togglePill}>
+            <TouchableOpacity
+              style={[styles.togglePillBtn, viewMode === 'day' && styles.togglePillBtnActive]}
+              onPress={() => handleSwitchMode('day')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.togglePillText, viewMode === 'day' && styles.togglePillTextActive]}>နေ့</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.togglePillBtn, viewMode === 'month' && styles.togglePillBtnActive]}
+              onPress={() => handleSwitchMode('month')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.togglePillText, viewMode === 'month' && styles.togglePillTextActive]}>လ</Text>
+            </TouchableOpacity>
+          </View>
+
           {hasActiveDateFilter && (
             <TouchableOpacity
               style={styles.clearFilterBtn}
@@ -225,19 +293,47 @@ export default function DailySummaryScreen() {
         {/* List */}
         {isLoading ? (
           <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
-        ) : (
+        ) : viewMode === 'day' ? (
           <FlatList
-            data={summaries}
+            data={dailySummaries}
             keyExtractor={(item) => item.date}
             renderItem={({ item }) => <DaySummaryCard summary={item} />}
-            contentContainerStyle={[styles.list, summaries.length === 0 && styles.listEmpty]}
+            contentContainerStyle={[styles.list, dailySummaries.length === 0 && styles.listEmpty]}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={isFetching && !isLoading}
-                onRefresh={() => {
-                  refetch();
-                }}
+                onRefresh={() => { refetch(); }}
+                tintColor={COLORS.primary}
+              />
+            }
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Text style={styles.emptyTitle}>မှတ်တမ်း မတွေ့ပါ</Text>
+                <Text style={styles.emptySub}>
+                  {hasActiveDateFilter
+                    ? 'ရွေးချယ်ထားသော ကာလအတွင်း မှတ်တမ်း မရှိပါ'
+                    : 'ပါဆယ် မှတ်တမ်းများ မရှိသေးပါ'}
+                </Text>
+              </View>
+            }
+          />
+        ) : (
+          <FlatList
+            data={monthlyGroups}
+            keyExtractor={(item) => item.key}
+            renderItem={({ item }) => (
+              <MonthSummaryCard
+                group={item}
+                onPress={() => router.push(`/monthly-summary/${item.key}`)}
+              />
+            )}
+            contentContainerStyle={[styles.list, monthlyGroups.length === 0 && styles.listEmpty]}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isFetching && !isLoading}
+                onRefresh={() => { refetch(); }}
                 tintColor={COLORS.primary}
               />
             }
@@ -367,14 +463,11 @@ function DaySummaryCard({ summary }: { summary: DailySummary }) {
   );
 }
 
-const MONTHS_MM = [
-  'ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်',
-  'ဇူလိုင်', 'သြဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ',
-];
-
 function MonthSummaryCard({ group, onPress }: { group: {
   key: string; year: number; month: number; parcel_count: number; sender_count: number;
-  recipient_count: number; fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
+  recipient_count: number; received_count: number; verified_count: number; in_transit_count: number;
+  delivered_count: number; failed_count: number; damaged_count: number;
+  fee_mmk: number; fee_thb: number; cod_mmk: number; cod_thb: number; day_count: number;
 }; onPress: () => void }) {
   const feeStats: { value: number; label: string; color: string }[] = [];
   if (group.fee_mmk > 0) feeStats.push({ value: group.fee_mmk, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
@@ -383,14 +476,22 @@ function MonthSummaryCard({ group, onPress }: { group: {
   if (group.cod_thb > 0) feeStats.push({ value: group.cod_thb, label: 'COD (฿)', color: COLORS.warning });
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+    <TouchableOpacity
+      style={[styles.card, (group.parcel_count > 0 && group.delivered_count === group.parcel_count) && styles.cardHighlighted]}
+      onPress={onPress}
+      activeOpacity={0.85}
+    >
       <View style={styles.cardHeader}>
+        <View style={styles.dateIconWrap}>
+          <Ionicons name="calendar-outline" size={16} color={COLORS.primary} />
+        </View>
         <Text style={styles.dateText}>{MONTHS_MM[group.month]} {group.year}</Text>
-        <Text style={styles.monthDayCount}>{group.day_count} ရက်</Text>
+        <View style={styles.monthBadge}>
+          <Text style={styles.monthDayCount}>{group.day_count} ရက်</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
       </View>
-
       <View style={styles.divider} />
-
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
           <Text style={styles.statValue}>{group.parcel_count.toLocaleString()}</Text>
@@ -408,6 +509,42 @@ function MonthSummaryCard({ group, onPress }: { group: {
         </View>
       </View>
 
+      {/* Status counts */}
+      <View style={styles.rowDivider} />
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.RECEIVED || COLORS.text }]}>{(group.received_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>လက်ခံ</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.VERIFIED || COLORS.text }]}>{(group.verified_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>စစ်ဆေးပြီး</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.IN_TRANSIT || COLORS.text }]}>{(group.in_transit_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+        </View>
+      </View>
+      <View style={styles.rowDivider} />
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DELIVERED || COLORS.text }]}>{(group.delivered_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.FAILED || COLORS.text }]}>{(group.failed_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>မအောင်မြင်</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: STATUS_COLORS.DAMAGED || COLORS.text }]}>{(group.damaged_count ?? 0).toLocaleString()}</Text>
+          <Text style={styles.statLabel}>ပျက်ဆီး</Text>
+        </View>
+      </View>
+
       {feeStats.length > 0 && (
         <>
           <View style={styles.rowDivider} />
@@ -416,9 +553,7 @@ function MonthSummaryCard({ group, onPress }: { group: {
               <React.Fragment key={stat.label}>
                 {index > 0 && <View style={styles.statDivider} />}
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: stat.color }]}>
-                    {stat.value.toLocaleString()}
-                  </Text>
+                  <Text style={[styles.statValue, { color: stat.color }]}>{stat.value.toLocaleString()}</Text>
                   <Text style={styles.statLabel}>{stat.label}</Text>
                 </View>
               </React.Fragment>
@@ -433,41 +568,6 @@ function MonthSummaryCard({ group, onPress }: { group: {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
   contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
-  viewToggle: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 4,
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 3,
-  },
-  viewToggleBtn: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  viewToggleBtnActive: {
-    backgroundColor: COLORS.primary,
-  },
-  viewToggleText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    fontFamily: FONTS.semiBold,
-  },
-  viewToggleTextActive: {
-    color: COLORS.white,
-  },
-  monthDayCount: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontFamily: FONTS.regular,
-  },
 
   // Header
   header: {
@@ -500,6 +600,35 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontFamily: FONTS.regular,
   },
+
+  // Toggle pill
+  togglePill: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 10,
+    padding: 3,
+    gap: 2,
+  },
+  togglePillBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  togglePillBtnActive: {
+    backgroundColor: COLORS.white,
+  },
+  togglePillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.8)',
+    fontFamily: FONTS.semiBold,
+  },
+  togglePillTextActive: {
+    color: COLORS.primary,
+  },
+
   calendarBtn: {
     width: 40,
     height: 40,
@@ -524,25 +653,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginRight: 8,
-  },
-  pageSwitchBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 40,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginRight: 8,
-  },
-  pageSwitchText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.primary,
-    fontFamily: FONTS.semiBold,
   },
 
   // Date filter
@@ -700,6 +810,18 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     flex: 1,
     fontFamily: FONTS.bold,
+  },
+  monthBadge: {
+    marginLeft: 'auto' as any,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    backgroundColor: COLORS.background,
+  },
+  monthDayCount: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.regular,
   },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
   statsRow: {

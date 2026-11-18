@@ -64,14 +64,9 @@ export default function MoreScreen() {
       onPress: () => router.navigate('/(tabs)/customers'),
     });
     items.push({
-      label: 'နေ့စဉ် မှတ်တမ်း',
-      icon: 'calendar',
+      label: 'မှတ်တမ်း',
+      icon: 'document-text-outline',
       onPress: () => router.navigate('/(tabs)/daily-summary'),
-    });
-    items.push({
-      label: 'လစဉ် မှတ်တမ်း',
-      icon: 'calendar-outline',
-      onPress: () => router.navigate('/(tabs)/monthly-summary'),
     });
   }
 
