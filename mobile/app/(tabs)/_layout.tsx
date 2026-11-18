@@ -137,8 +137,11 @@ export default function TabLayout() {
         name="my-assignments"
         options={{
           title: 'ကျွန်ုပ်၏လုပ်ငန်းများ',
-          tabBarButton: () => null,
-          tabBarItemStyle: { display: 'none' },
+          tabBarButton: isStaff ? undefined : () => null,
+          tabBarItemStyle: isStaff ? undefined : { display: 'none' },
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="bicycle" size={20} color={color as string} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -168,14 +171,19 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'ပရိုဖိုင်',
-          tabBarButton: () => null,
-          tabBarItemStyle: { display: 'none' },
+          tabBarButton: isStaff ? undefined : () => null,
+          tabBarItemStyle: isStaff ? undefined : { display: 'none' },
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-circle-outline" size={20} color={color as string} />
+          ),
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
           title: 'မီနူး',
+          tabBarButton: isStaff ? () => null : undefined,
+          tabBarItemStyle: isStaff ? { display: 'none' } : undefined,
           tabBarIcon: ({ color }) => (
             <Ionicons name="menu" size={20} color={color as string} />
           ),
