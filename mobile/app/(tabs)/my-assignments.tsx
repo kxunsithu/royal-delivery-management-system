@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  SectionList,
+  FlatList,
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -15,173 +16,255 @@ import { Ionicons } from '@expo/vector-icons';
 import { deliveryService, Assignment } from '../../src/services/deliveryService';
 import {
   COLORS,
+  STATUS_COLORS,
+  STATUS_LABELS_MM,
+  FONTS,
   PRIORITY_COLORS,
   PRIORITY_LABELS_MM,
-  ASSIGNMENT_STATUS_LABELS_MM,
-  ASSIGNMENT_STATUS_COLORS,
-  FONTS,
 } from '../../src/constants';
 
-type ViewMode = 'day' | 'month';
+type GroupBy = 'day' | 'month';
 
-// Myanmar timezone offset +6:30
-function toMyanmarDate(isoStr: string): string {
-  const d = new Date(new Date(isoStr).getTime() + (6 * 60 + 30) * 60000);
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+// Myanmar timezone +6:30
+function toMMDate(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + (6 * 60 + 30) * 60000);
+  return d.toISOString().slice(0, 10);
+}
+function toMMMonth(iso: string): string {
+  return toMMDate(iso).slice(0, 7);
 }
 
-function toMyanmarMonth(isoStr: string): string {
-  return toMyanmarDate(isoStr).slice(0, 7); // YYYY-MM
-}
-
-function formatDateMM(dateStr: string): string {
-  const [y, m, d] = dateStr.split('-');
+function formatPeriodLabel(period: string, groupBy: GroupBy): string {
+  if (groupBy === 'month') {
+    const [y, m] = period.split('-');
+    const months = ['ဇန်နဝါရီ','ဖေဖော်ဝါရီ','မတ်','ဧပြီ','မေ','ဇွန်','ဇူလိုင်','သြဂုတ်','စက်တင်ဘာ','အောက်တိုဘာ','နိုဝင်ဘာ','ဒီဇင်ဘာ'];
+    return `${months[Number(m) - 1]} ${y}`;
+  }
+  const d = new Date(period + 'T00:00:00');
   const months = ['ဇန်နဝါရီ','ဖေဖော်ဝါရီ','မတ်','ဧပြီ','မေ','ဇွန်','ဇူလိုင်','သြဂုတ်','စက်တင်ဘာ','အောက်တိုဘာ','နိုဝင်ဘာ','ဒီဇင်ဘာ'];
   const days = ['တနင်္ဂနွေ','တနင်္လာ','အင်္ဂါ','ဗုဒ္ဓဟူး','ကြာသပတေး','သောကြာ','စနေ'];
-  const dateObj = new Date(`${y}-${m}-${d}T00:00:00`);
-  const dow = days[dateObj.getDay()];
-  return `${d} ${months[parseInt(m, 10) - 1]} ${y}ခု ${dow}နေ့`;
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}၊ ${days[d.getDay()]}`;
 }
 
-function formatMonthMM(monthStr: string): string {
-  const [y, m] = monthStr.split('-');
-  const months = ['ဇန်နဝါရီ','ဖေဖော်ဝါရီ','မတ်','ဧပြီ','မေ','ဇွန်','ဇူလိုင်','သြဂုတ်','စက်တင်ဘာ','အောက်တိုဘာ','နိုဝင်ဘာ','ဒီဇင်ဘာ'];
-  return `${months[parseInt(m, 10) - 1]} ${y}ခု`;
+interface PeriodSummary {
+  period: string;
+  total_count: number;
+  completed_count: number;
+  failed_count: number;
+  active_count: number;
+  assignments: Assignment[];
 }
 
-function groupByDate(assignments: Assignment[], mode: ViewMode) {
+function buildSummaries(assignments: Assignment[], groupBy: GroupBy): PeriodSummary[] {
   const map = new Map<string, Assignment[]>();
   for (const a of assignments) {
-    const key = mode === 'day'
-      ? toMyanmarDate(a.assigned_at)
-      : toMyanmarMonth(a.assigned_at);
+    const key = groupBy === 'day' ? toMMDate(a.assigned_at) : toMMMonth(a.assigned_at);
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(a);
   }
-  // Sort descending
   return Array.from(map.entries())
     .sort(([a], [b]) => b.localeCompare(a))
-    .map(([key, data]) => ({ title: key, data }));
+    .map(([period, list]) => ({
+      period,
+      total_count: list.length,
+      completed_count: list.filter((a) => a.status === 'COMPLETED').length,
+      failed_count: list.filter((a) => a.status === 'FAILED').length,
+      active_count: list.filter((a) => !['COMPLETED','FAILED','REASSIGNED'].includes(a.status)).length,
+      assignments: list,
+    }));
 }
+
+const STATUS_FILTERS = [
+  { label: 'အားလုံး', value: '' },
+  { label: 'ဆောင်ရွက်နေ', value: 'ACTIVE' },
+  { label: 'ပြီးစီး', value: 'COMPLETED' },
+  { label: 'မအောင်မြင်', value: 'FAILED' },
+];
 
 export default function MyAssignmentsScreen() {
   const insets = useSafeAreaInsets();
-  const [mode, setMode] = useState<ViewMode>('day');
+  const [groupBy, setGroupBy] = useState<GroupBy>('day');
+  const [view, setView] = useState<'summary' | 'list'>('summary');
+  const [selected, setSelected] = useState<PeriodSummary | null>(null);
+  const [statusFilter, setStatusFilter] = useState('');
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['my-assignments-all'],
-    queryFn: () =>
-      deliveryService.myAssignments({ per_page: 500 }),
+    queryFn: () => deliveryService.myAssignments({ per_page: 500 }),
   });
 
-  const assignments = data?.data ?? [];
+  const allAssignments = data?.data ?? [];
   const meta = data?.meta;
+  const totalCount = meta?.total_count ?? (meta?.total ?? allAssignments.length);
 
-  const activeCount = meta?.active_count ??
-    assignments.filter((a) => !['COMPLETED', 'FAILED', 'REASSIGNED'].includes(a.status)).length;
-  const completedCount = meta?.completed_count ??
-    assignments.filter((a) => a.status === 'COMPLETED').length;
-  const totalCount = meta?.total_count ?? (meta?.total ?? 0);
+  const summaries = buildSummaries(allAssignments, groupBy);
 
-  const sections = groupByDate(assignments, mode);
+  const todayStr = toMMDate(new Date().toISOString());
+  const displaySummaries =
+    groupBy === 'day' && !summaries.some((s) => s.period === todayStr)
+      ? [{ period: todayStr, total_count: 0, completed_count: 0, failed_count: 0, active_count: 0, assignments: [] }, ...summaries]
+      : summaries;
 
-  function renderSectionHeader({ section }: { section: { title: string; data: Assignment[] } }) {
-    const label = mode === 'day'
-      ? formatDateMM(section.title)
-      : formatMonthMM(section.title);
-    const count = section.data.length;
-    const done = section.data.filter((a) => a.status === 'COMPLETED').length;
-    const failed = section.data.filter((a) => a.status === 'FAILED').length;
-    const active = section.data.filter((a) => !['COMPLETED', 'FAILED', 'REASSIGNED'].includes(a.status)).length;
+  function openPeriod(s: PeriodSummary) {
+    setSelected(s);
+    setStatusFilter('');
+    setView('list');
+  }
+
+  function backToSummary() {
+    setView('summary');
+    setSelected(null);
+  }
+
+  // ── LIST VIEW ───────────────────────────────────────────────
+  if (view === 'list' && selected) {
+    const listAssignments = statusFilter === 'ACTIVE'
+      ? selected.assignments.filter((a) => !['COMPLETED','FAILED','REASSIGNED'].includes(a.status))
+      : statusFilter === 'COMPLETED'
+      ? selected.assignments.filter((a) => a.status === 'COMPLETED')
+      : statusFilter === 'FAILED'
+      ? selected.assignments.filter((a) => a.status === 'FAILED')
+      : selected.assignments;
 
     return (
-      <View style={styles.sectionHeader}>
-        <View style={styles.sectionHeaderLeft}>
-          <Ionicons name="calendar-outline" size={14} color={COLORS.primary} />
-          <Text style={styles.sectionTitle}>{label}</Text>
+      <View style={styles.container}>
+        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+            <TouchableOpacity style={styles.backBtn} onPress={backToSummary} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+            </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.headerTitle} numberOfLines={1}>
+                {formatPeriodLabel(selected.period, groupBy)}
+              </Text>
+              <Text style={styles.headerSubtitle}>စုစုပေါင်း {selected.total_count} ခု</Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.sectionStats}>
-          <Text style={styles.sectionTotal}>{count} ခု</Text>
-          {done > 0 && <Text style={[styles.sectionStat, { color: COLORS.success }]}>✓{done}</Text>}
-          {active > 0 && <Text style={[styles.sectionStat, { color: COLORS.warning }]}>↻{active}</Text>}
-          {failed > 0 && <Text style={[styles.sectionStat, { color: COLORS.error }]}>✗{failed}</Text>}
+
+        <View style={styles.contentArea}>
+          {/* Status filter chips */}
+          <View style={styles.filterRow}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterList}>
+              {STATUS_FILTERS.map((item) => (
+                <TouchableOpacity
+                  key={item.value}
+                  style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
+                  onPress={() => setStatusFilter(item.value)}
+                >
+                  <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={styles.listArea}>
+            <FlatList
+              data={listAssignments}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.list}
+              showsVerticalScrollIndicator={false}
+              refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { void refetch(); }} tintColor={COLORS.primary} />}
+              renderItem={({ item }) => <AssignmentCard assignment={item} />}
+              ListEmptyComponent={
+                <View style={styles.empty}>
+                  <Text style={styles.emptyTitle}>ပို့ဆောင်မှု မတွေ့ပါ</Text>
+                  <Text style={styles.emptySub}>ရွေးချယ်ထားသော filter နှင့် မကိုက်ညီပါ</Text>
+                </View>
+              }
+            />
+          </View>
         </View>
       </View>
     );
   }
 
-  function renderItem({ item }: { item: Assignment }) {
-    return <MyAssignmentCard assignment={item} />;
-  }
-
+  // ── SUMMARY VIEW ────────────────────────────────────────────
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
-
-        {/* Quick stat strip */}
-        <View style={styles.statStrip}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNum}>{activeCount}</Text>
-            <Text style={styles.statLabel}>ဆောင်ရွက်နေ</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNum}>{completedCount}</Text>
-            <Text style={styles.statLabel}>ပြီးစီး</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNum}>{totalCount}</Text>
-            <Text style={styles.statLabel}>စုစုပေါင်း</Text>
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
+            <Text style={styles.headerSubtitle}>စုစုပေါင်း {totalCount} ခု</Text>
           </View>
         </View>
-
-        {/* Day / Month toggle */}
-        <View style={styles.toggleRow}>
-          <TouchableOpacity
-            style={[styles.toggleBtn, mode === 'day' && styles.toggleBtnActive]}
-            onPress={() => setMode('day')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.toggleBtnText, mode === 'day' && styles.toggleBtnTextActive]}>နေ့</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <TouchableOpacity style={[styles.toggleBtn, groupBy === 'day' && styles.toggleBtnActive]} onPress={() => setGroupBy('day')}>
+            <Text style={[styles.toggleText, groupBy === 'day' && styles.toggleTextActive]}>နေ့</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleBtn, mode === 'month' && styles.toggleBtnActive]}
-            onPress={() => setMode('month')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.toggleBtnText, mode === 'month' && styles.toggleBtnTextActive]}>လ</Text>
+          <TouchableOpacity style={[styles.toggleBtn, groupBy === 'month' && styles.toggleBtnActive]} onPress={() => setGroupBy('month')}>
+            <Text style={[styles.toggleText, groupBy === 'month' && styles.toggleTextActive]}>လ</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Content */}
       <View style={styles.contentArea}>
         {isLoading ? (
-          <ActivityIndicator style={{ marginTop: 60 }} size="large" color={COLORS.primary} />
-        ) : sections.length === 0 ? (
-          <View style={styles.empty}>
-            <Ionicons name="bicycle-outline" size={44} color={COLORS.textLight} />
-            <Text style={styles.emptyText}>လုပ်ငန်းများ မတွေ့ပါ</Text>
-            <Text style={styles.emptySubText}>ပါဆယ် ချိတ်ဆက်မှုများ ဤနေရာတွင် ပေါ်ပါမည်</Text>
-          </View>
+          <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
         ) : (
-          <SectionList
-            sections={sections}
-            keyExtractor={(item) => item.id.toString()}
-            renderSectionHeader={renderSectionHeader}
-            renderItem={renderItem}
+          <FlatList
+            data={displaySummaries}
+            keyExtractor={(item) => item.period}
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
-            stickySectionHeadersEnabled={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={isFetching && !isLoading}
-                onRefresh={refetch}
-                tintColor={COLORS.primary}
-              />
+            refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { void refetch(); }} tintColor={COLORS.primary} />}
+            renderItem={({ item }) => {
+              const isToday = item.period === todayStr && groupBy === 'day';
+              const allDone = item.total_count > 0 && item.completed_count === item.total_count;
+              return (
+                <TouchableOpacity
+                  style={[styles.summaryCard, allDone && styles.summaryCardDone]}
+                  onPress={() => item.total_count > 0 && openPeriod(item)}
+                  activeOpacity={0.85}
+                >
+                  {/* Card header */}
+                  <View style={styles.cardHeader}>
+                    <View style={styles.dateIconWrap}>
+                      <Ionicons name="calendar" size={15} color={COLORS.primary} />
+                    </View>
+                    <Text style={styles.periodText} numberOfLines={1}>
+                      {isToday ? 'ဒီနေ့' : formatPeriodLabel(item.period, groupBy)}
+                    </Text>
+                    {item.total_count > 0 && (
+                      <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
+                    )}
+                  </View>
+
+                  <View style={styles.cardDivider} />
+
+                  {/* Stats row */}
+                  <View style={styles.statsRow}>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statValue}>{item.total_count}</Text>
+                      <Text style={styles.statLabel}>စုစုပေါင်း</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: COLORS.success }]}>{item.completed_count}</Text>
+                      <Text style={styles.statLabel}>ပြီးစီး</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: COLORS.primary }]}>{item.active_count}</Text>
+                      <Text style={styles.statLabel}>ဆောင်ရွက်နေ</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: COLORS.error }]}>{item.failed_count}</Text>
+                      <Text style={styles.statLabel}>မအောင်မြင်</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Text style={styles.emptyTitle}>လုပ်ငန်းများ မတွေ့ပါ</Text>
+                <Text style={styles.emptySub}>ပါဆယ် ချိတ်ဆက်မှုများ ဤနေရာတွင် ပေါ်ပါမည်</Text>
+              </View>
             }
           />
         )}
@@ -190,19 +273,22 @@ export default function MyAssignmentsScreen() {
   );
 }
 
-function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
+function AssignmentCard({ assignment }: { assignment: Assignment }) {
   const parcel = assignment.parcel;
-  const priority = parcel?.priority ?? 'NORMAL';
-  const priorityColor = PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS] || COLORS.success;
-  const priorityLabel = PRIORITY_LABELS_MM[priority as keyof typeof PRIORITY_LABELS_MM] || priority;
+  const parcelStatus = parcel?.status ?? '';
+  const statusColor = STATUS_COLORS[parcelStatus as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
+  const statusLabel = STATUS_LABELS_MM[parcelStatus as keyof typeof STATUS_LABELS_MM] || parcelStatus;
   const assignStatus = assignment.status ?? '';
-  const assignColor = ASSIGNMENT_STATUS_COLORS[assignStatus] || COLORS.primary;
-  const assignLabel = ASSIGNMENT_STATUS_LABELS_MM[assignStatus] || assignStatus;
-  const isTerminal = ['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignStatus);
+  const isActive = !['COMPLETED', 'FAILED', 'REASSIGNED'].includes(assignStatus);
+  const isTerminal = !isActive;
 
-  // Format assigned_at in Myanmar time
-  const assignedAt = new Date(new Date(assignment.assigned_at).getTime() + (6 * 60 + 30) * 60000);
-  const timeStr = assignedAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const assignLabel =
+    assignStatus === 'COMPLETED' ? 'ပြီးစီး'
+    : assignStatus === 'FAILED' ? 'မအောင်မြင်'
+    : assignStatus === 'REASSIGNED' ? 'ပြောင်းလဲ'
+    : 'ဆောင်ရွက်ဆဲ';
+
+  const assignColor = isActive ? COLORS.primary : COLORS.success;
 
   return (
     <TouchableOpacity
@@ -210,140 +296,125 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
       onPress={() => router.push(`/deliveries/${assignment.id}`)}
       activeOpacity={0.85}
     >
-      {/* Top row */}
-      <View style={styles.cardHeader}>
+      <View style={styles.cardTop}>
         <Text style={styles.trackingNumber}>{parcel?.tracking_number}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '18' }]}>
-            <Text style={[styles.priorityText, { color: priorityColor }]}>{priorityLabel}</Text>
-          </View>
-          <View style={[styles.statusBadge, { backgroundColor: assignColor + '18' }]}>
-            <View style={[styles.statusDot, { backgroundColor: assignColor }]} />
-            <Text style={[styles.statusText, { color: assignColor }]}>{assignLabel}</Text>
-          </View>
+        <View style={[styles.statusBadge, { backgroundColor: statusColor + '15' }]}>
+          <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
         </View>
       </View>
 
-      <View style={styles.divider} />
+      <Text style={styles.recipient} numberOfLines={1}>{parcel?.recipient_name}</Text>
+      <Text style={styles.address} numberOfLines={2}>{parcel?.delivery_address}</Text>
 
-      {/* Recipient info */}
-      <View style={styles.infoSection}>
-        <Text style={styles.recipientName} numberOfLines={1}>{parcel?.recipient_name}</Text>
-        <Text style={styles.infoText}>{parcel?.recipient_phone}</Text>
-        <Text style={styles.infoText} numberOfLines={2}>{parcel?.delivery_address}</Text>
-      </View>
-
-      {/* Footer */}
-      <View style={styles.cardFooter}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Ionicons name="time-outline" size={12} color={COLORS.textLight} />
-          <Text style={styles.timeText}>{timeStr}</Text>
-          {parcel?.is_cod && (
-            <View style={styles.codBadge}>
-              <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()}</Text>
-            </View>
-          )}
+      <View style={styles.cardBottom}>
+        <View style={[styles.assignBadge, { backgroundColor: isActive ? '#FFF3DC' : '#E8F8EF' }]}>
+          <Text style={[styles.assignBadgeText, { color: assignColor }]}>{assignLabel}</Text>
         </View>
-        {!isTerminal && (
-          <TouchableOpacity
-            style={styles.attemptBtn}
-            onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
-          >
-            <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
-          </TouchableOpacity>
+        {parcel && Number(parcel.delivery_fee) > 0 && (
+          <View style={styles.feeBadge}>
+            <Text style={styles.feeText}>
+              {parcel.currency === 'THB'
+                ? `ပို့ဆောင်ခ ${Number(parcel.delivery_fee).toLocaleString()} ฿`
+                : `ပို့ဆောင်ခ ${Number(parcel.delivery_fee).toLocaleString()} K`}
+            </Text>
+          </View>
+        )}
+        {parcel?.is_cod && (
+          <View style={styles.codBadge}>
+            <Text style={styles.codText}>
+              {parcel.currency === 'THB'
+                ? `COD ${Number(parcel.cod_amount).toLocaleString()} ฿`
+                : `COD ${Number(parcel.cod_amount).toLocaleString()} K`}
+            </Text>
+          </View>
         )}
       </View>
+
+      {/* Dates */}
+      <View style={styles.parcelDetails}>
+        <Text style={styles.detailText}>
+          ချိတ်ဆက်ရက်: {new Date(new Date(assignment.assigned_at).getTime() + (6*60+30)*60000).toLocaleString()}
+        </Text>
+        {parcel?.status === 'DELIVERED' && (parcel?.delivered_at || parcel?.updated_at) && (
+          <Text style={styles.detailText}>
+            ပို့ဆောင်ပြီးရက်: {new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString()}
+          </Text>
+        )}
+        {parcel?.status === 'FAILED' && (parcel?.failed_at || parcel?.updated_at) && (
+          <Text style={styles.detailText}>
+            မအောင်မြင်ရက်: {new Date((parcel.failed_at || parcel.updated_at)!).toLocaleString()}
+          </Text>
+        )}
+      </View>
+
+      {/* Attempt button for active */}
+      {!isTerminal && (
+        <TouchableOpacity
+          style={styles.attemptBtn}
+          onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
+        >
+          <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+  header: { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingBottom: 16 },
+  backBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
+  headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
+  filterRow: { height: 60 },
+  filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 38, justifyContent: 'center', alignSelf: 'center' },
+  filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
+  filterChipTextActive: { color: COLORS.white },
+  loader: { marginTop: 60 },
+  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
+  listArea: { flex: 1 },
+  empty: { alignItems: 'center', paddingVertical: 60 },
+  emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6, fontFamily: FONTS.bold },
+  emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center', fontFamily: FONTS.regular },
 
-  header: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    paddingTop: 12,
-  },
-  headerTitle: {
-    fontSize: 22, fontWeight: '800', color: COLORS.white,
-    fontFamily: FONTS.bold, marginBottom: 12,
-  },
+  // Summary cards
+  summaryCard: { backgroundColor: COLORS.white, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: COLORS.border, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 2 },
+  summaryCardDone: { borderColor: COLORS.success, borderWidth: 1.5, backgroundColor: '#E8F8EF' },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dateIconWrap: { width: 28, height: 28, borderRadius: 8, backgroundColor: COLORS.primaryBg ?? '#FFF3E0', alignItems: 'center', justifyContent: 'center' },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  cardDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
+  periodText: { fontSize: 14, fontWeight: '700', color: COLORS.text, flex: 1, fontFamily: FONTS.bold },
+  statsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' },
+  statItem: { flex: 1, alignItems: 'center', gap: 2 },
+  statValue: { fontSize: 16, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold, marginTop: 2 },
+  statLabel: { fontSize: 10, color: COLORS.textSecondary, fontFamily: FONTS.regular },
+  statDivider: { width: 1, height: 36, backgroundColor: COLORS.border },
 
-  // Stat strip
-  statStrip: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 12, padding: 12, marginBottom: 12,
-  },
-  statItem: { flex: 1, alignItems: 'center' },
-  statNum: { fontSize: 20, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
-  statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
-  statDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.3)' },
+  // Assignment card
+  card: { backgroundColor: COLORS.white, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: COLORS.border },
+  trackingNumber: { fontSize: 14, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
+  recipient: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 2, fontFamily: FONTS.bold },
+  address: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, fontFamily: FONTS.regular },
+  cardBottom: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, flexWrap: 'wrap' },
+  assignBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  assignBadgeText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
+  codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, backgroundColor: '#E8F4FB' },
+  codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
+  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, backgroundColor: '#E8F8EF' },
+  feeText: { fontSize: 11, fontWeight: '700', color: COLORS.success, fontFamily: FONTS.bold },
+  parcelDetails: { marginTop: 8, gap: 2 },
+  detailText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
+  attemptBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginTop: 10, alignSelf: 'flex-end' },
+  attemptBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 
-  // Toggle
-  toggleRow: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 10, padding: 3, alignSelf: 'flex-start',
-  },
-  toggleBtn: {
-    paddingHorizontal: 20, paddingVertical: 6, borderRadius: 8,
-  },
+  toggleBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.18)' },
   toggleBtnActive: { backgroundColor: COLORS.white },
-  toggleBtnText: { fontSize: 13, fontWeight: '700', color: 'rgba(255,255,255,0.75)', fontFamily: FONTS.bold },
-  toggleBtnTextActive: { color: COLORS.primary },
-
-  // Content
-  contentArea: { flex: 1 },
-  list: { paddingHorizontal: 14, paddingBottom: 24, paddingTop: 8, gap: 0 },
-
-  // Section header
-  sectionHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 4, paddingVertical: 10, marginTop: 6,
-  },
-  sectionHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
-  sectionStats: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  sectionTotal: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.medium },
-  sectionStat: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.bold },
-
-  // Card
-  card: {
-    backgroundColor: COLORS.white, borderRadius: 12, padding: 12,
-    borderWidth: 1, borderColor: COLORS.border,
-    marginBottom: 8,
-    shadowColor: '#000', shadowOpacity: 0.03, shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 }, elevation: 1,
-  },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
-  priorityBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
-  priorityText: { fontSize: 10, fontWeight: '700', fontFamily: FONTS.bold },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
-  statusDot: { width: 5, height: 5, borderRadius: 3 },
-  statusText: { fontSize: 10, fontWeight: '600', fontFamily: FONTS.semiBold },
-  divider: { height: StyleSheet.hairlineWidth, backgroundColor: COLORS.border, marginVertical: 8 },
-  infoSection: { gap: 3, marginBottom: 4 },
-  recipientName: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
-  infoText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
-  cardFooter: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    marginTop: 8, paddingTop: 8,
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border,
-  },
-  timeText: { fontSize: 11, color: COLORS.textLight, fontFamily: FONTS.regular },
-  codBadge: { backgroundColor: '#E8F4FB', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8, marginLeft: 6 },
-  codText: { fontSize: 10, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
-  attemptBtn: {
-    backgroundColor: COLORS.primary, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8,
-  },
-  attemptBtnText: { fontSize: 11, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
-
-  // Empty
-  empty: { alignItems: 'center', paddingVertical: 80, gap: 10 },
-  emptyText: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
-  emptySubText: { fontSize: 13, color: COLORS.textLight, textAlign: 'center', fontFamily: FONTS.regular },
+  toggleText: { fontSize: 12, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.semiBold },
+  toggleTextActive: { color: COLORS.primary },
 });
