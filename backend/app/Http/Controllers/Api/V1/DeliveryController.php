@@ -67,9 +67,9 @@ class DeliveryController extends Controller
         $groupBy = $request->input('group_by', 'day'); // day | month
 
         if ($groupBy === 'month') {
-            $periodExpr = "COALESCE(strftime('%Y-%m', parcels.delivered_at), strftime('%Y-%m', parcels.failed_at), strftime('%Y-%m', delivery_assignments.assigned_at))";
+            $periodExpr = "COALESCE(strftime('%Y-%m', datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), strftime('%Y-%m', datetime(parcels.failed_at, '+6 hours', '+30 minutes')), strftime('%Y-%m', datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes')))";
         } else {
-            $periodExpr = "COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at))";
+            $periodExpr = "COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes')))";
         }
 
         $query = DeliveryAssignment::query()
@@ -81,8 +81,8 @@ class DeliveryController extends Controller
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status NOT IN ('COMPLETED','FAILED','REASSIGNED') THEN 1 ELSE 0 END) as in_transit_count"),
             ])
-            ->when($request->date_from, fn($q) => $q->whereRaw("COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at)) >= ?", [$request->date_from]))
-            ->when($request->date_to, fn($q) => $q->whereRaw("COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at)) <= ?", [$request->date_to]))
+            ->when($request->date_from, fn($q) => $q->whereRaw("COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))) >= ?", [$request->date_from]))
+            ->when($request->date_to, fn($q) => $q->whereRaw("COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))) <= ?", [$request->date_to]))
             ->groupBy(DB::raw($periodExpr))
             ->orderBy('period', 'desc');
 

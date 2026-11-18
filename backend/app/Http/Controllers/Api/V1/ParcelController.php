@@ -179,7 +179,7 @@ class ParcelController extends Controller
 
         $query = Parcel::query()
             ->select([
-                DB::raw('DATE(received_at) as date'),
+                DB::raw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) as date"),
                 DB::raw('COUNT(*) as parcel_count'),
                 DB::raw('COUNT(DISTINCT sender_phone) as sender_count'),
                 DB::raw('COUNT(DISTINCT recipient_phone) as recipient_count'),
@@ -195,9 +195,9 @@ class ParcelController extends Controller
                 DB::raw("SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
             ])
             ->whereNotNull('received_at')
-            ->when($request->date_from, fn($q) => $q->whereDate('received_at', '>=', $request->date_from))
-            ->when($request->date_to,   fn($q) => $q->whereDate('received_at', '<=', $request->date_to))
-            ->groupBy(DB::raw('DATE(received_at)'))
+            ->when($request->date_from, fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) >= ?", [$request->date_from]))
+            ->when($request->date_to,   fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) <= ?", [$request->date_to]))
+            ->groupBy(DB::raw("DATE(datetime(received_at, '+6 hours', '+30 minutes'))"))
             ->orderBy('date', 'desc');
 
         $rows = $query->get()->map(fn($row) => [
@@ -235,7 +235,7 @@ class ParcelController extends Controller
 
         $query = Parcel::query()
             ->select([
-                DB::raw("strftime('%Y-%m', received_at) as month"),
+                DB::raw("strftime('%Y-%m', datetime(received_at, '+6 hours', '+30 minutes')) as month"),
                 DB::raw('COUNT(*) as parcel_count'),
                 DB::raw('COUNT(DISTINCT sender_phone) as sender_count'),
                 DB::raw('COUNT(DISTINCT recipient_phone) as recipient_count'),
@@ -249,12 +249,12 @@ class ParcelController extends Controller
                 DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as fee_thb"),
                 DB::raw("SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
                 DB::raw("SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
-                DB::raw('COUNT(DISTINCT DATE(received_at)) as day_count'),
+                DB::raw("COUNT(DISTINCT DATE(datetime(received_at, '+6 hours', '+30 minutes'))) as day_count"),
             ])
             ->whereNotNull('received_at')
-            ->when($request->date_from, fn($q) => $q->whereDate('received_at', '>=', $request->date_from))
-            ->when($request->date_to,   fn($q) => $q->whereDate('received_at', '<=', $request->date_to))
-            ->groupBy(DB::raw("strftime('%Y-%m', received_at)"))
+            ->when($request->date_from, fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) >= ?", [$request->date_from]))
+            ->when($request->date_to,   fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) <= ?", [$request->date_to]))
+            ->groupBy(DB::raw("strftime('%Y-%m', datetime(received_at, '+6 hours', '+30 minutes'))"))
             ->orderBy('month', 'desc');
 
         $rows = $query->get()->map(fn($row) => [
@@ -298,8 +298,8 @@ class ParcelController extends Controller
             }))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->priority, fn($q) => $q->where('priority', $request->priority))
-            ->when($request->date_from, fn($q) => $q->whereDate('received_at', '>=', $request->date_from))
-            ->when($request->date_to, fn($q) => $q->whereDate('received_at', '<=', $request->date_to))
+            ->when($request->date_from, fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) >= ?", [$request->date_from]))
+            ->when($request->date_to, fn($q) => $q->whereRaw("DATE(datetime(received_at, '+6 hours', '+30 minutes')) <= ?", [$request->date_to]))
             ->when($request->assigned_to, fn($q) => $q->whereHas('activeAssignment', fn($aq) => $aq->where('staff_id', $request->assigned_to)))
             ->orderBy($request->sort_by ?? 'received_at', $request->sort_dir ?? 'desc');
 
