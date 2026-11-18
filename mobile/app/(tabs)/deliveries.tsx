@@ -218,41 +218,33 @@ export default function DeliveriesScreen() {
                     <Text style={styles.statLabel}>မအောင်မြင်</Text>
                   </View>
                 </View>
-                {/* Fee / COD row */}
-                {((item.fee_mmk ?? 0) > 0 || (item.cod_mmk ?? 0) > 0 || (item.fee_thb ?? 0) > 0 || (item.cod_thb ?? 0) > 0) && (
-                  <>
-                    <View style={styles.rowDivider} />
-                    <View style={styles.statsRow}>
-                      {(item.fee_mmk ?? 0) > 0 && (
-                        <View style={styles.statItem}>
-                          <Text style={[styles.statValue, { color: COLORS.success, fontSize: 13 }]}>{(item.fee_mmk ?? 0).toLocaleString()}</Text>
-                          <Text style={styles.statLabel}>ပို့ဆောင်ခ (K)</Text>
-                        </View>
-                      )}
-                      {(item.fee_mmk ?? 0) > 0 && (item.cod_mmk ?? 0) > 0 && <View style={styles.statDivider} />}
-                      {(item.cod_mmk ?? 0) > 0 && (
-                        <View style={styles.statItem}>
-                          <Text style={[styles.statValue, { color: COLORS.warning, fontSize: 13 }]}>{(item.cod_mmk ?? 0).toLocaleString()}</Text>
-                          <Text style={styles.statLabel}>COD (K)</Text>
-                        </View>
-                      )}
-                      {(item.fee_thb ?? 0) > 0 && ((item.fee_mmk ?? 0) > 0 || (item.cod_mmk ?? 0) > 0) && <View style={styles.statDivider} />}
-                      {(item.fee_thb ?? 0) > 0 && (
-                        <View style={styles.statItem}>
-                          <Text style={[styles.statValue, { color: COLORS.success, fontSize: 13 }]}>{(item.fee_thb ?? 0).toLocaleString()}</Text>
-                          <Text style={styles.statLabel}>ပို့ဆောင်ခ (฿)</Text>
-                        </View>
-                      )}
-                      {(item.cod_thb ?? 0) > 0 && ((item.fee_mmk ?? 0) > 0 || (item.cod_mmk ?? 0) > 0 || (item.fee_thb ?? 0) > 0) && <View style={styles.statDivider} />}
-                      {(item.cod_thb ?? 0) > 0 && (
-                        <View style={styles.statItem}>
-                          <Text style={[styles.statValue, { color: COLORS.warning, fontSize: 13 }]}>{(item.cod_thb ?? 0).toLocaleString()}</Text>
-                          <Text style={styles.statLabel}>COD (฿)</Text>
-                        </View>
-                      )}
-                    </View>
-                  </>
-                )}
+                {/* Fee / COD row - same style as daily-summary */}
+                {(() => {
+                  const feeStats: { value: number; label: string; color: string }[] = [];
+                  if ((item.fee_mmk ?? 0) > 0) feeStats.push({ value: item.fee_mmk ?? 0, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
+                  if ((item.cod_mmk ?? 0) > 0) feeStats.push({ value: item.cod_mmk ?? 0, label: 'COD (K)', color: COLORS.warning });
+                  if ((item.fee_thb ?? 0) > 0) feeStats.push({ value: item.fee_thb ?? 0, label: 'ပို့ဆောင်ခ (฿)', color: COLORS.success });
+                  if ((item.cod_thb ?? 0) > 0) feeStats.push({ value: item.cod_thb ?? 0, label: 'COD (฿)', color: COLORS.warning });
+                  if (feeStats.length === 0) return null;
+                  return (
+                    <>
+                      <View style={styles.rowDivider} />
+                      <View style={styles.statsRow}>
+                        {feeStats.map((stat, index) => (
+                          <React.Fragment key={stat.label}>
+                            {index > 0 && <View style={styles.statDivider} />}
+                            <View style={styles.statItem}>
+                              <Text style={[styles.statValue, { color: stat.color, fontSize: 13 }]}>
+                                {stat.value.toLocaleString()}
+                              </Text>
+                              <Text style={styles.statLabel}>{stat.label}</Text>
+                            </View>
+                          </React.Fragment>
+                        ))}
+                      </View>
+                    </>
+                  );
+                })()}
               </TouchableOpacity>
             )}
             ListEmptyComponent={
