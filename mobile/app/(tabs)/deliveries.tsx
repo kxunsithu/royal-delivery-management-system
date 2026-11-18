@@ -15,6 +15,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { deliveryService, Assignment, DeliverySummary } from '../../src/services/deliveryService';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, FONTS } from '../../src/constants';
+import { useAuth } from '../../src/context/AuthContext';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
@@ -37,6 +38,10 @@ function formatPeriodLabel(period: string, groupBy: 'day' | 'month'): string {
 
 export default function DeliveriesScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const isStaff = user?.role === 'delivery_staff';
+  const staffId = isStaff ? user?.id : undefined;
+
   const [groupBy, setGroupBy] = useState<'day' | 'month'>('day');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -48,8 +53,8 @@ export default function DeliveriesScreen() {
   const hasDateFilter = !!(dateFrom || dateTo);
 
   const { data: summaryData, isLoading: summaryLoading, isFetching: summaryFetching, refetch: refetchSummary } = useQuery({
-    queryKey: ['delivery-summary', groupBy, dateFrom, dateTo],
-    queryFn: () => deliveryService.summary({ group_by: groupBy, date_from: dateFrom || undefined, date_to: dateTo || undefined }),
+    queryKey: ['delivery-summary', groupBy, dateFrom, dateTo, staffId],
+    queryFn: () => deliveryService.summary({ group_by: groupBy, date_from: dateFrom || undefined, date_to: dateTo || undefined, staff_id: staffId }),
     enabled: view === 'summary',
   });
 
@@ -62,8 +67,9 @@ export default function DeliveriesScreen() {
     : summaries;
 
   const { data: listData, isLoading: listLoading, isFetching: listFetching, refetch: refetchList } = useQuery({
-    queryKey: ['delivery-list', selected?.from, selected?.to, statusFilter, page],
+    queryKey: ['delivery-list', selected?.from, selected?.to, statusFilter, page, staffId],
     queryFn: () => deliveryService.allAssignments({
+      staff_id: staffId,
       status: statusFilter || undefined,
       date_from: selected?.from,
       date_to: selected?.to,
@@ -186,9 +192,11 @@ export default function DeliveriesScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.navigate('/(tabs)/more')} activeOpacity={0.7}>
-            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
-          </TouchableOpacity>
+          {!isStaff && (
+            <TouchableOpacity style={styles.backBtn} onPress={() => router.navigate('/(tabs)/more')} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+            </TouchableOpacity>
+          )}
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>ပို့ဆောင်မှုများ</Text>
             <Text style={styles.headerSubtitle}>စုစုပေါင်း {summaries.reduce((s, x) => s + x.total_count, 0)} ခု</Text>

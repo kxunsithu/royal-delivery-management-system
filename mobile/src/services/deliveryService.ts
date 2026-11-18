@@ -92,7 +92,7 @@ export interface StaffWorkload {
 }
 
 export const deliveryService = {
-  async summary(params?: { group_by?: 'day' | 'month'; date_from?: string; date_to?: string }): Promise<DeliverySummary[]> {
+  async summary(params?: { group_by?: 'day' | 'month'; date_from?: string; date_to?: string; staff_id?: number }): Promise<DeliverySummary[]> {
     const response = await apiClient.get('/deliveries/summary', { params });
     return response.data.data;
   },

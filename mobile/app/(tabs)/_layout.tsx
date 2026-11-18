@@ -147,8 +147,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="deliveries"
         options={{
-          tabBarButton: () => null,
-          tabBarItemStyle: { display: 'none' },
+          title: 'ပို့ဆောင်မှုများ',
+          tabBarButton: isStaff ? undefined : () => null,
+          tabBarItemStyle: isStaff ? undefined : { display: 'none' },
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="car" size={20} color={color as string} />
+          ),
         }}
       />
       <Tabs.Screen
