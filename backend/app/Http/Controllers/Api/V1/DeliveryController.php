@@ -67,20 +67,21 @@ class DeliveryController extends Controller
         $groupBy = $request->input('group_by', 'day'); // day | month
 
         if ($groupBy === 'month') {
-            $periodExpr = "strftime('%Y-%m', assigned_at)";
+            $periodExpr = "COALESCE(strftime('%Y-%m', parcels.delivered_at), strftime('%Y-%m', parcels.failed_at), strftime('%Y-%m', delivery_assignments.assigned_at))";
         } else {
-            $periodExpr = "DATE(assigned_at)";
+            $periodExpr = "COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at))";
         }
 
         $query = DeliveryAssignment::query()
+            ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
             ->select([
                 DB::raw("$periodExpr as period"),
                 DB::raw('COUNT(*) as total_count'),
-                DB::raw("SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_count"),
-                DB::raw("SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
+                DB::raw("SUM(CASE WHEN delivery_assignments.status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_count"),
+                DB::raw("SUM(CASE WHEN delivery_assignments.status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
             ])
-            ->when($request->date_from, fn($q) => $q->whereDate('assigned_at', '>=', $request->date_from))
-            ->when($request->date_to, fn($q) => $q->whereDate('assigned_at', '<=', $request->date_to))
+            ->when($request->date_from, fn($q) => $q->whereRaw("COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at)) >= ?", [$request->date_from]))
+            ->when($request->date_to, fn($q) => $q->whereRaw("COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at)) <= ?", [$request->date_to]))
             ->groupBy(DB::raw($periodExpr))
             ->orderBy('period', 'desc');
 
@@ -196,6 +197,8 @@ class DeliveryController extends Controller
             $updateData = ['status' => $newStatus];
             if ($validated['result'] === 'DELIVERED') {
                 $updateData['delivered_at'] = $validated['attempted_at'] ?? now();
+            } else {
+                $updateData['failed_at'] = $validated['attempted_at'] ?? now();
             }
             $parcel->update($updateData);
 
@@ -365,6 +368,7 @@ class DeliveryController extends Controller
                 'created_at' => $a->parcel->created_at?->toISOString(),
                 'updated_at' => $a->parcel->updated_at?->toISOString(),
                 'delivered_at' => $a->parcel->delivered_at?->toISOString(),
+                'failed_at' => $a->parcel->failed_at?->toISOString(),
                 'images' => $a->parcel->relationLoaded('images')
                     ? $a->parcel->images->map(fn($img) => [
                         'id'  => $img->id,

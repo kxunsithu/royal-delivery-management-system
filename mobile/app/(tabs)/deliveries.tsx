@@ -54,6 +54,12 @@ export default function DeliveriesScreen() {
   });
 
   const summaries = summaryData ?? [];
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const displaySummaries = groupBy === 'day'
+    ? (summaries.some((s) => s.period === todayStr)
+        ? summaries
+        : [{ period: todayStr, date_from: todayStr, date_to: todayStr, total_count: 0, completed_count: 0, failed_count: 0 }, ...summaries])
+    : summaries;
 
   const { data: listData, isLoading: listLoading, isFetching: listFetching, refetch: refetchList } = useQuery({
     queryKey: ['delivery-list', selected?.from, selected?.to, statusFilter, page],
@@ -180,7 +186,7 @@ export default function DeliveriesScreen() {
           <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
         ) : (
           <FlatList
-            data={summaries}
+            data={displaySummaries}
             keyExtractor={(item) => item.period}
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
@@ -188,7 +194,7 @@ export default function DeliveriesScreen() {
             renderItem={({ item }) => (
               <TouchableOpacity style={styles.summaryCard} onPress={() => openPeriod(item)} activeOpacity={0.85}>
                 <View style={styles.cardTop}>
-                  <Text style={styles.periodText}>{formatPeriodLabel(item.period, groupBy)}</Text>
+                  <Text style={styles.periodText}>{item.period === todayStr && groupBy === 'day' ? 'ဒီနေ့' : formatPeriodLabel(item.period, groupBy)}</Text>
                   <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
                 </View>
                 <View style={styles.statsRow}>
@@ -272,8 +278,11 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
       {/* Parcel create & complete dates */}
       <View style={styles.parcelDetails}>
         <Text style={styles.detailText}>လက်ခံရက်စွဲ: {parcel?.received_at ? new Date(parcel.received_at).toLocaleString() : (parcel?.created_at ? new Date(parcel.created_at).toLocaleString() : '-')}</Text>
-        {(parcel?.delivered_at || (parcel?.status === 'DELIVERED' && parcel?.updated_at)) ? (
+        {parcel?.status === 'DELIVERED' && (parcel?.delivered_at || parcel?.updated_at) ? (
           <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date((parcel?.delivered_at || parcel?.updated_at)!).toLocaleString()}</Text>
+        ) : null}
+        {parcel?.status === 'FAILED' && (parcel?.failed_at || parcel?.updated_at) ? (
+          <Text style={styles.detailText}>မအောင်မြင်ရက်စွဲ: {new Date((parcel?.failed_at || parcel?.updated_at)!).toLocaleString()}</Text>
         ) : null}
       </View>
     </TouchableOpacity>

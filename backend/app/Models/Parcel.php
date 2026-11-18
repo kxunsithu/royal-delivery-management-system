@@ -32,6 +32,7 @@ class Parcel extends Model
         'priority',
         'received_at',
         'delivered_at',
+        'failed_at',
         'received_by_id',
         'damage_description',
     ];
@@ -45,6 +46,7 @@ class Parcel extends Model
         'weight' => 'decimal:3',
             'received_at' => 'datetime',
             'delivered_at' => 'datetime',
+            'failed_at' => 'datetime',
             'quantity' => 'integer',
         ];
     }

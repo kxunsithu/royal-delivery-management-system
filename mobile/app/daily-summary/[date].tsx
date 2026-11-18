@@ -245,8 +245,11 @@ function ParcelCard({ parcel }: { parcel: Parcel }) {
       {/* Parcel create & complete dates */}
       <View style={styles.parcelDetails}>
         <Text style={styles.detailText}>လက်ခံရက်စွဲ: {new Date(parcel.received_at || parcel.created_at).toLocaleString()}</Text>
-        {(parcel.delivered_at || (parcel.status === 'DELIVERED' && parcel.updated_at)) ? (
+        {parcel.status === 'DELIVERED' && (parcel.delivered_at || parcel.updated_at) ? (
           <Text style={styles.detailText}>ပို့ဆောင်ပြီးရက်စွဲ: {new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString()}</Text>
+        ) : null}
+        {parcel.status === 'FAILED' && (parcel.failed_at || parcel.updated_at) ? (
+          <Text style={styles.detailText}>မအောင်မြင်ရက်စွဲ: {new Date((parcel.failed_at || parcel.updated_at)!).toLocaleString()}</Text>
         ) : null}
       </View>
 

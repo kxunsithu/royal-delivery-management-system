@@ -710,6 +710,7 @@ class ParcelController extends Controller
             'priority' => $parcel->priority,
             'received_at' => $parcel->received_at?->toISOString(),
             'delivered_at' => $parcel->delivered_at?->toISOString(),
+            'failed_at' => $parcel->failed_at?->toISOString(),
             'received_by' => $parcel->receivedBy ? [
                 'id' => $parcel->receivedBy->id,
                 'name' => $parcel->receivedBy->name,

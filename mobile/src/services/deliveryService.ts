@@ -23,6 +23,7 @@ export interface Assignment {
     priority: string;
     received_at?: string;
     delivered_at?: string;
+    failed_at?: string;
     received_by?: { id: number; name: string };
     active_assignment?: {
       id: number;
