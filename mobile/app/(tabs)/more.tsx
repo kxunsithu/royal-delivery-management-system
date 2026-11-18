@@ -73,7 +73,7 @@ export default function MoreScreen() {
 
   if (canAssign) {
     items.push({
-      label: 'ဝန်ထမ်း ချိတ်ဆက်မည်',
+      label: 'ချိတ်ဆက်ထားသောဝန်ထမ်း',
       icon: 'person-add-outline',
       onPress: () => router.navigate('/(tabs)/assign-staff'),
     });

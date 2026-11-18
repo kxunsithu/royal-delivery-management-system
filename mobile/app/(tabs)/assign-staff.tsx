@@ -188,7 +188,7 @@ export default function AssignStaffScreen() {
           <Ionicons name="chevron-back" size={22} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>ဝန်ထမ်း ချိတ်ဆက်မည်</Text>
+          <Text style={styles.headerTitle}>ချိတ်ဆက်ထားသောဝန်ထမ်း</Text>
           {parcelsData && (
             <Text style={styles.headerSub}>
               ပါဆယ် {parcels.length} ခု
@@ -548,3 +548,4 @@ const styles = StyleSheet.create({
   },
   confirmBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 });
+
