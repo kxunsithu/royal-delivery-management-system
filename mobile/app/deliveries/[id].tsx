@@ -92,6 +92,23 @@ export default function DeliveryDetailScreen() {
           {parcel?.description && (
             <InfoRow label="ဖော်ပြချက်" value={parcel.description} />
           )}
+          {parcel?.received_at && (
+            <InfoRow label="လက်ခံရက်" value={new Date(parcel.received_at).toLocaleString('my-MM')} />
+          )}
+          {parcel?.status === 'DELIVERED' && (parcel?.delivered_at || parcel?.updated_at) && (
+            <InfoRow
+              label="ပို့ဆောင်ပြီးရက်"
+              value={new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString('my-MM')}
+              valueColor={COLORS.success}
+            />
+          )}
+          {parcel?.status === 'FAILED' && (parcel?.failed_at || parcel?.updated_at) && (
+            <InfoRow
+              label="မအောင်မြင်ရက်"
+              value={new Date((parcel.failed_at || parcel.updated_at)!).toLocaleString('my-MM')}
+              valueColor={COLORS.error}
+            />
+          )}
         </InfoSection>
 
         {/* Fee & COD section */}
