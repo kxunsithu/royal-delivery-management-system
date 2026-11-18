@@ -118,6 +118,30 @@ export default function DeliveriesScreen() {
             </ScrollView>
           </View>
 
+          {/* Fee / COD total bar */}
+          {meta && ((meta.fee_mmk ?? 0) > 0 || (meta.cod_mmk ?? 0) > 0 || (meta.fee_thb ?? 0) > 0 || (meta.cod_thb ?? 0) > 0) && (() => {
+            const feeStats: { value: number; label: string; color: string }[] = [];
+            if ((meta.fee_mmk ?? 0) > 0) feeStats.push({ value: meta.fee_mmk!, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
+            if ((meta.cod_mmk ?? 0) > 0) feeStats.push({ value: meta.cod_mmk!, label: 'COD (K)', color: COLORS.warning });
+            if ((meta.fee_thb ?? 0) > 0) feeStats.push({ value: meta.fee_thb!, label: 'ပို့ဆောင်ခ (฿)', color: COLORS.success });
+            if ((meta.cod_thb ?? 0) > 0) feeStats.push({ value: meta.cod_thb!, label: 'COD (฿)', color: COLORS.warning });
+            return (
+              <View style={styles.feeSummaryBar}>
+                {feeStats.map((stat, index) => (
+                  <React.Fragment key={stat.label}>
+                    {index > 0 && <View style={styles.feeSummaryDivider} />}
+                    <View style={styles.feeSummaryItem}>
+                      <Text style={[styles.feeSummaryValue, { color: stat.color }]}>
+                        {stat.value.toLocaleString()}
+                      </Text>
+                      <Text style={styles.feeSummaryLabel}>{stat.label}</Text>
+                    </View>
+                  </React.Fragment>
+                ))}
+              </View>
+            );
+          })()}
+
           <View style={styles.listArea}>
             {listLoading ? (
               <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
@@ -371,6 +395,24 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 11, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   statDivider: { width: 1, height: 32, backgroundColor: COLORS.border },
   rowDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
+
+  // Fee summary bar in list view
+  feeSummaryBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  feeSummaryItem: { flex: 1, alignItems: 'center' },
+  feeSummaryValue: { fontSize: 15, fontWeight: '800', fontFamily: FONTS.bold },
+  feeSummaryLabel: { fontSize: 10, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
+  feeSummaryDivider: { width: 1, height: 28, backgroundColor: COLORS.border },
 
   // Assignment card
   card: { backgroundColor: COLORS.white, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: COLORS.border },

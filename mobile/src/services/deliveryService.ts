@@ -62,6 +62,11 @@ export interface AssignmentsResponse {
     active_count?: number;
     completed_count?: number;
     total_count?: number;
+    // Fee / COD totals
+    fee_mmk?: number;
+    fee_thb?: number;
+    cod_mmk?: number;
+    cod_thb?: number;
   };
 }
 

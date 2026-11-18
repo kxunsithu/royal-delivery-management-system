@@ -175,13 +175,38 @@ class DeliveryController extends Controller
 
         $assignments = $query->paginate($request->per_page ?? 20);
 
+        // Compute fee/COD totals from the full (unpaginated) dataset for this period
+        $totalsQuery = DeliveryAssignment::query()
+            ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
+            ->when($request->staff_id, fn($q) => $q->where('delivery_assignments.staff_id', $request->staff_id))
+            ->when($request->status, function ($q) use ($request) {
+                if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
+                    $q->whereNotIn('delivery_assignments.status', ['COMPLETED', 'FAILED', 'REASSIGNED']);
+                } else {
+                    $q->where('delivery_assignments.status', $request->status);
+                }
+            })
+            ->when($request->date_from, fn($q) => $q->whereRaw("$dateExpr >= ?", [$request->date_from]))
+            ->when($request->date_to, fn($q) => $q->whereRaw("$dateExpr <= ?", [$request->date_to]))
+            ->selectRaw("
+                SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') THEN parcels.delivery_fee ELSE 0 END) as fee_mmk,
+                SUM(CASE WHEN parcels.currency = 'THB' THEN parcels.delivery_fee ELSE 0 END) as fee_thb,
+                SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_mmk,
+                SUM(CASE WHEN parcels.currency = 'THB' AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_thb
+            ")
+            ->first();
+
         return response()->json([
             'data' => $assignments->map(fn($a) => $this->formatAssignment($a)),
             'meta' => [
                 'current_page' => $assignments->currentPage(),
-                'last_page' => $assignments->lastPage(),
-                'per_page' => $assignments->perPage(),
-                'total' => $assignments->total(),
+                'last_page'    => $assignments->lastPage(),
+                'per_page'     => $assignments->perPage(),
+                'total'        => $assignments->total(),
+                'fee_mmk'      => (float) ($totalsQuery->fee_mmk ?? 0),
+                'fee_thb'      => (float) ($totalsQuery->fee_thb ?? 0),
+                'cod_mmk'      => (float) ($totalsQuery->cod_mmk ?? 0),
+                'cod_thb'      => (float) ($totalsQuery->cod_thb ?? 0),
             ],
         ]);
     }
