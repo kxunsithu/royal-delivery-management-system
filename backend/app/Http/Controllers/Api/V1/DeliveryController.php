@@ -79,6 +79,7 @@ class DeliveryController extends Controller
                 DB::raw('COUNT(*) as total_count'),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
+                DB::raw("SUM(CASE WHEN delivery_assignments.status NOT IN ('COMPLETED','FAILED','REASSIGNED') THEN 1 ELSE 0 END) as in_transit_count"),
             ])
             ->when($request->date_from, fn($q) => $q->whereRaw("COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at)) >= ?", [$request->date_from]))
             ->when($request->date_to, fn($q) => $q->whereRaw("COALESCE(DATE(parcels.delivered_at), DATE(parcels.failed_at), DATE(delivery_assignments.assigned_at)) <= ?", [$request->date_to]))
@@ -102,6 +103,7 @@ class DeliveryController extends Controller
                 'total_count'     => (int) $row->total_count,
                 'completed_count' => (int) $row->completed_count,
                 'failed_count'     => (int) $row->failed_count,
+                'in_transit_count' => (int) $row->in_transit_count,
             ];
         });
 

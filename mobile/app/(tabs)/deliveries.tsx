@@ -58,7 +58,7 @@ export default function DeliveriesScreen() {
   const displaySummaries = groupBy === 'day'
     ? (summaries.some((s) => s.period === todayStr)
         ? summaries
-        : [{ period: todayStr, date_from: todayStr, date_to: todayStr, total_count: 0, completed_count: 0, failed_count: 0 }, ...summaries])
+        : [{ period: todayStr, date_from: todayStr, date_to: todayStr, total_count: 0, completed_count: 0, failed_count: 0, in_transit_count: 0 }, ...summaries])
     : summaries;
 
   const { data: listData, isLoading: listLoading, isFetching: listFetching, refetch: refetchList } = useQuery({
@@ -206,6 +206,11 @@ export default function DeliveriesScreen() {
                   <View style={styles.statItem}>
                     <Text style={[styles.statValue, { color: COLORS.success }]}>{item.completed_count}</Text>
                     <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
+                  </View>
+                  <View style={styles.statDivider} />
+                  <View style={styles.statItem}>
+                    <Text style={[styles.statValue, { color: COLORS.primary }]}>{item.in_transit_count}</Text>
+                    <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statItem}>
