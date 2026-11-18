@@ -215,42 +215,59 @@ export default function DeliveriesScreen() {
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl refreshing={summaryFetching && !summaryLoading} onRefresh={() => { void refetchSummary(); }} tintColor={COLORS.primary} />}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.summaryCard} onPress={() => openPeriod(item)} activeOpacity={0.85}>
-                <View style={styles.cardTop}>
-                  <Text style={styles.periodText}>{item.period === todayStr && groupBy === 'day' ? 'ဒီနေ့' : formatPeriodLabel(item.period, groupBy)}</Text>
-                  <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
-                </View>
-                <View style={styles.statsRow}>
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{item.total_count}</Text>
-                    <Text style={styles.statLabel}>စုစုပေါင်း</Text>
+            renderItem={({ item }) => {
+              const isToday = item.period === todayStr && groupBy === 'day';
+              const allDone = item.total_count > 0 && item.completed_count === item.total_count;
+              const feeStats: { value: number; label: string; color: string }[] = [];
+              if ((item.fee_mmk ?? 0) > 0) feeStats.push({ value: item.fee_mmk ?? 0, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
+              if ((item.cod_mmk ?? 0) > 0) feeStats.push({ value: item.cod_mmk ?? 0, label: 'COD (K)', color: COLORS.warning });
+              if ((item.fee_thb ?? 0) > 0) feeStats.push({ value: item.fee_thb ?? 0, label: 'ပို့ဆောင်ခ (฿)', color: COLORS.success });
+              if ((item.cod_thb ?? 0) > 0) feeStats.push({ value: item.cod_thb ?? 0, label: 'COD (฿)', color: COLORS.warning });
+
+              return (
+                <TouchableOpacity
+                  style={[styles.summaryCard, allDone && styles.summaryCardDone]}
+                  onPress={() => openPeriod(item)}
+                  activeOpacity={0.85}
+                >
+                  {/* Card header */}
+                  <View style={styles.cardHeader}>
+                    <View style={styles.dateIconWrap}>
+                      <Ionicons name="calendar" size={15} color={COLORS.primary} />
+                    </View>
+                    <Text style={styles.periodText} numberOfLines={1}>
+                      {isToday ? 'ဒီနေ့' : formatPeriodLabel(item.period, groupBy)}
+                    </Text>
+                    <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
                   </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: COLORS.success }]}>{item.completed_count}</Text>
-                    <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
+
+                  <View style={styles.cardDivider} />
+
+                  {/* Delivery counts */}
+                  <View style={styles.statsRow}>
+                    <View style={styles.statItem}>
+                      <Text style={styles.statValue}>{item.total_count}</Text>
+                      <Text style={styles.statLabel}>စုစုပေါင်း</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: COLORS.success }]}>{item.completed_count}</Text>
+                      <Text style={styles.statLabel}>ပို့ဆောင်ပြီး</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: COLORS.primary }]}>{item.in_transit_count}</Text>
+                      <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                      <Text style={[styles.statValue, { color: COLORS.error }]}>{item.failed_count}</Text>
+                      <Text style={styles.statLabel}>မအောင်မြင်</Text>
+                    </View>
                   </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: COLORS.primary }]}>{item.in_transit_count}</Text>
-                    <Text style={styles.statLabel}>ဆောင်ရွက်နေဆဲ</Text>
-                  </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statValue, { color: COLORS.error }]}>{item.failed_count}</Text>
-                    <Text style={styles.statLabel}>မအောင်မြင်</Text>
-                  </View>
-                </View>
-                {/* Fee / COD row - same style as daily-summary */}
-                {(() => {
-                  const feeStats: { value: number; label: string; color: string }[] = [];
-                  if ((item.fee_mmk ?? 0) > 0) feeStats.push({ value: item.fee_mmk ?? 0, label: 'ပို့ဆောင်ခ (K)', color: COLORS.success });
-                  if ((item.cod_mmk ?? 0) > 0) feeStats.push({ value: item.cod_mmk ?? 0, label: 'COD (K)', color: COLORS.warning });
-                  if ((item.fee_thb ?? 0) > 0) feeStats.push({ value: item.fee_thb ?? 0, label: 'ပို့ဆောင်ခ (฿)', color: COLORS.success });
-                  if ((item.cod_thb ?? 0) > 0) feeStats.push({ value: item.cod_thb ?? 0, label: 'COD (฿)', color: COLORS.warning });
-                  if (feeStats.length === 0) return null;
-                  return (
+
+                  {/* Fee / COD row */}
+                  {feeStats.length > 0 && (
                     <>
                       <View style={styles.rowDivider} />
                       <View style={styles.statsRow}>
@@ -258,7 +275,7 @@ export default function DeliveriesScreen() {
                           <React.Fragment key={stat.label}>
                             {index > 0 && <View style={styles.statDivider} />}
                             <View style={styles.statItem}>
-                              <Text style={[styles.statValue, { color: stat.color, fontSize: 13 }]}>
+                              <Text style={[styles.statValue, { color: stat.color, fontSize: 14 }]}>
                                 {stat.value.toLocaleString()}
                               </Text>
                               <Text style={styles.statLabel}>{stat.label}</Text>
@@ -267,7 +284,10 @@ export default function DeliveriesScreen() {
                         ))}
                       </View>
                     </>
-                  );
+                  )}
+                </TouchableOpacity>
+              );
+            }}
                 })()}
               </TouchableOpacity>
             )}
@@ -373,7 +393,7 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
+  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10 },
   listArea: { flex: 1 },
   empty: { alignItems: 'center', paddingVertical: 60 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6, fontFamily: FONTS.bold },
@@ -386,14 +406,40 @@ const styles = StyleSheet.create({
   pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600', fontFamily: FONTS.semiBold },
 
   // Summary cards
-  summaryCard: { backgroundColor: COLORS.white, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: COLORS.border, marginBottom: 10 },
+  summaryCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  summaryCardDone: {
+    borderColor: COLORS.success,
+    borderWidth: 1.5,
+    backgroundColor: '#E8F8EF',
+  },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dateIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: COLORS.primaryBg ?? '#FFF3E0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  periodText: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
-  statsRow: { flexDirection: 'row', alignItems: 'center' },
-  statItem: { flex: 1, alignItems: 'center' },
-  statValue: { fontSize: 18, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold },
-  statLabel: { fontSize: 11, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
-  statDivider: { width: 1, height: 32, backgroundColor: COLORS.border },
+  cardDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
+  periodText: { fontSize: 14, fontWeight: '700', color: COLORS.text, flex: 1, fontFamily: FONTS.bold },
+  statsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' },
+  statItem: { flex: 1, alignItems: 'center', gap: 2 },
+  statValue: { fontSize: 16, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold, marginTop: 2 },
+  statLabel: { fontSize: 10, color: COLORS.textSecondary, fontFamily: FONTS.regular },
+  statDivider: { width: 1, height: 36, backgroundColor: COLORS.border },
   rowDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
 
   // Fee summary bar in list view
