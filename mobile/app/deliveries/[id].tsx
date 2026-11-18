@@ -92,14 +92,36 @@ export default function DeliveryDetailScreen() {
           {parcel?.description && (
             <InfoRow label="ဖော်ပြချက်" value={parcel.description} />
           )}
-          {parcel?.is_cod && (
-            <InfoRow
-              label="COD"
-              value={`${Number(parcel.cod_amount).toLocaleString()} ကျပ်`}
-              valueColor={COLORS.info}
-            />
-          )}
         </InfoSection>
+
+        {/* Fee & COD section */}
+        {parcel && (Number(parcel.delivery_fee) > 0 || parcel.is_cod) && (() => {
+          const currency = parcel.currency ?? 'MMK';
+          const currencySymbol = currency === 'THB' ? '฿' : 'K';
+          const feeRows: { label: string; value: string; color: string }[] = [];
+          if (Number(parcel.delivery_fee) > 0) {
+            feeRows.push({
+              label: 'ပို့ဆောင်ခ',
+              value: `${Number(parcel.delivery_fee).toLocaleString()} ${currencySymbol}`,
+              color: COLORS.success,
+            });
+          }
+          if (parcel.is_cod) {
+            feeRows.push({
+              label: 'COD',
+              value: `${Number(parcel.cod_amount).toLocaleString()} ${currencySymbol}`,
+              color: COLORS.warning,
+            });
+          }
+          return (
+            <InfoSection title="ငွေကြေး အချက်အလက်">
+              {feeRows.map((row) => (
+                <InfoRow key={row.label} label={row.label} value={row.value} valueColor={row.color} />
+              ))}
+              <InfoRow label="ငွေကြေး" value={currency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} />
+            </InfoSection>
+          );
+        })()}
 
         {/* Parcel images (admin-uploaded) */}
         {parcel?.images && parcel.images.length > 0 && (
