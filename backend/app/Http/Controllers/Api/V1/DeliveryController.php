@@ -23,7 +23,7 @@ class DeliveryController extends Controller
     {
         $user = $request->user();
 
-        $query = DeliveryAssignment::with(['parcel'])
+        $query = DeliveryAssignment::with(['parcel.receivedBy', 'parcel.activeAssignment.staff', 'parcel.images'])
             ->where('staff_id', $user->id)
             ->when($request->status, function ($q) use ($request) {
                 if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
@@ -63,7 +63,7 @@ class DeliveryController extends Controller
     {
         $this->authorize('viewAny', DeliveryAssignment::class);
 
-        $query = DeliveryAssignment::with(['parcel', 'staff', 'assignedBy'])
+        $query = DeliveryAssignment::with(['parcel.receivedBy', 'parcel.activeAssignment.staff', 'parcel.images', 'staff', 'assignedBy'])
             ->when($request->staff_id, fn($q) => $q->where('staff_id', $request->staff_id))
             ->when($request->status, function ($q) use ($request) {
                 if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
@@ -278,16 +278,35 @@ class DeliveryController extends Controller
             'parcel' => $a->parcel ? [
                 'id' => $a->parcel->id,
                 'tracking_number' => $a->parcel->tracking_number,
+                'sender_name' => $a->parcel->sender_name,
+                'sender_phone' => $a->parcel->sender_phone,
                 'recipient_name' => $a->parcel->recipient_name,
                 'recipient_phone' => $a->parcel->recipient_phone,
                 'delivery_address' => $a->parcel->delivery_address,
-                'status' => $a->parcel->status,
+                'description' => $a->parcel->description,
+                'category' => $a->parcel->category,
+                'weight' => $a->parcel->weight,
+                'notes' => $a->parcel->notes,
                 'delivery_fee' => $a->parcel->delivery_fee,
                 'cod_amount' => $a->parcel->cod_amount,
                 'is_cod' => $a->parcel->is_cod,
+                'currency' => $a->parcel->currency ?? 'MMK',
+                'status' => $a->parcel->status,
+                'condition' => $a->parcel->condition,
                 'priority' => $a->parcel->priority,
-                'category' => $a->parcel->category,
-                'description' => $a->parcel->description,
+                'received_at' => $a->parcel->received_at?->toISOString(),
+                'received_by' => $a->parcel->relationLoaded('receivedBy') && $a->parcel->receivedBy ? [
+                    'id' => $a->parcel->receivedBy->id,
+                    'name' => $a->parcel->receivedBy->name,
+                ] : null,
+                'active_assignment' => $a->parcel->relationLoaded('activeAssignment') && $a->parcel->activeAssignment ? [
+                    'id' => $a->parcel->activeAssignment->id,
+                    'staff' => $a->parcel->activeAssignment->staff ? [
+                        'id' => $a->parcel->activeAssignment->staff->id,
+                        'name' => $a->parcel->activeAssignment->staff->name,
+                    ] : null,
+                    'assigned_at' => $a->parcel->activeAssignment->assigned_at->toISOString(),
+                ] : null,
                 'images' => $a->parcel->relationLoaded('images')
                     ? $a->parcel->images->map(fn($img) => [
                         'id'  => $img->id,

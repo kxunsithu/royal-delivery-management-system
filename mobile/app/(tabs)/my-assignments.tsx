@@ -181,6 +181,28 @@ function MyAssignmentCard({ assignment }: { assignment: Assignment }) {
         <Text style={styles.infoText} numberOfLines={2}>{parcel?.delivery_address}</Text>
       </View>
 
+      {/* Full parcel data */}
+      <View style={styles.parcelDetails}>
+        {parcel?.sender_name || parcel?.sender_phone ? (
+          <Text style={styles.detailText}>
+            ပေးပို့သူ: {parcel?.sender_name || ''}{parcel?.sender_name && parcel?.sender_phone ? ' · ' : ''}{parcel?.sender_phone || ''}
+          </Text>
+        ) : null}
+        {parcel?.priority ? <Text style={styles.detailText}>ဦးစားပေး: {parcel.priority}</Text> : null}
+        {parcel?.category ? <Text style={styles.detailText}>အမျိုးအစား: {parcel.category}</Text> : null}
+        {parcel?.weight ? <Text style={styles.detailText}>အလေးချိန်: {parcel.weight} kg</Text> : null}
+        {parcel?.description ? <Text style={styles.detailText}>ဖော်ပြချက်: {parcel.description}</Text> : null}
+        {parcel?.condition ? <Text style={styles.detailText}>အခြေအနေ: {parcel.condition}</Text> : null}
+        {parcel?.notes ? <Text style={styles.detailText}>မှတ်ချက်: {parcel.notes}</Text> : null}
+        {parcel?.received_at ? <Text style={styles.detailText}>လက်ခံချိန်: {new Date(parcel.received_at).toLocaleString()}</Text> : null}
+        {parcel?.received_by?.name ? <Text style={styles.detailText}>လက်ခံသူ: {parcel.received_by.name}</Text> : null}
+        {parcel?.currency || parcel?.delivery_fee !== undefined ? (
+          <Text style={styles.detailText}>ပို့ဆောင်ခ: {Number(parcel?.delivery_fee).toLocaleString()} {parcel?.currency === 'THB' ? 'THB' : 'MMK'}</Text>
+        ) : null}
+        {parcel?.is_cod ? <Text style={styles.detailText}>COD: {Number(parcel.cod_amount).toLocaleString()} {parcel.currency === 'THB' ? 'THB' : 'MMK'}</Text> : null}
+        {parcel?.active_assignment?.staff?.name ? <Text style={styles.detailText}>ဝန်ထမ်း: {parcel.active_assignment.staff.name}</Text> : null}
+      </View>
+
       <View style={styles.cardFooter}>
         <View style={[styles.statusBadge, { backgroundColor: assignColor + '18' }]}>
           <View style={[styles.statusDot, { backgroundColor: assignColor }]} />
@@ -273,6 +295,8 @@ const styles = StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
   infoSection: { gap: 4, marginBottom: 4 },
+  parcelDetails: { marginTop: 8, gap: 2 },
+  detailText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   recipientName: { fontSize: 15, fontWeight: '700', color: COLORS.text,
     fontFamily: FONTS.bold,
   },

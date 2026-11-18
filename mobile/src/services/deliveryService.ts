@@ -5,16 +5,29 @@ export interface Assignment {
   parcel?: {
     id: number;
     tracking_number: string;
+    sender_name?: string;
+    sender_phone?: string;
     recipient_name: string;
     recipient_phone: string;
     delivery_address: string;
-    status: string;
+    description?: string;
+    category?: string;
+    weight?: number;
+    notes?: string;
     delivery_fee: number;
     cod_amount: number;
     is_cod: boolean;
+    currency?: string;
+    status: string;
+    condition?: string;
     priority: string;
-    category?: string;
-    description?: string;
+    received_at?: string;
+    received_by?: { id: number; name: string };
+    active_assignment?: {
+      id: number;
+      staff?: { id: number; name: string };
+      assigned_at: string;
+    };
     images?: { id: number; url: string }[];
   };
   staff?: { id: number; name: string; phone?: string };

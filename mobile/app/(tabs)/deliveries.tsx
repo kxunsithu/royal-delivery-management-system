@@ -175,6 +175,28 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
       <Text style={styles.recipient} numberOfLines={1}>{parcel?.recipient_name}</Text>
       <Text style={styles.address} numberOfLines={2}>{parcel?.delivery_address}</Text>
 
+      {/* Full parcel data */}
+      <View style={styles.parcelDetails}>
+        {parcel?.sender_name || parcel?.sender_phone ? (
+          <Text style={styles.detailText}>
+            ပေးပို့သူ: {parcel?.sender_name || ''}{parcel?.sender_name && parcel?.sender_phone ? ' · ' : ''}{parcel?.sender_phone || ''}
+          </Text>
+        ) : null}
+        {parcel?.recipient_phone ? <Text style={styles.detailText}>လက်ခံသူဖုန်း: {parcel.recipient_phone}</Text> : null}
+        {parcel?.priority ? <Text style={styles.detailText}>ဦးစားပေး: {parcel.priority}</Text> : null}
+        {parcel?.category ? <Text style={styles.detailText}>အမျိုးအစား: {parcel.category}</Text> : null}
+        {parcel?.weight ? <Text style={styles.detailText}>အလေးချိန်: {parcel.weight} kg</Text> : null}
+        {parcel?.description ? <Text style={styles.detailText}>ဖော်ပြချက်: {parcel.description}</Text> : null}
+        {parcel?.condition ? <Text style={styles.detailText}>အခြေအနေ: {parcel.condition}</Text> : null}
+        {parcel?.notes ? <Text style={styles.detailText}>မှတ်ချက်: {parcel.notes}</Text> : null}
+        {parcel?.received_at ? <Text style={styles.detailText}>လက်ခံချိန်: {new Date(parcel.received_at).toLocaleString()}</Text> : null}
+        {parcel?.received_by?.name ? <Text style={styles.detailText}>လက်ခံသူ: {parcel.received_by.name}</Text> : null}
+        {parcel?.currency || parcel?.delivery_fee !== undefined ? (
+          <Text style={styles.detailText}>ပို့ဆောင်ခ: {Number(parcel?.delivery_fee).toLocaleString()} {parcel?.currency === 'THB' ? 'THB' : 'MMK'}</Text>
+        ) : null}
+        {parcel?.is_cod ? <Text style={styles.detailText}>COD: {Number(parcel.cod_amount).toLocaleString()} {parcel.currency === 'THB' ? 'THB' : 'MMK'}</Text> : null}
+      </View>
+
       {assignment.staff && (
         <Text style={styles.metaLine}>ဝန်ထမ်း: {assignment.staff.name}</Text>
       )}
@@ -304,6 +326,8 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontFamily: FONTS.regular,
   },
+  parcelDetails: { marginTop: 8, gap: 2 },
+  detailText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   cardBottom: {
     flexDirection: 'row',
     alignItems: 'center',
