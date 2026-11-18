@@ -132,7 +132,7 @@ export default function MyAssignmentsScreen() {
     return (
       <View style={styles.container}>
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <TouchableOpacity style={styles.backBtn} onPress={backToSummary} activeOpacity={0.7}>
               <Ionicons name="chevron-back" size={22} color={COLORS.white} />
             </TouchableOpacity>
@@ -188,19 +188,19 @@ export default function MyAssignmentsScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
             <Text style={styles.headerSubtitle}>စုစုပေါင်း {totalCount} ခု</Text>
           </View>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <TouchableOpacity style={[styles.toggleBtn, groupBy === 'day' && styles.toggleBtnActive]} onPress={() => setGroupBy('day')}>
-            <Text style={[styles.toggleText, groupBy === 'day' && styles.toggleTextActive]}>နေ့</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.toggleBtn, groupBy === 'month' && styles.toggleBtnActive]} onPress={() => setGroupBy('month')}>
-            <Text style={[styles.toggleText, groupBy === 'month' && styles.toggleTextActive]}>လ</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <TouchableOpacity style={[styles.toggleBtn, groupBy === 'day' && styles.toggleBtnActive]} onPress={() => setGroupBy('day')}>
+              <Text style={[styles.toggleText, groupBy === 'day' && styles.toggleTextActive]}>နေ့</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.toggleBtn, groupBy === 'month' && styles.toggleBtnActive]} onPress={() => setGroupBy('month')}>
+              <Text style={[styles.toggleText, groupBy === 'month' && styles.toggleTextActive]}>လ</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
