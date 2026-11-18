@@ -66,11 +66,34 @@ class DeliveryController extends Controller
 
         $groupBy = $request->input('group_by', 'day'); // day | month
 
+        // Date expression: use delivered_at for DELIVERED parcels, failed_at for FAILED,
+        // fallback to updated_at when status matches but specific date field is null,
+        // finally fallback to assigned_at for in-transit parcels.
         if ($groupBy === 'month') {
-            $periodExpr = "COALESCE(strftime('%Y-%m', datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), strftime('%Y-%m', datetime(parcels.failed_at, '+6 hours', '+30 minutes')), strftime('%Y-%m', datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes')))";
+            $periodExpr = "COALESCE(
+                strftime('%Y-%m', datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
+                CASE WHEN parcels.status = 'DELIVERED' THEN strftime('%Y-%m', datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+                strftime('%Y-%m', datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
+                CASE WHEN parcels.status = 'FAILED' THEN strftime('%Y-%m', datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+                strftime('%Y-%m', datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+            )";
         } else {
-            $periodExpr = "COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes')))";
+            $periodExpr = "COALESCE(
+                DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
+                CASE WHEN parcels.status = 'DELIVERED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+                DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
+                CASE WHEN parcels.status = 'FAILED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+                DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+            )";
         }
+
+        $filterExpr = "COALESCE(
+            DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
+            CASE WHEN parcels.status = 'DELIVERED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+            DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
+            CASE WHEN parcels.status = 'FAILED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+            DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+        )";
 
         $query = DeliveryAssignment::query()
             ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
@@ -81,8 +104,8 @@ class DeliveryController extends Controller
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status NOT IN ('COMPLETED','FAILED','REASSIGNED') THEN 1 ELSE 0 END) as in_transit_count"),
             ])
-            ->when($request->date_from, fn($q) => $q->whereRaw("COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))) >= ?", [$request->date_from]))
-            ->when($request->date_to, fn($q) => $q->whereRaw("COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))) <= ?", [$request->date_to]))
+            ->when($request->date_from, fn($q) => $q->whereRaw("$filterExpr >= ?", [$request->date_from]))
+            ->when($request->date_to, fn($q) => $q->whereRaw("$filterExpr <= ?", [$request->date_to]))
             ->groupBy(DB::raw($periodExpr))
             ->orderBy('period', 'desc');
 
@@ -117,7 +140,13 @@ class DeliveryController extends Controller
     {
         $this->authorize('viewAny', DeliveryAssignment::class);
 
-        $dateExpr = "COALESCE(DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')), DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')), DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes')))";
+        $dateExpr = "COALESCE(
+            DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
+            CASE WHEN parcels.status = 'DELIVERED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+            DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
+            CASE WHEN parcels.status = 'FAILED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
+            DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+        )";
 
         $query = DeliveryAssignment::with(['parcel.receivedBy', 'parcel.activeAssignment.staff', 'parcel.images', 'staff', 'assignedBy'])
             ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
