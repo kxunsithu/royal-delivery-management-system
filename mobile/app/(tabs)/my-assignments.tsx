@@ -193,12 +193,12 @@ export default function MyAssignmentsScreen() {
             <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
             <Text style={styles.headerSubtitle}>စုစုပေါင်း {totalCount} ခု</Text>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <TouchableOpacity style={[styles.toggleBtn, groupBy === 'day' && styles.toggleBtnActive]} onPress={() => setGroupBy('day')}>
-              <Text style={[styles.toggleText, groupBy === 'day' && styles.toggleTextActive]}>နေ့</Text>
+          <View style={styles.togglePill}>
+            <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'day' && styles.togglePillBtnActive]} onPress={() => setGroupBy('day')} activeOpacity={0.8}>
+              <Text style={[styles.togglePillText, groupBy === 'day' && styles.togglePillTextActive]}>နေ့</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.toggleBtn, groupBy === 'month' && styles.toggleBtnActive]} onPress={() => setGroupBy('month')}>
-              <Text style={[styles.toggleText, groupBy === 'month' && styles.toggleTextActive]}>လ</Text>
+            <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'month' && styles.togglePillBtnActive]} onPress={() => setGroupBy('month')} activeOpacity={0.8}>
+              <Text style={[styles.togglePillText, groupBy === 'month' && styles.togglePillTextActive]}>လ</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -420,4 +420,10 @@ const styles = StyleSheet.create({
   toggleBtnActive: { backgroundColor: COLORS.white },
   toggleText: { fontSize: 12, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.semiBold },
   toggleTextActive: { color: COLORS.primary },
+
+  togglePill: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 10, padding: 3, gap: 2 },
+  togglePillBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  togglePillBtnActive: { backgroundColor: COLORS.white },
+  togglePillText: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.8)', fontFamily: FONTS.semiBold },
+  togglePillTextActive: { color: COLORS.primary },
 });
