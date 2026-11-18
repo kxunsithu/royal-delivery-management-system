@@ -214,12 +214,6 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
               </View>
               <Text style={styles.quickActionLabel}>ပို့ဆောင်မှုများ</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/customers')} activeOpacity={0.8}>
-              <View style={[styles.quickActionIcon, { backgroundColor: '#FFF3E0' }]}>
-                <Ionicons name="people-outline" size={24} color={COLORS.warning} />
-              </View>
-              <Text style={styles.quickActionLabel}>ဖောက်သည်များ</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/daily-summary')} activeOpacity={0.8}>
               <View style={[styles.quickActionIcon, { backgroundColor: '#EFF6FF' }]}>
                 <Ionicons name="bar-chart-outline" size={24} color={COLORS.info} />
@@ -465,16 +459,17 @@ const styles = StyleSheet.create({
   quickActionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
     marginBottom: 16,
   },
   quickAction: {
-    width: '47%',
+    width: '30%',
+    flexGrow: 1,
     backgroundColor: COLORS.white,
     borderRadius: 14,
-    padding: 16,
+    padding: 14,
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: '#000',
@@ -484,14 +479,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   quickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   quickActionLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.text,
     fontFamily: FONTS.semiBold,
