@@ -288,9 +288,6 @@ export default function DeliveriesScreen() {
                 </TouchableOpacity>
               );
             }}
-                })()}
-              </TouchableOpacity>
-            )}
             ListEmptyComponent={
               <View style={styles.empty}>
                 <Text style={styles.emptyTitle}>ပို့ဆောင်မှု မတွေ့ပါ</Text>
