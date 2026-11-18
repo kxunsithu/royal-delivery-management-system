@@ -218,6 +218,41 @@ export default function DeliveriesScreen() {
                     <Text style={styles.statLabel}>မအောင်မြင်</Text>
                   </View>
                 </View>
+                {/* Fee / COD row */}
+                {((item.fee_mmk ?? 0) > 0 || (item.cod_mmk ?? 0) > 0 || (item.fee_thb ?? 0) > 0 || (item.cod_thb ?? 0) > 0) && (
+                  <>
+                    <View style={styles.rowDivider} />
+                    <View style={styles.statsRow}>
+                      {(item.fee_mmk ?? 0) > 0 && (
+                        <View style={styles.statItem}>
+                          <Text style={[styles.statValue, { color: COLORS.success, fontSize: 13 }]}>{(item.fee_mmk ?? 0).toLocaleString()}</Text>
+                          <Text style={styles.statLabel}>ပို့ဆောင်ခ (K)</Text>
+                        </View>
+                      )}
+                      {(item.fee_mmk ?? 0) > 0 && (item.cod_mmk ?? 0) > 0 && <View style={styles.statDivider} />}
+                      {(item.cod_mmk ?? 0) > 0 && (
+                        <View style={styles.statItem}>
+                          <Text style={[styles.statValue, { color: COLORS.warning, fontSize: 13 }]}>{(item.cod_mmk ?? 0).toLocaleString()}</Text>
+                          <Text style={styles.statLabel}>COD (K)</Text>
+                        </View>
+                      )}
+                      {(item.fee_thb ?? 0) > 0 && ((item.fee_mmk ?? 0) > 0 || (item.cod_mmk ?? 0) > 0) && <View style={styles.statDivider} />}
+                      {(item.fee_thb ?? 0) > 0 && (
+                        <View style={styles.statItem}>
+                          <Text style={[styles.statValue, { color: COLORS.success, fontSize: 13 }]}>{(item.fee_thb ?? 0).toLocaleString()}</Text>
+                          <Text style={styles.statLabel}>ပို့ဆောင်ခ (฿)</Text>
+                        </View>
+                      )}
+                      {(item.cod_thb ?? 0) > 0 && ((item.fee_mmk ?? 0) > 0 || (item.cod_mmk ?? 0) > 0 || (item.fee_thb ?? 0) > 0) && <View style={styles.statDivider} />}
+                      {(item.cod_thb ?? 0) > 0 && (
+                        <View style={styles.statItem}>
+                          <Text style={[styles.statValue, { color: COLORS.warning, fontSize: 13 }]}>{(item.cod_thb ?? 0).toLocaleString()}</Text>
+                          <Text style={styles.statLabel}>COD (฿)</Text>
+                        </View>
+                      )}
+                    </View>
+                  </>
+                )}
               </TouchableOpacity>
             )}
             ListEmptyComponent={
@@ -330,6 +365,7 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 18, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold },
   statLabel: { fontSize: 11, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   statDivider: { width: 1, height: 32, backgroundColor: COLORS.border },
+  rowDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
 
   // Assignment card
   card: { backgroundColor: COLORS.white, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: COLORS.border },

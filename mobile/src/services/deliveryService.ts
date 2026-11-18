@@ -73,6 +73,10 @@ export interface DeliverySummary {
   completed_count: number;
   failed_count: number;
   in_transit_count: number;
+  fee_mmk: number;
+  fee_thb: number;
+  cod_mmk: number;
+  cod_thb: number;
 }
 
 export interface StaffWorkload {
