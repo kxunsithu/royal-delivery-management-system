@@ -148,14 +148,14 @@ export default function DailySummaryScreen() {
               onPress={() => handleSwitchMode('day')}
               activeOpacity={0.8}
             >
-              <Text style={[styles.togglePillText, viewMode === 'day' && styles.togglePillTextActive]}>နေ့</Text>
+              <Text style={[styles.togglePillText, viewMode === 'day' && styles.togglePillTextActive]}>နေ့စဉ်</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.togglePillBtn, viewMode === 'month' && styles.togglePillBtnActive]}
               onPress={() => handleSwitchMode('month')}
               activeOpacity={0.8}
             >
-              <Text style={[styles.togglePillText, viewMode === 'month' && styles.togglePillTextActive]}>လ</Text>
+              <Text style={[styles.togglePillText, viewMode === 'month' && styles.togglePillTextActive]}>လစဉ်</Text>
             </TouchableOpacity>
           </View>
 
