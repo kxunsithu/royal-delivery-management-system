@@ -214,12 +214,6 @@ function AdminManagerDashboard({ data, isAdmin, canCreateParcel }: { data: any; 
               </View>
               <Text style={styles.quickActionLabel}>ပို့ဆောင်မှုများ</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/assign-staff')} activeOpacity={0.8}>
-              <View style={[styles.quickActionIcon, { backgroundColor: '#FFF3E0' }]}>
-                <Ionicons name="people-outline" size={24} color={COLORS.warning} />
-              </View>
-              <Text style={styles.quickActionLabel}>ဝန်ထမ်းချိတ်ဆက်</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.quickAction} onPress={() => router.navigate('/(tabs)/daily-summary')} activeOpacity={0.8}>
               <View style={[styles.quickActionIcon, { backgroundColor: '#EFF6FF' }]}>
                 <Ionicons name="bar-chart-outline" size={24} color={COLORS.info} />
