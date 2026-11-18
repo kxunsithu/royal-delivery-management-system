@@ -150,26 +150,39 @@ export default function AssignStaffScreen() {
     const statusColor = STATUS_COLORS[item.status as keyof typeof STATUS_COLORS] || COLORS.textSecondary;
     const statusLabel = STATUS_LABELS_MM[item.status as keyof typeof STATUS_LABELS_MM] || item.status;
     return (
-      <TouchableOpacity
-        style={styles.parcelCard}
-        activeOpacity={0.85}
-        onPress={() => openReassignModal(item)}
-      >
-        <View style={styles.cardTopRow}>
-          <Text style={styles.trackingNum} numberOfLines={1}>{item.tracking_number}</Text>
-          <View style={[styles.statusPill, { backgroundColor: statusColor + '20' }]}>
-            <Text style={[styles.statusPillText, { color: statusColor }]}>{statusLabel}</Text>
+      <View style={styles.parcelCard}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => router.push(`/parcels/${item.id}` as any)}
+        >
+          <View style={styles.cardTopRow}>
+            <Text style={styles.trackingNum} numberOfLines={1}>{item.tracking_number}</Text>
+            <View style={[styles.statusPill, { backgroundColor: statusColor + '20' }]}>
+              <Text style={[styles.statusPillText, { color: statusColor }]}>{statusLabel}</Text>
+            </View>
           </View>
-        </View>
-        <Text style={styles.recipientName} numberOfLines={1}>{item.recipient_name}</Text>
-        <Text style={styles.addressText} numberOfLines={1}>{item.delivery_address}</Text>
+          <Text style={styles.recipientName} numberOfLines={1}>{item.recipient_name}</Text>
+          <Text style={styles.addressText} numberOfLines={1}>{item.delivery_address}</Text>
+        </TouchableOpacity>
         <View style={styles.cardFooter}>
-          <View style={styles.reassignBtn}>
+          <TouchableOpacity
+            style={styles.detailBtn}
+            onPress={() => router.push(`/parcels/${item.id}` as any)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="document-text-outline" size={12} color={COLORS.primary} />
+            <Text style={styles.detailBtnText}>အသေးစိတ်</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.reassignBtn}
+            onPress={() => openReassignModal(item)}
+            activeOpacity={0.8}
+          >
             <Ionicons name="swap-horizontal-outline" size={12} color={COLORS.white} />
             <Text style={styles.reassignBtnText}>ဝန်ထမ်းပြောင်းမည်</Text>
-          </View>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </View>
     );
   }
 
@@ -491,9 +504,16 @@ const styles = StyleSheet.create({
   recipientName: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, marginBottom: 2 },
   addressText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular, marginBottom: 10 },
   cardFooter: {
-    flexDirection: 'row', justifyContent: 'flex-end',
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, paddingTop: 8,
+    gap: 8,
   },
+  detailBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: COLORS.primaryBg, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20,
+    borderWidth: 1, borderColor: COLORS.primary + '40',
+  },
+  detailBtnText: { fontSize: 12, color: COLORS.primary, fontFamily: FONTS.semiBold },
   reassignBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20,
