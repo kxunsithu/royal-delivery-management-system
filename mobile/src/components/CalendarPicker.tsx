@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 16,

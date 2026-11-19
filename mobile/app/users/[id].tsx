@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 40, gap: 14 },
 
   // Profile card
-  profileCard: {
+  profileCard: { minHeight: 80, minWidth: 120,
     alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 16,
     padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   callBtnText: { color: COLORS.white, fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
 
   // Generic card
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white, borderRadius: 16, padding: 16,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   toggleTextBtnText: { color: COLORS.primary, fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
 
   // Role picker
-  roleList: { gap: 8 },
+  roleList: { minHeight: 44, gap: 8 },
   roleItem: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 10, borderWidth: 1.5, borderColor: COLORS.border },
   roleDot: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   roleDotInner: { width: 8, height: 8, borderRadius: 4 },

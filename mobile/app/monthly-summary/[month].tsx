@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
 
   // Summary card
-  summaryCard: {
+  summaryCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
     marginTop: 16,
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
 
   // Filter
   filterRow: { height: 52 },
-  filterList: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
+  filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -333,11 +333,11 @@ const styles = StyleSheet.create({
   filterChipTextActive: { color: COLORS.white },
 
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 24, gap: 10 },
+  list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 24, gap: 10 },
   listEmpty: { flex: 1, justifyContent: 'center' },
 
   // Card
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 14,

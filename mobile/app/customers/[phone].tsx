@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 1,
   },
   filterRow: { height: 48 },
-  filterList: { paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' },
+  filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -391,10 +391,10 @@ const styles = StyleSheet.create({
   },
 
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingBottom: 24, gap: 10, paddingTop: 4 },
+  list: { minHeight: 180, paddingHorizontal: 16, paddingBottom: 24, gap: 10, paddingTop: 4 },
 
   // Parcel card
-  parcelCard: {
+  parcelCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 14,

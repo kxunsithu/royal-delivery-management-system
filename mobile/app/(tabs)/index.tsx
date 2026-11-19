@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     minHeight: 500,
   },
-  section: { padding: 16, paddingBottom: 32 },
+  section: { minHeight: 48, padding: 16, paddingBottom: 32 },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   },
 
   // Banner (staff total)
-  bannerCard: {
+  bannerCard: { minHeight: 80, minWidth: 120,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
 
   // Revenue card
-  revenueCard: {
+  revenueCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     paddingVertical: 4,

@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     fontSize: 12, fontWeight: '700', color: COLORS.textLight,
     textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: FONTS.bold,
   },
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     overflow: 'hidden',

@@ -497,9 +497,9 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
   content: { padding: 16, paddingBottom: 40 },
 
-  section: { marginBottom: 16 },
+  section: { minHeight: 48, marginBottom: 16 },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
-  infoCard: {
+  infoCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 12,
     overflow: 'hidden',
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   reasonChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, fontFamily: FONTS.semiBold },
   reasonChipTextActive: { color: COLORS.white },
 
-  inputCard: {
+  inputCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 12,
     borderWidth: 1,

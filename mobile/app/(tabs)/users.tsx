@@ -278,10 +278,10 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: 14, color: COLORS.text, fontFamily: FONTS.regular },
   filterRow: { height: 56 },
-  filterList: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
+  filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
   listArea: { flex: 1 },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
+  list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   filterChip: {
     paddingHorizontal: 14,
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
 
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 14,

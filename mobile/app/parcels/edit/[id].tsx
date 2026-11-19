@@ -482,9 +482,9 @@ const styles = StyleSheet.create({
   },
   saveBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   content: { padding: 16, paddingBottom: 40 },
-  formSection: { marginBottom: 16 },
+  formSection: { minHeight: 48, marginBottom: 16 },
   formSectionTitle: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
-  formCard: {
+  formCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 10,
     padding: 14,

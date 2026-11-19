@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
 
   // Profile card
-  profileCard: {
+  profileCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 20,
     padding: 24,
@@ -802,13 +802,13 @@ const styles = StyleSheet.create({
   },
 
   // ── Section ──
-  section: { marginBottom: 16 },
+  section: { minHeight: 48, marginBottom: 16 },
   sectionTitle: {
     fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 8, marginLeft: 4,
     textTransform: 'uppercase', letterSpacing: 0.5,
     fontFamily: FONTS.semiBold,
   },
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     overflow: 'hidden',

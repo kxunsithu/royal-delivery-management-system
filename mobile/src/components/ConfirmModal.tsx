@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     width: '100%',
     maxWidth: 380,
     backgroundColor: COLORS.white,

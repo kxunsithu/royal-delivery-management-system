@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
 
   // Parcel list
   listContent: { padding: 14, gap: 10 },
-  parcelCard: {
+  parcelCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
     shadowColor: '#000', shadowOpacity: 0.07, shadowRadius: 10,
     shadowOffset: { width: 0, height: 2 }, elevation: 3,
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
   statusPillText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
   recipientName: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, marginBottom: 2 },
-  addressRowCard: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 },
+  addressRowCard: { minHeight: 80, minWidth: 120, flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 },
   addressText: { flex: 1, fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   cardFooter: {
     flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center',
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background, paddingHorizontal: 14, paddingVertical: 10,
   },
   staffSearchInput: { flex: 1, fontSize: 13, color: COLORS.text, fontFamily: FONTS.regular, paddingVertical: 0 },
-  staffFlatList: { maxHeight: 300 },
+  staffFlatList: { minHeight: 44, maxHeight: 300 },
   staffItem: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     paddingHorizontal: 16, paddingVertical: 12,

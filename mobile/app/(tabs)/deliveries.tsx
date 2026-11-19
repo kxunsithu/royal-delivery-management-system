@@ -418,13 +418,13 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
   headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
   filterRow: { height: 58 },
-  filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
+  filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
   filterChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 24, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 36, justifyContent: 'center' },
   filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 10 },
+  list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 10 },
   listArea: { flex: 1 },
   empty: { alignItems: 'center', paddingVertical: 60 },
   emptyIconWrap: {
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600', fontFamily: FONTS.semiBold },
 
   // Summary cards
-  summaryCard: {
+  summaryCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white, borderRadius: 16, padding: 14,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 10, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   statDivider: { width: 1, height: 36, backgroundColor: COLORS.border },
   rowDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
-  progressSection: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 },
+  progressSection: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 },
   progressTrack: { flex: 1, height: 5, borderRadius: 3, backgroundColor: COLORS.border, overflow: 'hidden' },
   progressBar: { height: '100%', borderRadius: 3 },
   progressLabel: { fontSize: 11, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.semiBold, width: 30, textAlign: 'right' },
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   feeSummaryDivider: { width: 1, height: 28, backgroundColor: COLORS.border },
 
   // Assignment card
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },

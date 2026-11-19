@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
 
   // Filter chips
   filterRow: { height: 56 },
-  filterList: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
+  filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
   listArea: { flex: 1 },
   filterChip: {
     paddingHorizontal: 14,
@@ -652,10 +652,10 @@ const styles = StyleSheet.create({
   parcelDetails: { marginTop: 8, gap: 2 },
   detailText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
+  list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   // Card
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 12,

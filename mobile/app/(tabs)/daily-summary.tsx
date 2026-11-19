@@ -763,11 +763,11 @@ const styles = StyleSheet.create({
   },
 
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
+  list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
   listEmpty: { flex: 1, justifyContent: 'center' },
 
   // Card
-  card: {
+  card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 14,

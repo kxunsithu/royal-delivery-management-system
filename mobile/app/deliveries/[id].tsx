@@ -369,11 +369,11 @@ const styles = StyleSheet.create({
   statusAccentStrip: { height: 3 },
   content: { padding: 16, paddingBottom: 32 },
 
-  section: { marginBottom: 18 },
+  section: { minHeight: 48, marginBottom: 18 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   sectionAccentBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: COLORS.primary },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, flex: 1 },
-  infoCard: {
+  infoCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center',
   },
 
-  attemptCard: {
+  attemptCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
     marginBottom: 10,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   attemptDetail: { fontSize: 13, color: COLORS.textSecondary, marginTop: 4, fontFamily: FONTS.regular },
 
   // Proof photo section inside attempt card
-  proofSection: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
+  proofSection: { minHeight: 48, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
   proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginBottom: 8, fontFamily: FONTS.bold },
   proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   proofThumbWrap: { borderRadius: 10, overflow: 'hidden', position: 'relative' },
