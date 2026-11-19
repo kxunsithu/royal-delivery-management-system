@@ -92,7 +92,7 @@ export default function CustomerDetailScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <Text style={styles.headerName} numberOfLines={1}>{decodedName}</Text>
@@ -107,118 +107,124 @@ export default function CustomerDetailScreen() {
         )}
       </View>
 
-      {/* Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{meta?.total ?? parcels.length}</Text>
-          <Text style={styles.statLabel}>ပါဆယ်</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{totalMMK.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>MMK</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{totalTHB.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>THB</Text>
-        </View>
-      </View>
-
-      {(codMMK > 0 || codTHB > 0) && (
+      {/* White content area */}
+      <View style={styles.contentArea}>
+        {/* Stats */}
         <View style={styles.statsRow}>
-          {codMMK > 0 && (
-            <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: COLORS.warning }]}>{codMMK.toLocaleString()}</Text>
-              <Text style={styles.statLabel}>COD (K)</Text>
-            </View>
-          )}
-          {codMMK > 0 && codTHB > 0 && <View style={styles.statDivider} />}
-          {codTHB > 0 && (
-            <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: COLORS.warning }]}>{codTHB.toLocaleString()}</Text>
-              <Text style={styles.statLabel}>COD (฿)</Text>
-            </View>
-          )}
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{meta?.total ?? parcels.length}</Text>
+            <Text style={styles.statLabel}>ပါဆယ်</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{totalMMK.toLocaleString()}</Text>
+            <Text style={styles.statLabel}>MMK</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{totalTHB.toLocaleString()}</Text>
+            <Text style={styles.statLabel}>THB</Text>
+          </View>
         </View>
-      )}
 
-      {/* Status counts */}
-      <View style={styles.statusCountRow}>
-        <Text style={styles.statusCountBadge}>လက်ခံ {receivedCount}</Text>
-        <Text style={styles.statusCountBadge}>စစ်ဆေး {verifiedCount}</Text>
-        <Text style={styles.statusCountBadge}>ဆောင်ရွက် {inTransitCount}</Text>
-        <Text style={styles.statusCountBadge}>ပို့ပြီး {deliveredCount}</Text>
-        <Text style={styles.statusCountBadge}>မအောင် {failedCount}</Text>
-        <Text style={styles.statusCountBadge}>ပျက် {damagedCount}</Text>
-      </View>
-
-      {/* Status Filter */}
-      <View style={styles.filterRow}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterList}>
-          {STATUS_FILTERS.map((item) => (
-            <TouchableOpacity
-              key={item.value}
-              style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
-              onPress={() => { setStatusFilter(item.value); setPage(1); }}
-            >
-              <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Parcel List */}
-      {isLoading ? (
-        <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
-      ) : (
-        <FlatList
-          data={parcels}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isFetching && !isLoading}
-              onRefresh={() => { setPage(1); refetch(); }}
-              tintColor={COLORS.primary}
-            />
-          }
-          renderItem={({ item }) => <ParcelRow parcel={item} />}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>ပါဆယ် မတွေ့ပါ</Text>
-            </View>
-          }
-          ListFooterComponent={
-            meta && meta.last_page > 1 ? (
-              <View style={styles.pagination}>
-                <TouchableOpacity
-                  style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]}
-                  onPress={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.pageBtnText, page <= 1 && { color: COLORS.textLight }]}>နှုတ်</Text>
-                </TouchableOpacity>
-                <View style={styles.pageInfoBox}>
-                  <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
-                </View>
-                <TouchableOpacity
-                  style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]}
-                  onPress={() => setPage(p => Math.min(meta.last_page, p + 1))}
-                  disabled={page >= meta.last_page}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.pageBtnText, page >= meta.last_page && { color: COLORS.textLight }]}>နောက်</Text>
-                </TouchableOpacity>
+        {(codMMK > 0 || codTHB > 0) && (
+          <View style={styles.statsRow}>
+            {codMMK > 0 && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: COLORS.warning }]}>{codMMK.toLocaleString()}</Text>
+                <Text style={styles.statLabel}>COD (K)</Text>
               </View>
-            ) : undefined
-          }
-        />
-      )}
+            )}
+            {codMMK > 0 && codTHB > 0 && <View style={styles.statDivider} />}
+            {codTHB > 0 && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: COLORS.warning }]}>{codTHB.toLocaleString()}</Text>
+                <Text style={styles.statLabel}>COD (฿)</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Status counts */}
+        <View style={styles.statusCountRow}>
+          <Text style={styles.statusCountBadge}>လက်ခံ {receivedCount}</Text>
+          <Text style={styles.statusCountBadge}>စစ်ဆေး {verifiedCount}</Text>
+          <Text style={styles.statusCountBadge}>ဆောင်ရွက် {inTransitCount}</Text>
+          <Text style={styles.statusCountBadge}>ပို့ပြီး {deliveredCount}</Text>
+          <Text style={styles.statusCountBadge}>မအောင် {failedCount}</Text>
+          <Text style={styles.statusCountBadge}>ပျက် {damagedCount}</Text>
+        </View>
+
+        {/* Status Filter */}
+        <View style={styles.filterRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterList}>
+            {STATUS_FILTERS.map((item) => (
+              <TouchableOpacity
+                key={item.value}
+                style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
+                onPress={() => { setStatusFilter(item.value); setPage(1); }}
+              >
+                <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Parcel List */}
+        {isLoading ? (
+          <ActivityIndicator style={styles.loader} size="large" color={COLORS.primary} />
+        ) : (
+          <FlatList
+            data={parcels}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isFetching && !isLoading}
+                onRefresh={() => { setPage(1); refetch(); }}
+                tintColor={COLORS.primary}
+              />
+            }
+            renderItem={({ item }) => <ParcelRow parcel={item} />}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <View style={styles.emptyIconWrap}>
+                  <Ionicons name="cube-outline" size={36} color={COLORS.primary} />
+                </View>
+                <Text style={styles.emptyText}>ပါဆယ် မတွေ့ပါ</Text>
+              </View>
+            }
+            ListFooterComponent={
+              meta && meta.last_page > 1 ? (
+                <View style={styles.pagination}>
+                  <TouchableOpacity
+                    style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]}
+                    onPress={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.pageBtnText, page <= 1 && { color: COLORS.textLight }]}>နှုတ်</Text>
+                  </TouchableOpacity>
+                  <View style={styles.pageInfoBox}>
+                    <Text style={styles.pageInfo}>{page} / {meta.last_page}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.pageBtn, page >= meta.last_page && styles.pageBtnDisabled]}
+                    onPress={() => setPage(p => Math.min(meta.last_page, p + 1))}
+                    disabled={page >= meta.last_page}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.pageBtnText, page >= meta.last_page && { color: COLORS.textLight }]}>နောက်</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : undefined
+            }
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -284,22 +290,7 @@ function ParcelRow({ parcel }: { parcel: Parcel }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  statusCountRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
-  statusCountBadge: {
-    fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.semiBold,
-    backgroundColor: COLORS.background, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
-  },
-  filterRow: { height: 48 },
-  filterList: { paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' },
-  filterChip: {
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16,
-    backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border,
-    height: 30, justifyContent: 'center', alignSelf: 'center',
-  },
-  filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  filterChipText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
-  filterChipTextActive: { color: COLORS.white },
+  container: { flex: 1, backgroundColor: COLORS.primary },
 
   // Header
   header: {
@@ -307,30 +298,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
-    paddingBottom: 14,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    paddingBottom: 24,
+    backgroundColor: COLORS.primary,
   },
-  backBtn: { padding: 4 },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1 },
   headerName: {
     fontSize: 17,
     fontWeight: '700',
-    color: COLORS.text,
+    color: COLORS.white,
     fontFamily: FONTS.bold,
   },
   headerSub: {
     fontSize: 13,
-    color: COLORS.textSecondary,
+    color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
     fontFamily: FONTS.regular,
   },
   addBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: COLORS.primary,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.25)',
   },
   addBtnText: {
     fontSize: 13,
@@ -338,6 +327,38 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontFamily: FONTS.bold,
   },
+
+  // White content area
+  contentArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+
+  statusCountRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
+  statusCountBadge: {
+    fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.semiBold,
+    backgroundColor: COLORS.white, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 1,
+  },
+  filterRow: { height: 48 },
+  filterList: { paddingHorizontal: 16, paddingVertical: 6, gap: 8, alignItems: 'center' },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: COLORS.white,
+    height: 30,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  filterChipActive: { backgroundColor: COLORS.primary },
+  filterChipText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
+  filterChipTextActive: { color: COLORS.white },
 
   // Stats
   statsRow: {
@@ -347,10 +368,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    borderRadius: 16,
     paddingVertical: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   statItem: { flex: 1, alignItems: 'center', gap: 2 },
   statDivider: { width: 1, height: 32, backgroundColor: COLORS.border },
@@ -372,10 +396,13 @@ const styles = StyleSheet.create({
   // Parcel card
   parcelCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 14,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   trackingNumber: {
@@ -417,7 +444,16 @@ const styles = StyleSheet.create({
   feeText: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
 
   // Empty
-  empty: { alignItems: 'center', paddingTop: 80 },
+  empty: { alignItems: 'center', paddingTop: 60 },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   emptyText: { fontSize: 15, color: COLORS.textSecondary, fontFamily: FONTS.regular },
 
   // Pagination

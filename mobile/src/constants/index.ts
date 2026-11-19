@@ -77,10 +77,10 @@ export const PRIORITY_COLORS = {
 };
 
 export const ROLE_LABELS_MM = {
-  admin: 'အက်ဒ်မင်',
-  manager: 'မန်နေဂျာ',
-  delivery_staff: 'ပို့ဆောင်ရေးဝန်ထမ်း',
-  accountant: 'စာရင်းကိုင်',
+  admin: 'Admin (CEO)',
+  manager: 'Manager',
+  delivery_staff: 'Delivery Staff',
+  accountant: 'Accountant',
 };
 
 export const ASSIGNMENT_STATUS_LABELS_MM: Record<string, string> = {

@@ -350,19 +350,17 @@ function FormField({
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scrollArea: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background, },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
 
   // Header
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingBottom: 16,
-    borderBottomLeftRadius: 20, borderBottomRightRadius: 20, gap: 12,
+    backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingBottom: 24,
+    gap: 12,
   },
-  backBtn: {
-    paddingHorizontal: 4, paddingVertical: 4,
-  },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.white, textAlign: 'center',
     fontFamily: FONTS.bold,
   },

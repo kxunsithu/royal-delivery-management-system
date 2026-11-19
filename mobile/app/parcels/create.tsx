@@ -611,8 +611,8 @@ function FormField({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scrollArea: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background, },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     gap: 12,
   },
-  backBtn: { padding: 4 },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   backBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold },
   headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold, textAlign: 'center' },
   saveBtn: {

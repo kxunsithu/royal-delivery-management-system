@@ -139,6 +139,9 @@ export default function UsersScreen() {
               )}
               ListEmptyComponent={
                 <View style={styles.empty}>
+                  <View style={styles.emptyIconWrap}>
+                    <Ionicons name="people-outline" size={36} color={COLORS.primary} />
+                  </View>
                   <Text style={styles.emptyTitle}>အသုံးပြုသူ မတွေ့ပါ</Text>
                   <Text style={styles.emptySub}>
                     {search ? `"${search}" နှင့် မကိုက်ညီပါ` : 'အသုံးပြုသူ မရှိသေးပါ'}
@@ -223,7 +226,10 @@ function UserCard({ user, onToggleStatus }: { user: User; onToggleStatus: () => 
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
-  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
+  contentArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
 
   header: {
     flexDirection: 'row',
@@ -231,15 +237,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    paddingBottom: 24,
   },
   backBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -248,14 +252,12 @@ const styles = StyleSheet.create({
   addBtn: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
-  addBtnText: { fontSize: 22, fontWeight: '700', color: COLORS.primary, lineHeight: 24 },
+  addBtnText: { fontSize: 22, fontWeight: '700', color: COLORS.white, lineHeight: 24 },
 
   searchWrapper: {
     flexDirection: 'row',
@@ -265,11 +267,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 4,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   searchInput: { flex: 1, fontSize: 14, color: COLORS.text, fontFamily: FONTS.regular },
   filterRow: { height: 56 },
@@ -295,15 +300,18 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 14,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  avatarImage: { width: 44, height: 44, borderRadius: 22, flexShrink: 0 },
+  avatar: { width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  avatarImage: { width: 50, height: 50, borderRadius: 25, flexShrink: 0 },
   avatarText: { fontSize: 18, fontWeight: '700', fontFamily: FONTS.bold },
   userInfo: { flex: 1, gap: 2 },
   userName: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
@@ -317,6 +325,15 @@ const styles = StyleSheet.create({
   statusPillText: { fontSize: 11, fontWeight: '700', fontFamily: FONTS.bold },
 
   empty: { alignItems: 'center', paddingVertical: 60, gap: 6 },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
   emptySub: { fontSize: 13, color: COLORS.textSecondary, textAlign: 'center', fontFamily: FONTS.regular },
 

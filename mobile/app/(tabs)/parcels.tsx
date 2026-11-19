@@ -115,7 +115,7 @@ export default function ParcelsScreen() {
             <Ionicons
               name="calendar-outline"
               size={20}
-              color={hasActiveDateFilter ? COLORS.white : COLORS.primary}
+              color={hasActiveDateFilter ? COLORS.primary : COLORS.white}
             />
           </TouchableOpacity>
           {canCreateParcel && (
@@ -123,7 +123,7 @@ export default function ParcelsScreen() {
               style={styles.addBtn}
               onPress={() => router.push('/parcels/create')}
             >
-              <Ionicons name="add" size={24} color={COLORS.primary} />
+              <Ionicons name="add" size={24} color={COLORS.white} />
             </TouchableOpacity>
           )}
         </View>
@@ -262,6 +262,9 @@ export default function ParcelsScreen() {
               refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={() => { setPage(1); refetch(); }} tintColor={COLORS.primary} />}
               ListEmptyComponent={
                 <View style={styles.empty}>
+                  <View style={styles.emptyIconWrap}>
+                    <Ionicons name="cube-outline" size={36} color={COLORS.primary} />
+                  </View>
                   <Text style={styles.emptyTitle}>ပါဆယ် မတွေ့ပါ</Text>
                   <Text style={styles.emptySub}>
                     {search ? `"${search}" နှင့် မကိုက်ညီပါ` : 'ရွေးချယ်ထားသော filter နှင့် မကိုက်ညီပါ'}
@@ -339,6 +342,8 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
         onPress={() => router.push(`/parcels/${parcel.id}`)}
         activeOpacity={0.85}
       >
+        {/* Left color bar */}
+
         {/* Card Header */}
         <View style={styles.cardHeader}>
           <Text style={styles.trackingNumber}>{parcel.tracking_number}</Text>
@@ -439,7 +444,10 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
-  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
+  contentArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
 
   // Header
   header: {
@@ -448,9 +456,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    paddingBottom: 24,
   },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
     fontFamily: FONTS.bold,
@@ -466,27 +472,21 @@ const styles = StyleSheet.create({
   calendarBtn: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   calendarBtnActive: {
-    backgroundColor: COLORS.primary,
-    borderWidth: 1,
-    borderColor: COLORS.white,
+    backgroundColor: COLORS.white,
   },
   addBtn: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
 
   // Search
@@ -498,11 +498,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 4,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   searchInput: { flex: 1, fontSize: 14, color: COLORS.text,
     fontFamily: FONTS.regular,
@@ -539,8 +542,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 14,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   dateFilterRow: {
     flexDirection: 'row',
@@ -581,7 +587,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 8,
     top: '50%' as any,
-    marginTop: -8,
   },
   dateArrow: {
     marginBottom: 10,
@@ -652,10 +657,14 @@ const styles = StyleSheet.create({
   // Card
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary,
@@ -665,9 +674,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 24,
   },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontSize: 12, fontWeight: '600',
@@ -701,9 +710,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    paddingTop: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: COLORS.background,
+    borderRadius: 10,
   },
   footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   priorityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
@@ -726,6 +737,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.success,
     borderRadius: 10, paddingVertical: 9, marginTop: 10,
     alignItems: 'center', justifyContent: 'center',
+    shadowColor: COLORS.success,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   verifyBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white,
     fontFamily: FONTS.bold,
@@ -736,6 +752,15 @@ const styles = StyleSheet.create({
 
   // Empty
   empty: { alignItems: 'center', paddingVertical: 60 },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6,
     fontFamily: FONTS.bold,
   },

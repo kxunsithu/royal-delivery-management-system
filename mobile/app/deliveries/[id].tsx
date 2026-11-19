@@ -54,9 +54,9 @@ export default function DeliveryDetailScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
@@ -66,10 +66,14 @@ export default function DeliveryDetailScreen() {
             <Text style={styles.headerSubtitle} numberOfLines={1}>{assignment.staff.name}</Text>
           )}
         </View>
-        <View style={[styles.headerStatusBadge, { backgroundColor: statusColor + '18' }]}>
+        <View style={styles.headerStatusBadge}>
+          <View style={[styles.headerStatusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.headerStatusText, { color: statusColor }]}>{statusLabel}</Text>
         </View>
       </View>
+
+      {/* Status color accent strip */}
+      <View style={[styles.statusAccentStrip, { backgroundColor: statusColor }]} />
 
       <ScrollView
         style={styles.scrollArea}
@@ -77,13 +81,14 @@ export default function DeliveryDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Parcel info */}
-        <InfoSection title="ပါဆယ် အချက်အလက်">
+        <InfoSection title="ပါဆယ် အချက်အလက်" icon="cube-outline">
           <InfoRow label="ခြေရာခံ" value={parcel?.tracking_number || '—'} />
           <InfoRow label="လက်ခံသူ" value={parcel?.recipient_name || '—'} />
           <InfoRow
             label="ဖုန်းနံပါတ်"
             value={parcel?.recipient_phone || '—'}
             onPress={parcel?.recipient_phone ? () => Linking.openURL(`tel:${parcel.recipient_phone}`) : undefined}
+            isPhone
           />
           <InfoRow label="လိပ်စာ" value={parcel?.delivery_address || '—'} />
           {parcel?.category && (
@@ -100,6 +105,7 @@ export default function DeliveryDetailScreen() {
               label="ပို့ဆောင်ပြီးရက်"
               value={new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString('my-MM')}
               valueColor={COLORS.success}
+              isLast
             />
           )}
           {parcel?.status === 'FAILED' && (parcel?.failed_at || parcel?.updated_at) && (
@@ -107,6 +113,7 @@ export default function DeliveryDetailScreen() {
               label="မအောင်မြင်ရက်"
               value={new Date((parcel.failed_at || parcel.updated_at)!).toLocaleString('my-MM')}
               valueColor={COLORS.error}
+              isLast
             />
           )}
         </InfoSection>
@@ -131,11 +138,11 @@ export default function DeliveryDetailScreen() {
             });
           }
           return (
-            <InfoSection title="ငွေကြေး အချက်အလက်">
-              {feeRows.map((row) => (
-                <InfoRow key={row.label} label={row.label} value={row.value} valueColor={row.color} />
+            <InfoSection title="ငွေကြေး အချက်အလက်" icon="cash-outline">
+              {feeRows.map((row, i) => (
+                <InfoRow key={row.label} label={row.label} value={row.value} valueColor={row.color} isLast={i === feeRows.length - 1} />
               ))}
-              <InfoRow label="ငွေကြေး" value={currency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} />
+              <InfoRow label="ငွေကြေး" value={currency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} isLast />
             </InfoSection>
           );
         })()}
@@ -143,32 +150,41 @@ export default function DeliveryDetailScreen() {
         {/* Parcel images (admin-uploaded) */}
         {parcel?.images && parcel.images.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>ပါဆယ် ဓာတ်ပုံများ ({parcel.images.length})</Text>
-            <View style={styles.parcelImgGrid}>
-              {parcel.images.map((img: any, idx: number) => (
-                <TouchableOpacity
-                  key={img.id || idx}
-                  activeOpacity={0.85}
-                  style={styles.parcelImgWrap}
-                  onPress={() => {
-                    const imgs: PreviewImage[] = parcel.images!.map((item: any, i: number) => ({
-                      id: item.id || `img-${i}`,
-                      url: item.url,
-                    }));
-                    setPreviewImages(imgs);
-                    setPreviewIndex(idx);
-                    setPreviewVisible(true);
-                  }}
-                >
-                  <Image source={{ uri: img.url }} style={styles.parcelImgThumb} />
-                </TouchableOpacity>
-              ))}
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionAccentBar} />
+              <Ionicons name="images-outline" size={16} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>ပါဆယ် ဓာတ်ပုံများ ({parcel.images.length})</Text>
+            </View>
+            <View style={styles.infoCard}>
+              <View style={styles.parcelImgGrid}>
+                {parcel.images.map((img: any, idx: number) => (
+                  <TouchableOpacity
+                    key={img.id || idx}
+                    activeOpacity={0.85}
+                    style={styles.parcelImgWrap}
+                    onPress={() => {
+                      const imgs: PreviewImage[] = parcel.images!.map((item: any, i: number) => ({
+                        id: item.id || `img-${i}`,
+                        url: item.url,
+                      }));
+                      setPreviewImages(imgs);
+                      setPreviewIndex(idx);
+                      setPreviewVisible(true);
+                    }}
+                  >
+                    <Image source={{ uri: img.url }} style={styles.parcelImgThumb} />
+                    <View style={styles.imgOverlay}>
+                      <Ionicons name="expand-outline" size={14} color={COLORS.white} />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           </View>
         )}
 
         {/* Assignment info */}
-        <InfoSection title="ချိတ်ဆက်မှု အချက်အလက်">
+        <InfoSection title="ချိတ်ဆက်မှု အချက်အလက်" icon="link-outline">
           {assignment?.staff && (
             <InfoRow label="ဝန်ထမ်း" value={assignment.staff.name} />
           )}
@@ -182,67 +198,78 @@ export default function DeliveryDetailScreen() {
             />
           )}
           {assignment?.status && (
-            <InfoRow label="အခြေအနေ" value={assignmentStatusLabel} />
+            <InfoRow label="အခြေအနေ" value={assignmentStatusLabel} isLast />
           )}
         </InfoSection>
 
         {/* Delivery attempts */}
         {assignment?.delivery_attempts && assignment.delivery_attempts.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              ပို့ဆောင်ကြိုးပမ်းမှုများ ({assignment.delivery_attempts.length})
-            </Text>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionAccentBar} />
+              <Ionicons name="flag-outline" size={16} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>
+                ပို့ဆောင်ကြိုးပမ်းမှုများ ({assignment.delivery_attempts.length})
+              </Text>
+            </View>
             {[...assignment.delivery_attempts].reverse().map((attempt: any, i: number) => {
               const delivered = attempt.result === 'DELIVERED';
               return (
                 <View key={attempt.id ?? i} style={styles.attemptCard}>
-                  <View style={styles.attemptHeader}>
-                    <View style={[styles.attemptBadge, delivered ? styles.attemptDelivered : styles.attemptFailed]}>
-                      <Text style={[styles.attemptBadgeText, { color: delivered ? COLORS.success : COLORS.error }]}>
-                        {delivered ? 'ပို့ဆောင်ပြီး' : 'မအောင်မြင်'}
-                      </Text>
-                    </View>
-                    <Text style={styles.attemptTime}>
-                      {new Date(attempt.attempted_at).toLocaleString('my-MM')}
-                    </Text>
-                  </View>
-                  {attempt.failure_reason && (
-                    <Text style={styles.attemptDetail}>{attempt.failure_reason}</Text>
-                  )}
-                  {attempt.recipient_name && (
-                    <Text style={styles.attemptDetail}>{attempt.recipient_name}</Text>
-                  )}
-                  {attempt.notes && (
-                    <Text style={[styles.attemptDetail, { fontStyle: 'italic' }]}>{attempt.notes}</Text>
-                  )}
-                  {/* Proof Photos */}
-                  {attempt.proof_photos && attempt.proof_photos.length > 0 && (
-                    <View style={styles.proofSection}>
-                      <Text style={styles.proofSectionTitle}>
-                        သက်သေဓာတ်ပုံ ({attempt.proof_photos.length})
-                      </Text>
-                      <View style={styles.proofGrid}>
-                        {attempt.proof_photos.map((p: any, pIdx: number) => (
-                          <TouchableOpacity
-                            key={p.id || pIdx}
-                            activeOpacity={0.8}
-                            onPress={() => {
-                              const imgs: PreviewImage[] = attempt.proof_photos.map((item: any, i: number) => ({
-                                id: item.id || `proof-${i}`,
-                                url: item.file_url,
-                              }));
-                              setPreviewImages(imgs);
-                              setPreviewIndex(pIdx);
-                              setPreviewVisible(true);
-                            }}
-                            style={styles.proofThumbWrap}
-                          >
-                            <Image source={{ uri: p.file_url }} style={styles.proofThumb} />
-                          </TouchableOpacity>
-                        ))}
+                  <View style={[styles.attemptCardBar, { backgroundColor: delivered ? COLORS.success : COLORS.error }]} />
+                  <View style={styles.attemptCardContent}>
+                    <View style={styles.attemptHeader}>
+                      <View style={[styles.attemptBadge, delivered ? styles.attemptDelivered : styles.attemptFailed]}>
+                        <Ionicons name={delivered ? 'checkmark-circle' : 'close-circle'} size={13} color={delivered ? COLORS.success : COLORS.error} />
+                        <Text style={[styles.attemptBadgeText, { color: delivered ? COLORS.success : COLORS.error }]}>
+                          {delivered ? 'ပို့ဆောင်ပြီး' : 'မအောင်မြင်'}
+                        </Text>
                       </View>
+                      <Text style={styles.attemptTime}>
+                        {new Date(attempt.attempted_at).toLocaleString('my-MM')}
+                      </Text>
                     </View>
-                  )}
+                    {attempt.failure_reason && (
+                      <Text style={styles.attemptDetail}>{attempt.failure_reason}</Text>
+                    )}
+                    {attempt.recipient_name && (
+                      <Text style={styles.attemptDetail}>{attempt.recipient_name}</Text>
+                    )}
+                    {attempt.notes && (
+                      <Text style={[styles.attemptDetail, { fontStyle: 'italic' }]}>{attempt.notes}</Text>
+                    )}
+                    {/* Proof Photos */}
+                    {attempt.proof_photos && attempt.proof_photos.length > 0 && (
+                      <View style={styles.proofSection}>
+                        <Text style={styles.proofSectionTitle}>
+                          သက်သေဓာတ်ပုံ ({attempt.proof_photos.length})
+                        </Text>
+                        <View style={styles.proofGrid}>
+                          {attempt.proof_photos.map((p: any, pIdx: number) => (
+                            <TouchableOpacity
+                              key={p.id || pIdx}
+                              activeOpacity={0.8}
+                              onPress={() => {
+                                const imgs: PreviewImage[] = attempt.proof_photos.map((item: any, i: number) => ({
+                                  id: item.id || `proof-${i}`,
+                                  url: item.file_url,
+                                }));
+                                setPreviewImages(imgs);
+                                setPreviewIndex(pIdx);
+                                setPreviewVisible(true);
+                              }}
+                              style={styles.proofThumbWrap}
+                            >
+                              <Image source={{ uri: p.file_url }} style={styles.proofThumb} />
+                              <View style={styles.imgOverlay}>
+                                <Ionicons name="expand-outline" size={12} color={COLORS.white} />
+                              </View>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                    )}
+                  </View>
                 </View>
               );
             })}
@@ -258,6 +285,7 @@ export default function DeliveryDetailScreen() {
             onPress={() => router.push(`/deliveries/attempt/${id}`)}
             activeOpacity={0.85}
           >
+            <Ionicons name="checkmark-circle-outline" size={20} color={COLORS.white} />
             <Text style={styles.recordBtnText}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
           </TouchableOpacity>
         </View>
@@ -274,20 +302,24 @@ export default function DeliveryDetailScreen() {
   );
 }
 
-function InfoSection({ title, children }: { title: string; children: React.ReactNode }) {
+function InfoSection({ title, children, icon }: { title: string; children: React.ReactNode; icon?: any }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionAccentBar} />
+        {icon && <Ionicons name={icon} size={16} color={COLORS.primary} />}
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
       <View style={styles.infoCard}>{children}</View>
     </View>
   );
 }
 
-function InfoRow({ label, value, valueColor, onPress }: {
-  label: string; value: string; valueColor?: string; onPress?: () => void;
+function InfoRow({ label, value, valueColor, onPress, isPhone, isLast }: {
+  label: string; value: string; valueColor?: string; onPress?: () => void; isPhone?: boolean; isLast?: boolean;
 }) {
   const content = (
-    <View style={styles.infoRow}>
+    <View style={[styles.infoRow, isLast && styles.infoRowLast]}>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text
         style={[styles.infoValue, valueColor ? { color: valueColor, fontWeight: '700' } : {}]}
@@ -295,6 +327,11 @@ function InfoRow({ label, value, valueColor, onPress }: {
       >
         {value}
       </Text>
+      {isPhone && onPress && (
+        <View style={styles.callIconWrap}>
+          <Ionicons name="call" size={14} color={COLORS.white} />
+        </View>
+      )}
     </View>
   );
   return onPress ? <TouchableOpacity onPress={onPress} activeOpacity={0.7}>{content}</TouchableOpacity> : content;
@@ -302,71 +339,102 @@ function InfoRow({ label, value, valueColor, onPress }: {
 
 const styles = StyleSheet.create({
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scrollArea: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background, },
   header: {
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
-    paddingBottom: 16, gap: 12,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+    paddingBottom: 24, gap: 12,
+    backgroundColor: COLORS.primary,
   },
-  backBtn: { padding: 4 },
+  backBtn: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center',
+  },
   headerCenter: { flex: 1 },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
-  headerSubtitle: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
-  headerStatusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20, alignSelf: 'flex-start' },
-  headerStatusText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
+  headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
+  headerStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 24,
+    alignSelf: 'center',
+    backgroundColor: COLORS.white,
+  },
+  headerStatusDot: { width: 6, height: 6, borderRadius: 3 },
+  headerStatusText: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.bold },
+  statusAccentStrip: { height: 3 },
   content: { padding: 16, paddingBottom: 32 },
 
-  section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
+  section: { marginBottom: 18 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  sectionAccentBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: COLORS.primary },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, flex: 1 },
   infoCard: {
-    backgroundColor: COLORS.white, borderRadius: 12, overflow: 'hidden',
-    borderWidth: 1, borderColor: COLORS.border,
+    backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
   infoRow: {
     flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 14, paddingVertical: 11, gap: 10,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
+    paddingHorizontal: 16, paddingVertical: 12, gap: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border,
   },
-  infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 96, fontFamily: FONTS.regular },
+  infoRowLast: { borderBottomWidth: 0 },
+  infoLabel: { fontSize: 12, color: COLORS.textSecondary, width: 92, fontFamily: FONTS.regular },
   infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', fontFamily: FONTS.medium },
+  callIconWrap: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: COLORS.success, alignItems: 'center', justifyContent: 'center',
+  },
 
-  // Parcel (admin-uploaded) images
-  parcelImgGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  parcelImgWrap: { borderRadius: 10, overflow: 'hidden' },
-  parcelImgThumb: { width: 90, height: 90, borderRadius: 10, backgroundColor: COLORS.border },
+  // Parcel images
+  parcelImgGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 14 },
+  parcelImgWrap: { borderRadius: 12, overflow: 'hidden', position: 'relative' },
+  parcelImgThumb: { width: 88, height: 88, borderRadius: 12, backgroundColor: COLORS.border },
+  imgOverlay: {
+    position: 'absolute', bottom: 6, right: 6,
+    width: 24, height: 24, borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center',
+  },
 
   attemptCard: {
-    backgroundColor: COLORS.white, borderRadius: 12, padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: COLORS.border,
+    backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
+    marginBottom: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
-  attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  attemptBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  attemptCardBar: { width: 4 },
+  attemptCardContent: { flex: 1, padding: 14 },
+  attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 24 },
   attemptDelivered: { backgroundColor: '#E8F8EF' },
   attemptFailed: { backgroundColor: '#FDE8E8' },
   attemptBadgeText: { fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
-  attemptTime: { fontSize: 12, color: COLORS.textLight, fontFamily: FONTS.regular },
+  attemptTime: { fontSize: 11, color: COLORS.textLight, fontFamily: FONTS.regular },
   attemptDetail: { fontSize: 13, color: COLORS.textSecondary, marginTop: 4, fontFamily: FONTS.regular },
 
   // Proof photo section inside attempt card
   proofSection: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
   proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginBottom: 8, fontFamily: FONTS.bold },
   proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  proofThumbWrap: { borderRadius: 8, overflow: 'hidden' },
-  proofThumb: { width: 72, height: 72, borderRadius: 8, backgroundColor: COLORS.border },
+  proofThumbWrap: { borderRadius: 10, overflow: 'hidden', position: 'relative' },
+  proofThumb: { width: 72, height: 72, borderRadius: 10, backgroundColor: COLORS.border },
 
   // Sticky footer
   stickyFooter: {
     backgroundColor: COLORS.white,
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 14,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 8,
   },
   recordBtn: {
-    backgroundColor: COLORS.primary, borderRadius: 10, paddingVertical: 14,
-    alignItems: 'center', justifyContent: 'center',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    backgroundColor: COLORS.primary, borderRadius: 14, paddingVertical: 15,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
   },
   recordBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700', fontFamily: FONTS.bold },
 });

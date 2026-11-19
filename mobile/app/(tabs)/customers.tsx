@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { parcelService, Customer } from '../../src/services/parcelService';
-import { COLORS, STATUS_COLORS } from '../../src/constants';
+import { COLORS, STATUS_COLORS, FONTS } from '../../src/constants';
 
 type CustomerType = 'recipient' | 'sender';
 
@@ -117,6 +117,9 @@ export default function CustomersScreen() {
               }
               ListEmptyComponent={
                 <View style={styles.empty}>
+                  <View style={styles.emptyIconWrap}>
+                    <Ionicons name="people-outline" size={36} color={COLORS.primary} />
+                  </View>
                   <Text style={styles.emptyTitle}>ဖောက်သည် မတွေ့ပါ</Text>
                   <Text style={styles.emptySub}>
                     {search ? `"${search}" နှင့် မကိုက်ညီပါ` : 'ဖောက်သည် မရှိသေးပါ'}
@@ -214,7 +217,7 @@ function CustomerCard({ customer, type }: { customer: Customer; type: CustomerTy
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
-  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, },
 
   // Header
   header: {
@@ -223,21 +226,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    paddingBottom: 24,
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: '800',
     color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   headerSub: {
     fontSize: 13,
     color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
 
   // Type toggle
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   typeTabTextActive: { color: COLORS.white },
 
@@ -282,6 +283,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 14,
     paddingHorizontal: 14,
+    paddingVertical: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -292,8 +294,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     color: COLORS.text,
-    paddingVertical: 12,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
 
   listArea: { flex: 1 },
@@ -309,47 +310,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
-  cardHighlighted: {
-    borderWidth: 1.5,
-    borderColor: COLORS.success,
-    backgroundColor: '#E8F8EF',
+  cardHighlighted: { backgroundColor: '#F0FDF4',
   },
   avatarCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: COLORS.primary + '18',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary + '30',
   },
   avatarText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   cardInfo: { flex: 1, gap: 2 },
   cardName: {
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   cardPhone: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   lastDate: {
     fontSize: 11,
     color: COLORS.textLight,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   statusGrid: {
     flexDirection: 'row',
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
   cardRight: { alignItems: 'flex-end' },
   countBadge: {
@@ -377,22 +377,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
 
   // Empty
-  empty: { alignItems: 'center', paddingTop: 80, gap: 6 },
+  empty: { alignItems: 'center', paddingTop: 60, gap: 6 },
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.text,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
   emptySub: {
     fontSize: 14,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    fontFamily: 'NotoSansMyanmar_400Regular',
+    fontFamily: FONTS.regular,
   },
 
   // Pagination
@@ -419,7 +428,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: COLORS.primary,
-    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    fontFamily: FONTS.semiBold,
   },
   pageInfoBox: {
     paddingHorizontal: 16,
@@ -431,6 +440,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: COLORS.white,
-    fontFamily: 'NotoSansMyanmar_700Bold',
+    fontFamily: FONTS.bold,
   },
 });

@@ -3,11 +3,14 @@ FROM php:8.5-cli
 
 # System dependencies for PHP extensions and tooling
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git unzip \
+        git unzip tzdata \
         libzip-dev libsqlite3-dev libpq-dev libonig-dev libxml2-dev libcurl4-openssl-dev \
+    && ln -snf /usr/share/zoneinfo/Asia/Yangon /etc/localtime && echo "Asia/Yangon" > /etc/timezone \
     && docker-php-ext-install \
         pdo pdo_sqlite pdo_pgsql zip mbstring xml curl \
     && rm -rf /var/lib/apt/lists/*
+
+ENV TZ=Asia/Yangon
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

@@ -138,7 +138,9 @@ export default function AssignStaffScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.permissionBox}>
-          <Ionicons name="lock-closed-outline" size={40} color={COLORS.textLight} />
+          <View style={styles.permissionIconWrap}>
+            <Ionicons name="lock-closed-outline" size={36} color={COLORS.textLight} />
+          </View>
           <Text style={styles.permissionText}>ဤစာမျက်နှာကို ကြည့်ရှုခွင့် မရှိပါ</Text>
         </View>
       </View>
@@ -151,36 +153,41 @@ export default function AssignStaffScreen() {
     const statusLabel = STATUS_LABELS_MM[item.status as keyof typeof STATUS_LABELS_MM] || item.status;
     return (
       <View style={styles.parcelCard}>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => router.push(`/parcels/${item.id}` as any)}
-        >
-          <View style={styles.cardTopRow}>
-            <Text style={styles.trackingNum} numberOfLines={1}>{item.tracking_number}</Text>
-            <View style={[styles.statusPill, { backgroundColor: statusColor + '20' }]}>
-              <Text style={[styles.statusPillText, { color: statusColor }]}>{statusLabel}</Text>
-            </View>
-          </View>
-          <Text style={styles.recipientName} numberOfLines={1}>{item.recipient_name}</Text>
-          <Text style={styles.addressText} numberOfLines={1}>{item.delivery_address}</Text>
-        </TouchableOpacity>
-        <View style={styles.cardFooter}>
+        <View style={styles.parcelCardContent}>
           <TouchableOpacity
-            style={styles.detailBtn}
+            activeOpacity={0.85}
             onPress={() => router.push(`/parcels/${item.id}` as any)}
-            activeOpacity={0.7}
           >
-            <Ionicons name="document-text-outline" size={12} color={COLORS.primary} />
-            <Text style={styles.detailBtnText}>အသေးစိတ်</Text>
+            <View style={styles.cardTopRow}>
+              <Text style={styles.trackingNum} numberOfLines={1}>{item.tracking_number}</Text>
+              <View style={[styles.statusPill, { backgroundColor: statusColor + '20' }]}>
+                <Text style={[styles.statusPillText, { color: statusColor }]}>{statusLabel}</Text>
+              </View>
+            </View>
+            <Text style={styles.recipientName} numberOfLines={1}>{item.recipient_name}</Text>
+            <View style={styles.addressRowCard}>
+              <Ionicons name="location-outline" size={12} color={COLORS.textLight} />
+              <Text style={styles.addressText} numberOfLines={1}>{item.delivery_address}</Text>
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.reassignBtn}
-            onPress={() => openReassignModal(item)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="swap-horizontal-outline" size={12} color={COLORS.white} />
-            <Text style={styles.reassignBtnText}>ဝန်ထမ်းပြောင်းမည်</Text>
-          </TouchableOpacity>
+          <View style={styles.cardFooter}>
+            <TouchableOpacity
+              style={styles.detailBtn}
+              onPress={() => router.push(`/parcels/${item.id}` as any)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="document-text-outline" size={13} color={COLORS.primary} />
+              <Text style={styles.detailBtnText}>အသေးစိတ်</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.reassignBtn}
+              onPress={() => openReassignModal(item)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="swap-horizontal-outline" size={13} color={COLORS.white} />
+              <Text style={styles.reassignBtnText}>ဝန်ထမ်းပြောင်းမည်</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -188,6 +195,7 @@ export default function AssignStaffScreen() {
 
   // ── Staff row ───────────────────────────────────────────────
   function renderStaffRow({ item }: { item: typeof staffGroups[0] }) {
+    const initials = item.name.charAt(0).toUpperCase();
     return (
       <TouchableOpacity
         style={styles.staffRow}
@@ -195,7 +203,7 @@ export default function AssignStaffScreen() {
         onPress={() => { setSelectedStaffId(item.id); setSelectedStaffName(item.name); }}
       >
         <View style={styles.staffAvatarPlaceholder}>
-          <Text style={styles.staffAvatarLetter}>{item.name[0].toUpperCase()}</Text>
+          <Text style={styles.staffAvatarLetter}>{initials}</Text>
         </View>
 
         <View style={styles.staffRowInfo}>
@@ -204,7 +212,7 @@ export default function AssignStaffScreen() {
             {item.inTransit > 0 && (
               <View style={[styles.statBadge, { backgroundColor: COLORS.warning + '20' }]}>
                 <Text style={[styles.statBadgeText, { color: COLORS.warning }]}>
-                  ဆောင်ရွက်နေဆဲ {item.inTransit}
+                  ဆောင်ရွက်နေ {item.inTransit}
                 </Text>
               </View>
             )}
@@ -250,7 +258,7 @@ export default function AssignStaffScreen() {
             <Text style={styles.headerTitle}>{selectedStaffName}</Text>
             <Text style={styles.headerSub}>ပါဆယ် {staffParcels.length} ခု</Text>
           </View>
-          <View style={{ width: 36 }} />
+          <View style={{ width: 38 }} />
         </View>
 
         <FlatList
@@ -260,11 +268,13 @@ export default function AssignStaffScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetchParcels} tintColor={COLORS.primary} />
+            <RefreshControl refreshing={isRefetching} onRefresh={() => { void refetchParcels(); }} tintColor={COLORS.primary} />
           }
           ListEmptyComponent={
             <View style={styles.emptyBox}>
-              <Ionicons name="cube-outline" size={40} color={COLORS.textLight} />
+              <View style={styles.emptyIconWrap}>
+                <Ionicons name="cube-outline" size={36} color={COLORS.textLight} />
+              </View>
               <Text style={styles.emptyText}>ပါဆယ် မတွေ့ပါ</Text>
             </View>
           }
@@ -278,7 +288,7 @@ export default function AssignStaffScreen() {
           staffSearch={staffSearch}
           onSearchChange={setStaffSearch}
           assignTarget={assignTarget}
-          onSelectStaff={(s) => setAssignTarget({ id: s.id, name: s.name })}
+          onSelectStaff={(s: any) => setAssignTarget({ id: s.id, name: s.name })}
           onClose={() => setReassignModalVisible(false)}
           onConfirm={handleConfirmAssign}
           isPending={assignMutation.isPending}
@@ -301,14 +311,16 @@ export default function AssignStaffScreen() {
             {parcelsLoading ? '...' : `ဝန်ထမ်း ${staffGroups.length} ဦး · ပါဆယ် ${allParcels.length} ခု`}
           </Text>
         </View>
-        <View style={{ width: 36 }} />
+        <View style={{ width: 38 }} />
       </View>
 
       {parcelsLoading ? (
         <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 40 }} />
       ) : staffGroups.length === 0 ? (
         <View style={styles.emptyBox}>
-          <Ionicons name="people-outline" size={44} color={COLORS.textLight} />
+          <View style={styles.emptyIconWrap}>
+            <Ionicons name="people-outline" size={36} color={COLORS.textLight} />
+          </View>
           <Text style={styles.emptyText}>ချိတ်ဆက်ထားသော ဝန်ထမ်း မတွေ့ပါ</Text>
           <Text style={styles.emptySubText}>သင်က assign လုပ်ထားသော ပါဆယ်တွေ ရှိမှ ဤနေရာတွင် ပြမည်</Text>
         </View>
@@ -320,7 +332,7 @@ export default function AssignStaffScreen() {
           contentContainerStyle={styles.staffListContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetchParcels} tintColor={COLORS.primary} />
+            <RefreshControl refreshing={isRefetching} onRefresh={() => { void refetchParcels(); }} tintColor={COLORS.primary} />
           }
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
@@ -338,6 +350,9 @@ function ReassignModal({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalSheet}>
+          {/* Handle bar */}
+          <View style={styles.modalHandle} />
+
           <View style={styles.modalHeader}>
             <View style={{ flex: 1 }}>
               <Text style={styles.modalTitle}>ဝန်ထမ်း ပြောင်းချိတ်မည်</Text>
@@ -354,7 +369,7 @@ function ReassignModal({
 
           {parcel?.active_assignment?.staff && (
             <View style={styles.currentAssignRow}>
-              <Ionicons name="person-circle" size={16} color={COLORS.primary} />
+              <View style={styles.currentAssignDot} />
               <Text style={styles.currentAssignText}>
                 လက်ရှိ: {parcel.active_assignment.staff.name}
               </Text>
@@ -362,7 +377,7 @@ function ReassignModal({
           )}
 
           <View style={styles.staffSearchBox}>
-            <Ionicons name="search-outline" size={14} color={COLORS.textLight} />
+            <Ionicons name="search-outline" size={16} color={COLORS.textLight} />
             <TextInput
               style={styles.staffSearchInput}
               placeholder="အမည်ဖြင့် ရှာရန်..."
@@ -372,7 +387,7 @@ function ReassignModal({
             />
             {staffSearch.length > 0 && (
               <TouchableOpacity onPress={() => onSearchChange('')}>
-                <Ionicons name="close-circle" size={14} color={COLORS.textLight} />
+                <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
               </TouchableOpacity>
             )}
           </View>
@@ -387,7 +402,7 @@ function ReassignModal({
                 <Text style={styles.staffEmptyText}>ဝန်ထမ်း မတွေ့ပါ</Text>
               </View>
             }
-            renderItem={({ item: s }: any) => {
+    renderItem={({ item: s }: { item: any }) => {
               const isCurrentStaff = parcel?.active_assignment?.staff?.id === s.id;
               const isSelected = assignTarget?.id === s.id;
               return (
@@ -416,11 +431,11 @@ function ReassignModal({
                     )}
                   </View>
                   {isSelected ? (
-                    <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />
+                    <Ionicons name="checkmark-circle" size={22} color={COLORS.primary} />
                   ) : isCurrentStaff ? (
-                    <Ionicons name="checkmark-circle-outline" size={20} color={COLORS.primary} />
+                    <Ionicons name="checkmark-circle-outline" size={22} color={COLORS.primary} />
                   ) : (
-                    <Ionicons name="radio-button-off" size={20} color={COLORS.border} />
+                    <Ionicons name="radio-button-off" size={22} color={COLORS.border} />
                   )}
                 </TouchableOpacity>
               );
@@ -436,7 +451,7 @@ function ReassignModal({
               <ActivityIndicator size="small" color={COLORS.white} />
             ) : (
               <>
-                <Ionicons name="swap-horizontal-outline" size={16} color={COLORS.white} />
+                <Ionicons name="swap-horizontal-outline" size={18} color={COLORS.white} />
                 <Text style={styles.confirmBtnText}>
                   {assignTarget ? `${assignTarget.name} သို့ ပြောင်းမည်` : 'ဝန်ထမ်းရွေးချယ်ပါ'}
                 </Text>
@@ -455,83 +470,91 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: COLORS.primary,
     flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 12, paddingBottom: 14, paddingTop: 8, gap: 8,
+    paddingHorizontal: 16, paddingBottom: 16, paddingTop: 10, gap: 10,
   },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 38, height: 38, borderRadius: 19,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   headerCenter: { flex: 1, alignItems: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
-  headerSub: { fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 1, fontFamily: FONTS.regular },
+  headerSub: { fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 2, fontFamily: FONTS.regular },
 
   // Staff list
-  staffListContent: { paddingVertical: 8 },
+  staffListContent: { paddingVertical: 10, paddingHorizontal: 0 },
   staffRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: COLORS.white, paddingHorizontal: 16, paddingVertical: 14,
   },
   staffAvatarPlaceholder: {
-    width: 46, height: 46, borderRadius: 23,
+    width: 50, height: 50, borderRadius: 25,
     backgroundColor: COLORS.primaryBg,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: COLORS.primary + '40',
+    borderWidth: 2, borderColor: COLORS.primary + '30',
   },
-  staffAvatarLetter: { fontSize: 18, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
+  staffAvatarLetter: { fontSize: 20, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
   staffRowInfo: { flex: 1, gap: 5 },
   staffRowName: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
   staffRowStats: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
-  statBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 10 },
+  statBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
   statBadgeText: { fontSize: 10, fontWeight: '600', fontFamily: FONTS.semiBold },
   staffRowCount: { alignItems: 'center', marginRight: 4 },
-  staffRowCountNum: { fontSize: 20, fontWeight: '800', color: COLORS.primary, fontFamily: FONTS.bold },
+  staffRowCountNum: { fontSize: 22, fontWeight: '800', color: COLORS.primary, fontFamily: FONTS.bold },
   staffRowCountLabel: { fontSize: 10, color: COLORS.textSecondary, fontFamily: FONTS.regular },
-  separator: { height: StyleSheet.hairlineWidth, backgroundColor: COLORS.border, marginLeft: 74 },
+  separator: { height: StyleSheet.hairlineWidth, backgroundColor: COLORS.border, marginLeft: 80 },
 
   // Parcel list
-  listContent: { padding: 12, gap: 10 },
+  listContent: { padding: 14, gap: 10 },
   parcelCard: {
-    backgroundColor: COLORS.white, borderRadius: 12,
-    padding: 14, borderWidth: 1, borderColor: COLORS.border,
-    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 }, elevation: 2,
+    backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
+    shadowColor: '#000', shadowOpacity: 0.07, shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 }, elevation: 3,
   },
+  parcelCardContent: { flex: 1, padding: 14 },
   cardTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   trackingNum: { fontSize: 13, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold, flex: 1, marginRight: 8 },
-  statusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
+  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
   statusPillText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
   recipientName: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, marginBottom: 2 },
-  addressText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular, marginBottom: 10 },
+  addressRowCard: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 },
+  addressText: { flex: 1, fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   cardFooter: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, paddingTop: 8,
+    flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, paddingTop: 10,
     gap: 8,
   },
   detailBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: COLORS.primaryBg, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20,
-    borderWidth: 1, borderColor: COLORS.primary + '40',
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: COLORS.primaryBg, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 24,
+    borderWidth: 1, borderColor: COLORS.primary + '30',
   },
   detailBtnText: { fontSize: 12, color: COLORS.primary, fontFamily: FONTS.semiBold },
   reassignBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 24,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 3,
   },
   reassignBtnText: { fontSize: 12, color: COLORS.white, fontFamily: FONTS.semiBold },
 
   // Empty / permission
-  emptyBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24, marginTop: 60 },
+  emptyBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 24, marginTop: 60 },
+  emptyIconWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   emptyText: { fontSize: 15, color: COLORS.textSecondary, fontFamily: FONTS.semiBold, textAlign: 'center' },
   emptySubText: { fontSize: 12, color: COLORS.textLight, fontFamily: FONTS.regular, textAlign: 'center' },
-  permissionBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  permissionBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
+  permissionIconWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
   permissionText: { fontSize: 15, color: COLORS.textSecondary, fontFamily: FONTS.regular },
 
   // Modal
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   modalSheet: {
-    backgroundColor: COLORS.white, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    maxHeight: '80%', paddingBottom: 24,
+    backgroundColor: COLORS.white,
+    maxHeight: '82%', paddingBottom: 28,
+  },
+  modalHandle: {
+    width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.border,
+    alignSelf: 'center', marginTop: 10, marginBottom: 4,
   },
   modalHeader: {
     flexDirection: 'row', alignItems: 'flex-start',
@@ -540,41 +563,43 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 16, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold },
   modalSub: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular, marginTop: 2 },
   closeBtn: {
-    width: 32, height: 32, borderRadius: 16, backgroundColor: COLORS.background,
+    width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.background,
     alignItems: 'center', justifyContent: 'center',
   },
   currentAssignRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: COLORS.primaryBg, paddingHorizontal: 16, paddingVertical: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: COLORS.primaryBg, paddingHorizontal: 16, paddingVertical: 10,
   },
+  currentAssignDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.primary },
   currentAssignText: { fontSize: 13, color: COLORS.primary, fontFamily: FONTS.medium },
   staffSearchBox: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    margin: 12, borderRadius: 10, borderWidth: 1, borderColor: COLORS.border,
-    backgroundColor: COLORS.background, paddingHorizontal: 12, paddingVertical: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    margin: 12, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.border,
+    backgroundColor: COLORS.background, paddingHorizontal: 14, paddingVertical: 10,
   },
   staffSearchInput: { flex: 1, fontSize: 13, color: COLORS.text, fontFamily: FONTS.regular, paddingVertical: 0 },
   staffFlatList: { maxHeight: 300 },
   staffItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
     paddingHorizontal: 16, paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border,
   },
   staffItemActive: { backgroundColor: COLORS.primaryBg },
   staffAvatarSm: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 40, height: 40, borderRadius: 20,
     backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: COLORS.border,
+    borderWidth: 1.5, borderColor: COLORS.border,
   },
-  staffAvatarSmLetter: { fontSize: 14, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.bold },
+  staffAvatarSmLetter: { fontSize: 15, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.bold },
   staffName: { fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
-  staffCurrentBadge: { fontSize: 11, color: COLORS.primary, fontFamily: FONTS.regular, marginTop: 1 },
+  staffCurrentBadge: { fontSize: 11, color: COLORS.primary, fontFamily: FONTS.regular, marginTop: 2 },
   staffEmpty: { padding: 24, alignItems: 'center' },
   staffEmptyText: { fontSize: 13, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   confirmBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: COLORS.primary, marginHorizontal: 16, marginTop: 12,
-    paddingVertical: 14, borderRadius: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    backgroundColor: COLORS.primary, marginHorizontal: 16, marginTop: 14,
+    paddingVertical: 15, borderRadius: 14,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  confirmBtnText: { fontSize: 14, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
+  confirmBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 });

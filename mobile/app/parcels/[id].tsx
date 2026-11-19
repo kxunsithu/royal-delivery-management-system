@@ -292,21 +292,22 @@ export default function ParcelDetailScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>{parcel.tracking_number}</Text>
-          <View style={[styles.headerStatusBadge, { backgroundColor: statusColor + '18' }]}>
+          <View style={[styles.headerStatusBadge, { borderColor: statusColor }]}>
+            <View style={[styles.headerStatusDot, { backgroundColor: statusColor }]} />
             <Text style={[styles.headerStatusText, { color: statusColor }]}>{statusLabel}</Text>
           </View>
         </View>
         {canEditParcel && !isTerminal && (
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.headerActionBtn} onPress={() => router.push(`/parcels/edit/${id}`)} activeOpacity={0.7}>
-              <Ionicons name="create-outline" size={22} color={COLORS.primary} />
+              <Ionicons name="create-outline" size={22} color={COLORS.white} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.headerActionBtn} onPress={handleDelete} activeOpacity={0.7}>
-              <Ionicons name="trash-outline" size={22} color={COLORS.error} />
+              <Ionicons name="trash-outline" size={22} color={COLORS.white} />
             </TouchableOpacity>
           </View>
         )}
@@ -796,48 +797,50 @@ function InfoRow({ label, value, valueColor, onPress }: {
 }
 
 const styles = StyleSheet.create({
-  addItemsBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    backgroundColor: COLORS.primaryBg,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  addItemsBtnText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.primary,
-    fontFamily: FONTS.bold,
-  },
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scrollArea: { flex: 1, backgroundColor: COLORS.background },
-  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: COLORS.primary },
+  scrollArea: { flex: 1, backgroundColor: COLORS.background, },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 24,
     gap: 12,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.primary,
   },
-  backBtn: { padding: 4 },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerCenter: { flex: 1 },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   headerStatusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 24,
     alignSelf: 'flex-start',
-    marginTop: 3,
+    marginTop: 6,
+    backgroundColor: COLORS.white,
+    borderWidth: 0,
   },
-  headerStatusText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
-  headerActions: { flexDirection: 'row', gap: 8 },
-  headerActionBtn: { paddingVertical: 6, paddingHorizontal: 8 },
+  headerStatusDot: { width: 6, height: 6, borderRadius: 3 },
+  headerStatusText: { fontSize: 11, fontWeight: '700', fontFamily: FONTS.bold },
+  headerActions: { flexDirection: 'row', gap: 6 },
+  headerActionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerActionText: { fontSize: 13, fontWeight: '600', color: COLORS.primary, fontFamily: FONTS.semiBold },
   content: { padding: 16, paddingBottom: 32 },
   imageScroll: { marginBottom: 16 },
@@ -852,10 +855,13 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
   infoCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 2,
   },
   infoRow: {
     flexDirection: 'row',
@@ -863,8 +869,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 11,
     gap: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: COLORS.border,
+  },
+  addItemsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: COLORS.primaryBg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.border,
+  },
+  addItemsBtnText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
   },
   infoLabel: { fontSize: 13, color: COLORS.textSecondary, width: 96, fontFamily: FONTS.regular },
   infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', fontFamily: FONTS.medium },

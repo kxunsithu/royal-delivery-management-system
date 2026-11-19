@@ -71,28 +71,28 @@ class DeliveryController extends Controller
         // finally fallback to assigned_at for in-transit parcels.
         if ($groupBy === 'month') {
             $periodExpr = "COALESCE(
-                strftime('%Y-%m', datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
-                CASE WHEN parcels.status = 'DELIVERED' THEN strftime('%Y-%m', datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-                strftime('%Y-%m', datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
-                CASE WHEN parcels.status = 'FAILED' THEN strftime('%Y-%m', datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-                strftime('%Y-%m', datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+                strftime('%Y-%m', parcels.delivered_at),
+                CASE WHEN parcels.status = 'DELIVERED' THEN strftime('%Y-%m', parcels.updated_at) ELSE NULL END,
+                strftime('%Y-%m', parcels.failed_at),
+                CASE WHEN parcels.status = 'FAILED' THEN strftime('%Y-%m', parcels.updated_at) ELSE NULL END,
+                strftime('%Y-%m', delivery_assignments.assigned_at)
             )";
         } else {
             $periodExpr = "COALESCE(
-                DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
-                CASE WHEN parcels.status = 'DELIVERED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-                DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
-                CASE WHEN parcels.status = 'FAILED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-                DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+                DATE(parcels.delivered_at),
+                CASE WHEN parcels.status = 'DELIVERED' THEN DATE(parcels.updated_at) ELSE NULL END,
+                DATE(parcels.failed_at),
+                CASE WHEN parcels.status = 'FAILED' THEN DATE(parcels.updated_at) ELSE NULL END,
+                DATE(delivery_assignments.assigned_at)
             )";
         }
 
         $filterExpr = "COALESCE(
-            DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
-            CASE WHEN parcels.status = 'DELIVERED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-            DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
-            CASE WHEN parcels.status = 'FAILED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-            DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+            DATE(parcels.delivered_at),
+            CASE WHEN parcels.status = 'DELIVERED' THEN DATE(parcels.updated_at) ELSE NULL END,
+            DATE(parcels.failed_at),
+            CASE WHEN parcels.status = 'FAILED' THEN DATE(parcels.updated_at) ELSE NULL END,
+            DATE(delivery_assignments.assigned_at)
         )";
 
         $query = DeliveryAssignment::query()
@@ -151,11 +151,11 @@ class DeliveryController extends Controller
         $this->authorize('viewAny', DeliveryAssignment::class);
 
         $dateExpr = "COALESCE(
-            DATE(datetime(parcels.delivered_at, '+6 hours', '+30 minutes')),
-            CASE WHEN parcels.status = 'DELIVERED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-            DATE(datetime(parcels.failed_at, '+6 hours', '+30 minutes')),
-            CASE WHEN parcels.status = 'FAILED' THEN DATE(datetime(parcels.updated_at, '+6 hours', '+30 minutes')) ELSE NULL END,
-            DATE(datetime(delivery_assignments.assigned_at, '+6 hours', '+30 minutes'))
+            DATE(parcels.delivered_at),
+            CASE WHEN parcels.status = 'DELIVERED' THEN DATE(parcels.updated_at) ELSE NULL END,
+            DATE(parcels.failed_at),
+            CASE WHEN parcels.status = 'FAILED' THEN DATE(parcels.updated_at) ELSE NULL END,
+            DATE(delivery_assignments.assigned_at)
         )";
 
         $query = DeliveryAssignment::with(['parcel.receivedBy', 'parcel.activeAssignment.staff', 'parcel.images', 'staff', 'assignedBy'])

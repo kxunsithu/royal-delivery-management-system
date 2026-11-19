@@ -567,7 +567,7 @@ function MonthSummaryCard({ group, onPress }: { group: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
-  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1 },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, },
 
   // Header
   header: {
@@ -576,26 +576,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    paddingBottom: 24,
   },
   backBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: COLORS.white,
     fontFamily: FONTS.bold,
   },
   headerSub: {
-    fontSize: 13,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
     fontFamily: FONTS.regular,
@@ -605,14 +603,14 @@ const styles = StyleSheet.create({
   togglePill: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 3,
     gap: 2,
   },
   togglePillBtn: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -620,7 +618,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   togglePillText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.8)',
     fontFamily: FONTS.semiBold,
@@ -632,27 +630,21 @@ const styles = StyleSheet.create({
   calendarBtn: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   calendarBtnActive: {
-    backgroundColor: COLORS.primary,
-    borderWidth: 1,
-    borderColor: COLORS.white,
+    backgroundColor: COLORS.white,
   },
   clearFilterBtn: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
 
   // Date filter
@@ -708,7 +700,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 8,
     top: '50%' as any,
-    marginTop: -8,
   },
   dateArrow: {
     marginBottom: 10,

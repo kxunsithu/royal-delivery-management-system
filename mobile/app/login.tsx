@@ -56,6 +56,10 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* Decorative circles */}
+      <View style={styles.decorTR} />
+      <View style={styles.decorBL} />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex}
@@ -67,18 +71,22 @@ export default function LoginScreen() {
         >
           {/* Brand */}
           <View style={styles.brand}>
-            <View style={styles.brandMark}>
-              <Image source={require('../assets/icon.png')} style={styles.brandMarkImage} resizeMode="contain" />
+            <View style={styles.logoWrap}>
+              <Image
+                source={require('../assets/icon.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.appName}>Royal Myawaddy</Text>
             <Text style={styles.appSubtitle}>ပို့ဆောင်ရေး စီမံခန့်ခွဲမှုစနစ်</Text>
           </View>
 
-          {/* Form */}
+          {/* Form — no card, directly on orange */}
           <View style={styles.form}>
             <Text style={styles.title}>အကောင့်ဝင်ရောက်ရန်</Text>
-            <Text style={styles.subtitle}>သင်၏ အကောင့်အချက်အလက် ထည့်သွင်းပါ</Text>
 
+            {/* Phone Field */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
               <View
@@ -88,17 +96,21 @@ export default function LoginScreen() {
                   errors.phone ? styles.inputError : null,
                 ]}
               >
-                <View style={styles.iconWrap}>
-                  <MaterialCommunityIcons
-                    name="phone-outline"
-                    size={20}
-                    color={errors.phone ? COLORS.error : focused === 'phone' ? COLORS.primary : COLORS.primaryDark}
-                  />
-                </View>
+                <MaterialCommunityIcons
+                  name="phone-outline"
+                  size={20}
+                  color={
+                    errors.phone
+                      ? COLORS.error
+                      : focused === 'phone'
+                      ? COLORS.primary
+                      : '#AAAAAA'
+                  }
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="09..."
-                  placeholderTextColor={COLORS.textLight}
+                  placeholderTextColor="#AAAAAA"
                   value={phone}
                   onChangeText={(t) => {
                     setPhone(t);
@@ -116,6 +128,7 @@ export default function LoginScreen() {
               {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
             </View>
 
+            {/* Password Field */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>စကားဝှက်</Text>
               <View
@@ -125,17 +138,21 @@ export default function LoginScreen() {
                   errors.password ? styles.inputError : null,
                 ]}
               >
-                <View style={styles.iconWrap}>
-                  <MaterialCommunityIcons
-                    name="lock-outline"
-                    size={20}
-                    color={errors.password ? COLORS.error : focused === 'password' ? COLORS.primary : COLORS.primaryDark}
-                  />
-                </View>
+                <MaterialCommunityIcons
+                  name="lock-outline"
+                  size={20}
+                  color={
+                    errors.password
+                      ? COLORS.error
+                      : focused === 'password'
+                      ? COLORS.primary
+                      : '#AAAAAA'
+                  }
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="••••••••"
-                  placeholderTextColor={COLORS.textLight}
+                  placeholderTextColor="#AAAAAA"
                   value={password}
                   onChangeText={(t) => {
                     setPassword(t);
@@ -150,21 +167,20 @@ export default function LoginScreen() {
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
-                  style={styles.toggleButton}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   accessibilityRole="button"
-                  accessibilityLabel={showPassword ? 'စကားဝှက် ဖျောက်ရန်' : 'စကားဝှက် ဖော်ပြရန်'}
                 >
                   <MaterialCommunityIcons
                     name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                     size={20}
-                    color={COLORS.primaryDark}
+                    color="#AAAAAA"
                   />
                 </TouchableOpacity>
               </View>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
 
+            {/* Login Button */}
             <TouchableOpacity
               style={[styles.loginBtn, isLoading && styles.loginBtnDisabled]}
               onPress={handleLogin}
@@ -172,7 +188,7 @@ export default function LoginScreen() {
               activeOpacity={0.85}
             >
               {isLoading ? (
-                <ActivityIndicator color={COLORS.white} size="small" />
+                <ActivityIndicator color={COLORS.primary} size="small" />
               ) : (
                 <Text style={styles.loginBtnText}>ဝင်ရောက်မည်</Text>
               )}
@@ -191,123 +207,155 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingHorizontal: 28,
+    paddingBottom: 32,
   },
+
+  // Decorative background blobs
+  decorTR: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(255,255,255,0.09)',
+  },
+  decorBL: {
+    position: 'absolute',
+    bottom: 40,
+    left: -120,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+  },
+
+  // Brand
   brand: {
     alignItems: 'center',
-    marginBottom: 36,
+    marginTop: 48,
+    marginBottom: 44,
   },
-  brandMark: {
+  logoWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 24,
+    backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    marginBottom: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
   },
-  brandMarkImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 16,
-  },
+  logoImage: { width: 72, height: 72, borderRadius: 16 },
   appName: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: '800',
     color: COLORS.white,
     fontFamily: FONTS.bold,
     letterSpacing: 0.3,
+    marginBottom: 6,
   },
   appSubtitle: {
-    fontSize: 13,
-    color: COLORS.white,
-    marginTop: 4,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.78)',
     fontFamily: FONTS.regular,
   },
+
+  // Form (no card — directly on orange)
   form: {
-    width: '100%',
-    maxWidth: 420,
-    alignSelf: 'center',
+    gap: 0,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     color: COLORS.white,
-    marginBottom: 4,
     fontFamily: FONTS.bold,
+    marginBottom: 24,
   },
-  subtitle: {
-    fontSize: 13,
-    color: COLORS.white,
-    marginBottom: 22,
-    fontFamily: FONTS.regular,
-  },
-  fieldGroup: { marginBottom: 16 },
+
+  // Field
+  fieldGroup: { marginBottom: 18 },
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: COLORS.white,
-    marginBottom: 6,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 8,
     fontFamily: FONTS.semiBold,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: COLORS.border,
-    borderRadius: 12,
     backgroundColor: COLORS.white,
-    paddingHorizontal: 14,
-    height: 50,
-    gap: 10,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    height: 54,
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   inputFocused: {
-    borderColor: COLORS.primary,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 6,
   },
   inputError: {
+    borderWidth: 2,
     borderColor: COLORS.error,
   },
   input: {
     flex: 1,
     fontSize: 15,
-    color: COLORS.primaryDark,
+    color: COLORS.text,
     fontFamily: FONTS.regular,
     paddingVertical: 0,
-    textAlignVertical: 'center',
   },
-  iconWrap: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toggleButton: { padding: 4 },
   errorText: {
     fontSize: 12,
-    color: COLORS.error,
+    color: 'rgba(255,255,255,0.95)',
     fontWeight: '600',
-    marginTop: 4,
+    marginTop: 6,
     marginLeft: 4,
     fontFamily: FONTS.semiBold,
   },
+
+  // Login button — white on orange bg
   loginBtn: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 12,
-    height: 50,
-    marginTop: 8,
+    borderRadius: 14,
+    height: 54,
+    marginTop: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  loginBtnDisabled: { opacity: 0.7 },
+  loginBtnDisabled: { opacity: 0.6, shadowOpacity: 0 },
   loginBtnText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.primaryDark,
+    fontWeight: '800',
+    color: COLORS.primary,
     fontFamily: FONTS.bold,
+    letterSpacing: 0.3,
   },
+
+  // Footer
   footer: {
     textAlign: 'center',
-    color: COLORS.white,
+    color: 'rgba(255,255,255,0.55)',
     fontSize: 12,
-    marginTop: 40,
     fontFamily: FONTS.regular,
+    marginTop: 36,
   },
 });

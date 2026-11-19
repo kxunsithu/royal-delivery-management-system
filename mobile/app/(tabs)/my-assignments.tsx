@@ -128,17 +128,15 @@ export default function MyAssignmentsScreen() {
 
     return (
       <View style={styles.container}>
-        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <TouchableOpacity style={styles.backBtn} onPress={backToSummary} activeOpacity={0.7}>
-              <Ionicons name="chevron-back" size={22} color={COLORS.white} />
-            </TouchableOpacity>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.headerTitle} numberOfLines={1}>
-                {formatPeriodLabel(selected.period, groupBy)}
-              </Text>
-              <Text style={styles.headerSubtitle}>စုစုပေါင်း {selected.total_count} ခု</Text>
-            </View>
+        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+          <TouchableOpacity style={styles.backBtn} onPress={backToSummary} activeOpacity={0.7}>
+            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle} numberOfLines={1}>
+              {formatPeriodLabel(selected.period, groupBy)}
+            </Text>
+            <Text style={styles.headerSubtitle}>စုစုပေါင်း {selected.total_count} ခု</Text>
           </View>
         </View>
 
@@ -170,6 +168,9 @@ export default function MyAssignmentsScreen() {
               renderItem={({ item }) => <AssignmentCard assignment={item} />}
               ListEmptyComponent={
                 <View style={styles.empty}>
+                  <View style={styles.emptyIconWrap}>
+                    <Ionicons name="bicycle" size={36} color={COLORS.textLight} />
+                  </View>
                   <Text style={styles.emptyTitle}>ပို့ဆောင်မှု မတွေ့ပါ</Text>
                   <Text style={styles.emptySub}>ရွေးချယ်ထားသော filter နှင့် မကိုက်ညီပါ</Text>
                 </View>
@@ -184,20 +185,18 @@ export default function MyAssignmentsScreen() {
   // ── SUMMARY VIEW ────────────────────────────────────────────
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
-            <Text style={styles.headerSubtitle}>စုစုပေါင်း {totalCount} ခု</Text>
-          </View>
-          <View style={styles.togglePill}>
-            <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'day' && styles.togglePillBtnActive]} onPress={() => setGroupBy('day')} activeOpacity={0.8}>
-              <Text style={[styles.togglePillText, groupBy === 'day' && styles.togglePillTextActive]}>နေ့</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'month' && styles.togglePillBtnActive]} onPress={() => setGroupBy('month')} activeOpacity={0.8}>
-              <Text style={[styles.togglePillText, groupBy === 'month' && styles.togglePillTextActive]}>လ</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
+          <Text style={styles.headerSubtitle}>စုစုပေါင်း {totalCount} ခု</Text>
+        </View>
+        <View style={styles.togglePill}>
+          <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'day' && styles.togglePillBtnActive]} onPress={() => setGroupBy('day')} activeOpacity={0.8}>
+            <Text style={[styles.togglePillText, groupBy === 'day' && styles.togglePillTextActive]}>နေ့</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.togglePillBtn, groupBy === 'month' && styles.togglePillBtnActive]} onPress={() => setGroupBy('month')} activeOpacity={0.8}>
+            <Text style={[styles.togglePillText, groupBy === 'month' && styles.togglePillTextActive]}>လ</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -214,6 +213,7 @@ export default function MyAssignmentsScreen() {
             renderItem={({ item }) => {
               const isToday = item.period === todayStr && groupBy === 'day';
               const allDone = item.total_count > 0 && item.completed_count === item.total_count;
+              const completionPct = item.total_count > 0 ? Math.round((item.completed_count / item.total_count) * 100) : 0;
               return (
                 <TouchableOpacity
                   style={[styles.summaryCard, allDone && styles.summaryCardDone]}
@@ -222,12 +222,13 @@ export default function MyAssignmentsScreen() {
                 >
                   {/* Card header */}
                   <View style={styles.cardHeader}>
-                    <View style={styles.dateIconWrap}>
-                      <Ionicons name="calendar" size={15} color={COLORS.primary} />
+                    <View style={[styles.dateIconWrap, isToday && { backgroundColor: COLORS.primary }]}>
+                      <Ionicons name="calendar" size={15} color={isToday ? COLORS.white : COLORS.primary} />
                     </View>
                     <Text style={styles.periodText} numberOfLines={1}>
                       {isToday ? 'ဒီနေ့' : formatPeriodLabel(item.period, groupBy)}
                     </Text>
+                    {isToday && <View style={styles.todayBadge}><Text style={styles.todayBadgeText}>Today</Text></View>}
                     {item.total_count > 0 && (
                       <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
                     )}
@@ -252,11 +253,24 @@ export default function MyAssignmentsScreen() {
                       <Text style={styles.statLabel}>မအောင်မြင်</Text>
                     </View>
                   </View>
+
+                  {/* Progress bar */}
+                  {item.total_count > 0 && (
+                    <View style={styles.progressSection}>
+                      <View style={styles.progressTrack}>
+                        <View style={[styles.progressBar, { width: `${completionPct}%` as any, backgroundColor: allDone ? COLORS.success : COLORS.primary }]} />
+                      </View>
+                      <Text style={styles.progressLabel}>{completionPct}%</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             }}
             ListEmptyComponent={
               <View style={styles.empty}>
+                <View style={styles.emptyIconWrap}>
+                  <Ionicons name="bicycle" size={36} color={COLORS.textLight} />
+                </View>
                 <Text style={styles.emptyTitle}>လုပ်ငန်းများ မတွေ့ပါ</Text>
                 <Text style={styles.emptySub}>ပါဆယ် ချိတ်ဆက်မှုများ ဤနေရာတွင် ပေါ်ပါမည်</Text>
               </View>
@@ -291,131 +305,146 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
       onPress={() => router.push(`/deliveries/${assignment.id}`)}
       activeOpacity={0.85}
     >
-      <View style={styles.cardTop}>
-        <Text style={styles.trackingNumber}>{parcel?.tracking_number}</Text>
-        <View style={[styles.statusBadge, { backgroundColor: statusColor + '15' }]}>
-          <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
-        </View>
-      </View>
-
-      <Text style={styles.recipient} numberOfLines={1}>{parcel?.recipient_name}</Text>
-      <Text style={styles.address} numberOfLines={2}>{parcel?.delivery_address}</Text>
-
-      <View style={styles.cardBottom}>
-        <View style={[styles.assignBadge, { backgroundColor: isActive ? '#FFF3DC' : '#E8F8EF' }]}>
-          <Text style={[styles.assignBadgeText, { color: assignColor }]}>{assignLabel}</Text>
-        </View>
-        {parcel && Number(parcel.delivery_fee) > 0 && (
-          <View style={styles.feeBadge}>
-            <Text style={styles.feeText}>
-              {parcel.currency === 'THB'
-                ? `ပို့ဆောင်ခ ${Number(parcel.delivery_fee).toLocaleString()} ฿`
-                : `ပို့ဆောင်ခ ${Number(parcel.delivery_fee).toLocaleString()} K`}
-            </Text>
+      <View style={styles.cardContent}>
+        <View style={styles.cardTop}>
+          <Text style={styles.trackingNumber}>{parcel?.tracking_number}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: statusColor + '18' }]}>
+            <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
           </View>
-        )}
-        {parcel?.is_cod && (
-          <View style={styles.codBadge}>
-            <Text style={styles.codText}>
-              {parcel.currency === 'THB'
-                ? `COD ${Number(parcel.cod_amount).toLocaleString()} ฿`
-                : `COD ${Number(parcel.cod_amount).toLocaleString()} K`}
-            </Text>
+        </View>
+
+        <Text style={styles.recipient} numberOfLines={1}>{parcel?.recipient_name}</Text>
+        <View style={styles.addressRow}>
+          <Ionicons name="location-outline" size={12} color={COLORS.textLight} />
+          <Text style={styles.address} numberOfLines={1}>{parcel?.delivery_address}</Text>
+        </View>
+
+        <View style={styles.cardBottom}>
+          <View style={[styles.assignBadge, { backgroundColor: isActive ? '#FFF3DC' : '#E8F8EF' }]}>
+            <Text style={[styles.assignBadgeText, { color: assignColor }]}>{assignLabel}</Text>
           </View>
+          {parcel && Number(parcel.delivery_fee) > 0 && (
+            <View style={styles.feeBadge}>
+              <Text style={styles.feeText}>
+                {parcel.currency === 'THB'
+                  ? `${Number(parcel.delivery_fee).toLocaleString()} ฿`
+                  : `${Number(parcel.delivery_fee).toLocaleString()} K`}
+              </Text>
+            </View>
+          )}
+          {parcel?.is_cod && (
+            <View style={styles.codBadge}>
+              <Text style={styles.codText}>
+                COD {parcel.currency === 'THB'
+                  ? `${Number(parcel.cod_amount).toLocaleString()} ฿`
+                  : `${Number(parcel.cod_amount).toLocaleString()} K`}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Dates */}
+        <View style={styles.parcelDetails}>
+          <Text style={styles.detailText}>
+            ချိတ်ဆက်ရက်: {new Date(assignment.assigned_at).toLocaleString()}
+          </Text>
+          {parcel?.status === 'DELIVERED' && (parcel?.delivered_at || parcel?.updated_at) && (
+            <Text style={styles.detailText}>
+              ပို့ဆောင်ပြီးရက်: {new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString()}
+            </Text>
+          )}
+          {parcel?.status === 'FAILED' && (parcel?.failed_at || parcel?.updated_at) && (
+            <Text style={styles.detailText}>
+              မအောင်မြင်ရက်: {new Date((parcel.failed_at || parcel.updated_at)!).toLocaleString()}
+            </Text>
+          )}
+        </View>
+
+        {/* Attempt button for active */}
+        {!isTerminal && (
+          <TouchableOpacity
+            style={styles.attemptBtn}
+            onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="checkmark-circle-outline" size={16} color={COLORS.white} />
+            <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
+          </TouchableOpacity>
         )}
       </View>
-
-      {/* Dates */}
-      <View style={styles.parcelDetails}>
-        <Text style={styles.detailText}>
-          ချိတ်ဆက်ရက်: {new Date(new Date(assignment.assigned_at).getTime() + (6*60+30)*60000).toLocaleString()}
-        </Text>
-        {parcel?.status === 'DELIVERED' && (parcel?.delivered_at || parcel?.updated_at) && (
-          <Text style={styles.detailText}>
-            ပို့ဆောင်ပြီးရက်: {new Date((parcel.delivered_at || parcel.updated_at)!).toLocaleString()}
-          </Text>
-        )}
-        {parcel?.status === 'FAILED' && (parcel?.failed_at || parcel?.updated_at) && (
-          <Text style={styles.detailText}>
-            မအောင်မြင်ရက်: {new Date((parcel.failed_at || parcel.updated_at)!).toLocaleString()}
-          </Text>
-        )}
-      </View>
-
-      {/* Attempt button for active */}
-      {!isTerminal && (
-        <TouchableOpacity
-          style={styles.attemptBtn}
-          onPress={() => router.push(`/deliveries/attempt/${assignment.id}`)}
-        >
-          <Text style={styles.attemptBtnText}>ရလဒ် မှတ်တမ်းတင်</Text>
-        </TouchableOpacity>
-      )}
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
-  contentArea: { flex: 1, backgroundColor: COLORS.background, marginTop: -1, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
-  header: { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingBottom: 16 },
-  backBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
-  headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
-  filterRow: { height: 60 },
+  contentArea: { flex: 1, backgroundColor: COLORS.background, },
+  header: { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingBottom: 24, flexDirection: 'row', alignItems: 'center', gap: 12, },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 20, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
+  headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
+  filterRow: { height: 58 },
   filterList: { paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
-  filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 38, justifyContent: 'center', alignSelf: 'center' },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 24, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 36, justifyContent: 'center' },
   filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
   loader: { marginTop: 60 },
-  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
+  list: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 10 },
   listArea: { flex: 1 },
   empty: { alignItems: 'center', paddingVertical: 60 },
+  emptyIconWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6, fontFamily: FONTS.bold },
   emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center', fontFamily: FONTS.regular },
 
   // Summary cards
-  summaryCard: { backgroundColor: COLORS.white, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: COLORS.border, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 2 },
-  summaryCardDone: { borderColor: COLORS.success, borderWidth: 1.5, backgroundColor: '#E8F8EF' },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dateIconWrap: { width: 28, height: 28, borderRadius: 8, backgroundColor: COLORS.primaryBg ?? '#FFF3E0', alignItems: 'center', justifyContent: 'center' },
+  summaryCard: { backgroundColor: COLORS.white, borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3 },
+  summaryCardDone: { backgroundColor: '#F0FDF4' },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  dateIconWrap: { width: 30, height: 30, borderRadius: 10, backgroundColor: COLORS.primaryBg, alignItems: 'center', justifyContent: 'center' },
+  todayBadge: { backgroundColor: COLORS.primary + '20', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  todayBadgeText: { fontSize: 10, color: COLORS.primary, fontWeight: '700', fontFamily: FONTS.bold },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   cardDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
   periodText: { fontSize: 14, fontWeight: '700', color: COLORS.text, flex: 1, fontFamily: FONTS.bold },
   statsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' },
   statItem: { flex: 1, alignItems: 'center', gap: 2 },
-  statValue: { fontSize: 16, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold, marginTop: 2 },
+  statValue: { fontSize: 18, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold, marginTop: 2 },
   statLabel: { fontSize: 10, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   statDivider: { width: 1, height: 36, backgroundColor: COLORS.border },
+  progressSection: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 },
+  progressTrack: { flex: 1, height: 5, borderRadius: 3, backgroundColor: COLORS.border, overflow: 'hidden' },
+  progressBar: { height: '100%', borderRadius: 3 },
+  progressLabel: { fontSize: 11, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.semiBold, width: 30, textAlign: 'right' },
 
   // Assignment card
-  card: { backgroundColor: COLORS.white, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: COLORS.border },
-  trackingNumber: { fontSize: 14, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
-  recipient: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 2, fontFamily: FONTS.bold },
-  address: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18, fontFamily: FONTS.regular },
-  cardBottom: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, flexWrap: 'wrap' },
-  assignBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  assignBadgeText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
-  codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, backgroundColor: '#E8F4FB' },
+  card: { backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3 },
+  cardContent: { flex: 1, padding: 14 },
+  trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
+  statusText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
+  recipient: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 4, fontFamily: FONTS.bold },
+  addressRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
+  address: { flex: 1, fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
+  cardBottom: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, flexWrap: 'wrap' },
+  assignBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
+  assignBadgeText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
+  codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 24, backgroundColor: '#E8F4FB' },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
-  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, backgroundColor: '#E8F8EF' },
+  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 24, backgroundColor: '#E8F8EF' },
   feeText: { fontSize: 11, fontWeight: '700', color: COLORS.success, fontFamily: FONTS.bold },
   parcelDetails: { marginTop: 8, gap: 2 },
-  detailText: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
-  attemptBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, marginTop: 10, alignSelf: 'flex-end' },
-  attemptBtnText: { fontSize: 12, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
+  detailText: { fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.regular },
+  attemptBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: COLORS.primary, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginTop: 12,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
+  },
+  attemptBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 
-  toggleBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.18)' },
-  toggleBtnActive: { backgroundColor: COLORS.white },
-  toggleText: { fontSize: 12, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.semiBold },
-  toggleTextActive: { color: COLORS.primary },
-
-  togglePill: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 10, padding: 3, gap: 2 },
-  togglePillBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  togglePill: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 12, padding: 3, gap: 2 },
+  togglePillBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   togglePillBtnActive: { backgroundColor: COLORS.white },
-  togglePillText: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.8)', fontFamily: FONTS.semiBold },
+  togglePillText: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.8)', fontFamily: FONTS.semiBold },
   togglePillTextActive: { color: COLORS.primary },
 });
