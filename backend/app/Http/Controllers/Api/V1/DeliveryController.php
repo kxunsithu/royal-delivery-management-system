@@ -293,9 +293,11 @@ class DeliveryController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            // Update assignment status if delivered
+            // Update assignment status
             if ($validated['result'] === 'DELIVERED') {
                 $delivery->update(['status' => 'COMPLETED', 'completed_at' => now()]);
+            } else {
+                $delivery->update(['status' => 'FAILED', 'completed_at' => now()]);
             }
 
             ActivityLog::record('delivery.attempt_recorded', $parcel, ['status' => $oldStatus], [
