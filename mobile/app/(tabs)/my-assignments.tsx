@@ -102,10 +102,7 @@ export default function MyAssignmentsScreen() {
   const summaries = buildSummaries(allAssignments, groupBy);
 
   const todayStr = toMMDate(new Date().toISOString());
-  const displaySummaries =
-    groupBy === 'day' && !summaries.some((s) => s.period === todayStr)
-      ? [{ period: todayStr, total_count: 0, completed_count: 0, failed_count: 0, active_count: 0, assignments: [] }, ...summaries]
-      : summaries;
+  const displaySummaries = summaries;
 
   function openPeriod(s: PeriodSummary) {
     setSelected(s);
