@@ -13,9 +13,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { COLORS, FONTS, ROLE_LABELS_MM } from '../../src/constants';
 
 export default function MoreScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -115,7 +117,7 @@ export default function MoreScreen() {
   const initials = user?.name ? user.name.charAt(0).toUpperCase() : '?';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View style={styles.profileRow}>
@@ -204,11 +206,11 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   avatar: {
-    width: 56, height: 56, borderRadius: 28,
+    width: 56, height: 56, borderRadius: 6,
     borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.8)',
   },
   avatarFallback: {
-    width: 56, height: 56, borderRadius: 28,
+    width: 56, height: 56, borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.5)',
@@ -224,14 +226,14 @@ const styles = StyleSheet.create({
   roleBadge: {
     alignSelf: 'flex-start',
     backgroundColor: 'rgba(255,255,255,0.22)',
-    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20,
+    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 6,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
   },
   roleBadgeText: {
     fontSize: 11, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold,
   },
   editProfileBtn: {
-    width: 38, height: 38, borderRadius: 19,
+    width: 38, height: 38, borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center', justifyContent: 'center',
   },
@@ -243,7 +245,7 @@ const styles = StyleSheet.create({
   },
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     overflow: 'hidden',
     marginBottom: 16,
     shadowColor: '#000',
@@ -263,7 +265,7 @@ const styles = StyleSheet.create({
   },
   menuRowLast: { borderBottomWidth: 0 },
   menuIconWrap: {
-    width: 40, height: 40, borderRadius: 12,
+    width: 40, height: 40, borderRadius: 6,
     alignItems: 'center', justifyContent: 'center',
   },
   menuLabel: {
@@ -271,13 +273,13 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: COLORS.white, borderRadius: 16, padding: 14,
+    backgroundColor: COLORS.white, borderRadius: 6, padding: 14,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
     marginBottom: 24,
   },
   logoutIconWrap: {
-    width: 40, height: 40, borderRadius: 12,
+    width: 40, height: 40, borderRadius: 6,
     backgroundColor: '#FEE2E2', alignItems: 'center', justifyContent: 'center',
   },
   logoutText: { flex: 1, fontSize: 14, fontWeight: '700', color: '#EF4444', fontFamily: FONTS.semiBold },

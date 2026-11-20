@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/context/ThemeContext';
 import React, { useState } from 'react';
 import {
   View,
@@ -81,6 +82,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function MyAssignmentsScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [groupBy, setGroupBy] = useState<GroupBy>('day');
   const [view, setView] = useState<'summary' | 'list'>('summary');
@@ -124,7 +126,7 @@ export default function MyAssignmentsScreen() {
       : selected.assignments;
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
           <TouchableOpacity style={styles.backBtn} onPress={backToSummary} activeOpacity={0.7}>
             <Ionicons name="chevron-back" size={22} color={COLORS.white} />
@@ -181,7 +183,7 @@ export default function MyAssignmentsScreen() {
 
   // ── SUMMARY VIEW ────────────────────────────────────────────
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
@@ -377,12 +379,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
   contentArea: { flex: 1, backgroundColor: COLORS.background, },
   header: { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingBottom: 24, flexDirection: 'row', alignItems: 'center', gap: 12, },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 20, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
   headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
   filterRow: { height: 58 },
   filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
-  filterChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 24, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 36, justifyContent: 'center' },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 6, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 36, justifyContent: 'center' },
   filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
@@ -390,16 +392,16 @@ const styles = StyleSheet.create({
   list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 10 },
   listArea: { flex: 1 },
   empty: { alignItems: 'center', paddingVertical: 60 },
-  emptyIconWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
+  emptyIconWrap: { width: 72, height: 72, borderRadius: 6, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6, fontFamily: FONTS.bold },
   emptySub: { fontSize: 13, color: COLORS.textLight, textAlign: 'center', fontFamily: FONTS.regular },
 
   // Summary cards
-  summaryCard: { minHeight: 80, minWidth: 120, backgroundColor: COLORS.white, borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3 },
+  summaryCard: { minHeight: 80, minWidth: 120, backgroundColor: COLORS.white, borderRadius: 6, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3 },
   summaryCardDone: { backgroundColor: '#F0FDF4' },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dateIconWrap: { width: 30, height: 30, borderRadius: 10, backgroundColor: COLORS.primaryBg, alignItems: 'center', justifyContent: 'center' },
-  todayBadge: { backgroundColor: COLORS.primary + '20', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  dateIconWrap: { width: 30, height: 30, borderRadius: 6, backgroundColor: COLORS.primaryBg, alignItems: 'center', justifyContent: 'center' },
+  todayBadge: { backgroundColor: COLORS.primary + '20', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
   todayBadgeText: { fontSize: 10, color: COLORS.primary, fontWeight: '700', fontFamily: FONTS.bold },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   cardDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
@@ -415,32 +417,32 @@ const styles = StyleSheet.create({
   progressLabel: { fontSize: 11, fontWeight: '700', color: COLORS.textSecondary, fontFamily: FONTS.semiBold, width: 30, textAlign: 'right' },
 
   // Assignment card
-  card: { minHeight: 80, minWidth: 120, backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3 },
+  card: { minHeight: 80, minWidth: 120, backgroundColor: COLORS.white, borderRadius: 6, flexDirection: 'row', overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3 },
   cardContent: { flex: 1, padding: 14 },
   trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   statusText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
   recipient: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 4, fontFamily: FONTS.bold },
   addressRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
   address: { flex: 1, fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   cardBottom: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, flexWrap: 'wrap' },
-  assignBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
+  assignBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   assignBadgeText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
-  codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 24, backgroundColor: '#E8F4FB' },
+  codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: '#E8F4FB' },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
-  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 24, backgroundColor: '#E8F8EF' },
+  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: '#E8F8EF' },
   feeText: { fontSize: 11, fontWeight: '700', color: COLORS.success, fontFamily: FONTS.bold },
   parcelDetails: { marginTop: 8, gap: 2 },
   detailText: { fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   attemptBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: COLORS.primary, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginTop: 12,
+    backgroundColor: COLORS.primary, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 6, marginTop: 12,
     shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
   },
   attemptBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 
-  togglePill: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 12, padding: 3, gap: 2 },
-  togglePillBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  togglePill: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 6, padding: 3, gap: 2 },
+  togglePillBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
   togglePillBtnActive: { backgroundColor: COLORS.white },
   togglePillText: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.8)', fontFamily: FONTS.semiBold },
   togglePillTextActive: { color: COLORS.primary },

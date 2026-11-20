@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/context/ThemeContext';
 import React, { useState } from 'react';
 import {
   View,
@@ -26,6 +27,7 @@ function formatDateHeader(dateStr: string): string {
 }
 
 export default function DailySummaryDetailScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { date } = useLocalSearchParams<{ date: string }>();
   const [page, setPage] = useState(1);
@@ -54,7 +56,7 @@ export default function DailySummaryDetailScreen() {
   const uniqueRecipients = new Set(parcels.map(p => p.recipient_phone)).size;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Orange Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
@@ -249,7 +251,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     backgroundColor: COLORS.primary,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1 },
   headerTitle: {
     fontSize: 17,
@@ -276,7 +278,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 4,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -323,7 +325,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     height: 32,
     justifyContent: 'center',
@@ -345,7 +347,7 @@ const styles = StyleSheet.create({
   // Card
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -369,7 +371,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 24,
+    borderRadius: 6,
   },
   statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
@@ -401,7 +403,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 6,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -434,7 +436,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
@@ -449,7 +451,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 6,
   },
   pageInfo: {
     fontSize: 13,

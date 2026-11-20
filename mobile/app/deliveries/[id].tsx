@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/context/ThemeContext';
 import React, { useState } from 'react';
 import {
   View,
@@ -18,6 +19,7 @@ import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, FONTS } from '../../src/consta
 import ImagePreviewModal, { PreviewImage } from '../../src/components/ImagePreviewModal';
 
 export default function DeliveryDetailScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -52,7 +54,7 @@ export default function DeliveryDetailScreen() {
     : 'ဆောင်ရွက်နေ';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
@@ -347,7 +349,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   backBtn: {
-    width: 38, height: 38, borderRadius: 19,
+    width: 38, height: 38, borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center', justifyContent: 'center',
   },
@@ -360,7 +362,7 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 24,
+    borderRadius: 6,
     alignSelf: 'center',
     backgroundColor: COLORS.white,
   },
@@ -374,7 +376,7 @@ const styles = StyleSheet.create({
   sectionAccentBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: COLORS.primary },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, flex: 1 },
   infoCard: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 16, overflow: 'hidden',
+    backgroundColor: COLORS.white, borderRadius: 6, overflow: 'hidden',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
   infoRow: {
@@ -386,29 +388,29 @@ const styles = StyleSheet.create({
   infoLabel: { fontSize: 12, color: COLORS.textSecondary, width: 92, fontFamily: FONTS.regular },
   infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', fontFamily: FONTS.medium },
   callIconWrap: {
-    width: 28, height: 28, borderRadius: 14,
+    width: 28, height: 28, borderRadius: 6,
     backgroundColor: COLORS.success, alignItems: 'center', justifyContent: 'center',
   },
 
   // Parcel images
   parcelImgGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 14 },
-  parcelImgWrap: { borderRadius: 12, overflow: 'hidden', position: 'relative' },
-  parcelImgThumb: { width: 88, height: 88, borderRadius: 12, backgroundColor: COLORS.border },
+  parcelImgWrap: { borderRadius: 6, overflow: 'hidden', position: 'relative' },
+  parcelImgThumb: { width: 88, height: 88, borderRadius: 6, backgroundColor: COLORS.border },
   imgOverlay: {
     position: 'absolute', bottom: 6, right: 6,
-    width: 24, height: 24, borderRadius: 12,
+    width: 24, height: 24, borderRadius: 6,
     backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center',
   },
 
   attemptCard: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
+    backgroundColor: COLORS.white, borderRadius: 6, flexDirection: 'row', overflow: 'hidden',
     marginBottom: 10,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
   attemptCardBar: { width: 4 },
   attemptCardContent: { flex: 1, padding: 14 },
   attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 24 },
+  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 },
   attemptDelivered: { backgroundColor: '#E8F8EF' },
   attemptFailed: { backgroundColor: '#FDE8E8' },
   attemptBadgeText: { fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
@@ -419,8 +421,8 @@ const styles = StyleSheet.create({
   proofSection: { minHeight: 48, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
   proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginBottom: 8, fontFamily: FONTS.bold },
   proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  proofThumbWrap: { borderRadius: 10, overflow: 'hidden', position: 'relative' },
-  proofThumb: { width: 72, height: 72, borderRadius: 10, backgroundColor: COLORS.border },
+  proofThumbWrap: { borderRadius: 6, overflow: 'hidden', position: 'relative' },
+  proofThumb: { width: 72, height: 72, borderRadius: 6, backgroundColor: COLORS.border },
 
   // Sticky footer
   stickyFooter: {
@@ -433,7 +435,7 @@ const styles = StyleSheet.create({
   },
   recordBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: COLORS.primary, borderRadius: 14, paddingVertical: 15,
+    backgroundColor: COLORS.primary, borderRadius: 6, paddingVertical: 15,
     shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
   },
   recordBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700', fontFamily: FONTS.bold },

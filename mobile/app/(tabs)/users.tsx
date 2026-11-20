@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/context/ThemeContext';
 import React, { useState } from 'react';
 import {
   View,
@@ -20,6 +21,7 @@ import { userService, User } from '../../src/services/userService';
 import { COLORS, ROLE_LABELS_MM, FONTS } from '../../src/constants';
 
 export default function UsersScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -67,7 +69,7 @@ export default function UsersScreen() {
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <TouchableOpacity
@@ -242,7 +244,7 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -252,7 +254,7 @@ const styles = StyleSheet.create({
   addBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 4,
-    borderRadius: 14,
+    borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 12,
     shadowColor: '#000',
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 20,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -300,7 +302,7 @@ const styles = StyleSheet.create({
 
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -310,8 +312,8 @@ const styles = StyleSheet.create({
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  avatar: { width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  avatarImage: { width: 50, height: 50, borderRadius: 25, flexShrink: 0 },
+  avatar: { width: 50, height: 50, borderRadius: 6, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  avatarImage: { width: 50, height: 50, borderRadius: 6, flexShrink: 0 },
   avatarText: { fontSize: 18, fontWeight: '700', fontFamily: FONTS.bold },
   userInfo: { flex: 1, gap: 2 },
   userName: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
   roleDot: { width: 6, height: 6, borderRadius: 3 },
   roleText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
-  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   statusPillActive: { backgroundColor: '#DCFCE7' },
   statusPillInactive: { backgroundColor: '#FEE2E2' },
   statusPillText: { fontSize: 11, fontWeight: '700', fontFamily: FONTS.bold },
@@ -328,7 +330,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 6,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -341,6 +343,6 @@ const styles = StyleSheet.create({
   pageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary, fontFamily: FONTS.semiBold },
-  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: COLORS.border },
+  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: COLORS.border },
   pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600', fontFamily: FONTS.semiBold },
 });

@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/context/ThemeContext';
 import React, { useState, useMemo } from 'react';
 import {
   View,
@@ -36,6 +37,7 @@ const MONTHS_MM = [
 ];
 
 export default function DailySummaryScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [viewMode, setViewMode] = useState<'day' | 'month'>('day');
@@ -122,7 +124,7 @@ export default function DailySummaryScreen() {
     : `${itemCount} လ မှတ်တမ်း`;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
@@ -581,7 +583,7 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -603,14 +605,14 @@ const styles = StyleSheet.create({
   togglePill: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: 12,
+    borderRadius: 6,
     padding: 3,
     gap: 2,
   },
   togglePillBtn: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 10,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -630,7 +632,7 @@ const styles = StyleSheet.create({
   calendarBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -641,7 +643,7 @@ const styles = StyleSheet.create({
   clearFilterBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -653,7 +655,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 6,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -680,7 +682,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1.5,
     borderColor: COLORS.border,
     paddingHorizontal: 10,
@@ -719,7 +721,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 6,
     paddingVertical: 9,
   },
   dateApplyBtnText: {
@@ -734,7 +736,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 10,
+    borderRadius: 6,
     paddingVertical: 9,
     paddingHorizontal: 16,
     borderWidth: 1.5,
@@ -752,7 +754,7 @@ const styles = StyleSheet.create({
     gap: 5,
     marginTop: 8,
     backgroundColor: COLORS.primary + '12',
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
@@ -769,7 +771,7 @@ const styles = StyleSheet.create({
   // Card
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -790,7 +792,7 @@ const styles = StyleSheet.create({
   dateIconWrap: {
     width: 28,
     height: 28,
-    borderRadius: 8,
+    borderRadius: 6,
     backgroundColor: COLORS.primaryBg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -806,7 +808,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto' as any,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 6,
     backgroundColor: COLORS.background,
   },
   monthDayCount: {

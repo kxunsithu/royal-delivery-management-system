@@ -15,8 +15,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { parcelService, Parcel } from '../../src/services/parcelService';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_COLORS, PRIORITY_LABELS_MM, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 
 export default function CustomerDetailScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { phone, type, name } = useLocalSearchParams<{
     phone: string; type: string; name: string;
@@ -68,7 +70,7 @@ export default function CustomerDetailScreen() {
     .reduce((s, p) => s + Number(p.cod_amount), 0);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
@@ -254,7 +256,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     backgroundColor: COLORS.primary,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1 },
   headerName: {
     fontSize: 17,
@@ -271,7 +273,7 @@ const styles = StyleSheet.create({
   addBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.25)',
   },
   addBtnText: {
@@ -290,7 +292,7 @@ const styles = StyleSheet.create({
   statusCountRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
   statusCountBadge: {
     fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.semiBold,
-    backgroundColor: COLORS.white, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
+    backgroundColor: COLORS.white, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 1,
   },
   filterRow: { height: 48 },
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     height: 30,
     justifyContent: 'center',
@@ -321,7 +323,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
-    borderRadius: 16,
+    borderRadius: 6,
     paddingVertical: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -349,7 +351,7 @@ const styles = StyleSheet.create({
   // Parcel card
   parcelCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 6,
   },
   statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
@@ -383,13 +385,13 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.border,
   },
   footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   priorityText: { fontSize: 11, fontWeight: '700', fontFamily: FONTS.bold },
   codBadge: {
     backgroundColor: '#E8F4FB',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 6,
   },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
   parcelDetails: { marginTop: 8, gap: 2 },
@@ -401,7 +403,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 6,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -424,7 +426,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
@@ -439,7 +441,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 6,
   },
   pageInfo: {
     fontSize: 13,

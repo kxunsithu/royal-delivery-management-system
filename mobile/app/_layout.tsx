@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 import { ActivityIndicator, View, Text, TextInput } from 'react-native';
 import { COLORS, FONTS } from '../src/constants';
 import * as SplashScreen from 'expo-splash-screen';
@@ -144,10 +145,12 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <StatusBar style="light" />
-            <RootLayoutNav />
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <StatusBar style="light" />
+              <RootLayoutNav />
+            </AuthProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

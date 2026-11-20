@@ -18,9 +18,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { parcelService, ContactSuggestion } from '../../src/services/parcelService';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { COLORS, PARCEL_CATEGORIES, FONTS } from '../../src/constants';
 
 export default function CreateParcelScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -252,7 +254,7 @@ export default function CreateParcelScreen() {
   if (!canCreate) return null;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
           <Ionicons name="chevron-back" size={22} color={COLORS.white} />
@@ -622,14 +624,14 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     gap: 12,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   backBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold },
   headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold, textAlign: 'center' },
   saveBtn: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   saveBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   content: { padding: 16, paddingBottom: 40 },
@@ -637,7 +639,7 @@ const styles = StyleSheet.create({
   formSectionTitle: { fontSize: 14, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
   formCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 10,
+    borderRadius: 6,
     padding: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -649,7 +651,7 @@ const styles = StyleSheet.create({
   textInput: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 6,
     padding: 10,
     fontSize: 15,
     color: COLORS.text,
@@ -667,7 +669,7 @@ const styles = StyleSheet.create({
   categoryChip: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,
@@ -691,7 +693,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontSize: 14,
@@ -704,7 +706,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 14,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   addCategoryBtnText: {
     color: COLORS.white,
@@ -720,7 +722,7 @@ const styles = StyleSheet.create({
   },
   segmented: {
     flexDirection: 'row',
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     overflow: 'hidden',
@@ -741,7 +743,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 6,
     padding: 16,
     marginTop: 8,
   },
@@ -752,7 +754,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.background,
@@ -760,14 +762,14 @@ const styles = StyleSheet.create({
   imagePickBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
   imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
   imageThumbWrap: { position: 'relative' },
-  imageThumb: { width: 76, height: 76, borderRadius: 8 },
+  imageThumb: { width: 76, height: 76, borderRadius: 6 },
   imageRemoveBtn: {
     position: 'absolute',
     top: -6,
     right: -6,
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -778,7 +780,7 @@ const styles = StyleSheet.create({
   imageHint: { fontSize: 11, color: COLORS.textLight, marginTop: 6, textAlign: 'center', fontFamily: FONTS.regular },
   acField: { gap: 2 },
   inlineSugBox: {
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,

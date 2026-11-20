@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/context/ThemeContext';
 import React, { useState } from 'react';
 import {
   View,
@@ -19,6 +20,7 @@ import { COLORS, STATUS_COLORS, FONTS } from '../../src/constants';
 type CustomerType = 'recipient' | 'sender';
 
 export default function CustomersScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [type, setType] = useState<CustomerType>('recipient');
   const [search, setSearch] = useState('');
@@ -50,7 +52,7 @@ export default function CustomersScreen() {
   const meta = data?.meta;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View>
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 4,
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 6,
     padding: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -261,7 +263,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 6,
   },
   typeTabActive: { backgroundColor: COLORS.primary },
   typeTabText: {
@@ -281,7 +283,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 10,
     marginBottom: 8,
-    borderRadius: 14,
+    borderRadius: 6,
     paddingHorizontal: 14,
     paddingVertical: 12,
     shadowColor: '#000',
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
   // Card
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -320,7 +322,7 @@ const styles = StyleSheet.create({
   avatarCircle: {
     width: 50,
     height: 50,
-    borderRadius: 25,
+    borderRadius: 6,
     backgroundColor: COLORS.primary + '18',
     alignItems: 'center',
     justifyContent: 'center',
@@ -371,7 +373,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary + '15',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 20,
+    borderRadius: 6,
   },
   countText: {
     fontSize: 13,
@@ -385,7 +387,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 6,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -419,7 +421,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
@@ -434,7 +436,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 6,
   },
   pageInfo: {
     fontSize: 13,

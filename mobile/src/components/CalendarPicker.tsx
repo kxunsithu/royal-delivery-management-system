@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 6,
     padding: 16,
     width: 320,
     maxWidth: '90%' as any,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   navBtn: {
     width: 32,
     height: 32,
-    borderRadius: 8,
+    borderRadius: 6,
     backgroundColor: COLORS.background,
     alignItems: 'center',
     justifyContent: 'center',
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   dayCircle: {
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   cancelBtn: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: 'center',
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   confirmBtn: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,

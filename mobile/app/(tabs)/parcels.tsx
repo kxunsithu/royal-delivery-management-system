@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { parcelService, Parcel } from '../../src/services/parcelService';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, PRIORITY_LABELS_MM, PRIORITY_COLORS, FONTS } from '../../src/constants';
 import ConfirmModal from '../../src/components/ConfirmModal';
 
@@ -34,6 +35,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function ParcelsScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -98,7 +100,7 @@ export default function ParcelsScreen() {
   const meta = data?.meta;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View>
@@ -472,7 +474,7 @@ const styles = StyleSheet.create({
   calendarBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -483,7 +485,7 @@ const styles = StyleSheet.create({
   addBtn: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -498,7 +500,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 4,
-    borderRadius: 14,
+    borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 12,
     shadowColor: '#000',
@@ -518,7 +520,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 20,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -540,7 +542,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 6,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -567,7 +569,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 10,
@@ -606,7 +608,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.primary,
-    borderRadius: 10,
+    borderRadius: 6,
     paddingVertical: 9,
   },
   dateApplyBtnText: {
@@ -621,7 +623,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 10,
+    borderRadius: 6,
     paddingVertical: 9,
     paddingHorizontal: 16,
     borderWidth: 1,
@@ -639,7 +641,7 @@ const styles = StyleSheet.create({
     gap: 5,
     marginTop: 8,
     backgroundColor: COLORS.primary + '12',
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
@@ -657,7 +659,7 @@ const styles = StyleSheet.create({
   // Card
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 12,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -676,7 +678,7 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 24,
+    borderRadius: 6,
   },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontSize: 12, fontWeight: '600',
@@ -685,12 +687,12 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
   cardBody: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
   parcelThumb: {
-    width: 60, height: 60, borderRadius: 8,
+    width: 60, height: 60, borderRadius: 6,
     backgroundColor: COLORS.border,
     flexShrink: 0,
   },
   parcelThumbPlaceholder: {
-    width: 60, height: 60, borderRadius: 8,
+    width: 60, height: 60, borderRadius: 6,
     backgroundColor: COLORS.background,
     flexShrink: 0,
     borderWidth: 1,
@@ -714,10 +716,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     backgroundColor: COLORS.background,
-    borderRadius: 10,
+    borderRadius: 6,
   },
   footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  priorityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  priorityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   priorityText: { fontSize: 11, fontWeight: '700',
     fontFamily: FONTS.bold,
   },
@@ -725,7 +727,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8F4FB',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info,
     fontFamily: FONTS.bold,
@@ -735,7 +737,7 @@ const styles = StyleSheet.create({
   },
   verifyBtn: {
     backgroundColor: COLORS.success,
-    borderRadius: 10, paddingVertical: 9, marginTop: 10,
+    borderRadius: 6, paddingVertical: 9, marginTop: 10,
     alignItems: 'center', justifyContent: 'center',
     shadowColor: COLORS.success,
     shadowOffset: { width: 0, height: 3 },
@@ -755,7 +757,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 6,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -775,7 +777,7 @@ const styles = StyleSheet.create({
   pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary,
     fontFamily: FONTS.semiBold,
   },
-  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: COLORS.border },
+  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: COLORS.border },
   pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600',
     fontFamily: FONTS.semiBold,
   },

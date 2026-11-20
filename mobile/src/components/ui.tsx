@@ -10,20 +10,23 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { COLORS, FONTS } from '../constants';
+import { useTheme } from '../context/ThemeContext';
 
 // ---------- Screen ----------
 export function Screen({ children, scroll = true, style }: { children: React.ReactNode; scroll?: boolean; style?: any }) {
+  const { colors } = useTheme();
   const content = scroll ? <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>{children}</ScrollView> : children;
-  return <SafeAreaView style={[styles.screen, style]}>{content}</SafeAreaView>;
+  return <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }, style]}>{content}</SafeAreaView>;
 }
 
 // ---------- Header ----------
 export function PageHeader({ title, subtitle, right }: { title: string; subtitle?: string; right?: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: colors.white, borderBottomColor: colors.border }]}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.headerTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.headerSubtitle}>{subtitle}</Text> : null}
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{title}</Text>
+        {subtitle ? <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text> : null}
       </View>
       {right}
     </View>
@@ -32,12 +35,14 @@ export function PageHeader({ title, subtitle, right }: { title: string; subtitle
 
 // ---------- Card ----------
 export function Card({ children, style }: { children: React.ReactNode; style?: any }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  const { colors } = useTheme();
+  return <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }, style]}>{children}</View>;
 }
 
 // ---------- Section title ----------
 export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.sectionTitle}>{children}</Text>;
+  const { colors } = useTheme();
+  return <Text style={[styles.sectionTitle, { color: colors.text }]}>{children}</Text>;
 }
 
 // ---------- Button ----------
@@ -58,7 +63,14 @@ export function Button({
   style?: any;
   textStyle?: any;
 }) {
-  const v = variantStyles[variant];
+  const { colors } = useTheme();
+  const v = variant === 'primary'
+    ? { container: { backgroundColor: colors.primary }, text: { color: colors.white }, loaderColor: colors.white }
+    : variant === 'secondary'
+    ? { container: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border }, text: { color: colors.text }, loaderColor: colors.text }
+    : variant === 'ghost'
+    ? { container: { backgroundColor: 'transparent' }, text: { color: colors.primary }, loaderColor: colors.primary }
+    : { container: { backgroundColor: colors.error }, text: { color: colors.white }, loaderColor: colors.white };
   return (
     <TouchableOpacity
       style={[styles.btn, v.container, (disabled || loading) && styles.btnDisabled, style]}
@@ -74,13 +86,6 @@ export function Button({
     </TouchableOpacity>
   );
 }
-
-const variantStyles: any = {
-  primary: { container: { backgroundColor: COLORS.primary }, text: { color: COLORS.white }, loaderColor: COLORS.white },
-  secondary: { container: { backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border }, text: { color: COLORS.text }, loaderColor: COLORS.text },
-  ghost: { container: { backgroundColor: 'transparent' }, text: { color: COLORS.primary }, loaderColor: COLORS.primary },
-  danger: { container: { backgroundColor: COLORS.error }, text: { color: COLORS.white }, loaderColor: COLORS.white },
-};
 
 // ---------- Input ----------
 export function Input({
@@ -104,14 +109,15 @@ export function Input({
   editable?: boolean;
   right?: React.ReactNode;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.fieldGroup}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-      <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
+      {label ? <Text style={[styles.label, { color: colors.text }]}>{label}</Text> : null}
+      <View style={[styles.inputWrapper, { backgroundColor: colors.white, borderColor: error ? colors.error : colors.border }, error ? styles.inputError : null]}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: colors.text }]}
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textLight}
+          placeholderTextColor={colors.textLight}
           value={value}
           onChangeText={onChangeText}
           secureTextEntry={secureTextEntry}
@@ -120,45 +126,51 @@ export function Input({
         />
         {right}
       </View>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {error ? <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text> : null}
     </View>
   );
 }
 
 // ---------- Badge ----------
-export function Badge({ label, color = COLORS.primary, bg }: { label: string; color?: string; bg?: string }) {
+export function Badge({ label, color, bg }: { label: string; color?: string; bg?: string }) {
+  const { colors } = useTheme();
+  const c = color || colors.primary;
   return (
-    <View style={[styles.badge, { backgroundColor: bg || color + '18' }]}>
-      <Text style={[styles.badgeText, { color }]}>{label}</Text>
+    <View style={[styles.badge, { backgroundColor: bg || c + '18' }]}>
+      <Text style={[styles.badgeText, { color: c }]}>{label}</Text>
     </View>
   );
 }
 
 // ---------- StatCard ----------
-export function StatCard({ label, value, color = COLORS.primary }: { label: string; value: any; color?: string }) {
+export function StatCard({ label, value, color }: { label: string; value: any; color?: string }) {
+  const { colors } = useTheme();
+  const c = color || colors.primary;
   return (
-    <View style={styles.statCard}>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <Text style={[styles.statValue, { color: c }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{label}</Text>
     </View>
   );
 }
 
 // ---------- EmptyState ----------
 export function EmptyState({ title, subtitle }: { title: string; subtitle?: string }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.empty}>
-      <Text style={styles.emptyTitle}>{title}</Text>
-      {subtitle ? <Text style={styles.emptySubtitle}>{subtitle}</Text> : null}
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>{title}</Text>
+      {subtitle ? <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>{subtitle}</Text> : null}
     </View>
   );
 }
 
 // ---------- Loading ----------
 export function Loading() {
+  const { colors } = useTheme();
   return (
     <View style={styles.loading}>
-      <ActivityIndicator size="large" color={COLORS.primary} />
+      <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }
@@ -180,7 +192,7 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 18,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -195,7 +207,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     height: 46,
-    borderRadius: 10,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
@@ -209,7 +221,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 10,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     paddingHorizontal: 12,
     height: 44,
@@ -221,7 +233,7 @@ const styles = StyleSheet.create({
   badgeText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   statCard: { minHeight: 80, minWidth: 100,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 6,
     padding: 14,
     borderWidth: 1,
     borderColor: COLORS.border,

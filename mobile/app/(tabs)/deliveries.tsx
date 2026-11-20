@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { deliveryService, Assignment, DeliverySummary } from '../../src/services/deliveryService';
 import { COLORS, STATUS_COLORS, STATUS_LABELS_MM, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 
 const STATUS_FILTERS = [
   { label: 'အားလုံး', value: '' },
@@ -41,6 +42,7 @@ function formatPeriodLabel(period: string, groupBy: 'day' | 'month'): string {
 }
 
 export default function DeliveriesScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const isStaff = user?.role === 'delivery_staff';
@@ -100,7 +102,7 @@ export default function DeliveriesScreen() {
 
   if (view === 'list' && selected) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
             <TouchableOpacity style={styles.backBtn} onPress={backToSummary} activeOpacity={0.7}>
@@ -198,7 +200,7 @@ export default function DeliveriesScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
           {!isStaff && (
@@ -414,12 +416,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary },
   contentArea: { flex: 1, backgroundColor: COLORS.background, },
   header: { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 20, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
   headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
   filterRow: { height: 58 },
   filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' },
-  filterChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 24, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 36, justifyContent: 'center' },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 6, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border, height: 36, justifyContent: 'center' },
   filterChipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
@@ -428,7 +430,7 @@ const styles = StyleSheet.create({
   listArea: { flex: 1 },
   empty: { alignItems: 'center', paddingVertical: 60 },
   emptyIconWrap: {
-    width: 72, height: 72, borderRadius: 36,
+    width: 72, height: 72, borderRadius: 6,
     backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center', marginBottom: 14,
   },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 6, fontFamily: FONTS.bold },
@@ -437,21 +439,21 @@ const styles = StyleSheet.create({
   pageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary, fontFamily: FONTS.semiBold },
-  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 16, paddingVertical: 6, borderRadius: 24, borderWidth: 1, borderColor: COLORS.border },
+  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 16, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: COLORS.border },
   pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600', fontFamily: FONTS.semiBold },
 
   // Summary cards
   summaryCard: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 16, padding: 14,
+    backgroundColor: COLORS.white, borderRadius: 6, padding: 14,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
   summaryCardDone: { backgroundColor: '#F0FDF4' },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dateIconWrap: {
-    width: 30, height: 30, borderRadius: 10,
+    width: 30, height: 30, borderRadius: 6,
     backgroundColor: COLORS.primaryBg, alignItems: 'center', justifyContent: 'center',
   },
-  todayBadge: { backgroundColor: COLORS.primary + '20', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  todayBadge: { backgroundColor: COLORS.primary + '20', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
   todayBadgeText: { fontSize: 10, color: COLORS.primary, fontWeight: '700', fontFamily: FONTS.bold },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   cardDivider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
@@ -470,7 +472,7 @@ const styles = StyleSheet.create({
   // Fee summary bar
   feeSummaryBar: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white,
-    marginHorizontal: 16, marginBottom: 10, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 8,
+    marginHorizontal: 16, marginBottom: 10, borderRadius: 6, paddingVertical: 10, paddingHorizontal: 8,
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
   feeSummaryItem: { flex: 1, alignItems: 'center' },
@@ -480,12 +482,12 @@ const styles = StyleSheet.create({
 
   // Assignment card
   card: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
+    backgroundColor: COLORS.white, borderRadius: 6, flexDirection: 'row', overflow: 'hidden',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
   },
   cardContent: { flex: 1, padding: 14 },
   trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   statusText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
   recipient: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 4, fontFamily: FONTS.bold },
   addressRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
@@ -493,17 +495,17 @@ const styles = StyleSheet.create({
   staffRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   metaLine: { fontSize: 12, color: COLORS.textLight, fontFamily: FONTS.regular },
   cardBottom: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.border, flexWrap: 'wrap' },
-  assignBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 24 },
+  assignBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
   assignBadgeText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
-  codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 24, backgroundColor: '#E8F4FB' },
+  codBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: '#E8F4FB' },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
-  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 24, backgroundColor: '#E8F8EF' },
+  feeBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: '#E8F8EF' },
   feeText: { fontSize: 11, fontWeight: '700', color: COLORS.success, fontFamily: FONTS.bold },
   parcelDetails: { marginTop: 8, gap: 2 },
   detailText: { fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.regular },
 
-  togglePill: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 12, padding: 3, gap: 2 },
-  togglePillBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  togglePill: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 6, padding: 3, gap: 2 },
+  togglePillBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
   togglePillBtnActive: { backgroundColor: COLORS.white },
   togglePillText: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.8)', fontFamily: FONTS.semiBold },
   togglePillTextActive: { color: COLORS.primary },

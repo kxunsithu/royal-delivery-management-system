@@ -15,9 +15,11 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../src/context/AuthContext';
+import { useTheme } from '../src/context/ThemeContext';
 import { COLORS, FONTS } from '../src/constants';
 
 export default function LoginScreen() {
+  const { colors } = useTheme();
   const { login } = useAuth();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -218,7 +220,7 @@ const styles = StyleSheet.create({
     right: -100,
     width: 280,
     height: 280,
-    borderRadius: 140,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.09)',
   },
   decorBL: {
@@ -227,7 +229,7 @@ const styles = StyleSheet.create({
     left: -120,
     width: 260,
     height: 260,
-    borderRadius: 130,
+    borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.07)',
   },
 
@@ -240,7 +242,7 @@ const styles = StyleSheet.create({
   logoWrap: {
     width: 96,
     height: 96,
-    borderRadius: 24,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
   },
-  logoImage: { width: 72, height: 72, borderRadius: 16 },
+  logoImage: { width: 72, height: 72, borderRadius: 6 },
   appName: {
     fontSize: 26,
     fontWeight: '800',
@@ -291,7 +293,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 6,
     paddingHorizontal: 16,
     height: 54,
     gap: 12,
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 6,
     height: 54,
     marginTop: 12,
     shadowColor: '#000',

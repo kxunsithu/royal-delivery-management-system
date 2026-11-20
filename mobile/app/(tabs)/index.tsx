@@ -14,9 +14,11 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { dashboardService } from '../../src/services/dashboardService';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { COLORS, FONTS, ROLE_LABELS_MM } from '../../src/constants';
 
 export default function DashboardScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -35,8 +37,9 @@ export default function DashboardScreen() {
 
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
+        stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -208,13 +211,11 @@ function AdminManagerDashboard({
         <QuickBtn icon="car-outline" label="ပို့ဆောင်" color={COLORS.success} onPress={() => router.navigate('/(tabs)/deliveries')} />
         <QuickBtn icon="bar-chart-outline" label="မှတ်တမ်း" color={COLORS.info} onPress={() => router.navigate('/(tabs)/daily-summary')} />
       </View>
-      {isAdmin && (
-        <View style={styles.quickRow}>
-          <QuickBtn icon="people-outline" label="သုံးစွဲသူများ" color="#8B5CF6" onPress={() => router.navigate('/(tabs)/users')} />
-          <QuickBtn icon="person-outline" label="ဖောက်သည်" color={COLORS.warning} onPress={() => router.navigate('/(tabs)/customers')} />
-          <QuickBtn icon="calendar-outline" label="လစဉ်" color="#0EA5E9" onPress={() => router.navigate('/(tabs)/monthly-summary')} />
-        </View>
-      )}
+      <View style={styles.quickRow}>
+        <QuickBtn icon="people-outline" label="သုံးစွဲသူများ" color="#8B5CF6" onPress={() => router.navigate('/(tabs)/users')} />
+        <QuickBtn icon="person-outline" label="ဖောက်သည်" color={COLORS.warning} onPress={() => router.navigate('/(tabs)/customers')} />
+        <QuickBtn icon="calendar-outline" label="လစဉ်" color="#0EA5E9" onPress={() => router.navigate('/(tabs)/monthly-summary')} />
+      </View>
     </View>
   );
 }
@@ -270,20 +271,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 6,
   },
   roleText: { fontSize: 12, color: COLORS.white, fontFamily: FONTS.semiBold },
   avatar: {
-    width: 52, height: 52, borderRadius: 26,
+    width: 52, height: 52, borderRadius: 6,
     borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.85)',
   },
   avatarFallback: {
-    width: 52, height: 52, borderRadius: 26,
+    width: 52, height: 52, borderRadius: 6,
     backgroundColor: COLORS.white,
     borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.85)',
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarIcon: { width: 36, height: 36, borderRadius: 18 },
+  avatarIcon: { width: 36, height: 36, borderRadius: 6 },
 
   // White content
   contentArea: {
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
   statBox: {
     flex: 1,
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 6,
     padding: 12,
     paddingBottom: 14,
     shadowColor: '#000',
@@ -340,7 +341,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     backgroundColor: COLORS.primary,
-    borderRadius: 14,
+    borderRadius: 6,
     paddingVertical: 16,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
@@ -387,7 +388,7 @@ const styles = StyleSheet.create({
   // Revenue card
   revenueCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     paddingVertical: 4,
     paddingHorizontal: 16,
     marginBottom: 16,
@@ -426,7 +427,7 @@ const styles = StyleSheet.create({
   quickBtn: {
     flex: 1,
     backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 6,
     paddingVertical: 16,
     alignItems: 'center',
     gap: 8,
@@ -437,7 +438,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   quickBtnIcon: {
-    width: 48, height: 48, borderRadius: 14,
+    width: 48, height: 48, borderRadius: 6,
     alignItems: 'center', justifyContent: 'center',
   },
   quickBtnLabel: {
@@ -452,7 +453,7 @@ const styles = StyleSheet.create({
   skeleton: {
     height: 90,
     backgroundColor: COLORS.border,
-    borderRadius: 16,
+    borderRadius: 6,
     marginBottom: 10,
     opacity: 0.4,
   },

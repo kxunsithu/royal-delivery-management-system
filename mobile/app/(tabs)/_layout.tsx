@@ -2,12 +2,14 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { Platform, TouchableOpacity, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { colors } = useTheme();
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
   const isAccountant = user?.role === 'accountant';
@@ -24,11 +26,11 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textLight,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textLight,
         tabBarStyle: {
-          backgroundColor: COLORS.white,
-          borderTopColor: COLORS.border,
+          backgroundColor: colors.white,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           height: tabHeight,
           paddingBottom: isWeb ? 6 : bottomInset,

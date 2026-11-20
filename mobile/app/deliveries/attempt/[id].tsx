@@ -1,3 +1,4 @@
+import { useTheme } from '../../../src/context/ThemeContext';
 import React, { useState } from 'react';
 import {
   View,
@@ -30,6 +31,7 @@ const FAILURE_REASONS = [
 ];
 
 export default function RecordAttemptScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
@@ -244,7 +246,7 @@ export default function RecordAttemptScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Hidden web file input */}
       {Platform.OS === 'web' && (
         <input
@@ -491,7 +493,7 @@ const styles = StyleSheet.create({
     gap: 12,
     backgroundColor: COLORS.primary,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   headerCenter: { flex: 1 },
   headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
   headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
@@ -501,7 +503,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
   infoCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 6,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -524,7 +526,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 10,
+    borderRadius: 6,
     paddingVertical: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -537,7 +539,7 @@ const styles = StyleSheet.create({
   reasonChip: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,
@@ -548,7 +550,7 @@ const styles = StyleSheet.create({
 
   inputCard: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: 4,
@@ -570,7 +572,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,
@@ -579,14 +581,14 @@ const styles = StyleSheet.create({
   photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   photoThumbWrap: { position: 'relative' },
   photoThumbTouch: { flex: 1, width: '100%', height: '100%' },
-  photoThumb: { width: 80, height: 80, borderRadius: 8, backgroundColor: COLORS.border },
+  photoThumb: { width: 80, height: 80, borderRadius: 6, backgroundColor: COLORS.border },
   photoRemoveBtn: {
     position: 'absolute',
     top: -6,
     right: -6,
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: 6,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -599,7 +601,7 @@ const styles = StyleSheet.create({
     bottom: 4,
     left: 4,
     backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
@@ -607,7 +609,7 @@ const styles = StyleSheet.create({
   noPhotoBox: {
     alignItems: 'center',
     paddingVertical: 20,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderStyle: 'dashed',
@@ -621,7 +623,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 6,
     padding: 16,
     marginTop: 8,
   },
