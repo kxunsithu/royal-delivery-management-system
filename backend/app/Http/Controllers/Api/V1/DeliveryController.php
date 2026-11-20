@@ -64,6 +64,9 @@ class DeliveryController extends Controller
     {
         $this->authorize('viewAny', DeliveryAssignment::class);
 
+        $user = $request->user();
+        $staffId = $user->isDeliveryStaff() ? $user->id : $request->input('staff_id');
+
         $groupBy = $request->input('group_by', 'day'); // day | month
 
         // Date expression: use delivered_at for DELIVERED parcels, failed_at for FAILED,
@@ -112,6 +115,7 @@ class DeliveryController extends Controller
             ])
             ->when($request->date_from, fn($q) => $q->whereRaw("$filterExpr >= ?", [$request->date_from]))
             ->when($request->date_to, fn($q) => $q->whereRaw("$filterExpr <= ?", [$request->date_to]))
+            ->when($staffId, fn($q) => $q->where('delivery_assignments.staff_id', $staffId))
             ->groupBy(DB::raw($periodExpr))
             ->orderBy('period', 'desc');
 
@@ -150,6 +154,9 @@ class DeliveryController extends Controller
     {
         $this->authorize('viewAny', DeliveryAssignment::class);
 
+        $user = $request->user();
+        $staffId = $user->isDeliveryStaff() ? $user->id : $request->input('staff_id');
+
         $dateExpr = "COALESCE(
             DATE(parcels.delivered_at),
             CASE WHEN parcels.status = 'DELIVERED' THEN DATE(parcels.updated_at) ELSE NULL END,
@@ -161,7 +168,7 @@ class DeliveryController extends Controller
         $query = DeliveryAssignment::with(['parcel.receivedBy', 'parcel.activeAssignment.staff', 'parcel.images', 'staff', 'assignedBy'])
             ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
             ->select('delivery_assignments.*')
-            ->when($request->staff_id, fn($q) => $q->where('delivery_assignments.staff_id', $request->staff_id))
+            ->when($staffId, fn($q) => $q->where('delivery_assignments.staff_id', $staffId))
             ->when($request->status, function ($q) use ($request) {
                 if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
                     $q->whereNotIn('delivery_assignments.status', ['COMPLETED', 'FAILED', 'REASSIGNED']);
@@ -178,7 +185,7 @@ class DeliveryController extends Controller
         // Compute fee/COD totals from the full (unpaginated) dataset for this period
         $totalsQuery = DeliveryAssignment::query()
             ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
-            ->when($request->staff_id, fn($q) => $q->where('delivery_assignments.staff_id', $request->staff_id))
+            ->when($staffId, fn($q) => $q->where('delivery_assignments.staff_id', $staffId))
             ->when($request->status, function ($q) use ($request) {
                 if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
                     $q->whereNotIn('delivery_assignments.status', ['COMPLETED', 'FAILED', 'REASSIGNED']);

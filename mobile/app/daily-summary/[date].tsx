@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -26,29 +25,17 @@ function formatDateHeader(dateStr: string): string {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}၊ ${days[d.getDay()]}`;
 }
 
-const STATUS_FILTERS = [
-  { label: 'အားလုံး', value: '' },
-  { label: 'လက်ခံ', value: 'RECEIVED' },
-  { label: 'စစ်ဆေးပြီး', value: 'VERIFIED' },
-  { label: 'ဆောင်ရွက်နေဆဲ', value: 'IN_TRANSIT' },
-  { label: 'ပို့ဆောင်ပြီး', value: 'DELIVERED' },
-  { label: 'မအောင်မြင်', value: 'FAILED' },
-  { label: 'ပျက်ဆီး', value: 'DAMAGED' },
-];
-
 export default function DailySummaryDetailScreen() {
   const insets = useSafeAreaInsets();
   const { date } = useLocalSearchParams<{ date: string }>();
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('');
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['parcels-daily-detail', date, statusFilter, page],
+    queryKey: ['parcels-daily-detail', date, page],
     queryFn: () =>
       parcelService.list({
         date_from: date,
         date_to: date,
-        status: statusFilter || undefined,
         page,
         per_page: 50,
       }),
@@ -145,23 +132,6 @@ export default function DailySummaryDetailScreen() {
             )}
           </View>
         )}
-
-        {/* Status Filter */}
-        <View style={styles.filterRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterList}>
-            {STATUS_FILTERS.map((item) => (
-              <TouchableOpacity
-                key={item.value}
-                style={[styles.filterChip, statusFilter === item.value && styles.filterChipActive]}
-                onPress={() => { setStatusFilter(item.value); setPage(1); }}
-              >
-                <Text style={[styles.filterChipText, statusFilter === item.value && styles.filterChipTextActive]}>
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
 
         {/* Parcel List */}
         {isLoading ? (

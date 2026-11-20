@@ -9,8 +9,8 @@ class DeliveryAssignmentPolicy
 {
     public function viewAny(User $user): bool
     {
-        // admin, manager, and accountant can view all assignments
-        return $user->isAdmin() || $user->isManager() || $user->isAccountant();
+        // admin, manager, accountant can view all assignments; delivery staff can view their own
+        return $user->isAdmin() || $user->isManager() || $user->isAccountant() || $user->isDeliveryStaff();
     }
 
     public function view(User $user, DeliveryAssignment $assignment): bool
