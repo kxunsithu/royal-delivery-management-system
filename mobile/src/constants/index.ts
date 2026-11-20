@@ -51,11 +51,11 @@ export const COLORS = {
 };
 
 export const RADIUS = {
-  xs: 8,
-  sm: 10,
-  md: 14,
-  lg: 18,
-  xl: 24,
+  xs: 4,
+  sm: 4,
+  md: 4,
+  lg: 4,
+  xl: 4,
   pill: 999,
 };
 

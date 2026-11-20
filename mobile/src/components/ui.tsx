@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   headerIconBtn: {
     width: 40,
     height: 40,
-    borderRadius: RADIUS.md,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   iconBtn: {
     width: 40,
     height: 40,
-    borderRadius: RADIUS.md,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
   // Card
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: RADIUS.lg,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: COLORS.border,
     ...SHADOWS.card,
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
 
   btn: {
     height: 50,
-    borderRadius: RADIUS.md,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: RADIUS.md,
+    borderRadius: 4,
     backgroundColor: COLORS.card,
     paddingHorizontal: SPACING.md,
     height: 50,
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: RADIUS.pill,
+    borderRadius: 4,
     alignSelf: 'flex-start',
   },
   badgeText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   chip: {
     height: 36,
     paddingHorizontal: 14,
-    borderRadius: RADIUS.pill,
+    borderRadius: 4,
     borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
 
   statCard: {
     backgroundColor: COLORS.card,
-    borderRadius: RADIUS.lg,
+    borderRadius: 4,
     padding: SPACING.md + 2,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
   statIcon: {
     width: 30,
     height: 30,
-    borderRadius: RADIUS.sm,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 64,
     height: 64,
-    borderRadius: RADIUS.xl,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,

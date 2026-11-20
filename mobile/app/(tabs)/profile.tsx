@@ -571,7 +571,7 @@ const webModalStyles = StyleSheet.create({
     maxWidth: 520,
     maxHeight: '90%',
     backgroundColor: '#F3F4F6',
-    borderRadius: 14,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   compactSheet: {
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 38,
     height: 38,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   },
   editBtn: {
     paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.primary,
   },
   editBtnText: {
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
   // Profile card
   profileCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     padding: 24,
     alignItems: 'center',
     shadowColor: '#000',
@@ -765,18 +765,18 @@ const styles = StyleSheet.create({
   },
   avatarWrap: { position: 'relative', marginBottom: 12 },
   avatar: {
-    width: 96, height: 96, borderRadius: 14,
+    width: 96, height: 96, borderRadius: 4,
     backgroundColor: COLORS.primary,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarImage: { width: 96, height: 96, borderRadius: 14 },
+  avatarImage: { width: 96, height: 96, borderRadius: 4},
   avatarText: {
     fontSize: 36, fontWeight: '800', color: COLORS.white,
     fontFamily: FONTS.bold,
   },
   cameraOverlay: {
     position: 'absolute', bottom: 2, right: 2,
-    width: 26, height: 26, borderRadius: 14,
+    width: 26, height: 26, borderRadius: 4,
     backgroundColor: COLORS.primaryDark,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: COLORS.white,
@@ -789,21 +789,21 @@ const styles = StyleSheet.create({
   roleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 10, paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.background,
     borderWidth: 1, borderColor: COLORS.border,
   },
-  roleDot: { width: 7, height: 7, borderRadius: 4 },
+  roleDot: { width: 7, height: 7, borderRadius: 4},
   roleBadgeText: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.semiBold },
   statusBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 10, paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 4,
     borderWidth: 1,
   },
   statusActive: { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' },
   statusInactive: { backgroundColor: '#FEE2E2', borderColor: '#FECACA' },
-  statusDot: { width: 7, height: 7, borderRadius: 4 },
+  statusDot: { width: 7, height: 7, borderRadius: 4},
   statusText: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.semiBold },
   avatarHint: {
     fontSize: 12, color: COLORS.textLight, marginTop: 4,
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
     minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -857,7 +857,7 @@ const styles = StyleSheet.create({
   menuIconWrap: {
     width: 32,
     height: 32,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.primaryBg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -873,7 +873,7 @@ const styles = StyleSheet.create({
   // Actions
   actionBtn: {
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -910,7 +910,7 @@ const styles = StyleSheet.create({
     flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.text,
     fontFamily: FONTS.bold,
   },
-  modalSaveBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 14 },
+  modalSaveBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 4},
   modalSaveBtnText: {
     fontSize: 14, fontWeight: '700', color: COLORS.white,
     fontFamily: FONTS.semiBold,
@@ -924,7 +924,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semiBold,
   },
   formInput: {
-    borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 14,
+    borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 4,
     paddingHorizontal: 14, paddingVertical: 12,
     fontSize: 15, color: COLORS.text, backgroundColor: COLORS.white,
     fontFamily: FONTS.regular,
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
   // ── Web Dialogs ──
   dialogContainer: {
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     overflow: 'hidden',
     padding: 20,
     gap: 4,
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', gap: 10, marginTop: 4,
   },
   dialogActionBtn: {
-    flex: 1, paddingVertical: 12, borderRadius: 14, alignItems: 'center',
+    flex: 1, paddingVertical: 12, borderRadius: 4, alignItems: 'center',
   },
   dialogCancelActionBtn: {
     backgroundColor: COLORS.background,

@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     right: -90,
     width: 260,
     height: 260,
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: 'rgba(255,255,255,0.10)',
   },
   decorBL: {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     left: -120,
     width: 240,
     height: 240,
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: 'rgba(255,255,255,0.07)',
   },
 
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   logoWrap: {
     width: 84,
     height: 84,
-    borderRadius: 24,
+    borderRadius: 4,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 8,
   },
-  logoImage: { width: 62, height: 62, borderRadius: 18 },
+  logoImage: { width: 62, height: 62, borderRadius: 4},
   appName: {
     fontSize: 27,
     fontWeight: '700',
@@ -291,8 +291,8 @@ const styles = StyleSheet.create({
   sheet: {
     flex: 1,
     minHeight: 430,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
     paddingHorizontal: 24,
     paddingTop: 14,
     paddingBottom: 32,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   sheetHandle: {
     width: 38,
     height: 4,
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: '#E5E7EB',
     alignSelf: 'center',
     marginBottom: 24,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: RADIUS.md,
+    borderRadius: 4,
     borderWidth: 1,
     paddingHorizontal: 14,
     height: 52,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    borderRadius: RADIUS.md,
+    borderRadius: 4,
     height: 52,
     marginTop: 8,
   },

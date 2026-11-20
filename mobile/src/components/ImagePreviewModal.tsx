@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.14)',
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 4,
   },
   counterText: {
     color: '#fff',
@@ -265,13 +265,13 @@ const styles = StyleSheet.create({
   dot: {
     width: 5,
     height: 5,
-    borderRadius: 3,
+    borderRadius: 4,
     backgroundColor: 'rgba(255,255,255,0.3)',
   },
   dotActive: {
     backgroundColor: '#fff',
     width: 16,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   navBtn: {
     position: 'absolute',

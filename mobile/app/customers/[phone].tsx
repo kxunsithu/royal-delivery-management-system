@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 14, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 4, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1 },
   headerName: {
     fontSize: 17,
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   addBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.primary,
   },
   addBtnText: {
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   statusCountRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
   statusCountBadge: {
     fontSize: 11, color: COLORS.textSecondary, fontFamily: FONTS.semiBold,
-    backgroundColor: COLORS.white, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 14,
+    backgroundColor: COLORS.white, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4,
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3, elevation: 1,
   },
   filterRow: { height: 48 },
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.white,
     height: 30,
     justifyContent: 'center',
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
-    borderRadius: 14,
+    borderRadius: 4,
     paddingVertical: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   // Parcel card
   parcelCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 4,
   },
   statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
@@ -389,13 +389,13 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.border,
   },
   footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
+  priorityBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4},
   priorityText: { fontSize: 11, fontWeight: '700', fontFamily: FONTS.bold },
   codBadge: {
     backgroundColor: '#E8F4FB',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 4,
   },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info, fontFamily: FONTS.bold },
   parcelDetails: { marginTop: 8, gap: 2 },
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 14,
+    borderRadius: 4,
   },
   pageInfo: {
     fontSize: 13,

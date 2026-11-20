@@ -15,7 +15,7 @@ function TabIcon({ name, color, focused }: { name: IconName; color: any; focused
       style={{
         width: 42,
         height: 28,
-        borderRadius: RADIUS.sm,
+        borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: focused ? colors.primaryBg : 'transparent',

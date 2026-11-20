@@ -364,39 +364,39 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 14, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 4, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.text, textAlign: 'center',
     fontFamily: FONTS.bold,
   },
-  editBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, backgroundColor: COLORS.primaryBg },
+  editBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 4, backgroundColor: COLORS.primaryBg },
   editBtnText: { color: COLORS.primaryDark, fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
 
   content: { padding: 16, paddingBottom: 40, gap: 14 },
 
   // Profile card
   profileCard: {
-    alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 14,
+    alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 4,
     padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 16, elevation: 1,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  avatar: { width: 72, height: 72, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
-  avatarImage: { width: 72, height: 72, borderRadius: 14, marginBottom: 10 },
+  avatar: { width: 72, height: 72, borderRadius: 4, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  avatarImage: { width: 72, height: 72, borderRadius: 4, marginBottom: 10 },
   avatarText: { fontSize: 28, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
   userName: { fontSize: 18, fontWeight: '800', color: COLORS.text, marginBottom: 2, fontFamily: FONTS.bold },
   userContact: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 10, fontFamily: FONTS.regular },
   badgeRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 12 },
-  badge: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 14 },
+  badge: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 4},
   badgeText: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.bold },
   callBtn: {
-    backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14,
+    backgroundColor: COLORS.primary, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 4,
   },
   callBtnText: { color: COLORS.white, fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
 
   // Generic card
   card: {
-    backgroundColor: COLORS.white, borderRadius: 14, padding: 16,
+    backgroundColor: COLORS.white, borderRadius: 4, padding: 16,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 16, elevation: 1,
     borderWidth: 1,
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   detailValue: { fontSize: 15, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
 
   // Status toggle
-  toggleBtn: { borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1 },
+  toggleBtn: { borderRadius: 4, padding: 14, alignItems: 'center', borderWidth: 1 },
   activateBtn: { backgroundColor: COLORS.successBg, borderColor: COLORS.successBg },
   deactivateBtn: { backgroundColor: COLORS.errorBg, borderColor: COLORS.errorBg },
   toggleBtnText: { fontSize: 15, fontWeight: '700', fontFamily: FONTS.bold },
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   // Form fields
   field: { marginBottom: 12 },
   label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6, fontFamily: FONTS.semiBold },
-  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 14, padding: 12, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background, fontFamily: FONTS.regular },
+  textInput: { borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 4, padding: 12, fontSize: 15, color: COLORS.text, backgroundColor: COLORS.background, fontFamily: FONTS.regular },
   inputError: { borderColor: COLORS.error },
   errorText: { fontSize: 12, color: COLORS.error, marginTop: 4, fontFamily: FONTS.regular },
   passRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -427,12 +427,12 @@ const styles = StyleSheet.create({
 
   // Role picker
   roleList: { minHeight: 44, gap: 8 },
-  roleItem: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.border },
-  roleDot: { width: 18, height: 18, borderRadius: 14, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  roleDotInner: { width: 8, height: 8, borderRadius: 4 },
+  roleItem: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 4, borderWidth: 1.5, borderColor: COLORS.border },
+  roleDot: { width: 18, height: 18, borderRadius: 4, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  roleDotInner: { width: 8, height: 8, borderRadius: 4},
   roleItemText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500', fontFamily: FONTS.medium },
 
   // Submit
-  submitBtn: { backgroundColor: COLORS.primary, borderRadius: 14, padding: 16, alignItems: 'center' },
+  submitBtn: { backgroundColor: COLORS.primary, borderRadius: 4, padding: 16, alignItems: 'center' },
   submitBtnText: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 });

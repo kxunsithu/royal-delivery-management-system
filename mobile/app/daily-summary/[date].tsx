@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 14, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 4, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1 },
   headerTitle: {
     fontSize: 17,
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 4,
-    borderRadius: 14,
+    borderRadius: 4,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.white,
     height: 32,
     justifyContent: 'center',
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   // Card
   card: {
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 14,
+    borderRadius: 4,
   },
   statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 4,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 14,
+    borderRadius: 4,
   },
   pageInfo: {
     fontSize: 13,

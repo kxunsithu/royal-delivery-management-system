@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.border,
   },
   backBtn: {
-    width: 38, height: 38, borderRadius: 14,
+    width: 38, height: 38, borderRadius: 4,
     backgroundColor: COLORS.muted,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -364,21 +364,21 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 14,
+    borderRadius: 4,
     alignSelf: 'center',
     backgroundColor: COLORS.white,
   },
-  headerStatusDot: { width: 6, height: 6, borderRadius: 3 },
+  headerStatusDot: { width: 6, height: 6, borderRadius: 4},
   headerStatusText: { fontSize: 12, fontWeight: '700', fontFamily: FONTS.bold },
   statusAccentStrip: { height: 3 },
   content: { padding: 16, paddingBottom: 32 },
 
   section: { minHeight: 48, marginBottom: 18 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  sectionAccentBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: COLORS.primary },
+  sectionAccentBar: { width: 4, height: 18, borderRadius: 4, backgroundColor: COLORS.primary },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, flex: 1 },
   infoCard: {
-    backgroundColor: COLORS.white, borderRadius: 14, overflow: 'hidden',
+    backgroundColor: COLORS.white, borderRadius: 4, overflow: 'hidden',
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 14, elevation: 1,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -392,24 +392,24 @@ const styles = StyleSheet.create({
   infoLabel: { fontSize: 12, color: COLORS.textSecondary, width: 92, fontFamily: FONTS.regular },
   infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', fontFamily: FONTS.medium },
   callIconWrap: {
-    width: 28, height: 28, borderRadius: 14,
+    width: 28, height: 28, borderRadius: 4,
     backgroundColor: COLORS.success, alignItems: 'center', justifyContent: 'center',
   },
 
   // Parcel images
   parcelImgGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 14 },
-  parcelImgWrap: { borderRadius: 14, overflow: 'hidden', position: 'relative' },
-  parcelImgThumb: { width: 88, height: 88, borderRadius: 14, backgroundColor: COLORS.border },
+  parcelImgWrap: { borderRadius: 4, overflow: 'hidden', position: 'relative' },
+  parcelImgThumb: { width: 88, height: 88, borderRadius: 4, backgroundColor: COLORS.border },
   imgOverlay: {
     position: 'absolute', bottom: 6, right: 6,
-    width: 24, height: 24, borderRadius: 14,
+    width: 24, height: 24, borderRadius: 4,
     backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center',
   },
 
   attemptCard: {
     minHeight: 80,
     minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
+    backgroundColor: COLORS.white, borderRadius: 4, flexDirection: 'row', overflow: 'hidden',
     marginBottom: 10,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 14,
     elevation: 1,
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   attemptCardBar: { width: 4 },
   attemptCardContent: { flex: 1, padding: 14 },
   attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14 },
+  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4},
   attemptDelivered: { backgroundColor: '#E8F8EF' },
   attemptFailed: { backgroundColor: '#FDE8E8' },
   attemptBadgeText: { fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
@@ -430,8 +430,8 @@ const styles = StyleSheet.create({
   proofSection: { minHeight: 48, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
   proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginBottom: 8, fontFamily: FONTS.bold },
   proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  proofThumbWrap: { borderRadius: 14, overflow: 'hidden', position: 'relative' },
-  proofThumb: { width: 72, height: 72, borderRadius: 14, backgroundColor: COLORS.border },
+  proofThumbWrap: { borderRadius: 4, overflow: 'hidden', position: 'relative' },
+  proofThumb: { width: 72, height: 72, borderRadius: 4, backgroundColor: COLORS.border },
 
   // Sticky footer
   stickyFooter: {
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   },
   recordBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: COLORS.primary, borderRadius: 14, paddingVertical: 15,
+    backgroundColor: COLORS.primary, borderRadius: 4, paddingVertical: 15,
     shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 14, elevation: 1,
   },
   recordBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700', fontFamily: FONTS.bold },
