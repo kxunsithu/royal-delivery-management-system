@@ -1,10 +1,30 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS } from '../../src/constants';
+import { FONTS, RADIUS } from '../../src/constants';
 import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
-import { Platform, TouchableOpacity, Text } from 'react-native';
+import { Platform, TouchableOpacity, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+type IconName = keyof typeof Ionicons.glyphMap;
+
+function TabIcon({ name, color, focused }: { name: IconName; color: any; focused: boolean }) {
+  const { colors } = useTheme();
+  return (
+    <View
+      style={{
+        width: 42,
+        height: 28,
+        borderRadius: RADIUS.sm,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: focused ? colors.primaryBg : 'transparent',
+      }}
+    >
+      <Ionicons name={name} size={21} color={color} />
+    </View>
+  );
+}
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -20,7 +40,7 @@ export default function TabLayout() {
   const isWeb = Platform.OS === 'web';
   const isIos = Platform.OS === 'ios';
   const bottomInset = insets.bottom > 0 ? insets.bottom : (isIos ? 20 : 8);
-  const tabHeight = isWeb ? 64 : ((isIos ? 52 : 54) + bottomInset);
+  const tabHeight = isWeb ? 66 : ((isIos ? 54 : 56) + bottomInset);
 
   return (
     <Tabs
@@ -29,16 +49,17 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textLight,
         tabBarStyle: {
-          backgroundColor: colors.white,
+          backgroundColor: colors.card,
           borderTopColor: colors.border,
           borderTopWidth: 1,
           height: tabHeight,
           paddingBottom: isWeb ? 6 : bottomInset,
-          paddingTop: isWeb ? 4 : 6,
+          paddingTop: isWeb ? 4 : 8,
           elevation: 0,
-          shadowOpacity: 0,
-          shadowRadius: 0,
-          shadowOffset: { width: 0, height: 0 },
+          shadowColor: '#0F172A',
+          shadowOpacity: 0.04,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: -2 },
         },
         tabBarItemStyle: {
           paddingVertical: 2,
@@ -47,7 +68,7 @@ export default function TabLayout() {
         },
         tabBarIconStyle: {
           marginTop: 0,
-          marginBottom: 2,
+          marginBottom: 3,
         },
         tabBarLabel: ({ color, children }) => (
           <Text
@@ -58,9 +79,6 @@ export default function TabLayout() {
               fontFamily: FONTS.semiBold,
               textAlign: 'center',
               lineHeight: 14,
-              paddingBottom: 2,
-              overflow: 'visible',
-              textDecorationLine: 'none',
               ...(isWeb ? { userSelect: 'none' } : {}),
             }}
           >
@@ -92,8 +110,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'ဒက်ရှ်ဘုတ်',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="grid" size={20} color={color as string} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'grid' : 'grid-outline'} color={color} focused={focused} />
           ),
         }}
       />
@@ -103,8 +121,8 @@ export default function TabLayout() {
           title: 'ပါဆယ်များ',
           tabBarButton: canSeeParcels ? undefined : () => null,
           tabBarItemStyle: canSeeParcels ? undefined : { display: 'none' },
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="cube" size={20} color={color as string} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'cube' : 'cube-outline'} color={color} focused={focused} />
           ),
         }}
       />
@@ -130,8 +148,8 @@ export default function TabLayout() {
           title: 'ဖောက်သည်',
           tabBarButton: canSeeParcels ? undefined : () => null,
           tabBarItemStyle: canSeeParcels ? undefined : { display: 'none' },
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="people" size={20} color={color as string} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'people' : 'people-outline'} color={color} focused={focused} />
           ),
         }}
       />
@@ -141,8 +159,8 @@ export default function TabLayout() {
           title: 'ကျွန်ုပ်၏လုပ်ငန်းများ',
           tabBarButton: isStaff ? undefined : () => null,
           tabBarItemStyle: isStaff ? undefined : { display: 'none' },
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="bicycle" size={20} color={color as string} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'bicycle' : 'bicycle-outline'} color={color} focused={focused} />
           ),
         }}
       />
@@ -152,8 +170,8 @@ export default function TabLayout() {
           title: 'ပို့ဆောင်မှုများ',
           tabBarButton: isStaff ? undefined : () => null,
           tabBarItemStyle: isStaff ? undefined : { display: 'none' },
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="car" size={20} color={color as string} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'car' : 'car-outline'} color={color} focused={focused} />
           ),
         }}
       />
@@ -179,8 +197,8 @@ export default function TabLayout() {
           title: 'ပရိုဖိုင်',
           tabBarButton: isStaff ? undefined : () => null,
           tabBarItemStyle: isStaff ? undefined : { display: 'none' },
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person-circle-outline" size={20} color={color as string} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'person-circle' : 'person-circle-outline'} color={color} focused={focused} />
           ),
         }}
       />
@@ -190,8 +208,8 @@ export default function TabLayout() {
           title: 'မီနူး',
           tabBarButton: isStaff ? () => null : undefined,
           tabBarItemStyle: isStaff ? { display: 'none' } : undefined,
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="menu" size={20} color={color as string} />
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name={focused ? 'menu' : 'menu-outline'} color={color} focused={focused} />
           ),
         }}
       />

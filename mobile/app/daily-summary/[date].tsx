@@ -60,7 +60,7 @@ export default function DailySummaryDetailScreen() {
       {/* Orange Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>နေ့စဉ် မှတ်တမ်း</Text>
@@ -240,7 +240,7 @@ function ParcelCard({ parcel }: { parcel: Parcel }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
 
   // Header
   header: {
@@ -249,19 +249,21 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 16,
     paddingBottom: 24,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 14, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1 },
   headerTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: COLORS.white,
+    color: COLORS.text,
     fontFamily: FONTS.bold,
   },
   headerDate: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.75)',
+    color: COLORS.textSecondary,
     marginTop: 2,
     fontFamily: FONTS.regular,
   },
@@ -273,18 +275,22 @@ const styles = StyleSheet.create({
   },
 
   // Summary card
-  summaryCard: { minHeight: 80, minWidth: 120,
+  summaryCard: {
+    minHeight: 80,
+    minWidth: 120,
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 4,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -325,14 +331,14 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.white,
     height: 32,
     justifyContent: 'center',
     alignSelf: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
@@ -345,15 +351,17 @@ const styles = StyleSheet.create({
   listEmpty: { flex: 1, justifyContent: 'center' },
 
   // Card
-  card: { minHeight: 80, minWidth: 120,
+  card: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -371,7 +379,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   statusText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
@@ -403,7 +411,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -436,7 +444,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
@@ -451,7 +459,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   pageInfo: {
     fontSize: 13,

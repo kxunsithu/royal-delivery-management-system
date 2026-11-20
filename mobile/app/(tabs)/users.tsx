@@ -77,7 +77,7 @@ export default function UsersScreen() {
             onPress={() => router.navigate('/(tabs)/more')}
             activeOpacity={0.7}
           >
-            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+            <Ionicons name="chevron-back" size={22} color={COLORS.text} />
           </TouchableOpacity>
           <View>
             <Text style={styles.headerTitle}>အသုံးပြုသူများ</Text>
@@ -91,7 +91,7 @@ export default function UsersScreen() {
 
       <View style={styles.contentArea}>
         <View style={styles.searchWrapper}>
-          <Ionicons name="search" size={18} color={COLORS.textLight} />
+          <Ionicons name="search" size={14} color={COLORS.textLight} />
           <TextInput
             style={styles.searchInput}
             placeholder="ဝန်ထမ်း ရှာဖွေမည်..."
@@ -101,7 +101,7 @@ export default function UsersScreen() {
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => { setSearch(''); setSearchDebounced(''); }}>
-              <Ionicons name="close-circle" size={18} color={COLORS.textLight} />
+              <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
             </TouchableOpacity>
           )}
         </View>
@@ -227,7 +227,7 @@ function UserCard({ user, onToggleStatus }: { user: User; onToggleStatus: () => 
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   contentArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -237,25 +237,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
     paddingHorizontal: 20,
     paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   backBtn: {
     width: 38,
     height: 38,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
-  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold },
+  headerSub: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   addBtn: {
     width: 40,
     height: 40,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -264,21 +266,23 @@ const styles = StyleSheet.create({
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 6,
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 4,
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    marginTop: 6,
+    marginBottom: 2,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  searchInput: { flex: 1, fontSize: 14, color: COLORS.text, fontFamily: FONTS.regular },
+  searchInput: { flex: 1, fontSize: 12, color: COLORS.text, fontFamily: FONTS.regular },
   filterRow: { height: 56 },
   filterList: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' },
   listArea: { flex: 1 },
@@ -288,7 +292,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -300,20 +304,22 @@ const styles = StyleSheet.create({
   filterChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '600', fontFamily: FONTS.semiBold },
   filterChipTextActive: { color: COLORS.white },
 
-  card: { minHeight: 80, minWidth: 120,
+  card: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   cardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  avatar: { width: 50, height: 50, borderRadius: 6, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  avatarImage: { width: 50, height: 50, borderRadius: 6, flexShrink: 0 },
+  avatar: { width: 50, height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  avatarImage: { width: 50, height: 50, borderRadius: 14, flexShrink: 0 },
   avatarText: { fontSize: 18, fontWeight: '700', fontFamily: FONTS.bold },
   userInfo: { flex: 1, gap: 2 },
   userName: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
@@ -321,7 +327,7 @@ const styles = StyleSheet.create({
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
   roleDot: { width: 6, height: 6, borderRadius: 3 },
   roleText: { fontSize: 12, fontWeight: '600', fontFamily: FONTS.semiBold },
-  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
   statusPillActive: { backgroundColor: '#DCFCE7' },
   statusPillInactive: { backgroundColor: '#FEE2E2' },
   statusPillText: { fontSize: 11, fontWeight: '700', fontFamily: FONTS.bold },
@@ -330,7 +336,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -343,6 +349,6 @@ const styles = StyleSheet.create({
   pageBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 },
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary, fontFamily: FONTS.semiBold },
-  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: COLORS.border },
+  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 14, borderWidth: 1, borderColor: COLORS.border },
   pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600', fontFamily: FONTS.semiBold },
 });

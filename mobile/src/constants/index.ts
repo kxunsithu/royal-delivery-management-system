@@ -9,24 +9,38 @@ export const FONTS = {
   bold: 'NotoSansMyanmar_700Bold',
 };
 
-// Colors - Yellow/Parcel theme
+// ─── Design tokens ──────────────────────────────────────────────────────────
+// Clean minimal white + orange. White surfaces, hairline borders, soft
+// orange accents and generous rounding.
 export const COLORS = {
-  primary: '#E67701',
-  primaryDark: '#B45309',
-  primaryLight: '#FDE68A',
-  primaryBg: '#FFFBEB',
-  secondary: '#1F2937',
-  background: '#F3F4F6',
+  primary: '#F97316',
+  primaryDark: '#C2410C',
+  primaryLight: '#FFEDD5',
+  primaryBg: '#FFF7ED',
+  secondary: '#0F172A',
+
+  background: '#F7F8FA',
+  surface: '#FFFFFF',
+  card: '#FFFFFF',
   white: '#FFFFFF',
+  muted: '#F3F4F6',
+
   text: '#111827',
   textSecondary: '#6B7280',
   textLight: '#9CA3AF',
-  border: '#E5E7EB',
-  card: '#FFFFFF',
+
+  border: '#ECEEF2',
+  borderStrong: '#E2E5EA',
+
   success: '#16A34A',
+  successBg: '#ECFDF3',
   error: '#DC2626',
+  errorBg: '#FEF2F2',
   warning: '#D97706',
+  warningBg: '#FFFBEB',
   info: '#2563EB',
+  infoBg: '#EFF6FF',
+
   // Status colors
   statusReceived: '#2563EB',
   statusVerified: '#7C3AED',
@@ -34,6 +48,43 @@ export const COLORS = {
   statusDelivered: '#16A34A',
   statusFailed: '#DC2626',
   statusDamaged: '#B91C1C',
+};
+
+export const RADIUS = {
+  xs: 8,
+  sm: 10,
+  md: 14,
+  lg: 18,
+  xl: 24,
+  pill: 999,
+};
+
+export const SPACING = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+};
+
+// Minimal elevation — mostly rely on hairline borders.
+export const SHADOWS = {
+  none: {},
+  card: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 1,
+  },
+  floating: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    elevation: 4,
+  },
 };
 
 // Parcel Statuses
@@ -62,6 +113,15 @@ export const STATUS_COLORS = {
   DELIVERED: COLORS.statusDelivered,
   FAILED: COLORS.statusFailed,
   DAMAGED: COLORS.statusDamaged,
+};
+
+export const STATUS_BG = {
+  RECEIVED: '#EFF6FF',
+  VERIFIED: '#F5F3FF',
+  IN_TRANSIT: '#FFFBEB',
+  DELIVERED: '#ECFDF3',
+  FAILED: '#FEF2F2',
+  DAMAGED: '#FEF2F2',
 };
 
 export const PRIORITY_LABELS_MM = {

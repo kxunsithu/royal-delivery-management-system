@@ -58,7 +58,7 @@ export default function DeliveryDetailScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
@@ -341,28 +341,30 @@ function InfoRow({ label, value, valueColor, onPress, isPhone, isLast }: {
 
 const styles = StyleSheet.create({
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background, },
   header: {
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
     paddingBottom: 24, gap: 12,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   backBtn: {
-    width: 38, height: 38, borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 38, height: 38, borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center', justifyContent: 'center',
   },
   headerCenter: { flex: 1 },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
-  headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
+  headerSubtitle: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   headerStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 6,
+    borderRadius: 14,
     alignSelf: 'center',
     backgroundColor: COLORS.white,
   },
@@ -375,9 +377,11 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   sectionAccentBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: COLORS.primary },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, flex: 1 },
-  infoCard: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 6, overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
+  infoCard: {
+    backgroundColor: COLORS.white, borderRadius: 14, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 14, elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   infoRow: {
     flexDirection: 'row', alignItems: 'center',
@@ -388,29 +392,34 @@ const styles = StyleSheet.create({
   infoLabel: { fontSize: 12, color: COLORS.textSecondary, width: 92, fontFamily: FONTS.regular },
   infoValue: { flex: 1, fontSize: 14, color: COLORS.text, fontWeight: '500', fontFamily: FONTS.medium },
   callIconWrap: {
-    width: 28, height: 28, borderRadius: 6,
+    width: 28, height: 28, borderRadius: 14,
     backgroundColor: COLORS.success, alignItems: 'center', justifyContent: 'center',
   },
 
   // Parcel images
   parcelImgGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, padding: 14 },
-  parcelImgWrap: { borderRadius: 6, overflow: 'hidden', position: 'relative' },
-  parcelImgThumb: { width: 88, height: 88, borderRadius: 6, backgroundColor: COLORS.border },
+  parcelImgWrap: { borderRadius: 14, overflow: 'hidden', position: 'relative' },
+  parcelImgThumb: { width: 88, height: 88, borderRadius: 14, backgroundColor: COLORS.border },
   imgOverlay: {
     position: 'absolute', bottom: 6, right: 6,
-    width: 24, height: 24, borderRadius: 6,
+    width: 24, height: 24, borderRadius: 14,
     backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center',
   },
 
-  attemptCard: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 6, flexDirection: 'row', overflow: 'hidden',
+  attemptCard: {
+    minHeight: 80,
+    minWidth: 120,
+    backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
     marginBottom: 10,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 14,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   attemptCardBar: { width: 4 },
   attemptCardContent: { flex: 1, padding: 14 },
   attemptHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 },
+  attemptBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14 },
   attemptDelivered: { backgroundColor: '#E8F8EF' },
   attemptFailed: { backgroundColor: '#FDE8E8' },
   attemptBadgeText: { fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
@@ -421,8 +430,8 @@ const styles = StyleSheet.create({
   proofSection: { minHeight: 48, marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.border },
   proofSectionTitle: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginBottom: 8, fontFamily: FONTS.bold },
   proofGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  proofThumbWrap: { borderRadius: 6, overflow: 'hidden', position: 'relative' },
-  proofThumb: { width: 72, height: 72, borderRadius: 6, backgroundColor: COLORS.border },
+  proofThumbWrap: { borderRadius: 14, overflow: 'hidden', position: 'relative' },
+  proofThumb: { width: 72, height: 72, borderRadius: 14, backgroundColor: COLORS.border },
 
   // Sticky footer
   stickyFooter: {
@@ -431,12 +440,12 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 8,
+    shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.04, shadowRadius: 14, elevation: 8,
   },
   recordBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: COLORS.primary, borderRadius: 6, paddingVertical: 15,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
+    backgroundColor: COLORS.primary, borderRadius: 14, paddingVertical: 15,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 14, elevation: 1,
   },
   recordBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700', fontFamily: FONTS.bold },
 });

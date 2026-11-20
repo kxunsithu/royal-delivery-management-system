@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
-import { COLORS, FONTS, ROLE_LABELS_MM } from '../../src/constants';
+import { COLORS, FONTS, RADIUS, ROLE_LABELS_MM } from '../../src/constants';
 
 export default function MoreScreen() {
   const { colors } = useTheme();
@@ -42,14 +42,14 @@ export default function MoreScreen() {
     ]);
   }
 
-  type MenuItem = { label: string; icon: any; onPress: () => void; iconBg: string; iconColor: string; danger?: boolean };
+  type MenuItem = { label: string; icon: any; onPress: () => void; tint: string; bg: string };
   const items: MenuItem[] = [];
 
   items.push({
     label: 'ပရိုဖိုင်',
     icon: 'person-circle-outline',
-    iconBg: '#EEF2FF',
-    iconColor: '#4F46E5',
+    tint: '#4F46E5',
+    bg: '#EEF2FF',
     onPress: () => router.navigate('/(tabs)/profile'),
   });
 
@@ -57,29 +57,29 @@ export default function MoreScreen() {
     items.push({
       label: 'ပါဆယ်များ',
       icon: 'cube-outline',
-      iconBg: '#FFFBEB',
-      iconColor: COLORS.primary,
+      tint: colors.primary,
+      bg: colors.primaryBg,
       onPress: () => router.navigate('/(tabs)/parcels'),
     });
     items.push({
       label: 'ပို့ဆောင်မှု အားလုံး',
       icon: 'car-outline',
-      iconBg: '#E8F8EF',
-      iconColor: COLORS.success,
+      tint: colors.success,
+      bg: colors.successBg,
       onPress: () => router.navigate('/(tabs)/deliveries'),
     });
     items.push({
       label: 'ဖောက်သည်များ',
       icon: 'people-outline',
-      iconBg: '#EFF6FF',
-      iconColor: COLORS.info,
+      tint: colors.info,
+      bg: colors.infoBg,
       onPress: () => router.navigate('/(tabs)/customers'),
     });
     items.push({
       label: 'မှတ်တမ်း',
       icon: 'bar-chart-outline',
-      iconBg: '#F5F3FF',
-      iconColor: '#7C3AED',
+      tint: '#7C3AED',
+      bg: '#F5F3FF',
       onPress: () => router.navigate('/(tabs)/daily-summary'),
     });
   }
@@ -88,8 +88,8 @@ export default function MoreScreen() {
     items.push({
       label: 'ချိတ်ဆက်ထားသောဝန်ထမ်း',
       icon: 'person-add-outline',
-      iconBg: '#FFF7ED',
-      iconColor: COLORS.warning,
+      tint: colors.warning,
+      bg: colors.warningBg,
       onPress: () => router.navigate('/(tabs)/assign-staff'),
     });
   }
@@ -98,8 +98,8 @@ export default function MoreScreen() {
     items.push({
       label: 'ကျွန်ုပ်၏ လုပ်ငန်းများ',
       icon: 'bicycle',
-      iconBg: '#E8F8EF',
-      iconColor: COLORS.success,
+      tint: colors.success,
+      bg: colors.successBg,
       onPress: () => router.navigate('/(tabs)/my-assignments'),
     });
   }
@@ -108,8 +108,8 @@ export default function MoreScreen() {
     items.push({
       label: 'အသုံးပြုသူ စီမံခန့်ခွဲမှု',
       icon: 'people',
-      iconBg: '#FEE2E2',
-      iconColor: '#DC2626',
+      tint: colors.error,
+      bg: colors.errorBg,
       onPress: () => router.navigate('/(tabs)/users'),
     });
   }
@@ -118,173 +118,222 @@ export default function MoreScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <View style={styles.profileRow}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Page title */}
+        <Text style={[styles.pageTitle, { color: colors.text }]}>မီနူး</Text>
+        <Text style={[styles.pageSubtitle, { color: colors.textSecondary }]}>
+          သင့်အကောင့်နှင့် ဝန်ဆောင်မှုများ
+        </Text>
+
+        {/* Profile card */}
+        <TouchableOpacity
+          style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+          activeOpacity={0.85}
+          onPress={() => router.navigate('/(tabs)/profile')}
+        >
           {user?.profile_image_url ? (
             <Image source={{ uri: user.profile_image_url }} style={styles.avatar} />
           ) : (
-            <View style={styles.avatarFallback}>
-              <Text style={styles.avatarInitials}>{initials}</Text>
+            <View style={[styles.avatarFallback, { backgroundColor: colors.primaryBg }]}>
+              <Text style={[styles.avatarInitials, { color: colors.primary }]}>{initials}</Text>
             </View>
           )}
           <View style={styles.profileInfo}>
-            <Text style={styles.headerName} numberOfLines={1}>{user?.name ?? 'အသုံးပြုသူ'}</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.roleBadgeText}>{roleLabel}</Text>
+            <Text style={[styles.headerName, { color: colors.text }]} numberOfLines={1}>
+              {user?.name ?? 'အသုံးပြုသူ'}
+            </Text>
+            <View style={[styles.roleBadge, { backgroundColor: colors.primaryBg }]}>
+              <Text style={[styles.roleBadgeText, { color: colors.primaryDark }]}>{roleLabel}</Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={styles.editProfileBtn}
-            onPress={() => router.navigate('/(tabs)/profile')}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="create-outline" size={18} color={COLORS.white} />
-          </TouchableOpacity>
-        </View>
-      </View>
+          <View style={[styles.editProfileBtn, { backgroundColor: colors.muted }]}>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </View>
+        </TouchableOpacity>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Menu Items */}
-        <View style={styles.sectionLabel}>
-          <Text style={styles.sectionLabelText}>မီနူး</Text>
-        </View>
-
-        <View style={styles.card}>
+        {/* Menu */}
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>မီနူး</Text>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {items.map((item, i) => (
             <TouchableOpacity
               key={item.label}
-              style={[styles.menuRow, i === items.length - 1 && styles.menuRowLast]}
+              style={[
+                styles.menuRow,
+                i !== items.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+              ]}
               onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View style={[styles.menuIconWrap, { backgroundColor: item.iconBg }]}>
-                <Ionicons name={item.icon} size={20} color={item.iconColor} />
+              <View style={[styles.menuIconWrap, { backgroundColor: item.bg }]}>
+                <Ionicons name={item.icon} size={19} color={item.tint} />
               </View>
-              <Text style={styles.menuLabel}>{item.label}</Text>
-              <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} />
+              <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={17} color={colors.textLight} />
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Logout */}
         <TouchableOpacity
-          style={[styles.logoutBtn, isLoggingOut && { opacity: 0.6 }]}
+          style={[styles.logoutBtn, { backgroundColor: colors.errorBg }, isLoggingOut && { opacity: 0.6 }]}
           onPress={handleLogout}
           disabled={isLoggingOut}
           activeOpacity={0.8}
         >
           {isLoggingOut ? (
-            <ActivityIndicator size="small" color="#EF4444" />
+            <ActivityIndicator size="small" color={colors.error} />
           ) : (
             <>
-              <View style={styles.logoutIconWrap}>
-                <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+              <View style={[styles.logoutIconWrap, { backgroundColor: colors.card }]}>
+                <Ionicons name="log-out-outline" size={19} color={colors.error} />
               </View>
-              <Text style={styles.logoutText}>အကောင့်မှ ထွက်ရန်</Text>
-              <Ionicons name="chevron-forward" size={16} color="#EF4444" />
+              <Text style={[styles.logoutText, { color: colors.error }]}>အကောင့်မှ ထွက်ရန်</Text>
             </>
           )}
         </TouchableOpacity>
 
-        <Text style={styles.versionText}>Royal Myawaddy Delivery © 2026</Text>
+        <Text style={[styles.versionText, { color: colors.textLight }]}>
+          Royal Myawaddy Delivery © 2026
+        </Text>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingBottom: 24,
+  container: { flex: 1 },
+  content: { paddingHorizontal: 16, paddingBottom: 32 },
+
+  pageTitle: {
+    fontSize: 27,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
+    letterSpacing: -0.3,
   },
-  profileRow: {
+  pageSubtitle: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    marginTop: 2,
+    marginBottom: 18,
+  },
+
+  profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
+    borderRadius: RADIUS.xl,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   avatar: {
-    width: 56, height: 56, borderRadius: 6,
-    borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.8)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   avatarFallback: {
-    width: 56, height: 56, borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.5)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarInitials: {
-    fontSize: 22, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold,
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
   },
   profileInfo: { flex: 1 },
   headerName: {
-    fontSize: 18, fontWeight: '800', color: COLORS.white,
-    fontFamily: FONTS.bold, marginBottom: 5,
+    fontSize: 17,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
+    marginBottom: 5,
   },
   roleBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 6,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: RADIUS.pill,
   },
   roleBadgeText: {
-    fontSize: 11, fontWeight: '600', color: COLORS.white, fontFamily: FONTS.semiBold,
+    fontSize: 10,
+    fontWeight: '600',
+    fontFamily: FONTS.semiBold,
   },
   editProfileBtn: {
-    width: 38, height: 38, borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center', justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  content: { padding: 16, paddingBottom: 32 },
-  sectionLabel: { marginBottom: 8, marginTop: 4 },
-  sectionLabelText: {
-    fontSize: 12, fontWeight: '700', color: COLORS.textLight,
-    textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: FONTS.bold,
+
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+    marginBottom: 10,
+    marginLeft: 2,
   },
-  card: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white,
-    borderRadius: 6,
+  card: {
+    borderRadius: RADIUS.lg,
     overflow: 'hidden',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 3,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.border,
-    gap: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    gap: 12,
   },
-  menuRowLast: { borderBottomWidth: 0 },
   menuIconWrap: {
-    width: 40, height: 40, borderRadius: 6,
-    alignItems: 'center', justifyContent: 'center',
+    width: 38,
+    height: 38,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   menuLabel: {
-    flex: 1, fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: FONTS.semiBold,
   },
+
   logoutBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: COLORS.white, borderRadius: 6, padding: 14,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderRadius: RADIUS.md,
+    paddingVertical: 14,
     marginBottom: 24,
   },
   logoutIconWrap: {
-    width: 40, height: 40, borderRadius: 6,
-    backgroundColor: '#FEE2E2', alignItems: 'center', justifyContent: 'center',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  logoutText: { flex: 1, fontSize: 14, fontWeight: '700', color: '#EF4444', fontFamily: FONTS.semiBold },
+  logoutText: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: FONTS.semiBold,
+  },
   versionText: {
-    textAlign: 'center', fontSize: 11, color: COLORS.textLight,
+    textAlign: 'center',
+    fontSize: 11,
     fontFamily: FONTS.regular,
   },
 });

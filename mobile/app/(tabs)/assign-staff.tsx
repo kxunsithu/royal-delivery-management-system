@@ -254,7 +254,7 @@ export default function AssignStaffScreen() {
             onPress={() => { setSelectedStaffId(null); setSelectedStaffName(''); }}
             style={styles.backBtn}
           >
-            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+            <Ionicons name="chevron-back" size={22} color={COLORS.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>{selectedStaffName}</Text>
@@ -305,7 +305,7 @@ export default function AssignStaffScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>ချိတ်ဆက်ထားသောဝန်ထမ်း</Text>
@@ -470,18 +470,20 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
 
   header: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingBottom: 16, paddingTop: 10, gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   backBtn: {
-    width: 38, height: 38, borderRadius: 6,
+    width: 38, height: 38, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: COLORS.muted,
   },
   headerCenter: { flex: 1, alignItems: 'center' },
-  headerTitle: { fontSize: 17, fontWeight: '800', color: COLORS.white, fontFamily: FONTS.bold },
-  headerSub: { fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 2, fontFamily: FONTS.regular },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold },
+  headerSub: { fontSize: 11, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
 
   // Staff list
   staffListContent: { paddingVertical: 10, paddingHorizontal: 0 },
@@ -490,7 +492,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white, paddingHorizontal: 16, paddingVertical: 14,
   },
   staffAvatarPlaceholder: {
-    width: 50, height: 50, borderRadius: 6,
+    width: 50, height: 50, borderRadius: 14,
     backgroundColor: COLORS.primaryBg,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: COLORS.primary + '30',
@@ -499,7 +501,7 @@ const styles = StyleSheet.create({
   staffRowInfo: { flex: 1, gap: 5 },
   staffRowName: { fontSize: 15, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
   staffRowStats: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
-  statBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  statBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 14 },
   statBadgeText: { fontSize: 10, fontWeight: '600', fontFamily: FONTS.semiBold },
   staffRowCount: { alignItems: 'center', marginRight: 4 },
   staffRowCountNum: { fontSize: 22, fontWeight: '800', color: COLORS.primary, fontFamily: FONTS.bold },
@@ -508,18 +510,20 @@ const styles = StyleSheet.create({
 
   // Parcel list
   listContent: { padding: 14, gap: 10 },
-  parcelCard: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white, borderRadius: 6, flexDirection: 'row', overflow: 'hidden',
-    shadowColor: '#000', shadowOpacity: 0.07, shadowRadius: 10,
-    shadowOffset: { width: 0, height: 2 }, elevation: 3,
+  parcelCard: {
+    backgroundColor: COLORS.white, borderRadius: 14, flexDirection: 'row', overflow: 'hidden',
+    shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 14,
+    shadowOffset: { width: 0, height: 2 }, elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   parcelCardContent: { flex: 1, padding: 14 },
   cardTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   trackingNum: { fontSize: 13, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold, flex: 1, marginRight: 8 },
-  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
   statusPillText: { fontSize: 11, fontWeight: '600', fontFamily: FONTS.semiBold },
   recipientName: { fontSize: 14, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold, marginBottom: 2 },
-  addressRowCard: { minHeight: 80, minWidth: 120, flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 },
+  addressRowCard: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 },
   addressText: { flex: 1, fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular },
   cardFooter: {
     flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center',
@@ -528,24 +532,24 @@ const styles = StyleSheet.create({
   },
   detailBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: COLORS.primaryBg, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 6,
+    backgroundColor: COLORS.primaryBg, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 14,
     borderWidth: 1, borderColor: COLORS.primary + '30',
   },
   detailBtnText: { fontSize: 12, color: COLORS.primary, fontFamily: FONTS.semiBold },
   reassignBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 6,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 3,
+    backgroundColor: COLORS.primary, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 14,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 1,
   },
   reassignBtnText: { fontSize: 12, color: COLORS.white, fontFamily: FONTS.semiBold },
 
   // Empty / permission
   emptyBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 24, marginTop: 60 },
-  emptyIconWrap: { width: 72, height: 72, borderRadius: 6, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  emptyIconWrap: { width: 72, height: 72, borderRadius: 14, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   emptyText: { fontSize: 15, color: COLORS.textSecondary, fontFamily: FONTS.semiBold, textAlign: 'center' },
   emptySubText: { fontSize: 12, color: COLORS.textLight, fontFamily: FONTS.regular, textAlign: 'center' },
   permissionBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
-  permissionIconWrap: { width: 72, height: 72, borderRadius: 6, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
+  permissionIconWrap: { width: 72, height: 72, borderRadius: 14, backgroundColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
   permissionText: { fontSize: 15, color: COLORS.textSecondary, fontFamily: FONTS.regular },
 
   // Modal
@@ -565,7 +569,7 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 16, fontWeight: '800', color: COLORS.text, fontFamily: FONTS.bold },
   modalSub: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular, marginTop: 2 },
   closeBtn: {
-    width: 34, height: 34, borderRadius: 6, backgroundColor: COLORS.background,
+    width: 34, height: 34, borderRadius: 14, backgroundColor: COLORS.background,
     alignItems: 'center', justifyContent: 'center',
   },
   currentAssignRow: {
@@ -576,7 +580,7 @@ const styles = StyleSheet.create({
   currentAssignText: { fontSize: 13, color: COLORS.primary, fontFamily: FONTS.medium },
   staffSearchBox: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    margin: 12, borderRadius: 6, borderWidth: 1.5, borderColor: COLORS.border,
+    margin: 12, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.border,
     backgroundColor: COLORS.background, paddingHorizontal: 14, paddingVertical: 10,
   },
   staffSearchInput: { flex: 1, fontSize: 13, color: COLORS.text, fontFamily: FONTS.regular, paddingVertical: 0 },
@@ -588,7 +592,7 @@ const styles = StyleSheet.create({
   },
   staffItemActive: { backgroundColor: COLORS.primaryBg },
   staffAvatarSm: {
-    width: 40, height: 40, borderRadius: 6,
+    width: 40, height: 40, borderRadius: 14,
     backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1.5, borderColor: COLORS.border,
   },
@@ -600,8 +604,8 @@ const styles = StyleSheet.create({
   confirmBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     backgroundColor: COLORS.primary, marginHorizontal: 16, marginTop: 14,
-    paddingVertical: 15, borderRadius: 6,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
+    paddingVertical: 15, borderRadius: 14,
+    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 16, elevation: 5,
   },
   confirmBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
 });

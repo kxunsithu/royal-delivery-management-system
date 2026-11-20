@@ -117,7 +117,7 @@ export default function ParcelsScreen() {
             <Ionicons
               name="calendar-outline"
               size={20}
-              color={hasActiveDateFilter ? COLORS.primary : COLORS.white}
+              color={hasActiveDateFilter ? COLORS.primary : COLORS.text}
             />
           </TouchableOpacity>
           {canCreateParcel && (
@@ -134,7 +134,7 @@ export default function ParcelsScreen() {
       <View style={styles.contentArea}>
         {/* Search */}
         <View style={styles.searchWrapper}>
-          <Ionicons name="search" size={18} color={COLORS.textLight} />
+          <Ionicons name="search" size={14} color={COLORS.textLight} />
           <TextInput
             style={styles.searchInput}
             placeholder="ပါဆယ်၊ ပေးပို့သူ၊ လက်ခံသူ၊ လိပ်စာ ရှာဖွေမည်..."
@@ -144,7 +144,7 @@ export default function ParcelsScreen() {
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => { setSearch(''); setSearchDebounced(''); }}>
-              <Ionicons name="close-circle" size={18} color={COLORS.textLight} />
+              <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
             </TouchableOpacity>
           )}
         </View>
@@ -445,7 +445,7 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   contentArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -456,14 +456,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
     paddingHorizontal: 20,
     paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.white,
+  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.text,
     fontFamily: FONTS.bold,
   },
-  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2,
+  headerSub: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2,
     fontFamily: FONTS.regular,
   },
   headerActions: {
@@ -474,19 +476,19 @@ const styles = StyleSheet.create({
   calendarBtn: {
     width: 40,
     height: 40,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   calendarBtnActive: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.primaryLight,
   },
   addBtn: {
     width: 40,
     height: 40,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -495,21 +497,23 @@ const styles = StyleSheet.create({
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 6,
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 4,
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    marginTop: 6,
+    marginBottom: 2,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  searchInput: { flex: 1, fontSize: 14, color: COLORS.text,
+  searchInput: { flex: 1, fontSize: 12, color: COLORS.text,
     fontFamily: FONTS.regular,
   },
 
@@ -520,7 +524,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -542,13 +546,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
   },
   dateFilterRow: {
     flexDirection: 'row',
@@ -569,7 +573,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingHorizontal: 10,
@@ -608,7 +612,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.primary,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 9,
   },
   dateApplyBtnText: {
@@ -623,7 +627,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 9,
     paddingHorizontal: 16,
     borderWidth: 1,
@@ -641,7 +645,7 @@ const styles = StyleSheet.create({
     gap: 5,
     marginTop: 8,
     backgroundColor: COLORS.primary + '12',
-    borderRadius: 6,
+    borderRadius: 14,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
@@ -657,16 +661,18 @@ const styles = StyleSheet.create({
   list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   // Card
-  card: { minHeight: 80, minWidth: 120,
+  card: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 12,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   trackingNumber: { fontSize: 13, fontWeight: '700', color: COLORS.primary,
@@ -678,7 +684,7 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontSize: 12, fontWeight: '600',
@@ -687,12 +693,12 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 10 },
   cardBody: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
   parcelThumb: {
-    width: 60, height: 60, borderRadius: 6,
+    width: 60, height: 60, borderRadius: 14,
     backgroundColor: COLORS.border,
     flexShrink: 0,
   },
   parcelThumbPlaceholder: {
-    width: 60, height: 60, borderRadius: 6,
+    width: 60, height: 60, borderRadius: 14,
     backgroundColor: COLORS.background,
     flexShrink: 0,
     borderWidth: 1,
@@ -702,7 +708,7 @@ const styles = StyleSheet.create({
   senderText: { fontSize: 11, color: COLORS.textSecondary, fontWeight: '500', flexShrink: 1,
     fontFamily: FONTS.medium,
     backgroundColor: COLORS.background,
-    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, alignSelf: 'flex-start',
+    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 14, alignSelf: 'flex-start',
   },
   infoText: { fontSize: 13, color: COLORS.text, flex: 1,
     fontFamily: FONTS.regular,
@@ -716,10 +722,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     backgroundColor: COLORS.background,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   footerLeft: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  priorityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  priorityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 14 },
   priorityText: { fontSize: 11, fontWeight: '700',
     fontFamily: FONTS.bold,
   },
@@ -727,7 +733,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8F4FB',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info,
     fontFamily: FONTS.bold,
@@ -737,13 +743,13 @@ const styles = StyleSheet.create({
   },
   verifyBtn: {
     backgroundColor: COLORS.success,
-    borderRadius: 6, paddingVertical: 9, marginTop: 10,
+    borderRadius: 14, paddingVertical: 9, marginTop: 10,
     alignItems: 'center', justifyContent: 'center',
     shadowColor: COLORS.success,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 3,
+    elevation: 1,
   },
   verifyBtnText: { fontSize: 13, fontWeight: '700', color: COLORS.white,
     fontFamily: FONTS.bold,
@@ -757,7 +763,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -777,7 +783,7 @@ const styles = StyleSheet.create({
   pageBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.primary,
     fontFamily: FONTS.semiBold,
   },
-  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: COLORS.border },
+  pageInfoBox: { backgroundColor: COLORS.white, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 14, borderWidth: 1, borderColor: COLORS.border },
   pageInfo: { fontSize: 13, color: COLORS.text, fontWeight: '600',
     fontFamily: FONTS.semiBold,
   },

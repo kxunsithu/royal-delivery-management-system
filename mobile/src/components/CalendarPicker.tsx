@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   card: { minHeight: 80, minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 16,
     width: 320,
     maxWidth: '90%' as any,
@@ -242,9 +242,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
     zIndex: 1,
   },
   title: {
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   navBtn: {
     width: 32,
     height: 32,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.background,
     alignItems: 'center',
     justifyContent: 'center',
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   dayCircle: {
     width: 30,
     height: 30,
-    borderRadius: 6,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   cancelBtn: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: 'center',
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   confirmBtn: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 6,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,

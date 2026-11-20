@@ -294,7 +294,7 @@ export default function ParcelDetailScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>{parcel.tracking_number}</Text>
@@ -306,10 +306,10 @@ export default function ParcelDetailScreen() {
         {canEditParcel && !isTerminal && (
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.headerActionBtn} onPress={() => router.push(`/parcels/edit/${id}`)} activeOpacity={0.7}>
-              <Ionicons name="create-outline" size={22} color={COLORS.white} />
+              <Ionicons name="create-outline" size={22} color={COLORS.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.headerActionBtn} onPress={handleDelete} activeOpacity={0.7}>
-              <Ionicons name="trash-outline" size={22} color={COLORS.white} />
+              <Ionicons name="trash-outline" size={22} color={COLORS.error} />
             </TouchableOpacity>
           </View>
         )}
@@ -799,7 +799,7 @@ function InfoRow({ label, value, valueColor, onPress }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background, },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
   header: {
@@ -808,25 +808,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 24,
     gap: 12,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   backBtn: {
     width: 38,
     height: 38,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerCenter: { flex: 1 },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
   headerStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 14,
     alignSelf: 'flex-start',
     marginTop: 6,
     backgroundColor: COLORS.white,
@@ -838,8 +840,8 @@ const styles = StyleSheet.create({
   headerActionBtn: {
     width: 36,
     height: 36,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -849,21 +851,23 @@ const styles = StyleSheet.create({
   parcelImage: {
     width: 160,
     height: 120,
-    borderRadius: 6,
+    borderRadius: 14,
     marginRight: 10,
     backgroundColor: COLORS.border,
   },
   section: { minHeight: 48, marginBottom: 16 },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
-  infoCard: { minHeight: 80, minWidth: 120,
+  infoCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 14,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   infoRow: {
     flexDirection: 'row',
@@ -899,22 +903,22 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1.5,
     backgroundColor: COLORS.white,
   },
   transitionBtnText: { fontSize: 14, fontWeight: '600', fontFamily: FONTS.semiBold },
   transitionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  transitionLoading: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.primaryLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  transitionLoading: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.primaryLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
   transitionLoadingText: { fontSize: 12, color: COLORS.primary, fontWeight: '600', fontFamily: FONTS.semiBold },
   assignHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  currentStaffPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.primaryLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  currentStaffPill: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.primaryLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
   currentStaffPillText: { fontSize: 11, color: COLORS.primary, fontWeight: '600', maxWidth: 100, fontFamily: FONTS.semiBold },
   staffRow: { flexDirection: 'row', gap: 10 },
   staffChip: {
     alignItems: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 12,
     width: 80,
     borderWidth: 1,
@@ -923,7 +927,7 @@ const styles = StyleSheet.create({
   staffAvatar: {
     width: 44,
     height: 44,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
@@ -934,7 +938,7 @@ const styles = StyleSheet.create({
   timeline: { paddingLeft: 4 },
   timelineItem: { flexDirection: 'row', gap: 12, marginBottom: 4 },
   timelineDot: { alignItems: 'center', width: 16 },
-  timelineDotInner: { width: 12, height: 12, borderRadius: 6 },
+  timelineDotInner: { width: 12, height: 12, borderRadius: 14 },
   timelineLine: { width: 2, flex: 1, backgroundColor: COLORS.border, marginTop: 2 },
   timelineContent: { flex: 1, paddingBottom: 16 },
   timelineStatus: { fontSize: 14, fontWeight: '700', marginBottom: 2, fontFamily: FONTS.bold },
@@ -945,7 +949,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 1,
@@ -955,7 +959,7 @@ const styles = StyleSheet.create({
   staffSearchInput: { flex: 1, fontSize: 14, color: COLORS.text, fontFamily: FONTS.regular },
   staffList: { minHeight: 44,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -974,7 +978,7 @@ const styles = StyleSheet.create({
   staffListName: { fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
   staffCurrentBadge: { fontSize: 11, color: COLORS.primary, marginTop: 2, fontFamily: FONTS.regular },
   staffAvatarActive: { backgroundColor: COLORS.primary },
-  staffAvatarImg: { width: 44, height: 44, borderRadius: 6, borderWidth: 2, borderColor: COLORS.border },
+  staffAvatarImg: { width: 44, height: 44, borderRadius: 14, borderWidth: 2, borderColor: COLORS.border },
   staffEmpty: { alignItems: 'center', paddingVertical: 24 },
   staffEmptyText: { fontSize: 13, color: COLORS.textLight, fontFamily: FONTS.regular },
   imageThumbWrap: { marginRight: 10 },
@@ -985,13 +989,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 14,
   },
   exportBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700', fontFamily: FONTS.bold },
   statusModalDetail: { width: '100%', alignItems: 'center', marginBottom: 8 },
   statusBadgeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 },
-  statusBadgePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, borderWidth: 1.5 },
+  statusBadgePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, borderWidth: 1.5 },
   statusBadgeText: { fontSize: 13, fontWeight: '700', fontFamily: FONTS.bold },
   reasonInputWrap: { width: '100%', marginTop: 8 },
   reasonInputLabel: { fontSize: 12, color: COLORS.textSecondary, fontFamily: FONTS.regular, marginBottom: 6 },
@@ -999,7 +1003,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
@@ -1008,12 +1012,12 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.regular,
   },
   proofHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  proofBadge: { backgroundColor: '#E8F5E9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  proofBadge: { backgroundColor: '#E8F5E9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 14 },
   proofBadgeText: { fontSize: 12, fontWeight: '700', color: COLORS.success, fontFamily: FONTS.bold },
-  proofCard: { minHeight: 80, minWidth: 120, backgroundColor: COLORS.white, borderRadius: 6, padding: 12, borderWidth: 1, borderColor: COLORS.border },
+  proofCard: { backgroundColor: COLORS.white, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: COLORS.border },
   proofScroll: { marginBottom: 8 },
   proofThumbWrap: { marginRight: 10 },
-  proofThumbImage: { width: 140, height: 110, borderRadius: 6, backgroundColor: COLORS.border },
+  proofThumbImage: { width: 140, height: 110, borderRadius: 14, backgroundColor: COLORS.border },
   proofThumbNote: { fontSize: 11, color: COLORS.textSecondary, maxWidth: 140, marginTop: 4, fontFamily: FONTS.regular },
   proofInfoBox: { borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: 8, marginTop: 4, gap: 6 },
   proofDetailRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },

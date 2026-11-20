@@ -261,7 +261,7 @@ export default function RecordAttemptScreen() {
 
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+          <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>ရလဒ် မှတ်တမ်းတင်မည်</Text>
@@ -483,7 +483,7 @@ function InfoRow({ label, value, valueColor }: { label: string; value: string; v
 
 const styles = StyleSheet.create({
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.background },
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   scrollArea: { flex: 1, backgroundColor: COLORS.background, },
   header: {
     flexDirection: 'row',
@@ -491,19 +491,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 16,
     gap: 12,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  backBtn: { width: 38, height: 38, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 14, backgroundColor: COLORS.muted, alignItems: 'center', justifyContent: 'center' },
   headerCenter: { flex: 1 },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.white, fontFamily: FONTS.bold },
-  headerSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontFamily: FONTS.regular },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, fontFamily: FONTS.bold },
+  headerSubtitle: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2, fontFamily: FONTS.regular },
   content: { padding: 16, paddingBottom: 40 },
 
   section: { minHeight: 48, marginBottom: 16 },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 8, fontFamily: FONTS.bold },
-  infoCard: { minHeight: 80, minWidth: 120,
+  infoCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -526,7 +528,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -539,7 +541,7 @@ const styles = StyleSheet.create({
   reasonChip: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,
@@ -548,9 +550,9 @@ const styles = StyleSheet.create({
   reasonChipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, fontFamily: FONTS.semiBold },
   reasonChipTextActive: { color: COLORS.white },
 
-  inputCard: { minHeight: 80, minWidth: 120,
+  inputCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: 4,
@@ -572,7 +574,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,
@@ -581,14 +583,14 @@ const styles = StyleSheet.create({
   photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   photoThumbWrap: { position: 'relative' },
   photoThumbTouch: { flex: 1, width: '100%', height: '100%' },
-  photoThumb: { width: 80, height: 80, borderRadius: 6, backgroundColor: COLORS.border },
+  photoThumb: { width: 80, height: 80, borderRadius: 14, backgroundColor: COLORS.border },
   photoRemoveBtn: {
     position: 'absolute',
     top: -6,
     right: -6,
     width: 20,
     height: 20,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -601,7 +603,7 @@ const styles = StyleSheet.create({
     bottom: 4,
     left: 4,
     backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 6,
+    borderRadius: 14,
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
@@ -609,7 +611,7 @@ const styles = StyleSheet.create({
   noPhotoBox: {
     alignItems: 'center',
     paddingVertical: 20,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderStyle: 'dashed',
@@ -623,7 +625,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 16,
     marginTop: 8,
   },

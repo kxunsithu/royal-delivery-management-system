@@ -133,7 +133,7 @@ export default function DailySummaryScreen() {
             onPress={() => router.navigate('/(tabs)/more')}
             activeOpacity={0.7}
           >
-            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+            <Ionicons name="chevron-back" size={22} color={COLORS.text} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle} numberOfLines={1}>မှတ်တမ်း</Text>
@@ -568,7 +568,7 @@ function MonthSummaryCard({ group, onPress }: { group: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   contentArea: { flex: 1, backgroundColor: COLORS.background, },
 
   // Header
@@ -576,27 +576,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
     paddingHorizontal: 20,
     paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   backBtn: {
     width: 38,
     height: 38,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: COLORS.white,
+    color: COLORS.text,
     fontFamily: FONTS.bold,
   },
   headerSub: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.75)',
+    color: COLORS.textSecondary,
     marginTop: 2,
     fontFamily: FONTS.regular,
   },
@@ -604,47 +606,47 @@ const styles = StyleSheet.create({
   // Toggle pill
   togglePill: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: 6,
+    backgroundColor: COLORS.muted,
+    borderRadius: 14,
     padding: 3,
     gap: 2,
   },
   togglePillBtn: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 6,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   togglePillBtnActive: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.primary,
   },
   togglePillText: {
     fontSize: 12,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.8)',
+    color: COLORS.textSecondary,
     fontFamily: FONTS.semiBold,
   },
   togglePillTextActive: {
-    color: COLORS.primary,
+    color: COLORS.white,
   },
 
   calendarBtn: {
     width: 40,
     height: 40,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   calendarBtnActive: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.primary,
   },
   clearFilterBtn: {
     width: 40,
     height: 40,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -655,13 +657,13 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
   },
   dateFilterRow: {
     flexDirection: 'row',
@@ -682,7 +684,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1.5,
     borderColor: COLORS.border,
     paddingHorizontal: 10,
@@ -721,7 +723,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.primary,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 9,
   },
   dateApplyBtnText: {
@@ -736,7 +738,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 6,
+    borderRadius: 14,
     paddingVertical: 9,
     paddingHorizontal: 16,
     borderWidth: 1.5,
@@ -754,7 +756,7 @@ const styles = StyleSheet.create({
     gap: 5,
     marginTop: 8,
     backgroundColor: COLORS.primary + '12',
-    borderRadius: 6,
+    borderRadius: 14,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
@@ -769,15 +771,17 @@ const styles = StyleSheet.create({
   listEmpty: { flex: 1, justifyContent: 'center' },
 
   // Card
-  card: { minHeight: 80, minWidth: 120,
+  card: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 14,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   cardHighlighted: {
     borderWidth: 1.5,
@@ -792,7 +796,7 @@ const styles = StyleSheet.create({
   dateIconWrap: {
     width: 28,
     height: 28,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primaryBg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -808,7 +812,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto' as any,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.background,
   },
   monthDayCount: {

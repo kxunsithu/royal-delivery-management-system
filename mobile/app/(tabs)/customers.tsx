@@ -84,7 +84,7 @@ export default function CustomersScreen() {
 
         {/* Search */}
         <View style={styles.searchWrapper}>
-          <Ionicons name="search" size={18} color={COLORS.textLight} />
+          <Ionicons name="search" size={14} color={COLORS.textLight} />
           <TextInput
             style={styles.searchInput}
             placeholder="နာမည် သို့ ဖုန်းနံပါတ် ရှာဖွေမည်..."
@@ -94,7 +94,7 @@ export default function CustomersScreen() {
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => { setSearch(''); setSearchDebounced(''); }}>
-              <Ionicons name="close-circle" size={18} color={COLORS.textLight} />
+              <Ionicons name="close-circle" size={16} color={COLORS.textLight} />
             </TouchableOpacity>
           )}
         </View>
@@ -218,7 +218,7 @@ function CustomerCard({ customer, type }: { customer: Customer; type: CustomerTy
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
   contentArea: { flex: 1, backgroundColor: COLORS.background, },
 
   // Header
@@ -226,19 +226,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
     paddingHorizontal: 20,
     paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: COLORS.white,
+    color: COLORS.text,
     fontFamily: FONTS.bold,
   },
   headerSub: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.75)',
+    color: COLORS.textSecondary,
     marginTop: 2,
     fontFamily: FONTS.regular,
   },
@@ -250,20 +252,22 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 4,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
   },
   typeTab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   typeTabActive: { backgroundColor: COLORS.primary },
   typeTabText: {
@@ -278,23 +282,25 @@ const styles = StyleSheet.create({
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 6,
     backgroundColor: COLORS.white,
     marginHorizontal: 16,
-    marginTop: 10,
-    marginBottom: 8,
-    borderRadius: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    marginTop: 6,
+    marginBottom: 4,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 12,
     color: COLORS.text,
     fontFamily: FONTS.regular,
   },
@@ -304,25 +310,27 @@ const styles = StyleSheet.create({
   list: { minHeight: 180, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24, gap: 10 },
 
   // Card
-  card: { minHeight: 80, minWidth: 120,
+  card: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   cardHighlighted: { backgroundColor: '#F0FDF4',
   },
   avatarCircle: {
     width: 50,
     height: 50,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primary + '18',
     alignItems: 'center',
     justifyContent: 'center',
@@ -365,7 +373,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 14,
     fontFamily: FONTS.regular,
   },
   cardRight: { alignItems: 'flex-end' },
@@ -373,7 +381,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary + '15',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   countText: {
     fontSize: 13,
@@ -387,7 +395,7 @@ const styles = StyleSheet.create({
   emptyIconWrap: {
     width: 72,
     height: 72,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primary + '15',
     alignItems: 'center',
     justifyContent: 'center',
@@ -421,7 +429,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1.5,
     borderColor: COLORS.border,
   },
@@ -436,7 +444,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: COLORS.primary,
-    borderRadius: 6,
+    borderRadius: 14,
   },
   pageInfo: {
     fontSize: 13,

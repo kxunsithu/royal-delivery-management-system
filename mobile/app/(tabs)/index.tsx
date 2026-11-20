@@ -15,7 +15,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { dashboardService } from '../../src/services/dashboardService';
 import { useAuth } from '../../src/context/AuthContext';
 import { useTheme } from '../../src/context/ThemeContext';
-import { COLORS, FONTS, ROLE_LABELS_MM } from '../../src/constants';
+import { COLORS, FONTS, RADIUS, ROLE_LABELS_MM } from '../../src/constants';
+
+type IconName = keyof typeof Ionicons.glyphMap;
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
@@ -35,66 +37,61 @@ export default function DashboardScreen() {
     user?.role ||
     'ဝန်ထမ်း';
 
+  const firstName = user?.name?.split(' ')[0] ?? 'အသုံးပြုသူ';
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Sticky header */}
+      <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.background}]}>
+        <View style={styles.headerLeft}>
+          <Text style={[styles.appName, { color: colors.text }]} numberOfLines={1}>
+            Royal Myawaddy
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => router.navigate('/(tabs)/profile')}
+        >
+          {user?.profile_image_url ? (
+            <Image source={{ uri: user.profile_image_url }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatarFallback, { backgroundColor: colors.primary }]}>
+              <Text style={styles.avatarInitial}>
+                {(user?.name?.[0] ?? 'R').toUpperCase()}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
-        stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={() => { refetch(); }}
-            tintColor={COLORS.white}
+            tintColor={colors.primary}
           />
         }
         contentContainerStyle={styles.scrollContent}
+        style={{ flex: 1 }}
       >
-        {/* Header */}
-        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.username} numberOfLines={1}>
-              {user?.name ?? 'အသုံးပြုသူ'}
-            </Text>
-            <View style={styles.rolePill}>
-              <Text style={styles.roleText}>{roleLabel}</Text>
-            </View>
+        {isLoading ? (
+          <View style={styles.skeletonWrap}>
+            {[1, 2, 3].map((i) => (
+              <View key={i} style={[styles.skeleton, { backgroundColor: colors.muted }]} />
+            ))}
           </View>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.navigate('/(tabs)/profile')}
-          >
-            {user?.profile_image_url ? (
-              <Image source={{ uri: user.profile_image_url }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarFallback}>
-                <Image
-                  source={require('../../assets/icon.png')}
-                  style={styles.avatarIcon}
-                  resizeMode="contain"
-                />
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* White content area */}
-        <View style={styles.contentArea}>
-          {isLoading ? (
-            <View style={styles.skeletonWrap}>
-              {[1, 2, 3].map(i => <View key={i} style={styles.skeleton} />)}
-            </View>
-          ) : isStaff ? (
-            <StaffDashboard data={data} />
-          ) : (
-            <AdminManagerDashboard
-              data={data}
-              isAdmin={isAdmin}
-              canCreateParcel={canCreateParcel}
-            />
-          )}
-        </View>
+        ) : isStaff ? (
+          <StaffDashboard data={data} />
+        ) : (
+          <AdminManagerDashboard
+            data={data}
+            isAdmin={isAdmin}
+            canCreateParcel={canCreateParcel}
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -102,55 +99,63 @@ export default function DashboardScreen() {
 
 /* ─── Staff Dashboard ─────────────────────────────────────────── */
 function StaffDashboard({ data }: { data: any }) {
+  const { colors } = useTheme();
+
+  const stats: { label: string; value: number; color: string; bg: string; icon: IconName }[] = [
+    {
+      label: 'ဆောင်ရွက်နေဆဲ',
+      value: data?.assignments?.active ?? 0,
+      color: colors.primary,
+      bg: colors.primaryBg,
+      icon: 'bicycle-outline',
+    },
+    {
+      label: 'ယနေ့ပြီးစီး',
+      value: data?.assignments?.completed_today ?? 0,
+      color: colors.success,
+      bg: colors.successBg,
+      icon: 'checkmark-circle-outline',
+    },
+    {
+      label: 'ကြိုးပမ်းမှု',
+      value: data?.attempts_today ?? 0,
+      color: colors.info,
+      bg: colors.infoBg,
+      icon: 'flash-outline',
+    },
+    {
+      label: 'မအောင်မြင်',
+      value: data?.failed_today ?? 0,
+      color: colors.error,
+      bg: colors.errorBg,
+      icon: 'close-circle-outline',
+    },
+  ];
+
   return (
     <View style={styles.section}>
-      {/* 3-column stat grid */}
-      <View style={styles.statRow}>
-        <StatBox
-          label="ဆောင်ရွက်နေဆဲ"
-          value={data?.assignments?.active ?? 0}
-          color={COLORS.primary}
-          icon="bicycle-outline"
-        />
-        <StatBox
-          label="ယနေ့ပြီးစီး"
-          value={data?.assignments?.completed_today ?? 0}
-          color={COLORS.success}
-          icon="checkmark-circle-outline"
-        />
-        <StatBox
-          label="ကြိုးပမ်းမှု"
-          value={data?.attempts_today ?? 0}
-          color={COLORS.info}
-          icon="flash-outline"
-        />
-      </View>
-      <View style={styles.statRow}>
-        <StatBox
-          label="မအောင်မြင်"
-          value={data?.failed_today ?? 0}
-          color={COLORS.error}
-          icon="close-circle-outline"
-        />
-      </View>
+      <HeroCard
+        label="စုစုပေါင်း ပြီးစီးသောလုပ်ငန်းများ"
+        value={data?.assignments?.total_completed ?? 0}
+        caption="ယနေ့ သင့်လုပ်ငန်းများကို ဆက်လက်ဆောင်ရွက်ပါ"
+        icon="trophy-outline"
+      />
 
-      {/* Total completed banner */}
-      <View style={styles.bannerCard}>
-        <View>
-          <Text style={styles.bannerLabel}>စုစုပေါင်း ပြီးစီးသောလုပ်ငန်းများ</Text>
-          <Text style={styles.bannerValue}>{data?.assignments?.total_completed ?? 0}</Text>
-        </View>
-        <Ionicons name="trophy-outline" size={36} color={COLORS.primary} style={{ opacity: 0.3 }} />
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>ယနေ့ အနှစ်ချုပ်</Text>
+      <View style={styles.statGrid}>
+        {stats.map((s) => (
+          <StatTile key={s.label} {...s} />
+        ))}
       </View>
 
       <TouchableOpacity
-        style={styles.primaryBtn}
+        style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
         onPress={() => router.navigate('/(tabs)/my-assignments')}
         activeOpacity={0.85}
       >
-        <Ionicons name="bicycle" size={18} color={COLORS.white} />
+        <Ionicons name="bicycle" size={18} color="#FFFFFF" />
         <Text style={styles.primaryBtnText}>ကျွန်ုပ်၏ လုပ်ငန်းများ</Text>
-        <Ionicons name="arrow-forward" size={16} color={COLORS.white} />
+        <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
   );
@@ -159,208 +164,318 @@ function StaffDashboard({ data }: { data: any }) {
 /* ─── Admin / Manager Dashboard ─────────────────────────────────── */
 function AdminManagerDashboard({
   data,
-  isAdmin,
-  canCreateParcel,
 }: {
   data: any;
   isAdmin: boolean;
   canCreateParcel: boolean;
 }) {
+  const { colors } = useTheme();
   const stats = data?.parcel_stats;
   const todayCount = stats?.today ?? data?.today_received ?? 0;
   const inTransitCount = stats?.in_transit ?? stats?.out_for_delivery ?? stats?.in_progress ?? 0;
 
-  const statItems = [
-    { label: 'စုစုပေါင်း', value: stats?.total ?? 0, color: COLORS.primary, icon: 'cube-outline' },
-    { label: 'ယနေ့ရောက်', value: todayCount, color: COLORS.info, icon: 'today-outline' },
-    { label: 'လက်ခံ', value: stats?.received ?? 0, color: COLORS.info, icon: 'download-outline' },
-    { label: 'စစ်ဆေးပြီး', value: stats?.verified ?? 0, color: '#8B5CF6', icon: 'shield-checkmark-outline' },
-    { label: 'ဆောင်ရွက်နေဆဲ', value: inTransitCount, color: COLORS.warning, icon: 'car-outline' },
-    { label: 'ပို့ပြီး', value: stats?.delivered ?? 0, color: COLORS.success, icon: 'checkmark-circle-outline' },
-    { label: 'မအောင်', value: stats?.failed ?? 0, color: COLORS.error, icon: 'close-circle-outline' },
-    { label: 'ပျက်ဆီး', value: stats?.damaged ?? 0, color: COLORS.error, icon: 'warning-outline' },
+  const statItems: { label: string; value: number; color: string; bg: string; icon: IconName }[] = [
+    { label: 'ယနေ့ရောက်', value: todayCount, color: colors.info, bg: colors.infoBg, icon: 'today-outline' },
+    { label: 'လက်ခံ', value: stats?.received ?? 0, color: colors.primary, bg: colors.primaryBg, icon: 'download-outline' },
+    { label: 'စစ်ဆေးပြီး', value: stats?.verified ?? 0, color: '#7C3AED', bg: '#F5F3FF', icon: 'shield-checkmark-outline' },
+    { label: 'ဆောင်ရွက်နေဆဲ', value: inTransitCount, color: colors.warning, bg: colors.warningBg, icon: 'car-outline' },
+    { label: 'ပို့ပြီး', value: stats?.delivered ?? 0, color: colors.success, bg: colors.successBg, icon: 'checkmark-circle-outline' },
+    { label: 'မအောင်', value: stats?.failed ?? 0, color: colors.error, bg: colors.errorBg, icon: 'close-circle-outline' },
+    { label: 'ပျက်ဆီး', value: stats?.damaged ?? 0, color: '#B91C1C', bg: '#FEF2F2', icon: 'warning-outline' },
   ];
-
-  // Split into triples for 3-col rows
-  const pairs: (typeof statItems)[] = [];
-  for (let i = 0; i < statItems.length; i += 3) {
-    pairs.push(statItems.slice(i, i + 3));
-  }
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>ပါဆယ် အခြေအနေ</Text>
-      {pairs.map((pair, ri) => (
-        <View key={ri} style={styles.statRow}>
-          {pair.map((item, ci) => (
-            <StatBox
-              key={ci}
-              label={item.label}
-              value={item.value}
-              color={item.color}
-              icon={item.icon as any}
-            />
-          ))}
-        </View>
-      ))}
+      <HeroCard
+        label="စုစုပေါင်း ပါဆယ်"
+        value={stats?.total ?? 0}
+        caption="ယနေ့ လုပ်ငန်းအခြေအနေ အကျဉ်းချုပ်"
+        icon="cube-outline"
+      />
 
-      {/* Quick actions — all roles */}
-      <Text style={[styles.sectionTitle, { marginTop: 8 }]}>အမြန်သွားရောက်မည်</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>ပါဆယ် အခြေအနေ</Text>
+      <View style={styles.statGrid}>
+        {statItems.map((item) => (
+          <StatTile key={item.label} {...item} />
+        ))}
+      </View>
+
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 20 }]}>
+        အမြန်သွားရောက်မည်
+      </Text>
       <View style={styles.quickRow}>
-        <QuickBtn icon="cube-outline" label="ပါဆယ်" color={COLORS.primary} onPress={() => router.navigate('/(tabs)/parcels')} />
-        <QuickBtn icon="car-outline" label="ပို့ဆောင်" color={COLORS.success} onPress={() => router.navigate('/(tabs)/deliveries')} />
-        <QuickBtn icon="bar-chart-outline" label="မှတ်တမ်း" color={COLORS.info} onPress={() => router.navigate('/(tabs)/daily-summary')} />
+        <QuickBtn icon="cube-outline" label="ပါဆယ်" tint={colors.primary} bg={colors.primaryBg} onPress={() => router.navigate('/(tabs)/parcels')} />
+        <QuickBtn icon="car-outline" label="ပို့ဆောင်" tint={colors.success} bg={colors.successBg} onPress={() => router.navigate('/(tabs)/deliveries')} />
+        <QuickBtn icon="bar-chart-outline" label="မှတ်တမ်း" tint={colors.info} bg={colors.infoBg} onPress={() => router.navigate('/(tabs)/daily-summary')} />
       </View>
       <View style={styles.quickRow}>
-        <QuickBtn icon="people-outline" label="သုံးစွဲသူများ" color="#8B5CF6" onPress={() => router.navigate('/(tabs)/users')} />
-        <QuickBtn icon="person-outline" label="ဖောက်သည်" color={COLORS.warning} onPress={() => router.navigate('/(tabs)/customers')} />
-        <QuickBtn icon="calendar-outline" label="လစဉ်" color="#0EA5E9" onPress={() => router.navigate('/(tabs)/monthly-summary')} />
+        <QuickBtn icon="people-outline" label="သုံးစွဲသူ" tint="#7C3AED" bg="#F5F3FF" onPress={() => router.navigate('/(tabs)/users')} />
+        <QuickBtn icon="person-outline" label="ဖောက်သည်" tint={colors.warning} bg={colors.warningBg} onPress={() => router.navigate('/(tabs)/customers')} />
+        <QuickBtn icon="calendar-outline" label="လစဉ်" tint="#0EA5E9" bg="#E0F2FE" onPress={() => router.navigate('/(tabs)/monthly-summary')} />
       </View>
     </View>
   );
 }
 
 /* ─── Sub-components ─────────────────────────────────────────────── */
-function StatBox({ label, value, color, icon }: { label: string; value: any; color: string; icon: any }) {
+function HeroCard({
+  label,
+  value,
+  caption,
+  icon,
+}: {
+  label: string;
+  value: number;
+  caption: string;
+  icon: IconName;
+}) {
   return (
-    <View style={styles.statBox}>
-      <Ionicons name={icon} size={20} color={color} style={styles.statIcon} />
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={styles.heroCard}>
+      <View style={styles.heroOrbLarge} />
+      <View style={styles.heroOrbSmall} />
+      <View style={styles.heroTop}>
+        <Text style={styles.heroLabel}>{label}</Text>
+        <View style={styles.heroIconWrap}>
+          <Ionicons name={icon} size={20} color="#FFFFFF" />
+        </View>
+      </View>
+      <Text style={styles.heroValue}>{Number(value).toLocaleString()}</Text>
+      <Text style={styles.heroCaption}>{caption}</Text>
+    </View>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  color,
+  bg,
+  icon,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  bg: string;
+  icon: IconName;
+}) {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.statTile, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[styles.statIconWrap, { backgroundColor: bg }]}>
+        <Ionicons name={icon} size={18} color={color} />
+      </View>
+      <View style={styles.statTextWrap}>
+        <Text style={[styles.statValue, { color: colors.text }]}>{Number(value).toLocaleString()}</Text>
+        <Text style={[styles.statLabel, { color: colors.textSecondary }]} numberOfLines={1}>
+          {label}
+        </Text>
+      </View>
     </View>
   );
 }
 
 function QuickBtn({
-  icon, label, color, onPress,
-}: { icon: any; label: string; color: string; onPress: () => void }) {
+  icon,
+  label,
+  tint,
+  bg,
+  onPress,
+}: {
+  icon: IconName;
+  label: string;
+  tint: string;
+  bg: string;
+  onPress: () => void;
+}) {
+  const { colors } = useTheme();
   return (
-    <TouchableOpacity style={styles.quickBtn} onPress={onPress} activeOpacity={0.8}>
-      <View style={[styles.quickBtnIcon, { backgroundColor: color + '15' }]}>
-        <Ionicons name={icon} size={24} color={color} />
+    <TouchableOpacity
+      style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View style={[styles.quickBtnIcon, { backgroundColor: bg }]}>
+        <Ionicons name={icon} size={21} color={tint} />
       </View>
-      <Text style={styles.quickBtnLabel}>{label}</Text>
+      <Text style={[styles.quickBtnLabel, { color: colors.text }]} numberOfLines={1}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
 
 /* ─── Styles ──────────────────────────────────────────────────────── */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
-  scrollContent: { flexGrow: 1 },
+  container: { flex: 1 },
+  scrollContent: { paddingBottom: 32 },
 
-  // Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingBottom: 28,
+    paddingBottom: 20,
   },
   headerLeft: { flex: 1, paddingRight: 12 },
-  username: {
-    fontSize: 22,
+  appName: {
+    fontSize: 20,
     fontWeight: '800',
-    color: COLORS.white,
     fontFamily: FONTS.bold,
-    marginBottom: 10,
+    letterSpacing: -0.3,
+  },
+  greeting: {
+    fontSize: 13,
+    fontFamily: FONTS.regular,
+    marginBottom: 2,
+  },
+  username: {
+    fontSize: 25,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
+    letterSpacing: -0.3,
+    marginBottom: 8,
   },
   rolePill: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: RADIUS.pill,
   },
-  roleText: { fontSize: 12, color: COLORS.white, fontFamily: FONTS.semiBold },
+  roleDot: { width: 6, height: 6, borderRadius: 3 },
+  roleText: { fontSize: 11, fontFamily: FONTS.semiBold },
   avatar: {
-    width: 52, height: 52, borderRadius: 6,
-    borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.85)',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   avatarFallback: {
-    width: 52, height: 52, borderRadius: 6,
-    backgroundColor: COLORS.white,
-    borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.85)',
-    alignItems: 'center', justifyContent: 'center',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  avatarIcon: { width: 36, height: 36, borderRadius: 6 },
-
-  // White content
-  contentArea: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    minHeight: 500,
-  },
-  section: { minHeight: 48, padding: 16, paddingBottom: 32 },
-  sectionTitle: {
-    fontSize: 14,
+  avatarInitial: {
+    fontSize: 20,
     fontWeight: '700',
-    color: COLORS.textSecondary,
-    fontFamily: FONTS.semiBold,
-    marginBottom: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    color: '#FFFFFF',
+    fontFamily: FONTS.bold,
   },
 
-  // 3-col stat boxes
-  statRow: {
+  section: { paddingHorizontal: 20 },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+    marginBottom: 12,
+    marginTop: 22,
+  },
+
+  // Hero
+  heroCard: {
+    backgroundColor: '#F97316',
+    borderRadius: RADIUS.xl,
+    padding: 20,
+    overflow: 'hidden',
+    shadowColor: '#F97316',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  heroOrbLarge: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    top: -70,
+    right: -50,
+  },
+  heroOrbSmall: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    bottom: -30,
+    right: 40,
+  },
+  heroTop: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
-  statBox: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: 6,
-    padding: 12,
-    paddingBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+  heroLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.88)',
+    fontFamily: FONTS.regular,
   },
-  statIcon: { marginBottom: 8 },
-  statValue: {
-    fontSize: 22,
-    fontWeight: '800',
+  heroIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: RADIUS.sm,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroValue: {
+    fontSize: 40,
+    fontWeight: '700',
+    color: '#FFFFFF',
     fontFamily: FONTS.bold,
-    marginBottom: 3,
+    letterSpacing: -0.5,
+    marginBottom: 2,
+  },
+  heroCaption: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.78)',
+    fontFamily: FONTS.regular,
+  },
+
+  // Stats
+  statGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  statTile: {
+    width: '48%',
+    flexGrow: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  statIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: RADIUS.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statTextWrap: { flex: 1 },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: FONTS.bold,
+    marginBottom: 1,
   },
   statLabel: {
     fontSize: 10,
-    color: COLORS.textSecondary,
     fontFamily: FONTS.regular,
     lineHeight: 14,
-  },
-
-  // Banner (staff total)
-  bannerCard: { minHeight: 80, minWidth: 120,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: 6,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  bannerLabel: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    fontFamily: FONTS.regular,
-    marginBottom: 4,
-  },
-  bannerValue: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: COLORS.primary,
-    fontFamily: FONTS.bold,
   },
 
   // Primary button
@@ -368,93 +483,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    backgroundColor: COLORS.primary,
-    borderRadius: 6,
-    paddingVertical: 16,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
+    gap: 8,
+    borderRadius: RADIUS.md,
+    paddingVertical: 15,
+    marginTop: 20,
   },
   primaryBtnText: {
     fontSize: 15,
     fontWeight: '700',
-    color: COLORS.white,
+    color: '#FFFFFF',
     fontFamily: FONTS.bold,
   },
 
-  // Revenue card
-  revenueCard: { minHeight: 80, minWidth: 120,
-    backgroundColor: COLORS.white,
-    borderRadius: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  revenueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    gap: 10,
-  },
-  revenueDot: { width: 8, height: 8, borderRadius: 4 },
-  revenueLabel: {
-    flex: 1,
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    fontFamily: FONTS.regular,
-  },
-  revenueValue: {
-    fontSize: 15,
-    fontWeight: '700',
-    fontFamily: FONTS.bold,
-  },
-  divider: { height: StyleSheet.hairlineWidth, backgroundColor: COLORS.border },
-
-  // Quick buttons
+  // Quick actions
   quickRow: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   quickBtn: {
     flex: 1,
-    backgroundColor: COLORS.white,
-    borderRadius: 6,
-    paddingVertical: 16,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    paddingVertical: 14,
     alignItems: 'center',
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
   },
   quickBtnIcon: {
-    width: 48, height: 48, borderRadius: 6,
-    alignItems: 'center', justifyContent: 'center',
+    width: 42,
+    height: 42,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   quickBtnLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    color: COLORS.text,
     fontFamily: FONTS.semiBold,
   },
 
   // Skeleton
-  skeletonWrap: { padding: 16 },
+  skeletonWrap: { paddingHorizontal: 20, gap: 10 },
   skeleton: {
-    height: 90,
-    backgroundColor: COLORS.border,
-    borderRadius: 6,
-    marginBottom: 10,
-    opacity: 0.4,
+    height: 84,
+    borderRadius: RADIUS.lg,
+    opacity: 0.7,
   },
 });

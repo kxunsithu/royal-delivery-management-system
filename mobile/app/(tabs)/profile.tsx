@@ -282,7 +282,7 @@ export default function ProfileScreen() {
             onPress={() => router.navigate('/(tabs)/more')}
             activeOpacity={0.7}
           >
-            <Ionicons name="chevron-back" size={22} color={COLORS.white} />
+            <Ionicons name="chevron-back" size={22} color={COLORS.text} />
           </TouchableOpacity>
           <View>
             <Text style={styles.headerTitle}>ပရိုဖိုင်</Text>
@@ -571,7 +571,7 @@ const webModalStyles = StyleSheet.create({
     maxWidth: 520,
     maxHeight: '90%',
     backgroundColor: '#F3F4F6',
-    borderRadius: 6,
+    borderRadius: 14,
     overflow: 'hidden',
   },
   compactSheet: {
@@ -705,38 +705,39 @@ function MenuRow({ label, icon, onPress, last }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.primary },
+  container: { flex: 1, backgroundColor: COLORS.background },
 
   // ── Header ──
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white,
     paddingHorizontal: 20,
     paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   backBtn: {
     width: 38,
     height: 38,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 14,
+    backgroundColor: COLORS.muted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 22, fontWeight: '800', color: COLORS.white,
+    fontSize: 22, fontWeight: '800', color: COLORS.text,
     fontFamily: FONTS.bold,
   },
   headerSub: {
-    fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2,
+    fontSize: 13, color: COLORS.textSecondary, marginTop: 2,
     fontFamily: FONTS.regular,
   },
   editBtn: {
     paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)',
+    borderRadius: 14,
+    backgroundColor: COLORS.primary,
   },
   editBtnText: {
     fontSize: 13, fontWeight: '700', color: COLORS.white,
@@ -748,32 +749,34 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
 
   // Profile card
-  profileCard: { minHeight: 80, minWidth: 120,
+  profileCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 24,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   avatarWrap: { position: 'relative', marginBottom: 12 },
   avatar: {
-    width: 96, height: 96, borderRadius: 6,
+    width: 96, height: 96, borderRadius: 14,
     backgroundColor: COLORS.primary,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarImage: { width: 96, height: 96, borderRadius: 6 },
+  avatarImage: { width: 96, height: 96, borderRadius: 14 },
   avatarText: {
     fontSize: 36, fontWeight: '800', color: COLORS.white,
     fontFamily: FONTS.bold,
   },
   cameraOverlay: {
     position: 'absolute', bottom: 2, right: 2,
-    width: 26, height: 26, borderRadius: 6,
+    width: 26, height: 26, borderRadius: 14,
     backgroundColor: COLORS.primaryDark,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: COLORS.white,
@@ -786,7 +789,7 @@ const styles = StyleSheet.create({
   roleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 10, paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.background,
     borderWidth: 1, borderColor: COLORS.border,
   },
@@ -795,7 +798,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 10, paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 14,
     borderWidth: 1,
   },
   statusActive: { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' },
@@ -814,15 +817,19 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase', letterSpacing: 0.5,
     fontFamily: FONTS.semiBold,
   },
-  card: { minHeight: 80, minWidth: 120,
+  card: {
+    minHeight: 80,
+    minWidth: 120,
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 14,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   infoRow: {
     flexDirection: 'row', alignItems: 'center',
@@ -850,7 +857,7 @@ const styles = StyleSheet.create({
   menuIconWrap: {
     width: 32,
     height: 32,
-    borderRadius: 6,
+    borderRadius: 14,
     backgroundColor: COLORS.primaryBg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -866,15 +873,15 @@ const styles = StyleSheet.create({
   // Actions
   actionBtn: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 1,
     marginBottom: 10,
   },
   actionBtnText: {
@@ -903,7 +910,7 @@ const styles = StyleSheet.create({
     flex: 1, fontSize: 17, fontWeight: '700', color: COLORS.text,
     fontFamily: FONTS.bold,
   },
-  modalSaveBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 6 },
+  modalSaveBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 14 },
   modalSaveBtnText: {
     fontSize: 14, fontWeight: '700', color: COLORS.white,
     fontFamily: FONTS.semiBold,
@@ -917,7 +924,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.semiBold,
   },
   formInput: {
-    borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 6,
+    borderWidth: 1.5, borderColor: COLORS.border, borderRadius: 14,
     paddingHorizontal: 14, paddingVertical: 12,
     fontSize: 15, color: COLORS.text, backgroundColor: COLORS.white,
     fontFamily: FONTS.regular,
@@ -934,7 +941,7 @@ const styles = StyleSheet.create({
   // ── Web Dialogs ──
   dialogContainer: {
     backgroundColor: COLORS.white,
-    borderRadius: 6,
+    borderRadius: 14,
     overflow: 'hidden',
     padding: 20,
     gap: 4,
@@ -962,7 +969,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', gap: 10, marginTop: 4,
   },
   dialogActionBtn: {
-    flex: 1, paddingVertical: 12, borderRadius: 6, alignItems: 'center',
+    flex: 1, paddingVertical: 12, borderRadius: 14, alignItems: 'center',
   },
   dialogCancelActionBtn: {
     backgroundColor: COLORS.background,

@@ -14,12 +14,13 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../src/context/AuthContext';
 import { useTheme } from '../src/context/ThemeContext';
-import { COLORS, FONTS } from '../src/constants';
+import { RADIUS } from '../src/constants';
 
 export default function LoginScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { login } = useAuth();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -56,308 +57,320 @@ export default function LoginScreen() {
     }
   }
 
+  const inputIconColor = (field: 'phone' | 'password') =>
+    errors[field] ? colors.error : focused === field ? colors.primary : colors.textLight;
+
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Decorative circles */}
-      <View style={styles.decorTR} />
-      <View style={styles.decorBL} />
+    <View style={styles.root}>
+      <StatusBar style="light" />
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        {/* Decorative circles */}
+        <View style={styles.decorTR} />
+        <View style={styles.decorBL} />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flex}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.flex}
         >
-          {/* Brand */}
-          <View style={styles.brand}>
-            <View style={styles.logoWrap}>
-              <Image
-                source={require('../assets/icon.png')}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-            <Text style={styles.appName}>Royal Myawaddy</Text>
-            <Text style={styles.appSubtitle}>ပို့ဆောင်ရေး စီမံခန့်ခွဲမှုစနစ်</Text>
-          </View>
-
-          {/* Form — no card, directly on orange */}
-          <View style={styles.form}>
-            <Text style={styles.title}>အကောင့်ဝင်ရောက်ရန်</Text>
-
-            {/* Phone Field */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>ဖုန်းနံပါတ်</Text>
-              <View
-                style={[
-                  styles.inputWrapper,
-                  focused === 'phone' && styles.inputFocused,
-                  errors.phone ? styles.inputError : null,
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="phone-outline"
-                  size={20}
-                  color={
-                    errors.phone
-                      ? COLORS.error
-                      : focused === 'phone'
-                      ? COLORS.primary
-                      : '#AAAAAA'
-                  }
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="09..."
-                  placeholderTextColor="#AAAAAA"
-                  value={phone}
-                  onChangeText={(t) => {
-                    setPhone(t);
-                    setErrors((e) => ({ ...e, phone: undefined }));
-                  }}
-                  onFocus={() => setFocused('phone')}
-                  onBlur={() => setFocused(null)}
-                  keyboardType="phone-pad"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!isLoading}
-                  returnKeyType="next"
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Brand */}
+            <View style={styles.hero}>
+              <View style={styles.logoWrap}>
+                <Image
+                  source={require('../assets/icon.png')}
+                  style={styles.logoImage}
+                  resizeMode="contain"
                 />
               </View>
-              {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+              <Text style={styles.appName}>Royal Myawaddy</Text>
+              <Text style={styles.appSubtitle}>ပို့ဆောင်ရေး စီမံခန့်ခွဲမှုစနစ်</Text>
             </View>
 
-            {/* Password Field */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>စကားဝှက်</Text>
-              <View
-                style={[
-                  styles.inputWrapper,
-                  focused === 'password' && styles.inputFocused,
-                  errors.password ? styles.inputError : null,
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="lock-outline"
-                  size={20}
-                  color={
-                    errors.password
-                      ? COLORS.error
-                      : focused === 'password'
-                      ? COLORS.primary
-                      : '#AAAAAA'
-                  }
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="••••••••"
-                  placeholderTextColor="#AAAAAA"
-                  value={password}
-                  onChangeText={(t) => {
-                    setPassword(t);
-                    setErrors((e) => ({ ...e, password: undefined }));
-                  }}
-                  onFocus={() => setFocused('password')}
-                  onBlur={() => setFocused(null)}
-                  secureTextEntry={!showPassword}
-                  editable={!isLoading}
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  accessibilityRole="button"
+            {/* White sheet */}
+            <View style={[styles.sheet, { backgroundColor: isDark ? colors.card : '#FFFFFF' }]}>
+              <View style={styles.sheetHandle} />
+              <Text style={[styles.title, { color: colors.text }]}>အကောင့်ဝင်ရောက်ရန်</Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                ဖုန်းနံပါတ်နှင့် စကားဝှက် ထည့်သွင်းပါ
+              </Text>
+
+              {/* Phone Field */}
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>ဖုန်းနံပါတ်</Text>
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    {
+                      backgroundColor: isDark ? colors.background : '#FFFFFF',
+                      borderColor: errors.phone
+                        ? colors.error
+                        : focused === 'phone'
+                        ? colors.primary
+                        : colors.border,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons name="phone-outline" size={20} color={inputIconColor('phone')} />
+                  <TextInput
+                    style={[styles.input, { color: colors.text }]}
+                    placeholder="09..."
+                    placeholderTextColor={colors.textLight}
+                    value={phone}
+                    onChangeText={(t) => {
+                      setPhone(t);
+                      setErrors((e) => ({ ...e, phone: undefined }));
+                    }}
+                    onFocus={() => setFocused('phone')}
+                    onBlur={() => setFocused(null)}
+                    keyboardType="phone-pad"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!isLoading}
+                    returnKeyType="next"
+                  />
+                </View>
+                {errors.phone && (
+                  <Text style={[styles.errorText, { color: colors.error }]}>{errors.phone}</Text>
+                )}
+              </View>
+
+              {/* Password Field */}
+              <View style={styles.fieldGroup}>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>စကားဝှက်</Text>
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    {
+                      backgroundColor: isDark ? colors.background : '#FFFFFF',
+                      borderColor: errors.password
+                        ? colors.error
+                        : focused === 'password'
+                        ? colors.primary
+                        : colors.border,
+                    },
+                  ]}
                 >
                   <MaterialCommunityIcons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    name="lock-outline"
                     size={20}
-                    color="#AAAAAA"
+                    color={inputIconColor('password')}
                   />
-                </TouchableOpacity>
+                  <TextInput
+                    style={[styles.input, { color: colors.text }]}
+                    placeholder="••••••••"
+                    placeholderTextColor={colors.textLight}
+                    value={password}
+                    onChangeText={(t) => {
+                      setPassword(t);
+                      setErrors((e) => ({ ...e, password: undefined }));
+                    }}
+                    onFocus={() => setFocused('password')}
+                    onBlur={() => setFocused(null)}
+                    secureTextEntry={!showPassword}
+                    editable={!isLoading}
+                    returnKeyType="done"
+                    onSubmitEditing={handleLogin}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityRole="button"
+                  >
+                    <MaterialCommunityIcons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={colors.textLight}
+                    />
+                  </TouchableOpacity>
+                </View>
+                {errors.password && (
+                  <Text style={[styles.errorText, { color: colors.error }]}>{errors.password}</Text>
+                )}
               </View>
-              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+
+              {/* Login Button */}
+              <TouchableOpacity
+                style={[
+                  styles.loginBtn,
+                  { backgroundColor: colors.primary },
+                  isLoading && styles.loginBtnDisabled,
+                ]}
+                onPress={handleLogin}
+                disabled={isLoading}
+                activeOpacity={0.85}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <>
+                    <Text style={styles.loginBtnText}>ဝင်ရောက်မည်</Text>
+                    <MaterialCommunityIcons name="arrow-right" size={18} color="#FFFFFF" />
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <Text style={[styles.footer, { color: colors.textLight }]}>
+                Royal Myawaddy Delivery © 2026
+              </Text>
             </View>
-
-            {/* Login Button */}
-            <TouchableOpacity
-              style={[styles.loginBtn, isLoading && styles.loginBtnDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
-              activeOpacity={0.85}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={COLORS.primary} size="small" />
-              ) : (
-                <Text style={styles.loginBtnText}>ဝင်ရောက်မည်</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.footer}>Royal Myawaddy Delivery © 2026</Text>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.primary },
+  root: { flex: 1, backgroundColor: '#F97316' },
+  safe: { flex: 1, backgroundColor: '#F97316' },
   flex: { flex: 1 },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingBottom: 32,
-  },
 
-  // Decorative background blobs
+  // Decorative background shapes
   decorTR: {
     position: 'absolute',
-    top: -100,
-    right: -100,
-    width: 280,
-    height: 280,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.09)',
+    top: -110,
+    right: -90,
+    width: 260,
+    height: 260,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.10)',
   },
   decorBL: {
     position: 'absolute',
-    bottom: 40,
+    top: 170,
     left: -120,
-    width: 260,
-    height: 260,
-    borderRadius: 6,
+    width: 240,
+    height: 240,
+    borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.07)',
   },
 
+  scrollContent: { flexGrow: 1 },
+
   // Brand
-  brand: {
+  hero: {
     alignItems: 'center',
-    marginTop: 48,
-    marginBottom: 44,
+    paddingTop: 44,
+    paddingBottom: 34,
+    paddingHorizontal: 28,
   },
   logoWrap: {
-    width: 96,
-    height: 96,
-    borderRadius: 6,
-    backgroundColor: COLORS.white,
+    width: 84,
+    height: 84,
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 18,
-    shadowColor: '#000',
+    marginBottom: 16,
+    shadowColor: '#7C2D12',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.18,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 8,
   },
-  logoImage: { width: 72, height: 72, borderRadius: 6 },
+  logoImage: { width: 62, height: 62, borderRadius: 18 },
   appName: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: COLORS.white,
-    fontFamily: FONTS.bold,
-    letterSpacing: 0.3,
+    fontSize: 27,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+    letterSpacing: 0.2,
     marginBottom: 6,
   },
   appSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.78)',
-    fontFamily: FONTS.regular,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.82)',
+    fontFamily: 'NotoSansMyanmar_400Regular',
   },
 
-  // Form (no card — directly on orange)
-  form: {
-    gap: 0,
+  // Sheet
+  sheet: {
+    flex: 1,
+    minHeight: 430,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 24,
+    paddingTop: 14,
+    paddingBottom: 32,
+  },
+  sheetHandle: {
+    width: 38,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: '#E5E7EB',
+    alignSelf: 'center',
+    marginBottom: 24,
   },
   title: {
     fontSize: 22,
-    fontWeight: '800',
-    color: COLORS.white,
-    fontFamily: FONTS.bold,
+    fontWeight: '700',
+    fontFamily: 'NotoSansMyanmar_700Bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 13,
+    fontFamily: 'NotoSansMyanmar_400Regular',
     marginBottom: 24,
   },
 
   // Field
-  fieldGroup: { marginBottom: 18 },
+  fieldGroup: { marginBottom: 16 },
   label: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.9)',
-    marginBottom: 8,
-    fontFamily: FONTS.semiBold,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
+    marginBottom: 7,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: 6,
-    paddingHorizontal: 16,
-    height: 54,
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  inputFocused: {
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  inputError: {
-    borderWidth: 2,
-    borderColor: COLORS.error,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    height: 52,
+    gap: 10,
   },
   input: {
     flex: 1,
     fontSize: 15,
-    color: COLORS.text,
-    fontFamily: FONTS.regular,
+    fontFamily: 'NotoSansMyanmar_400Regular',
     paddingVertical: 0,
   },
   errorText: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.95)',
     fontWeight: '600',
     marginTop: 6,
-    marginLeft: 4,
-    fontFamily: FONTS.semiBold,
+    marginLeft: 3,
+    fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
 
-  // Login button — white on orange bg
+  // Login button
   loginBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: 6,
-    height: 54,
-    marginTop: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    gap: 8,
+    borderRadius: RADIUS.md,
+    height: 52,
+    marginTop: 8,
   },
-  loginBtnDisabled: { opacity: 0.6, shadowOpacity: 0 },
+  loginBtnDisabled: { opacity: 0.6 },
   loginBtnText: {
     fontSize: 16,
-    fontWeight: '800',
-    color: COLORS.primary,
-    fontFamily: FONTS.bold,
-    letterSpacing: 0.3,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    fontFamily: 'NotoSansMyanmar_700Bold',
   },
 
   // Footer
   footer: {
     textAlign: 'center',
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 12,
-    fontFamily: FONTS.regular,
-    marginTop: 36,
+    fontSize: 11,
+    fontFamily: 'NotoSansMyanmar_400Regular',
+    marginTop: 28,
   },
 });

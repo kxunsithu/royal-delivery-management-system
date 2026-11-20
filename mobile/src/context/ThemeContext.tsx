@@ -11,35 +11,53 @@ export interface ThemeColors {
   primaryBg: string;
   secondary: string;
   background: string;
+  surface: string;
   white: string;
+  muted: string;
   text: string;
   textSecondary: string;
   textLight: string;
   border: string;
+  borderStrong: string;
   card: string;
   success: string;
+  successBg: string;
   error: string;
+  errorBg: string;
   warning: string;
+  warningBg: string;
   info: string;
+  infoBg: string;
 }
 
 export const DARK_COLORS: ThemeColors = {
-  primary: '#E67701',
-  primaryDark: '#B45309',
-  primaryLight: '#7C3A00',
-  primaryBg: '#2A1F14',
+  primary: '#FB923C',
+  primaryDark: '#F97316',
+  primaryLight: '#4A2A12',
+  primaryBg: '#231A12',
   secondary: '#E5E7EB',
-  background: '#111827',
-  white: '#1F2937',
-  text: '#F9FAFB',
-  textSecondary: '#D1D5DB',
-  textLight: '#9CA3AF',
-  border: '#374151',
-  card: '#1F2937',
+
+  background: '#0B0F14',
+  surface: '#141A21',
+  white: '#141A21',
+  muted: '#1B232D',
+
+  text: '#F8FAFC',
+  textSecondary: '#B6C0CC',
+  textLight: '#8994A3',
+
+  border: '#24303D',
+  borderStrong: '#304052',
+  card: '#141A21',
+
   success: '#22C55E',
+  successBg: '#10251A',
   error: '#F87171',
+  errorBg: '#2A1517',
   warning: '#FBBF24',
+  warningBg: '#2A2210',
   info: '#60A5FA',
+  infoBg: '#122033',
 };
 
 export const LIGHT_THEME_COLORS: ThemeColors = { ...LIGHT_COLORS };
