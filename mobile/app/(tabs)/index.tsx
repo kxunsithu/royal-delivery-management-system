@@ -164,24 +164,19 @@ function AdminManagerDashboard({
   canCreateParcel: boolean;
 }) {
   const stats = data?.parcel_stats;
+  const todayCount = stats?.today ?? data?.today_received ?? 0;
+  const inTransitCount = stats?.in_transit ?? stats?.out_for_delivery ?? stats?.in_progress ?? 0;
 
-  const statItems = isAdmin
-    ? [
-        { label: 'စုစုပေါင်း', value: stats?.total ?? 0, color: COLORS.primary, icon: 'cube-outline' },
-        { label: 'ယနေ့ရောက်', value: stats?.today ?? 0, color: COLORS.info, icon: 'today-outline' },
-        { label: 'ဆောင်ရွက်နေဆဲ', value: stats?.in_progress ?? 0, color: COLORS.warning, icon: 'car-outline' },
-        { label: 'ပို့ပြီး', value: stats?.delivered ?? 0, color: COLORS.success, icon: 'checkmark-circle-outline' },
-        { label: 'မအောင်', value: stats?.failed ?? 0, color: COLORS.error, icon: 'close-circle-outline' },
-        { label: 'အောင်မြင်နှုန်း', value: `${stats?.delivery_success_rate ?? 0}%`, color: '#8B5CF6', icon: 'trending-up-outline' },
-      ]
-    : [
-        { label: 'လက်ခံ', value: stats?.received ?? 0, color: COLORS.info, icon: 'download-outline' },
-        { label: 'စစ်ဆေးပြီး', value: stats?.verified ?? 0, color: '#8B5CF6', icon: 'shield-checkmark-outline' },
-        { label: 'ဆောင်ရွက်နေဆဲ', value: stats?.out_for_delivery ?? 0, color: COLORS.warning, icon: 'car-outline' },
-        { label: 'ပို့ပြီး', value: stats?.delivered ?? 0, color: COLORS.success, icon: 'checkmark-circle-outline' },
-        { label: 'မအောင်', value: stats?.failed ?? 0, color: COLORS.error, icon: 'close-circle-outline' },
-        { label: 'ပျက်ဆီး', value: stats?.damaged ?? 0, color: COLORS.error, icon: 'warning-outline' },
-      ];
+  const statItems = [
+    { label: 'စုစုပေါင်း', value: stats?.total ?? 0, color: COLORS.primary, icon: 'cube-outline' },
+    { label: 'ယနေ့ရောက်', value: todayCount, color: COLORS.info, icon: 'today-outline' },
+    { label: 'လက်ခံ', value: stats?.received ?? 0, color: COLORS.info, icon: 'download-outline' },
+    { label: 'စစ်ဆေးပြီး', value: stats?.verified ?? 0, color: '#8B5CF6', icon: 'shield-checkmark-outline' },
+    { label: 'ဆောင်ရွက်နေဆဲ', value: inTransitCount, color: COLORS.warning, icon: 'car-outline' },
+    { label: 'ပို့ပြီး', value: stats?.delivered ?? 0, color: COLORS.success, icon: 'checkmark-circle-outline' },
+    { label: 'မအောင်', value: stats?.failed ?? 0, color: COLORS.error, icon: 'close-circle-outline' },
+    { label: 'ပျက်ဆီး', value: stats?.damaged ?? 0, color: COLORS.error, icon: 'warning-outline' },
+  ];
 
   // Split into triples for 3-col rows
   const pairs: (typeof statItems)[] = [];

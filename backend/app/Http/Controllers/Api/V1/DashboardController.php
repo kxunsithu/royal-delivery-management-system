@@ -32,6 +32,9 @@ class DashboardController extends Controller
         $parcelStats = Parcel::selectRaw("
             COUNT(*) as total,
             SUM(CASE WHEN DATE(received_at) = ? THEN 1 ELSE 0 END) as today,
+            SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received,
+            SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified,
+            SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as in_transit,
             SUM(CASE WHEN status IN ('RECEIVED','VERIFIED','IN_TRANSIT') THEN 1 ELSE 0 END) as in_progress,
             SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered,
             SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed,
@@ -89,9 +92,11 @@ class DashboardController extends Controller
         $today = today();
 
         $statuses = Parcel::selectRaw("
+            COUNT(*) as total,
             SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received,
             SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified,
             SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as out_for_delivery,
+            SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as in_transit,
             SUM(CASE WHEN status = 'DELIVERED' THEN 1 ELSE 0 END) as delivered,
             SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed,
             SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged
@@ -122,9 +127,11 @@ class DashboardController extends Controller
             'data' => [
                 'role' => 'manager',
                 'parcel_stats' => [
+                    'total'            => (int) $statuses->total,
                     'received'         => (int) $statuses->received,
                     'verified'         => (int) $statuses->verified,
                     'out_for_delivery' => (int) $statuses->out_for_delivery,
+                    'in_transit'       => (int) $statuses->in_transit,
                     'delivered'        => (int) $statuses->delivered,
                     'failed'           => (int) $statuses->failed,
                     'damaged'          => (int) $statuses->damaged,
@@ -146,9 +153,11 @@ class DashboardController extends Controller
         $today = today();
 
         $statuses = Parcel::selectRaw("
+            COUNT(*) as total,
             SUM(CASE WHEN status = 'RECEIVED' THEN 1 ELSE 0 END) as received,
             SUM(CASE WHEN status = 'VERIFIED' THEN 1 ELSE 0 END) as verified,
             SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as out_for_delivery,
+            SUM(CASE WHEN status = 'IN_TRANSIT' THEN 1 ELSE 0 END) as in_transit,
             SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed
         ")->first();
 
@@ -163,9 +172,11 @@ class DashboardController extends Controller
             'data' => [
                 'role' => 'accountant',
                 'parcel_stats' => [
+                    'total'            => (int) $statuses->total,
                     'received'         => (int) $statuses->received,
                     'verified'         => (int) $statuses->verified,
                     'out_for_delivery' => (int) $statuses->out_for_delivery,
+                    'in_transit'       => (int) $statuses->in_transit,
                     'failed'           => (int) $statuses->failed,
                 ],
                 'today_received' => Parcel::whereDate('received_at', $today)->count(),
