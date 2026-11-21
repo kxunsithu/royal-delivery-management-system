@@ -15,9 +15,14 @@ php artisan config:cache
 php artisan route:cache || true
 php artisan view:cache || true
 
-# Do not run migrations or seeders automatically on deploy.
-# Database schema/data changes are applied manually to avoid
-# refreshing or overwriting production data on every push.
+# Run migrations (only pending ones; safe to re-run on every deploy)
+php artisan migrate --force
+
+# Seed only on first deploy, when the database has no users yet
+USER_COUNT=$(php artisan tinker --execute='echo \App\Models\User::count();' 2>/dev/null || echo "0")
+if [ "$USER_COUNT" = "0" ]; then
+    php artisan db:seed --force || echo "Seeding skipped or already applied"
+fi
 
 # Public storage symlink for uploaded files
 php artisan storage:link --force 2>/dev/null || true

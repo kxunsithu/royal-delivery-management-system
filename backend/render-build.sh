@@ -18,9 +18,14 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo "=== Skipping database migrations and seeding on build/deploy ==="
-# Database schema/data changes are applied manually to avoid
-# refreshing or overwriting production data on every push.
+echo "=== Running database migrations ==="
+php artisan migrate --force
+
+echo "=== Seeding database only on first deploy ==="
+USER_COUNT=$(php artisan tinker --execute='echo \App\Models\User::count();' 2>/dev/null || echo "0")
+if [ "$USER_COUNT" = "0" ]; then
+    php artisan db:seed --force || echo "Seeding skipped or already applied"
+fi
 
 echo "=== Setting storage permissions ==="
 chmod -R 775 storage bootstrap/cache
