@@ -340,6 +340,7 @@ class ParcelController extends Controller
             'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
             'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
             'weight' => ['nullable', 'numeric', 'min:0'],
+            'kg_fee' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'delivery_fee' => ['required', 'numeric', 'min:0'],
             'cod_amount' => ['numeric', 'min:0'],
@@ -443,6 +444,7 @@ class ParcelController extends Controller
             'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
             'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
             'weight' => ['nullable', 'numeric', 'min:0'],
+            'kg_fee' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'delivery_fee' => ['sometimes', 'numeric', 'min:0'],
             'cod_amount' => ['sometimes', 'numeric', 'min:0'],
@@ -732,6 +734,7 @@ class ParcelController extends Controller
                 ? $parcel->items->map(fn($i) => ['id' => $i->id, 'product_name' => $i->product_name, 'quantity' => $i->quantity])->values()->all()
                 : [],
             'weight' => $parcel->weight,
+            'kg_fee' => $parcel->kg_fee,
             'notes' => $parcel->notes,
             'delivery_fee' => $parcel->delivery_fee,
             'cod_amount' => $parcel->cod_amount,

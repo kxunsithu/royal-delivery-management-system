@@ -11,6 +11,7 @@ export interface Parcel {
   description?: string;
   items?: { id: number; product_name: string; quantity: number }[];
   weight?: number;
+  kg_fee?: number;
   notes?: string;
   delivery_fee: number;
   cod_amount: number;

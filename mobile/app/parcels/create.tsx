@@ -51,6 +51,7 @@ export default function CreateParcelScreen() {
     description: '',
     items: [{ product_name: '', quantity: '1' }],
     weight: '',
+    kg_fee: '',
     notes: '',
     delivery_fee: '',
     cod_amount: '0',
@@ -209,6 +210,7 @@ export default function CreateParcelScreen() {
         .filter((it) => it.product_name.trim())
         .map((it) => ({ product_name: it.product_name.trim(), quantity: Number(it.quantity) || 1 })),
       weight: form.weight ? Number(form.weight) : undefined,
+      kg_fee: form.kg_fee ? Number(form.kg_fee) : 0,
       notes: form.notes || undefined,
       delivery_fee: Number(form.delivery_fee),
       cod_amount: Number(form.cod_amount) || 0,
@@ -316,9 +318,30 @@ export default function CreateParcelScreen() {
           <FormField
             label="အလေးချိန် (kg)"
             value={form.weight}
-            onChangeText={(v) => update('weight', v)}
+            onChangeText={(v) => {
+              update('weight', v);
+              const w = Number(v);
+              if (w > 0) {
+                const rate = w <= 5 ? 40 : w <= 50 ? 33 : w <= 100 ? 31 : w <= 300 ? 27 : 20;
+                update('kg_fee', String(w * rate));
+              } else {
+                update('kg_fee', '');
+              }
+            }}
             keyboardType="numeric"
             placeholder="ချန်ထားနိုင်"
+          />
+          {Number(form.weight) >= 20 && (
+            <Text style={{ fontSize: 12, color: COLORS.success, fontFamily: FONTS.regular, marginTop: -4, marginBottom: 8 }}>
+              20Kg အထက် — အိမ်အရောက် ပို့ဆောင်ပေးပါမည်
+            </Text>
+          )}
+          <FormField
+            label="Kg ကြေး (THB)"
+            value={form.kg_fee}
+            onChangeText={(v) => update('kg_fee', v)}
+            keyboardType="numeric"
+            placeholder="0"
           />
 
           <View>

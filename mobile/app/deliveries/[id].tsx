@@ -94,7 +94,17 @@ export default function DeliveryDetailScreen() {
           />
           <InfoRow label="လိပ်စာ" value={parcel?.delivery_address || '—'} />
           {parcel?.items && parcel.items.length > 0 && (
-            <InfoRow label="ထုတ်ကုန်များ" value={parcel.items.map((it: any) => `${it.product_name} x${it.quantity}`).join(', ')} />
+            <View style={{ marginTop: 4 }}>
+              <Text style={{ fontSize: 12, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6, fontFamily: FONTS.semiBold }}>ထုတ်ကုန်များ</Text>
+              {parcel.items.map((it: any, idx: number) => (
+                <View key={idx} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, borderBottomWidth: idx < parcel.items!.length - 1 ? StyleSheet.hairlineWidth : 0, borderBottomColor: COLORS.border }}>
+                  <Text style={{ fontSize: 14, color: COLORS.text, fontFamily: FONTS.regular }}>{it.product_name}</Text>
+                  <View style={{ backgroundColor: COLORS.primaryBg, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 6 }}>
+                    <Text style={{ fontSize: 12, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold }}>x{it.quantity}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
           )}
           {parcel?.description && (
             <InfoRow label="ဖော်ပြချက်" value={parcel.description} />
@@ -132,6 +142,13 @@ export default function DeliveryDetailScreen() {
               label: 'ပို့ဆောင်ခ',
               value: `${Number(parcel.delivery_fee).toLocaleString()} ${feeSymbol}`,
               color: COLORS.success,
+            });
+          }
+          if (Number(parcel.kg_fee) > 0) {
+            feeRows.push({
+              label: 'Kg ကြေး',
+              value: `${Number(parcel.kg_fee).toLocaleString()} THB`,
+              color: COLORS.info,
             });
           }
           if (parcel.is_cod) {

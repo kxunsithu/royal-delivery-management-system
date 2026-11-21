@@ -45,7 +45,7 @@ export default function EditParcelScreen() {
     sender_name: '', sender_phone: '',
     recipient_name: '', recipient_phone: '',
     delivery_address: '',
-    description: '', weight: '', notes: '',
+    description: '', weight: '', kg_fee: '', notes: '',
     delivery_fee: '', cod_amount: '0', is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
     cod_currency: 'MMK' as 'MMK' | 'THB',
@@ -67,6 +67,7 @@ export default function EditParcelScreen() {
         delivery_address: parcel.delivery_address || '',
         description: parcel.description || '',
         weight: parcel.weight ? String(parcel.weight) : '',
+        kg_fee: parcel.kg_fee ? String(parcel.kg_fee) : '',
         notes: parcel.notes || '',
         delivery_fee: String(parcel.delivery_fee || 0),
         cod_amount: String(parcel.cod_amount || 0),
@@ -174,6 +175,7 @@ export default function EditParcelScreen() {
       delivery_address: form.delivery_address,
       description: form.description || undefined,
       weight: form.weight ? Number(form.weight) : undefined,
+      kg_fee: form.kg_fee ? Number(form.kg_fee) : 0,
       notes: form.notes || undefined,
       delivery_fee: Number(form.delivery_fee),
       cod_amount: Number(form.cod_amount) || 0,
@@ -280,7 +282,34 @@ export default function EditParcelScreen() {
             </TouchableOpacity>
           </View>
 
-          <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
+          <FormField
+            label="အလေးချိန် (kg)"
+            value={form.weight}
+            onChangeText={(v) => {
+              update('weight', v);
+              const w = Number(v);
+              if (w > 0) {
+                const rate = w <= 5 ? 40 : w <= 50 ? 33 : w <= 100 ? 31 : w <= 300 ? 27 : 20;
+                update('kg_fee', String(w * rate));
+              } else {
+                update('kg_fee', '');
+              }
+            }}
+            keyboardType="numeric"
+            placeholder="ချန်ထားနိုင်"
+          />
+          {Number(form.weight) >= 20 && (
+            <Text style={{ fontSize: 12, color: COLORS.success, fontFamily: FONTS.regular, marginTop: -4, marginBottom: 8 }}>
+              20Kg အထက် — အိမ်အရောက် ပို့ဆောင်ပေးပါမည်
+            </Text>
+          )}
+          <FormField
+            label="Kg ကြေး (THB)"
+            value={form.kg_fee}
+            onChangeText={(v) => update('kg_fee', v)}
+            keyboardType="numeric"
+            placeholder="0"
+          />
           <View>
             <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>
             <View style={styles.segmented}>
