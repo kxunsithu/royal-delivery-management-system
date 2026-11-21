@@ -50,8 +50,8 @@ export default function DailySummaryDetailScreen() {
   // Calculate summary stats from loaded parcels
   const feeMmk = parcels.filter(p => p.currency === 'MMK').reduce((s, p) => s + Number(p.delivery_fee), 0);
   const feeThb = parcels.filter(p => p.currency === 'THB').reduce((s, p) => s + Number(p.delivery_fee), 0);
-  const codMmk = parcels.filter(p => p.currency === 'MMK' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
-  const codThb = parcels.filter(p => p.currency === 'THB' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
+  const codMmk = parcels.filter(p => (p.cod_currency ?? p.currency) === 'MMK' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
+  const codThb = parcels.filter(p => (p.cod_currency ?? p.currency) === 'THB' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
   const uniqueSenders = new Set(parcels.map(p => p.sender_phone).filter(Boolean)).size;
   const uniqueRecipients = new Set(parcels.map(p => p.recipient_phone)).size;
 

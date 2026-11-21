@@ -16,6 +16,7 @@ export interface Parcel {
   cod_amount: number;
   is_cod: boolean;
   currency: 'MMK' | 'THB';
+  cod_currency?: 'MMK' | 'THB';
   status: string;
   condition: string;
   priority: string;

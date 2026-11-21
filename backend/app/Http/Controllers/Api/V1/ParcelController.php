@@ -191,8 +191,8 @@ class ParcelController extends Controller
                 DB::raw("SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged_count"),
                 DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as fee_mmk"),
                 DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as fee_thb"),
-                DB::raw("SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
-                DB::raw("SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
             ])
             ->whereNotNull('received_at')
             ->when($request->date_from, fn($q) => $q->whereRaw('DATE(received_at) >= ?', [$request->date_from]))
@@ -247,8 +247,8 @@ class ParcelController extends Controller
                 DB::raw("SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged_count"),
                 DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as fee_mmk"),
                 DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as fee_thb"),
-                DB::raw("SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
-                DB::raw("SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
                 DB::raw('COUNT(DISTINCT DATE(received_at)) as day_count'),
             ])
             ->whereNotNull('received_at')
@@ -343,6 +343,7 @@ class ParcelController extends Controller
             'cod_amount' => ['numeric', 'min:0'],
             'is_cod' => ['boolean'],
             'currency' => ['required', 'string', Rule::in(['MMK', 'THB'])],
+            'cod_currency' => ['nullable', 'string', Rule::in(['MMK', 'THB'])],
             'condition' => ['string', Rule::in(['GOOD', 'DAMAGED', 'MISSING'])],
             'priority' => ['string', Rule::in(['NORMAL', 'HIGH', 'URGENT'])],
             'received_at' => ['nullable', 'date'],
@@ -361,6 +362,7 @@ class ParcelController extends Controller
                 'cod_amount' => $validated['cod_amount'] ?? 0,
                 'is_cod' => $validated['is_cod'] ?? false,
                 'currency' => $validated['currency'] ?? 'MMK',
+                'cod_currency' => $validated['cod_currency'] ?? $validated['currency'] ?? 'MMK',
                 'condition' => $validated['condition'] ?? 'GOOD',
                 'priority' => $validated['priority'] ?? 'NORMAL',
             ]);
@@ -431,6 +433,7 @@ class ParcelController extends Controller
             'cod_amount' => ['sometimes', 'numeric', 'min:0'],
             'is_cod' => ['sometimes', 'boolean'],
             'currency' => ['sometimes', 'string', Rule::in(['MMK', 'THB'])],
+            'cod_currency' => ['sometimes', 'nullable', 'string', Rule::in(['MMK', 'THB'])],
             'condition' => ['sometimes', 'string', Rule::in(['GOOD', 'DAMAGED', 'MISSING'])],
             'priority' => ['sometimes', 'string', Rule::in(['NORMAL', 'HIGH', 'URGENT'])],
             'damage_description' => ['nullable', 'string'],
@@ -706,6 +709,7 @@ class ParcelController extends Controller
             'cod_amount' => $parcel->cod_amount,
             'is_cod' => $parcel->is_cod,
             'currency' => $parcel->currency ?? 'MMK',
+            'cod_currency' => $parcel->cod_currency ?? $parcel->currency ?? 'MMK',
             'status' => $parcel->status,
             'condition' => $parcel->condition,
             'priority' => $parcel->priority,

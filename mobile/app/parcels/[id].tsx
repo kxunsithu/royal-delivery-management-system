@@ -184,7 +184,7 @@ export default function ParcelDetailScreen() {
           ${parcel.weight ? `<div class="row"><span class="label">အလေးချိန်</span><span class="value">${parcel.weight} kg</span></div>` : ''}
           ${parcel.description ? `<div class="row"><span class="label">ဖော်ပြချက်</span><span class="value">${parcel.description}</span></div>` : ''}
           <div class="row"><span class="label">ပို့ဆောင်ခ</span><span class="value">${Number(parcel.delivery_fee).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>
-          ${parcel.is_cod ? `<div class="row"><span class="label">COD ပမာဏ</span><span class="value">${Number(parcel.cod_amount).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>` : ''}
+          ${parcel.is_cod ? `<div class="row"><span class="label">COD ပမာဏ</span><span class="value">${Number(parcel.cod_amount).toLocaleString()} ${(parcel.cod_currency ?? parcel.currency) === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>` : ''}
           ${parcel.active_assignment?.staff?.name ? `<div class="row"><span class="label">ချိတ်ဆက်ထားသောဝန်ထမ်း</span><span class="value">${parcel.active_assignment.staff.name}</span></div>` : ''}
           ${deliveryProofs.length > 0 ? `<div class="row"><span class="label">ပို့ဆောင်မှုသက်သေ</span><span class="value">${deliveryProofs.length} ပုံ</span></div>` : ''}
           <div class="footer">ကျေးဇူးတင်ပါသည်။</div>
@@ -389,7 +389,7 @@ export default function ParcelDetailScreen() {
         <InfoSection title="ငွေကြေး">
           <InfoRow label="ငွေကြေးအမျိုး" value={parcel.currency === 'THB' ? 'Thai Baht (THB)' : 'ကျပ် (MMK)'} />
           <InfoRow label="ပို့ဆောင်ခ" value={`${Number(parcel.delivery_fee).toLocaleString()} ${parcel.currency === 'THB' ? 'THB' : 'MMK'}`} />
-          {parcel.is_cod && <InfoRow label="COD ပမာဏ" value={`${Number(parcel.cod_amount).toLocaleString()} ${parcel.currency === 'THB' ? 'THB' : 'MMK'}`} />}
+          {parcel.is_cod && <InfoRow label="COD ပမာဏ" value={`${Number(parcel.cod_amount).toLocaleString()} ${(parcel.cod_currency ?? parcel.currency) === 'THB' ? 'THB' : 'MMK'}`} />}
         </InfoSection>
 
         {parcel.active_assignment && (

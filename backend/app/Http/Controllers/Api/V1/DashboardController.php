@@ -48,8 +48,8 @@ class DashboardController extends Controller
         $totals = Parcel::selectRaw("
             COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
             COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
-            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
-            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
         ")->first();
 
         $trends = [];
@@ -105,8 +105,8 @@ class DashboardController extends Controller
         $totals = Parcel::selectRaw("
             COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
             COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
-            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
-            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
         ")->first();
 
         $staffWorkload = DeliveryAssignment::selectRaw("
@@ -166,8 +166,8 @@ class DashboardController extends Controller
         $totals = Parcel::selectRaw("
             COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
             COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
-            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
-            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
         ")->first();
 
         return response()->json([
@@ -204,8 +204,8 @@ class DashboardController extends Controller
         $totals = Parcel::whereIn('id', $assignedParcelIds)->selectRaw("
             COALESCE(SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END),0) as fee_mmk,
             COALESCE(SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END),0) as fee_thb,
-            COALESCE(SUM(CASE WHEN currency = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
-            COALESCE(SUM(CASE WHEN currency = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_mmk,
+            COALESCE(SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END),0) as cod_thb
         ")->first();
 
         return response()->json([

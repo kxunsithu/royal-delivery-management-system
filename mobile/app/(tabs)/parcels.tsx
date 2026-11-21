@@ -418,7 +418,7 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
             </View>
             {parcel.is_cod && (
               <View style={styles.codBadge}>
-                <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()} {parcel.currency === 'THB' ? 'THB' : 'MMK'}</Text>
+                <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()} {(parcel.cod_currency ?? parcel.currency) === 'THB' ? 'THB' : 'MMK'}</Text>
               </View>
             )}
             {firstImage && (

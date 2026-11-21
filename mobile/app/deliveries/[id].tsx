@@ -122,29 +122,42 @@ export default function DeliveryDetailScreen() {
 
         {/* Fee & COD section */}
         {parcel && (Number(parcel.delivery_fee) > 0 || parcel.is_cod) && (() => {
-          const currency = parcel.currency ?? 'MMK';
-          const currencySymbol = currency === 'THB' ? '฿' : 'K';
+          const feeCurrency = parcel.currency ?? 'MMK';
+          const feeSymbol = feeCurrency === 'THB' ? '฿' : 'K';
+          const codCurrency = parcel.cod_currency ?? feeCurrency;
+          const codSymbol = codCurrency === 'THB' ? '฿' : 'K';
           const feeRows: { label: string; value: string; color: string }[] = [];
           if (Number(parcel.delivery_fee) > 0) {
             feeRows.push({
               label: 'ပို့ဆောင်ခ',
-              value: `${Number(parcel.delivery_fee).toLocaleString()} ${currencySymbol}`,
+              value: `${Number(parcel.delivery_fee).toLocaleString()} ${feeSymbol}`,
               color: COLORS.success,
             });
           }
           if (parcel.is_cod) {
             feeRows.push({
               label: 'COD',
-              value: `${Number(parcel.cod_amount).toLocaleString()} ${currencySymbol}`,
+              value: `${Number(parcel.cod_amount).toLocaleString()} ${codSymbol}`,
               color: COLORS.warning,
             });
           }
           return (
             <InfoSection title="ငွေကြေး အချက်အလက်" icon="cash-outline">
-              {feeRows.map((row, i) => (
-                <InfoRow key={row.label} label={row.label} value={row.value} valueColor={row.color} isLast={i === feeRows.length - 1} />
+              {feeRows.map((row) => (
+                <InfoRow key={row.label} label={row.label} value={row.value} valueColor={row.color} isLast={false} />
               ))}
-              <InfoRow label="ငွေကြေး" value={currency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} isLast />
+              {parcel.is_cod ? (
+                feeCurrency !== codCurrency ? (
+                  <>
+                    <InfoRow label="ပို့ဆောင်ခ ငွေကြေး" value={feeCurrency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} isLast={false} />
+                    <InfoRow label="COD ငွေကြေး" value={codCurrency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} isLast />
+                  </>
+                ) : (
+                  <InfoRow label="ငွေကြေး" value={feeCurrency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} isLast />
+                )
+              ) : (
+                <InfoRow label="ငွေကြေး" value={feeCurrency === 'THB' ? 'ထိုင်းဘတ် (฿)' : 'ကျပ် (K)'} isLast />
+              )}
             </InfoSection>
           );
         })()}

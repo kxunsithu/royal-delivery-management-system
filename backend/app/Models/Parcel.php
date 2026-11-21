@@ -27,6 +27,7 @@ class Parcel extends Model
         'cod_amount',
         'is_cod',
         'currency',
+        'cod_currency',
         'status',
         'condition',
         'priority',

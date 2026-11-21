@@ -18,6 +18,7 @@ export interface Assignment {
     cod_amount: number;
     is_cod: boolean;
     currency?: string;
+    cod_currency?: string;
     status: string;
     condition?: string;
     priority: string;

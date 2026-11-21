@@ -116,6 +116,7 @@ class ParcelSeeder extends Seeder
                 'cod_amount'      => $codAmount,
                 'is_cod'          => $isCod,
                 'currency'        => $currency,
+                'cod_currency'    => $currency,
                 'condition'       => 'GOOD',
                 'received_at'     => now()->subDays(($i - 1) % 30)->subHours($i % 24),
                 'received_by_id'  => $admin->id,

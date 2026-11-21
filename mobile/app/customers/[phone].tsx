@@ -63,10 +63,10 @@ export default function CustomerDetailScreen() {
     .filter(p => p.currency === 'THB')
     .reduce((s, p) => s + Number(p.delivery_fee), 0);
   const codMMK = parcels
-    .filter(p => p.currency === 'MMK' && p.is_cod)
+    .filter(p => (p.cod_currency ?? p.currency) === 'MMK' && p.is_cod)
     .reduce((s, p) => s + Number(p.cod_amount), 0);
   const codTHB = parcels
-    .filter(p => p.currency === 'THB' && p.is_cod)
+    .filter(p => (p.cod_currency ?? p.currency) === 'THB' && p.is_cod)
     .reduce((s, p) => s + Number(p.cod_amount), 0);
 
   return (
@@ -232,7 +232,7 @@ function ParcelRow({ parcel }: { parcel: Parcel }) {
           </View>
           {parcel.is_cod && (
             <View style={styles.codBadge}>
-              <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()} {parcel.currency === 'THB' ? 'THB' : 'MMK'}</Text>
+              <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()} {(parcel.cod_currency ?? parcel.currency) === 'THB' ? 'THB' : 'MMK'}</Text>
             </View>
           )}
         </View>

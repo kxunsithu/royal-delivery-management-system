@@ -391,7 +391,7 @@ function AssignmentCard({ assignment }: { assignment: Assignment }) {
           {parcel?.is_cod && (
             <View style={styles.codBadge}>
               <Text style={styles.codText}>
-                COD {parcel.currency === 'THB'
+                COD {(parcel.cod_currency ?? parcel.currency) === 'THB'
                   ? `${Number(parcel.cod_amount).toLocaleString()} ฿`
                   : `${Number(parcel.cod_amount).toLocaleString()} K`}
               </Text>

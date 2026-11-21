@@ -56,6 +56,7 @@ export default function CreateParcelScreen() {
     cod_amount: '0',
     is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
+    cod_currency: 'MMK' as 'MMK' | 'THB',
     priority: 'NORMAL',
     condition: 'GOOD',
   });
@@ -240,6 +241,7 @@ export default function CreateParcelScreen() {
       cod_amount: Number(form.cod_amount) || 0,
       is_cod: form.is_cod,
       currency: form.currency,
+      cod_currency: form.cod_currency,
       priority: form.priority,
       condition: form.condition,
     });
@@ -480,7 +482,7 @@ export default function CreateParcelScreen() {
 
         <FormSection title="ငွေကြေး">
           <View>
-            <Text style={styles.label}>ငွေကြေးအမျိုးအစား *</Text>
+            <Text style={styles.label}>ပို့ဆောင်ခ ငွေကြေး *</Text>
             <View style={styles.segmented}>
               {(['MMK', 'THB'] as const).map(cur => (
                 <TouchableOpacity
@@ -519,13 +521,31 @@ export default function CreateParcelScreen() {
           </View>
 
           {form.is_cod && (
-            <FormField
-              label={`COD ပမာဏ (${form.currency})`}
-              value={form.cod_amount}
-              onChangeText={(v) => update('cod_amount', v)}
-              keyboardType="numeric"
-              placeholder="0"
-            />
+            <>
+              <FormField
+                label={`COD ပမာဏ (${form.cod_currency})`}
+                value={form.cod_amount}
+                onChangeText={(v) => update('cod_amount', v)}
+                keyboardType="numeric"
+                placeholder="0"
+              />
+              <View>
+                <Text style={styles.label}>COD ငွေကြေး</Text>
+                <View style={styles.segmented}>
+                  {(['MMK', 'THB'] as const).map(cur => (
+                    <TouchableOpacity
+                      key={cur}
+                      style={[styles.segmentItem, form.cod_currency === cur && styles.segmentActive]}
+                      onPress={() => update('cod_currency', cur)}
+                    >
+                      <Text style={[styles.segmentText, form.cod_currency === cur && styles.segmentActiveText]}>
+                        {cur === 'MMK' ? 'ကျပ် (MMK)' : 'ဘတ် (THB)'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </>
           )}
         </FormSection>
 

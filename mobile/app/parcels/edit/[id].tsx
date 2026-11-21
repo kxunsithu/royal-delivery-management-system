@@ -48,6 +48,7 @@ export default function EditParcelScreen() {
     description: '', category: '', weight: '', notes: '',
     delivery_fee: '', cod_amount: '0', is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
+    cod_currency: 'MMK' as 'MMK' | 'THB',
     priority: 'NORMAL',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -71,6 +72,7 @@ export default function EditParcelScreen() {
         cod_amount: String(parcel.cod_amount || 0),
         is_cod: parcel.is_cod || false,
         currency: (parcel.currency as 'MMK' | 'THB') || 'MMK',
+        cod_currency: (parcel.cod_currency as 'MMK' | 'THB') || (parcel.currency as 'MMK' | 'THB') || 'MMK',
         priority: parcel.priority || 'NORMAL',
       });
       setExistingImages(parcel.images ?? []);
@@ -209,6 +211,7 @@ export default function EditParcelScreen() {
       cod_amount: Number(form.cod_amount) || 0,
       is_cod: form.is_cod,
       currency: form.currency,
+      cod_currency: form.cod_currency,
       priority: form.priority,
     });
   }
@@ -339,7 +342,7 @@ export default function EditParcelScreen() {
 
         <FormSection title="ငွေကြေး">
           <View>
-            <Text style={styles.label}>ငွေကြေးအမျိုးအစား *</Text>
+            <Text style={styles.label}>ပို့ဆောင်ခ ငွေကြေး *</Text>
             <View style={styles.segmented}>
               {(['MMK', 'THB'] as const).map(cur => (
                 <TouchableOpacity
@@ -362,7 +365,27 @@ export default function EditParcelScreen() {
             </View>
             <Switch value={form.is_cod} onValueChange={v => update('is_cod', v)} trackColor={{ false: COLORS.border, true: COLORS.primary }} thumbColor={COLORS.white} />
           </View>
-          {form.is_cod && <FormField label={`COD ပမာဏ (${form.currency})`} value={form.cod_amount} onChangeText={v => update('cod_amount', v)} keyboardType="numeric" placeholder="0" />}
+          {form.is_cod && (
+            <>
+              <FormField label={`COD ပမာဏ (${form.cod_currency})`} value={form.cod_amount} onChangeText={v => update('cod_amount', v)} keyboardType="numeric" placeholder="0" />
+              <View>
+                <Text style={styles.label}>COD ငွေကြေး</Text>
+                <View style={styles.segmented}>
+                  {(['MMK', 'THB'] as const).map(cur => (
+                    <TouchableOpacity
+                      key={cur}
+                      style={[styles.segmentItem, form.cod_currency === cur && styles.segmentActive]}
+                      onPress={() => update('cod_currency', cur)}
+                    >
+                      <Text style={[styles.segmentText, form.cod_currency === cur && styles.segmentActiveText]}>
+                        {cur === 'MMK' ? 'ကျပ် (MMK)' : 'ဘတ် (THB)'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
         </FormSection>
 
         <FormSection title="မှတ်ချက်">

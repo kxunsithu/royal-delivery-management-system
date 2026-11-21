@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     paddingTop: 54,
     paddingBottom: 28,
     marginBottom: 4,
-    minHeight: 210,
+    minHeight: 230,
     overflow: 'hidden',
     backgroundColor: '#EA580C',
   },
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: FONTS.bold,
     letterSpacing: -0.5,
-    lineHeight: 32,
+    lineHeight: 48,
   },
   heroBannerTitle2: {
     fontSize: 27,
@@ -394,13 +394,14 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.72)',
     fontFamily: FONTS.bold,
     letterSpacing: -0.5,
-    lineHeight: 34,
+    lineHeight: 48,
     marginBottom: 6,
   },
   heroBannerSubtitle: {
     fontSize: 10.5,
     color: 'rgba(255,255,255,0.68)',
     fontFamily: FONTS.regular,
+    lineHeight: 16,
     marginBottom: 10,
   },
 
