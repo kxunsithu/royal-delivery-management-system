@@ -101,7 +101,7 @@ export const deliveryService = {
     return response.data;
   },
 
-  async allAssignments(params?: { staff_id?: number; status?: string; date_from?: string; date_to?: string; page?: number; per_page?: number }): Promise<AssignmentsResponse> {
+  async allAssignments(params?: { staff_id?: number; status?: string; date_from?: string; date_to?: string; page?: number; per_page?: number; finished_only?: boolean }): Promise<AssignmentsResponse> {
     const response = await apiClient.get('/deliveries/assignments', { params });
     return response.data;
   },

@@ -102,7 +102,9 @@ class DeliveryController extends Controller
             ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
             ->select([
                 DB::raw("$periodExpr as period"),
-                DB::raw('COUNT(*) as total_count'),
+                // Total parcels only counts finished deliveries (delivered + failed);
+                // in-transit parcels are intentionally excluded.
+                DB::raw("SUM(CASE WHEN delivery_assignments.status IN ('COMPLETED','FAILED') THEN 1 ELSE 0 END) as total_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status = 'FAILED' THEN 1 ELSE 0 END) as failed_count"),
                 DB::raw("SUM(CASE WHEN delivery_assignments.status NOT IN ('COMPLETED','FAILED','REASSIGNED') THEN 1 ELSE 0 END) as in_transit_count"),
@@ -120,30 +122,33 @@ class DeliveryController extends Controller
             ->groupBy(DB::raw($periodExpr))
             ->orderBy('period', 'desc');
 
-        $rows = $query->get()->map(function ($row) use ($groupBy) {
-            $period = $row->period;
-            if ($groupBy === 'month') {
-                $firstDay = $period . '-01';
-                $lastDayDate = (new \DateTime($firstDay))->modify('last day of this month');
-                $lastDay = $lastDayDate->format('Y-m-d');
-            } else {
-                $firstDay = $period;
-                $lastDay = $period;
-            }
-            return [
-                'period'          => $period,
-                'date_from'       => $firstDay,
-                'date_to'         => $lastDay,
-                'total_count'     => (int) $row->total_count,
-                'completed_count' => (int) $row->completed_count,
-                'failed_count'    => (int) $row->failed_count,
-                'in_transit_count' => (int) $row->in_transit_count,
-                'fee_mmk'         => (float) $row->fee_mmk,
-                'fee_thb'         => (float) $row->fee_thb,
-                'cod_mmk'         => (float) $row->cod_mmk,
-                'cod_thb'         => (float) $row->cod_thb,
-            ];
-        });
+        $rows = $query->get()
+            ->filter(fn($row) => (int) $row->total_count > 0)
+            ->values()
+            ->map(function ($row) use ($groupBy) {
+                $period = $row->period;
+                if ($groupBy === 'month') {
+                    $firstDay = $period . '-01';
+                    $lastDayDate = (new \DateTime($firstDay))->modify('last day of this month');
+                    $lastDay = $lastDayDate->format('Y-m-d');
+                } else {
+                    $firstDay = $period;
+                    $lastDay = $period;
+                }
+                return [
+                    'period'          => $period,
+                    'date_from'       => $firstDay,
+                    'date_to'         => $lastDay,
+                    'total_count'     => (int) $row->total_count,
+                    'completed_count' => (int) $row->completed_count,
+                    'failed_count'    => (int) $row->failed_count,
+                    'in_transit_count' => (int) $row->in_transit_count,
+                    'fee_mmk'         => (float) $row->fee_mmk,
+                    'fee_thb'         => (float) $row->fee_thb,
+                    'cod_mmk'         => (float) $row->cod_mmk,
+                    'cod_thb'         => (float) $row->cod_thb,
+                ];
+            });
 
         return response()->json(['data' => $rows]);
     }
@@ -171,6 +176,7 @@ class DeliveryController extends Controller
             ->select('delivery_assignments.*')
             ->when($staffId, fn($q) => $q->where('delivery_assignments.staff_id', $staffId))
             ->when($user->isDeliveryStaff(), fn($q) => $q->whereIn('delivery_assignments.status', ['COMPLETED', 'FAILED']))
+            ->when($request->boolean('finished_only'), fn($q) => $q->whereIn('delivery_assignments.status', ['COMPLETED', 'FAILED']))
             ->when($request->status, function ($q) use ($request) {
                 if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
                     $q->whereNotIn('delivery_assignments.status', ['COMPLETED', 'FAILED', 'REASSIGNED']);
@@ -189,6 +195,7 @@ class DeliveryController extends Controller
             ->join('parcels', 'parcels.id', '=', 'delivery_assignments.parcel_id')
             ->when($staffId, fn($q) => $q->where('delivery_assignments.staff_id', $staffId))
             ->when($user->isDeliveryStaff(), fn($q) => $q->whereIn('delivery_assignments.status', ['COMPLETED', 'FAILED']))
+            ->when($request->boolean('finished_only'), fn($q) => $q->whereIn('delivery_assignments.status', ['COMPLETED', 'FAILED']))
             ->when($request->status, function ($q) use ($request) {
                 if (in_array($request->status, ['ACTIVE', 'IN_PROGRESS'])) {
                     $q->whereNotIn('delivery_assignments.status', ['COMPLETED', 'FAILED', 'REASSIGNED']);

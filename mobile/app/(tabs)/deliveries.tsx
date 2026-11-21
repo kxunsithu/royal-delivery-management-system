@@ -81,6 +81,7 @@ export default function DeliveriesScreen() {
       date_to: selected?.to,
       page,
       per_page: 20,
+      finished_only: true,
     }),
     enabled: view === 'list' && !!selected,
   });

@@ -10,14 +10,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Image,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../src/context/AuthContext';
 import { useTheme } from '../src/context/ThemeContext';
-import { RADIUS } from '../src/constants';
 
 export default function LoginScreen() {
   const { colors, isDark } = useTheme();
@@ -43,8 +41,8 @@ export default function LoginScreen() {
     try {
       await login(phone.trim(), password);
     } catch (error: any) {
-      const errors = error?.response?.data?.errors;
-      const firstError = errors ? Object.values(errors).flat()[0] : null;
+      const responseErrors = error?.response?.data?.errors;
+      const firstError = responseErrors ? Object.values(responseErrors).flat()[0] : null;
       const msg =
         firstError ||
         error?.response?.data?.message ||
@@ -61,13 +59,14 @@ export default function LoginScreen() {
     errors[field] ? colors.error : focused === field ? colors.primary : colors.textLight;
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.primary }]}>
       <StatusBar style="light" />
-      <SafeAreaView style={styles.safe} edges={['top']}>
-        {/* Decorative circles */}
-        <View style={styles.decorTR} />
-        <View style={styles.decorBL} />
+      <View style={[styles.headerBackground, { backgroundColor: colors.primary }]}>
+        <View style={styles.decorCircleOne} />
+        <View style={styles.decorCircleTwo} />
+      </View>
 
+      <SafeAreaView style={styles.safe} edges={['top']}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.flex}
@@ -77,35 +76,22 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {/* Brand */}
             <View style={styles.hero}>
-              <View style={styles.logoWrap}>
-                <Image
-                  source={require('../assets/icon.png')}
-                  style={styles.logoImage}
-                  resizeMode="contain"
-                />
-              </View>
               <Text style={styles.appName}>Royal Myawaddy</Text>
-              <Text style={styles.appSubtitle}>ပို့ဆောင်ရေး စီမံခန့်ခွဲမှုစနစ်</Text>
+              <Text style={styles.appSubtitle}>Delivery Management System</Text>
             </View>
 
-            {/* White sheet */}
-            <View style={[styles.sheet, { backgroundColor: isDark ? colors.card : '#FFFFFF' }]}>
-              <View style={styles.sheetHandle} />
-              <Text style={[styles.title, { color: colors.text }]}>အကောင့်ဝင်ရောက်ရန်</Text>
-              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                ဖုန်းနံပါတ်နှင့် စကားဝှက် ထည့်သွင်းပါ
-              </Text>
+            <View style={styles.sheet}>
+              <Text style={[styles.title, { color: '#FFFFFF' }]}>အကောင့်ဝင်ရောက်ရန်</Text>
+              <Text style={[styles.subtitle, { color: 'rgba(255,255,255,0.82)' }]}>သင့်အကောင့်သို့ ဝင်ရောက်ပါ</Text>
 
-              {/* Phone Field */}
               <View style={styles.fieldGroup}>
-                <Text style={[styles.label, { color: colors.textSecondary }]}>ဖုန်းနံပါတ်</Text>
+                <Text style={[styles.label, { color: '#FFFFFF' }]}>ဖုန်းနံပါတ်</Text>
                 <View
                   style={[
                     styles.inputWrapper,
                     {
-                      backgroundColor: isDark ? colors.background : '#FFFFFF',
+                      backgroundColor: isDark ? colors.background : '#F8F9FB',
                       borderColor: errors.phone
                         ? colors.error
                         : focused === 'phone'
@@ -114,15 +100,17 @@ export default function LoginScreen() {
                     },
                   ]}
                 >
-                  <MaterialCommunityIcons name="phone-outline" size={20} color={inputIconColor('phone')} />
+                  <View style={[styles.fieldIcon, { backgroundColor: isDark ? colors.muted : '#FFFFFF' }]}>
+                    <MaterialCommunityIcons name="phone-outline" size={20} color={inputIconColor('phone')} />
+                  </View>
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
-                    placeholder="09..."
+                    placeholder="09xxxxxxxxx"
                     placeholderTextColor={colors.textLight}
                     value={phone}
-                    onChangeText={(t) => {
-                      setPhone(t);
-                      setErrors((e) => ({ ...e, phone: undefined }));
+                    onChangeText={(text) => {
+                      setPhone(text);
+                      setErrors((previous) => ({ ...previous, phone: undefined }));
                     }}
                     onFocus={() => setFocused('phone')}
                     onBlur={() => setFocused(null)}
@@ -133,19 +121,16 @@ export default function LoginScreen() {
                     returnKeyType="next"
                   />
                 </View>
-                {errors.phone && (
-                  <Text style={[styles.errorText, { color: colors.error }]}>{errors.phone}</Text>
-                )}
+                {errors.phone && <Text style={[styles.errorText, { color: colors.error }]}>{errors.phone}</Text>}
               </View>
 
-              {/* Password Field */}
               <View style={styles.fieldGroup}>
-                <Text style={[styles.label, { color: colors.textSecondary }]}>စကားဝှက်</Text>
+                <Text style={[styles.label, { color: '#FFFFFF' }]}>စကားဝှက်</Text>
                 <View
                   style={[
                     styles.inputWrapper,
                     {
-                      backgroundColor: isDark ? colors.background : '#FFFFFF',
+                      backgroundColor: isDark ? colors.background : '#F8F9FB',
                       borderColor: errors.password
                         ? colors.error
                         : focused === 'password'
@@ -154,19 +139,17 @@ export default function LoginScreen() {
                     },
                   ]}
                 >
-                  <MaterialCommunityIcons
-                    name="lock-outline"
-                    size={20}
-                    color={inputIconColor('password')}
-                  />
+                  <View style={[styles.fieldIcon, { backgroundColor: isDark ? colors.muted : '#FFFFFF' }]}>
+                    <MaterialCommunityIcons name="lock-outline" size={20} color={inputIconColor('password')} />
+                  </View>
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="••••••••"
                     placeholderTextColor={colors.textLight}
                     value={password}
-                    onChangeText={(t) => {
-                      setPassword(t);
-                      setErrors((e) => ({ ...e, password: undefined }));
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      setErrors((previous) => ({ ...previous, password: undefined }));
                     }}
                     onFocus={() => setFocused('password')}
                     onBlur={() => setFocused(null)}
@@ -176,27 +159,25 @@ export default function LoginScreen() {
                     onSubmitEditing={handleLogin}
                   />
                   <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
+                    onPress={() => setShowPassword((visible) => !visible)}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     accessibilityRole="button"
+                    accessibilityLabel={showPassword ? 'စကားဝှက် ဖျောက်မည်' : 'စကားဝှက် ပြမည်'}
                   >
                     <MaterialCommunityIcons
                       name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                      size={20}
+                      size={21}
                       color={colors.textLight}
                     />
                   </TouchableOpacity>
                 </View>
-                {errors.password && (
-                  <Text style={[styles.errorText, { color: colors.error }]}>{errors.password}</Text>
-                )}
+                {errors.password && <Text style={[styles.errorText, { color: colors.error }]}>{errors.password}</Text>}
               </View>
 
-              {/* Login Button */}
               <TouchableOpacity
                 style={[
                   styles.loginBtn,
-                  { backgroundColor: colors.primary },
+                  { backgroundColor: '#FFFFFF' },
                   isLoading && styles.loginBtnDisabled,
                 ]}
                 onPress={handleLogin}
@@ -204,19 +185,19 @@ export default function LoginScreen() {
                 activeOpacity={0.85}
               >
                 {isLoading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={colors.primary} size="small" />
                 ) : (
                   <>
-                    <Text style={styles.loginBtnText}>ဝင်ရောက်မည်</Text>
-                    <MaterialCommunityIcons name="arrow-right" size={18} color="#FFFFFF" />
+                    <Text style={[styles.loginBtnText, { color: colors.primary }]}>ဝင်ရောက်မည်</Text>
+                    <View style={[styles.loginArrow, { backgroundColor: colors.primary }]}>
+                      <MaterialCommunityIcons name="arrow-right" size={17} color="#FFFFFF" />
+                    </View>
                   </>
                 )}
               </TouchableOpacity>
-
-              <Text style={[styles.footer, { color: colors.textLight }]}>
-                Royal Myawaddy Delivery © 2026
-              </Text>
             </View>
+
+            <Text style={[styles.footer, { color: 'rgba(255,255,255,0.82)' }]}>© 2026 Royal Myawaddy</Text>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -225,100 +206,100 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F97316' },
-  safe: { flex: 1, backgroundColor: '#F97316' },
+  root: { flex: 1 },
+  headerBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 310,
+  },
+  decorCircleOne: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    borderWidth: 32,
+    borderColor: 'rgba(255,255,255,0.08)',
+    right: -100,
+    top: -80,
+  },
+  decorCircleTwo: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 24,
+    borderColor: 'rgba(255,255,255,0.06)',
+    left: -90,
+    top: 150,
+  },
+  safe: { flex: 1 },
   flex: { flex: 1 },
-
-  // Decorative background shapes
-  decorTR: {
-    position: 'absolute',
-    top: -110,
-    right: -90,
-    width: 260,
-    height: 260,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.10)',
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
   },
-  decorBL: {
-    position: 'absolute',
-    top: 170,
-    left: -120,
-    width: 240,
-    height: 240,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-  },
-
-  scrollContent: { flexGrow: 1 },
-
-  // Brand
   hero: {
+    height: 210,
     alignItems: 'center',
-    paddingTop: 44,
-    paddingBottom: 34,
-    paddingHorizontal: 28,
+    justifyContent: 'center',
+    paddingBottom: 18,
   },
+  brandRow: { marginBottom: 10 },
   logoWrap: {
-    width: 84,
-    height: 84,
-    borderRadius: 4,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    borderWidth: 4,
+    borderColor: 'rgba(255,255,255,0.28)',
     shadowColor: '#7C2D12',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 20,
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
     elevation: 8,
   },
-  logoImage: { width: 62, height: 62, borderRadius: 4},
+  logoImage: { width: 54, height: 54, borderRadius: 27 },
   appName: {
-    fontSize: 27,
+    fontSize: 24,
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'NotoSansMyanmar_700Bold',
-    letterSpacing: 0.2,
-    marginBottom: 6,
   },
   appSubtitle: {
-    fontSize: 13,
+    marginTop: 2,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.82)',
     fontFamily: 'NotoSansMyanmar_400Regular',
   },
-
-  // Sheet
   sheet: {
-    flex: 1,
-    minHeight: 430,
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 4,
-    paddingHorizontal: 24,
-    paddingTop: 14,
-    paddingBottom: 32,
+    paddingHorizontal: 2,
+    paddingTop: 22,
+    paddingBottom: 24,
   },
-  sheetHandle: {
-    width: 38,
-    height: 4,
-    borderRadius: 4,
-    backgroundColor: '#E5E7EB',
-    alignSelf: 'center',
-    marginBottom: 24,
+  titleIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   title: {
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: '700',
     fontFamily: 'NotoSansMyanmar_700Bold',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 13,
     fontFamily: 'NotoSansMyanmar_400Regular',
-    marginBottom: 24,
+    marginTop: 3,
+    marginBottom: 20,
   },
-
-  // Field
-  fieldGroup: { marginBottom: 16 },
+  fieldGroup: { marginBottom: 14 },
   label: {
     fontSize: 12,
     fontWeight: '600',
@@ -329,48 +310,60 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 4,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    height: 52,
-    gap: 10,
+    borderWidth: 1.5,
+    paddingHorizontal: 8,
+    height: 56,
+  },
+  fieldIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
     flex: 1,
+    height: '100%',
+    paddingHorizontal: 10,
     fontSize: 15,
     fontFamily: 'NotoSansMyanmar_400Regular',
-    paddingVertical: 0,
   },
   errorText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    marginTop: 6,
+    marginTop: 5,
     marginLeft: 3,
     fontFamily: 'NotoSansMyanmar_600SemiBold',
   },
-
-  // Login button
   loginBtn: {
+    height: 56,
+    borderRadius: 4,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    borderRadius: 4,
-    height: 52,
-    marginTop: 8,
+    marginTop: 6,
   },
-  loginBtnDisabled: { opacity: 0.6 },
+  loginBtnDisabled: { opacity: 0.65 },
   loginBtnText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
     fontFamily: 'NotoSansMyanmar_700Bold',
   },
-
-  // Footer
+  loginArrow: {
+    position: 'absolute',
+    right: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   footer: {
     textAlign: 'center',
     fontSize: 11,
     fontFamily: 'NotoSansMyanmar_400Regular',
-    marginTop: 28,
+    marginVertical: 18,
   },
 });
