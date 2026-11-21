@@ -284,7 +284,7 @@ class ParcelController extends Controller
 
         $user = $request->user();
 
-        $query = Parcel::with(['receivedBy', 'activeAssignment.staff', 'activeAssignment.assignedBy', 'images' => function ($q) {
+        $query = Parcel::with(['receivedBy', 'activeAssignment.staff', 'activeAssignment.assignedBy', 'items', 'images' => function ($q) {
             $q->orderBy('sort_order')->limit(1);
         }])
             ->when($request->search, fn($q) => $q->where(function ($sq) use ($request) {
@@ -336,7 +336,9 @@ class ParcelController extends Controller
             'recipient_phone' => ['required', 'string', 'max:30'],
             'delivery_address' => ['required', 'string'],
             'description' => ['nullable', 'string'],
-            'category' => ['nullable', 'string', 'max:255'],
+            'items' => ['nullable', 'array'],
+            'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
+            'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'delivery_fee' => ['required', 'numeric', 'min:0'],
@@ -366,6 +368,16 @@ class ParcelController extends Controller
                 'condition' => $validated['condition'] ?? 'GOOD',
                 'priority' => $validated['priority'] ?? 'NORMAL',
             ]);
+
+            // Save product items (product name + quantity pairs)
+            if (!empty($validated['items'])) {
+                foreach ($validated['items'] as $item) {
+                    $parcel->items()->create([
+                        'product_name' => $item['product_name'],
+                        'quantity' => $item['quantity'] ?? 1,
+                    ]);
+                }
+            }
 
             ParcelStatusHistory::create([
                 'parcel_id' => $parcel->id,
@@ -404,6 +416,7 @@ class ParcelController extends Controller
             'proofOfDeliveries.deliveryAttempt',
             'activeAssignment.staff',
             'images',
+            'items',
         ]);
 
         return response()->json([
@@ -426,7 +439,9 @@ class ParcelController extends Controller
             'recipient_phone' => ['sometimes', 'string', 'max:30'],
             'delivery_address' => ['sometimes', 'string'],
             'description' => ['nullable', 'string'],
-            'category' => ['nullable', 'string', 'max:255'],
+            'items' => ['nullable', 'array'],
+            'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
+            'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'delivery_fee' => ['sometimes', 'numeric', 'min:0'],
@@ -441,6 +456,17 @@ class ParcelController extends Controller
 
         $oldValues = $parcel->toArray();
         $parcel->update($validated);
+
+        // Replace product items if provided
+        if (array_key_exists('items', $validated)) {
+            $parcel->items()->delete();
+            foreach ($validated['items'] ?? [] as $item) {
+                $parcel->items()->create([
+                    'product_name' => $item['product_name'],
+                    'quantity' => $item['quantity'] ?? 1,
+                ]);
+            }
+        }
 
         ActivityLog::record('parcel.updated', $parcel, $oldValues, $parcel->fresh()->toArray());
 
@@ -702,7 +728,9 @@ class ParcelController extends Controller
             'recipient_phone' => $parcel->recipient_phone,
             'delivery_address' => $parcel->delivery_address,
             'description' => $parcel->description,
-            'category' => $parcel->category,
+            'items' => $parcel->relationLoaded('items')
+                ? $parcel->items->map(fn($i) => ['id' => $i->id, 'product_name' => $i->product_name, 'quantity' => $i->quantity])->values()->all()
+                : [],
             'weight' => $parcel->weight,
             'notes' => $parcel->notes,
             'delivery_fee' => $parcel->delivery_fee,

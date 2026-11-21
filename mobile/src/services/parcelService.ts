@@ -9,7 +9,7 @@ export interface Parcel {
   recipient_phone: string;
   delivery_address: string;
   description?: string;
-  category?: string;
+  items?: { id: number; product_name: string; quantity: number }[];
   weight?: number;
   notes?: string;
   delivery_fee: number;

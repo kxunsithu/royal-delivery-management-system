@@ -19,7 +19,6 @@ class Parcel extends Model
         'recipient_phone',
         'delivery_address',
         'description',
-        'category',
         'quantity',
         'weight',
         'notes',
@@ -86,6 +85,11 @@ class Parcel extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ParcelImage::class)->orderBy('sort_order')->orderBy('created_at');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(ParcelItem::class)->orderBy('id');
     }
 
     // Scopes

@@ -45,10 +45,11 @@ export default function EditParcelScreen() {
     sender_name: '', sender_phone: '',
     recipient_name: '', recipient_phone: '',
     delivery_address: '',
-    description: '', category: '', weight: '', notes: '',
+    description: '', weight: '', notes: '',
     delivery_fee: '', cod_amount: '0', is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
     cod_currency: 'MMK' as 'MMK' | 'THB',
+    items: [] as { product_name: string; quantity: string }[],
     priority: 'NORMAL',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -65,7 +66,6 @@ export default function EditParcelScreen() {
         recipient_phone: parcel.recipient_phone || '',
         delivery_address: parcel.delivery_address || '',
         description: parcel.description || '',
-        category: parcel.category || '',
         weight: parcel.weight ? String(parcel.weight) : '',
         notes: parcel.notes || '',
         delivery_fee: String(parcel.delivery_fee || 0),
@@ -73,6 +73,7 @@ export default function EditParcelScreen() {
         is_cod: parcel.is_cod || false,
         currency: (parcel.currency as 'MMK' | 'THB') || 'MMK',
         cod_currency: (parcel.cod_currency as 'MMK' | 'THB') || (parcel.currency as 'MMK' | 'THB') || 'MMK',
+        items: (parcel.items ?? []).map((it: any) => ({ product_name: it.product_name, quantity: String(it.quantity ?? 1) })),
         priority: parcel.priority || 'NORMAL',
       });
       setExistingImages(parcel.images ?? []);
@@ -116,38 +117,6 @@ export default function EditParcelScreen() {
   function update(field: string, value: any) {
     setForm(f => ({ ...f, [field]: value }));
     setErrors(e => ({ ...e, [field]: undefined as any }));
-  }
-
-  const [customCategoryInput, setCustomCategoryInput] = useState('');
-
-  // Multi-select categories
-  const selectedCategories = form.category
-    ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
-    : [];
-
-  function toggleCategory(catValue: string) {
-    const current = form.category
-      ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
-      : [];
-    let next: string[];
-    if (current.includes(catValue)) {
-      next = current.filter((c) => c !== catValue);
-    } else {
-      next = [...current, catValue];
-    }
-    update('category', next.join(', '));
-  }
-
-  function handleAddCustomCategory() {
-    const trimmed = customCategoryInput.trim();
-    if (!trimmed) return;
-    const current = form.category
-      ? form.category.split(',').map((s) => s.trim()).filter(Boolean)
-      : [];
-    if (!current.includes(trimmed)) {
-      update('category', [...current, trimmed].join(', '));
-    }
-    setCustomCategoryInput('');
   }
 
   async function pickImages() {
@@ -204,7 +173,6 @@ export default function EditParcelScreen() {
       recipient_phone: form.recipient_phone,
       delivery_address: form.delivery_address,
       description: form.description || undefined,
-      category: form.category || undefined,
       weight: form.weight ? Number(form.weight) : undefined,
       notes: form.notes || undefined,
       delivery_fee: Number(form.delivery_fee),
@@ -212,6 +180,9 @@ export default function EditParcelScreen() {
       is_cod: form.is_cod,
       currency: form.currency,
       cod_currency: form.cod_currency,
+      items: form.items
+        .filter((it) => it.product_name.trim())
+        .map((it) => ({ product_name: it.product_name.trim(), quantity: Number(it.quantity) || 1 })),
       priority: form.priority,
     });
   }
@@ -260,62 +231,55 @@ export default function EditParcelScreen() {
             multiline
           />
           <View>
-            <View style={styles.labelRow}>
-              <Text style={styles.label}>အမျိုးအစား (တစ်ခုထက်မက ရွေးနိုင်သည်)</Text>
-              {selectedCategories.length > 0 && (
-                <Text style={styles.selectedCountText}>{selectedCategories.length} မျိုး ရွေးထားသည်</Text>
-              )}
-            </View>
-            <View style={styles.categoryRow}>
-              {PARCEL_CATEGORIES.map(cat => {
-                const isSelected = selectedCategories.includes(cat.value);
-                return (
-                  <TouchableOpacity
-                    key={cat.value}
-                    style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
-                    onPress={() => toggleCategory(cat.value)}
-                  >
-                    <Text style={[styles.categoryChipText, isSelected && styles.categoryChipTextActive]}>
-                      {cat.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-
-              {selectedCategories
-                .filter((c) => !PARCEL_CATEGORIES.some((p) => p.value === c))
-                .map((customCat) => (
-                  <TouchableOpacity
-                    key={customCat}
-                    style={[styles.categoryChip, styles.categoryChipActive]}
-                    onPress={() => toggleCategory(customCat)}
-                  >
-                    <Text style={[styles.categoryChipText, styles.categoryChipTextActive]}>
-                      {customCat}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-            </View>
-          </View>
-
-          <View style={styles.customCategoryRow}>
-            <TextInput
-              style={styles.customCategoryInput}
-              value={customCategoryInput}
-              onChangeText={setCustomCategoryInput}
-              placeholder="အခြား အမျိုးအစား ရိုက်ထည့်ပါ (ဥပမာ - အလှကုန်)..."
-              placeholderTextColor={COLORS.textLight}
-              onSubmitEditing={handleAddCustomCategory}
-              returnKeyType="done"
-            />
+            <Text style={styles.label}>ထုတ်ကုန်များ (အမည် + အရေအတွက်)</Text>
+            {form.items.map((item, idx) => (
+              <View key={idx} style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                <View style={{ flex: 2 }}>
+                  <TextInput
+                    style={styles.textInput}
+                    value={item.product_name}
+                    onChangeText={(v) => {
+                      const next = [...form.items];
+                      next[idx] = { ...next[idx], product_name: v };
+                      update('items', next);
+                    }}
+                    placeholder="ထုတ်ကုန်အမည်"
+                    placeholderTextColor={COLORS.textLight}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <TextInput
+                    style={styles.textInput}
+                    value={item.quantity}
+                    onChangeText={(v) => {
+                      const next = [...form.items];
+                      next[idx] = { ...next[idx], quantity: v };
+                      update('items', next);
+                    }}
+                    placeholder="အရေအတွက်"
+                    placeholderTextColor={COLORS.textLight}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    const next = form.items.filter((_, i) => i !== idx);
+                    update('items', next.length ? next : [{ product_name: '', quantity: '1' }]);
+                  }}
+                  style={{ padding: 8 }}
+                >
+                  <Text style={{ color: COLORS.error, fontWeight: '700' }}>×</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
             <TouchableOpacity
-              style={[styles.addCategoryBtn, !customCategoryInput.trim() && { opacity: 0.5 }]}
-              onPress={handleAddCustomCategory}
-              disabled={!customCategoryInput.trim()}
+              onPress={() => update('items', [...form.items, { product_name: '', quantity: '1' }])}
+              style={{ alignSelf: 'flex-start', paddingVertical: 6 }}
             >
-              <Text style={styles.addCategoryBtnText}>ထည့်မည်</Text>
+              <Text style={{ color: COLORS.primary, fontWeight: '600' }}>+ ထုတ်ကုန် ထပ်ထည့်မည်</Text>
             </TouchableOpacity>
           </View>
+
           <FormField label="အလေးချိန် (kg)" value={form.weight} onChangeText={v => update('weight', v)} keyboardType="numeric" placeholder="ချန်ထားနိုင်" />
           <View>
             <Text style={styles.label}>ဦးစားပေးအဆင့်</Text>

@@ -108,7 +108,6 @@ class ParcelSeeder extends Seeder
                 'recipient_phone' => sprintf('09%09d', 944074981 + (($i - 1) % count($namePool)) + 1),
                 'delivery_address'=> $deliveryAddress,
                 'description'     => $description,
-                'category'        => $category,
                 'quantity'        => $quantity,
                 'status'          => 'RECEIVED',
                 'priority'        => $priority,
@@ -126,6 +125,13 @@ class ParcelSeeder extends Seeder
                 ['tracking_number' => $parcel['tracking_number']],
                 $parcel
             );
+
+            if (!$seededParcel->items()->exists()) {
+                $seededParcel->items()->create([
+                    'product_name' => $category,
+                    'quantity' => $quantity,
+                ]);
+            }
 
             // Attach a sample parcel image from the parcel-images folder
             if (!$seededParcel->images()->exists()) {

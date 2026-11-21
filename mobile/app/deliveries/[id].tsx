@@ -93,8 +93,8 @@ export default function DeliveryDetailScreen() {
             isPhone
           />
           <InfoRow label="လိပ်စာ" value={parcel?.delivery_address || '—'} />
-          {parcel?.category && (
-            <InfoRow label="အမျိုးအစား" value={parcel.category} />
+          {parcel?.items && parcel.items.length > 0 && (
+            <InfoRow label="ထုတ်ကုန်များ" value={parcel.items.map((it: any) => `${it.product_name} x${it.quantity}`).join(', ')} />
           )}
           {parcel?.description && (
             <InfoRow label="ဖော်ပြချက်" value={parcel.description} />

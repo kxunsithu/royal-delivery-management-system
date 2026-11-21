@@ -180,7 +180,7 @@ export default function ParcelDetailScreen() {
           <div class="row"><span class="label">လက်ခံသူ ဖုန်း</span><span class="value">${parcel.recipient_phone}</span></div>
           <div class="row"><span class="label">လိပ်စာ</span><span class="value">${parcel.delivery_address}</span></div>
           <div class="row"><span class="label">ဦးစားပေးအဆင့်</span><span class="value">${PRIORITY_LABELS_MM[parcel.priority as keyof typeof PRIORITY_LABELS_MM] || parcel.priority}</span></div>
-          <div class="row"><span class="label">အမျိုးအစား</span><span class="value">${parcel.category || '-'}</span></div>
+          ${parcel.items && parcel.items.length ? `<div class="row"><span class="label">ထုတ်ကုန်များ</span><span class="value">${parcel.items.map((it: any) => `${it.product_name} x${it.quantity}`).join(', ')}</span></div>` : ''}
           ${parcel.weight ? `<div class="row"><span class="label">အလေးချိန်</span><span class="value">${parcel.weight} kg</span></div>` : ''}
           ${parcel.description ? `<div class="row"><span class="label">ဖော်ပြချက်</span><span class="value">${parcel.description}</span></div>` : ''}
           <div class="row"><span class="label">ပို့ဆောင်ခ</span><span class="value">${Number(parcel.delivery_fee).toLocaleString()} ${parcel.currency === 'THB' ? 'ဘတ်' : 'ကျပ်'}</span></div>
@@ -350,7 +350,7 @@ export default function ParcelDetailScreen() {
             valueColor={PRIORITY_COLORS[parcel.priority as keyof typeof PRIORITY_COLORS]}
           />
           {parcel.description && <InfoRow label="ဖော်ပြချက်" value={parcel.description} />}
-          {parcel.category && <InfoRow label="အမျိုးအစား" value={parcel.category} />}
+          {parcel.items && parcel.items.length > 0 && <InfoRow label="ထုတ်ကုန်များ" value={parcel.items.map((it: any) => `${it.product_name} x${it.quantity}`).join(', ')} />}
           {parcel.weight && <InfoRow label="အလေးချိန်" value={`${parcel.weight} kg`} />}
           {canEditParcel && !isTerminal && (
             <TouchableOpacity
