@@ -289,8 +289,8 @@ export default function EditParcelScreen() {
               update('weight', v);
               const w = Number(v);
               if (w > 0) {
-                const rate = w <= 5 ? 40 : w <= 50 ? 33 : w <= 100 ? 31 : w <= 300 ? 27 : 20;
-                update('kg_fee', String(w * rate));
+                const fee = w <= 5 ? 40 : w <= 50 ? 33 : w <= 100 ? 31 : w <= 300 ? 27 : 20;
+                update('kg_fee', String(fee));
               } else {
                 update('kg_fee', '');
               }
