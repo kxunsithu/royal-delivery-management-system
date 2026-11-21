@@ -12,8 +12,6 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserSeeder::class,
             BusinessSettingSeeder::class,
-            ParcelSeeder::class,
-            DeliveryAssignmentSeeder::class,
         ]);
     }
 }
