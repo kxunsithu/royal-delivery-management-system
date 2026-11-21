@@ -15,11 +15,9 @@ php artisan config:cache
 php artisan route:cache || true
 php artisan view:cache || true
 
-# Run migrations
-php artisan migrate --force
-
-# Idempotent seed (safe to re-run on every deploy)
-php artisan db:seed --force || echo "Seeding skipped or already applied"
+# Do not run migrations or seeders automatically on deploy.
+# Database schema/data changes are applied manually to avoid
+# refreshing or overwriting production data on every push.
 
 # Public storage symlink for uploaded files
 php artisan storage:link --force 2>/dev/null || true

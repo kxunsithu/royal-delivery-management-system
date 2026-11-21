@@ -18,11 +18,9 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo "=== Running database migrations ==="
-php artisan migrate --force
-
-echo "=== Seeding database (idempotent) ==="
-php artisan db:seed --force || echo "Seeding skipped or already applied"
+echo "=== Skipping database migrations and seeding on build/deploy ==="
+# Database schema/data changes are applied manually to avoid
+# refreshing or overwriting production data on every push.
 
 echo "=== Setting storage permissions ==="
 chmod -R 775 storage bootstrap/cache
