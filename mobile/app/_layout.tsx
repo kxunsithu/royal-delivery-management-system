@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { Stack, router } from 'expo-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Stack, router, usePathname } from 'expo-router';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { queryClient } from '../src/lib/queryClient';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -49,14 +50,19 @@ async function applyAvailableUpdate() {
 (TextInput as any).defaultProps.style = { fontFamily: FONTS.regular };
 // ────────────────────────────────────────────────────────────────────────────
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-    },
-  },
-});
+// Refresh every active query whenever the visible screen changes (e.g. going
+// back to a list after creating, editing or deleting something). This keeps
+// mounted screens in sync without remounting them or reloading the app.
+function RouteFocusRefetch() {
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    void queryClient.invalidateQueries();
+  }, [pathname, queryClient]);
+
+  return null;
+}
 
 function RootLayoutNav() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -80,38 +86,41 @@ function RootLayoutNav() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="login" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="parcels/[id]"
-        options={{ headerShown: false, presentation: 'card' }}
-      />
-      <Stack.Screen
-        name="parcels/create"
-        options={{ headerShown: false, presentation: 'modal' }}
-      />
-      <Stack.Screen
-        name="parcels/edit/[id]"
-        options={{ headerShown: false, presentation: 'modal' }}
-      />
-      <Stack.Screen
-        name="deliveries/[id]"
-        options={{ headerShown: false, presentation: 'card' }}
-      />
-      <Stack.Screen
-        name="deliveries/attempt/[id]"
-        options={{ headerShown: false, presentation: 'modal' }}
-      />
-      <Stack.Screen
-        name="users/[id]"
-        options={{ headerShown: false, presentation: 'card' }}
-      />
-      <Stack.Screen
-        name="users/create"
-        options={{ headerShown: false, presentation: 'modal' }}
-      />
-    </Stack>
+    <>
+      <RouteFocusRefetch />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="login" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="parcels/[id]"
+          options={{ headerShown: false, presentation: 'card' }}
+        />
+        <Stack.Screen
+          name="parcels/create"
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="parcels/edit/[id]"
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="deliveries/[id]"
+          options={{ headerShown: false, presentation: 'card' }}
+        />
+        <Stack.Screen
+          name="deliveries/attempt/[id]"
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="users/[id]"
+          options={{ headerShown: false, presentation: 'card' }}
+        />
+        <Stack.Screen
+          name="users/create"
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
+      </Stack>
+    </>
   );
 }
 

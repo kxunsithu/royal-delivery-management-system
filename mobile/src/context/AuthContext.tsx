@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { authService, User } from '../services/authService';
 
 interface AuthContextType {
@@ -13,6 +14,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,11 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login(phone: string, password: string) {
     const data = await authService.login({ phone, password });
+    // Drop any cached data from a previous session before showing the new user's data.
+    queryClient.clear();
     setUser(data.user);
   }
 
   async function logout() {
     await authService.logout();
+    // Never leak one account's cached lists/details into the next login.
+    queryClient.clear();
     setUser(null);
   }
 
