@@ -355,20 +355,37 @@ class ParcelController extends Controller
         DB::beginTransaction();
 
         try {
-            $parcel = Parcel::create([
-                ...$validated,
-                'tracking_number' => $validated['tracking_number'] ?? Parcel::generateTrackingNumber(),
-                'status' => 'RECEIVED',
-                'received_by_id' => $request->user()->id,
-                'received_at' => $validated['received_at'] ?? now(),
-                'delivery_fee' => $validated['delivery_fee'] ?? 0,
-                'cod_amount' => $validated['cod_amount'] ?? 0,
-                'is_cod' => $validated['is_cod'] ?? false,
-                'currency' => $validated['currency'] ?? 'MMK',
-                'cod_currency' => $validated['cod_currency'] ?? $validated['currency'] ?? 'MMK',
-                'condition' => $validated['condition'] ?? 'GOOD',
-                'priority' => $validated['priority'] ?? 'NORMAL',
-            ]);
+            $userSuppliedTracking = isset($validated['tracking_number']);
+            $maxAttempts = 5;
+            $parcel = null;
+
+            for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+                $trackingNumber = $userSuppliedTracking
+                    ? $validated['tracking_number']
+                    : Parcel::generateTrackingNumber();
+
+                try {
+                    $parcel = Parcel::create([
+                        ...$validated,
+                        'tracking_number' => $trackingNumber,
+                        'status' => 'RECEIVED',
+                        'received_by_id' => $request->user()->id,
+                        'received_at' => $validated['received_at'] ?? now(),
+                        'delivery_fee' => $validated['delivery_fee'] ?? 0,
+                        'cod_amount' => $validated['cod_amount'] ?? 0,
+                        'is_cod' => $validated['is_cod'] ?? false,
+                        'currency' => $validated['currency'] ?? 'MMK',
+                        'cod_currency' => $validated['cod_currency'] ?? $validated['currency'] ?? 'MMK',
+                        'condition' => $validated['condition'] ?? 'GOOD',
+                        'priority' => $validated['priority'] ?? 'NORMAL',
+                    ]);
+                    break;
+                } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                    if ($userSuppliedTracking || $attempt === $maxAttempts - 1) {
+                        throw $e;
+                    }
+                }
+            }
 
             // Save product items (product name + quantity pairs)
             if (!empty($validated['items'])) {

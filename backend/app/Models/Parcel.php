@@ -133,8 +133,10 @@ class Parcel extends Model
         $prefixCode = \App\Models\BusinessSetting::getValue('tracking_number_prefix', 'RMD');
         $prefix = "{$prefixCode}-{$date}-";
 
-        $lastToday = static::where('tracking_number', 'like', $prefix . '%')
+        $lastToday = static::withTrashed()
+            ->where('tracking_number', 'like', $prefix . '%')
             ->orderBy('tracking_number', 'desc')
+            ->lockForUpdate()
             ->value('tracking_number');
 
         if ($lastToday) {
@@ -144,6 +146,15 @@ class Parcel extends Model
             $seq = '00001';
         }
 
-        return $prefix . $seq;
+        $candidate = $prefix . $seq;
+
+        // Guard against races / gaps by ensuring the candidate is not already used
+        // (including soft-deleted records).
+        while (static::withTrashed()->where('tracking_number', $candidate)->exists()) {
+            $seq = str_pad((int) $seq + 1, 5, '0', STR_PAD_LEFT);
+            $candidate = $prefix . $seq;
+        }
+
+        return $candidate;
     }
 }
