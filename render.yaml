@@ -8,6 +8,10 @@ services:
     dockerfilePath: backend/Dockerfile
     dockerContext: backend
     healthCheckPath: /up
+    disk:
+      name: royal-delivery-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: APP_NAME
         value: "Royal Myawaddy Delivery"
@@ -24,7 +28,7 @@ services:
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
-        value: database/database.sqlite
+        value: /var/data/database.sqlite
       - key: SESSION_DRIVER
         value: file
       - key: CACHE_STORE
