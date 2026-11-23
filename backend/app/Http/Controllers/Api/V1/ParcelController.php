@@ -339,7 +339,6 @@ class ParcelController extends Controller
             'items' => ['nullable', 'array'],
             'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
             'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
-            'items.*.unit_price' => ['nullable', 'numeric', 'min:0'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'kg_fee' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
@@ -352,8 +351,6 @@ class ParcelController extends Controller
             'priority' => ['string', Rule::in(['NORMAL', 'HIGH', 'URGENT'])],
             'received_at' => ['nullable', 'date'],
         ]);
-
-        $itemsTotal = $this->calculateItemsTotal($validated['items'] ?? []);
 
         DB::beginTransaction();
 
@@ -375,10 +372,8 @@ class ParcelController extends Controller
                         'received_by_id' => $request->user()->id,
                         'received_at' => $validated['received_at'] ?? now(),
                         'delivery_fee' => $validated['delivery_fee'] ?? 0,
-                        'cod_amount' => $itemsTotal > 0 ? $itemsTotal : ($validated['cod_amount'] ?? 0),
-                        'is_cod' => array_key_exists('is_cod', $validated)
-                            ? $validated['is_cod']
-                            : $itemsTotal > 0,
+                        'cod_amount' => $validated['cod_amount'] ?? 0,
+                        'is_cod' => $validated['is_cod'] ?? false,
                         'currency' => $validated['currency'] ?? 'MMK',
                         'cod_currency' => $validated['cod_currency'] ?? $validated['currency'] ?? 'MMK',
                         'condition' => $validated['condition'] ?? 'GOOD',
@@ -398,7 +393,6 @@ class ParcelController extends Controller
                     $parcel->items()->create([
                         'product_name' => $item['product_name'],
                         'quantity' => $item['quantity'] ?? 1,
-                        'unit_price' => $item['unit_price'] ?? 0,
                     ]);
                 }
             }
@@ -416,7 +410,7 @@ class ParcelController extends Controller
             DB::commit();
 
             return response()->json([
-                'data' => $this->formatParcel($parcel->load(['receivedBy', 'items'])),
+                'data' => $this->formatParcel($parcel->load(['receivedBy'])),
                 'message' => 'Parcel registered successfully',
             ], 201);
 
@@ -466,7 +460,6 @@ class ParcelController extends Controller
             'items' => ['nullable', 'array'],
             'items.*.product_name' => ['required_with:items', 'string', 'max:255'],
             'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
-            'items.*.unit_price' => ['nullable', 'numeric', 'min:0'],
             'weight' => ['nullable', 'numeric', 'min:0'],
             'kg_fee' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
@@ -480,18 +473,6 @@ class ParcelController extends Controller
             'damage_description' => ['nullable', 'string'],
         ]);
 
-        if (array_key_exists('items', $validated)) {
-            $itemsTotal = $this->calculateItemsTotal($validated['items'] ?? []);
-
-            if ($itemsTotal > 0) {
-                $validated['cod_amount'] = $itemsTotal;
-
-                if (!array_key_exists('is_cod', $validated)) {
-                    $validated['is_cod'] = true;
-                }
-            }
-        }
-
         $oldValues = $parcel->toArray();
         $parcel->update($validated);
 
@@ -502,7 +483,6 @@ class ParcelController extends Controller
                 $parcel->items()->create([
                     'product_name' => $item['product_name'],
                     'quantity' => $item['quantity'] ?? 1,
-                    'unit_price' => $item['unit_price'] ?? 0,
                 ]);
             }
         }
@@ -510,7 +490,7 @@ class ParcelController extends Controller
         ActivityLog::record('parcel.updated', $parcel, $oldValues, $parcel->fresh()->toArray());
 
         return response()->json([
-            'data' => $this->formatParcel($parcel->fresh(['receivedBy', 'items'])),
+            'data' => $this->formatParcel($parcel->fresh(['receivedBy'])),
             'message' => 'Parcel updated successfully',
         ]);
     }
@@ -743,16 +723,6 @@ class ParcelController extends Controller
         return response()->json(['message' => 'Image deleted successfully']);
     }
 
-    /**
-     * Calculate the total value of all product items.
-     */
-    private function calculateItemsTotal(array $items): float
-    {
-        return round(collect($items)->sum(function (array $item) {
-            return (int) ($item['quantity'] ?? 1) * (float) ($item['unit_price'] ?? 0);
-        }), 2);
-    }
-
     private function formatImage(ParcelImage $image): array
     {
         return [
@@ -778,13 +748,7 @@ class ParcelController extends Controller
             'delivery_address' => $parcel->delivery_address,
             'description' => $parcel->description,
             'items' => $parcel->relationLoaded('items')
-                ? $parcel->items->map(fn($i) => [
-                    'id' => $i->id,
-                    'product_name' => $i->product_name,
-                    'quantity' => $i->quantity,
-                    'unit_price' => (float) $i->unit_price,
-                    'line_total' => round((int) $i->quantity * (float) $i->unit_price, 2),
-                ])->values()->all()
+                ? $parcel->items->map(fn($i) => ['id' => $i->id, 'product_name' => $i->product_name, 'quantity' => $i->quantity])->values()->all()
                 : [],
             'weight' => $parcel->weight,
             'kg_fee' => $parcel->kg_fee,

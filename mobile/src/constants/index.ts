@@ -1,5 +1,5 @@
 // Production API Base URL
-export const API_BASE_URL = 'https://royal-delivery-api.up.railway.app/api/v1';
+export const API_BASE_URL = 'https://royal-delivery-management-system.onrender.com/api/v1';
 
 // Myanmar Font Family
 export const FONTS = {
