@@ -74,7 +74,7 @@ class User extends Authenticatable
         if (!$this->profile_image) {
             return null;
         }
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->profile_image);
+        return \Illuminate\Support\Facades\Storage::disk(config('filesystems.image_disk', 'public'))->url($this->profile_image);
     }
 
     // Scopes
