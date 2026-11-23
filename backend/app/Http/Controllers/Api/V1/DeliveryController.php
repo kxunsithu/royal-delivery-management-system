@@ -112,8 +112,8 @@ class DeliveryController extends Controller
                 DB::raw("SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') THEN parcels.delivery_fee ELSE 0 END) as fee_mmk"),
                 DB::raw("SUM(CASE WHEN parcels.currency = 'THB' THEN parcels.delivery_fee ELSE 0 END) as fee_thb"),
                 // COD totals by currency (COD may use a different currency than the fee)
-                DB::raw("SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency, 'MMK') = 'MMK' AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_mmk"),
-                DB::raw("SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency) = 'THB' AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_thb"),
+                DB::raw("SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency, 'MMK') = 'MMK' AND parcels.is_cod = true THEN parcels.cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency) = 'THB' AND parcels.is_cod = true THEN parcels.cod_amount ELSE 0 END) as cod_thb"),
             ])
             ->when($request->date_from, fn($q) => $q->whereRaw("$filterExpr >= ?", [$request->date_from]))
             ->when($request->date_to, fn($q) => $q->whereRaw("$filterExpr <= ?", [$request->date_to]))
@@ -208,8 +208,8 @@ class DeliveryController extends Controller
             ->selectRaw("
                 SUM(CASE WHEN (parcels.currency IS NULL OR parcels.currency = 'MMK') THEN parcels.delivery_fee ELSE 0 END) as fee_mmk,
                 SUM(CASE WHEN parcels.currency = 'THB' THEN parcels.delivery_fee ELSE 0 END) as fee_thb,
-                SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency, 'MMK') = 'MMK' AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_mmk,
-                SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency) = 'THB' AND parcels.is_cod = 1 THEN parcels.cod_amount ELSE 0 END) as cod_thb
+                SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency, 'MMK') = 'MMK' AND parcels.is_cod = true THEN parcels.cod_amount ELSE 0 END) as cod_mmk,
+                SUM(CASE WHEN COALESCE(parcels.cod_currency, parcels.currency) = 'THB' AND parcels.is_cod = true THEN parcels.cod_amount ELSE 0 END) as cod_thb
             ")
             ->first();
 

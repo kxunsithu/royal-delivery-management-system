@@ -191,8 +191,8 @@ class ParcelController extends Controller
                 DB::raw("SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged_count"),
                 DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as fee_mmk"),
                 DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as fee_thb"),
-                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
-                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = true THEN cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = true THEN cod_amount ELSE 0 END) as cod_thb"),
             ])
             ->whereNotNull('received_at')
             ->when($request->date_from, fn($q) => $q->whereRaw('DATE(received_at) >= ?', [$request->date_from]))
@@ -247,8 +247,8 @@ class ParcelController extends Controller
                 DB::raw("SUM(CASE WHEN status = 'DAMAGED' THEN 1 ELSE 0 END) as damaged_count"),
                 DB::raw("SUM(CASE WHEN currency = 'MMK' THEN delivery_fee ELSE 0 END) as fee_mmk"),
                 DB::raw("SUM(CASE WHEN currency = 'THB' THEN delivery_fee ELSE 0 END) as fee_thb"),
-                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_mmk"),
-                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = 1 THEN cod_amount ELSE 0 END) as cod_thb"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency, 'MMK') = 'MMK' AND is_cod = true THEN cod_amount ELSE 0 END) as cod_mmk"),
+                DB::raw("SUM(CASE WHEN COALESCE(cod_currency, currency) = 'THB' AND is_cod = true THEN cod_amount ELSE 0 END) as cod_thb"),
                 DB::raw('COUNT(DISTINCT DATE(received_at)) as day_count'),
             ])
             ->whereNotNull('received_at')

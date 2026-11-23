@@ -31,7 +31,9 @@ async function clearTokens(): Promise<void> {
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  // Free-tier hosting can take a while to wake up / respond, so allow
+  // enough time before treating the request as failed.
+  timeout: 90000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -50,12 +52,28 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
+// Response interceptor for error handling + retry on transient failures
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
+    const config = (error.config || {}) as any;
+    const isLoginEndpoint = config?.url?.includes('/auth/login');
+
+    // Retry a few times for network/timeout errors (common on free-tier hosting).
+    const retryable =
+      !error.response ||
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ERR_NETWORK' ||
+      error.code === 'ETIMEDOUT';
+    config.__retryCount = config.__retryCount || 0;
+    if (retryable && config.__retryCount < 2) {
+      config.__retryCount += 1;
+      const delay = config.__retryCount * 1500;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return apiClient(config);
+    }
+
     // Only auto-clear auth if a protected API endpoint (not login) returned 401
-    const isLoginEndpoint = error.config?.url?.includes('/auth/login');
     if (error.response?.status === 401 && !isLoginEndpoint) {
       await clearTokens();
     }
