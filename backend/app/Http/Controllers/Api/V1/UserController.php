@@ -185,10 +185,10 @@ class UserController extends Controller
         ]);
 
         if ($user->profile_image) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_image);
+            \Illuminate\Support\Facades\Storage::disk(config('filesystems.image_disk', 'public'))->delete($user->profile_image);
         }
 
-        $path = $request->file('image')->store('avatars', 'public');
+        $path = $request->file('image')->store('avatars', config('filesystems.image_disk', 'public'));
         $user->update(['profile_image' => $path]);
 
         ActivityLog::record('user.profile_image_uploaded', $user, [], ['path' => $path]);
@@ -207,7 +207,7 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         if ($user->profile_image) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_image);
+            \Illuminate\Support\Facades\Storage::disk(config('filesystems.image_disk', 'public'))->delete($user->profile_image);
             $user->update(['profile_image' => null]);
         }
 

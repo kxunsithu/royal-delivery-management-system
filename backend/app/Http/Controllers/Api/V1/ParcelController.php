@@ -683,7 +683,7 @@ class ParcelController extends Controller
 
         foreach ($request->file('images') as $file) {
             $nextOrder++;
-            $path = $file->store('parcel-images', 'public');
+            $path = $file->store('parcel-images', config('filesystems.image_disk', 'public'));
 
             $image = ParcelImage::create([
                 'parcel_id'     => $parcel->id,

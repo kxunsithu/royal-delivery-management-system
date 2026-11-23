@@ -16,6 +16,12 @@ return [
     'default' => env('FILESYSTEM_DISK', 'local'),
 
     /*
+    | Optional disk used for publicly accessible images/uploads.
+    | Set IMAGE_DISK=s3 to store files on S3/MinIO instead of local public disk.
+    */
+    'image_disk' => env('IMAGE_DISK', 'public'),
+
+    /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------

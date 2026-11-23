@@ -352,7 +352,7 @@ class DeliveryController extends Controller
         // Support multiple files via 'files[]' array
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $file) {
-                $filePath = $file->store('proof-of-delivery/' . $delivery->parcel_id, 'public');
+                $filePath = $file->store('proof-of-delivery/' . $delivery->parcel_id, config('filesystems.image_disk', 'public'));
                 $proof = ProofOfDelivery::create([
                     'delivery_attempt_id' => $validated['delivery_attempt_id'],
                     'parcel_id'           => $delivery->parcel_id,

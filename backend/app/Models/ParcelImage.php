@@ -35,7 +35,7 @@ class ParcelImage extends Model
      */
     public function getUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->path);
+        return Storage::disk(config('filesystems.image_disk', 'public'))->url($this->path);
     }
 
     /**
@@ -44,7 +44,7 @@ class ParcelImage extends Model
     protected static function booted(): void
     {
         static::deleting(function (ParcelImage $image) {
-            Storage::disk('public')->delete($image->path);
+            Storage::disk(config('filesystems.image_disk', 'public'))->delete($image->path);
         });
     }
 }

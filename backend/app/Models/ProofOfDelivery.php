@@ -30,6 +30,6 @@ class ProofOfDelivery extends Model
         if (!$this->file_path) {
             return null;
         }
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->file_path);
+        return \Illuminate\Support\Facades\Storage::disk(config('filesystems.image_disk', 'public'))->url($this->file_path);
     }
 }
