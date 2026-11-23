@@ -3,14 +3,14 @@ set -e
 
 cd /var/www/html
 
-# Ensure SQLite storage directory exists on the persistent disk
+# SQLite fallback for local Docker only (production uses PostgreSQL)
 if [ "${DB_CONNECTION}" = "sqlite" ]; then
     DB_DIR="$(dirname "${DB_DATABASE:-/var/data/database.sqlite}")"
     mkdir -p "${DB_DIR}"
     touch "${DB_DATABASE:-/var/data/database.sqlite}"
 fi
 
-# Cache configuration (env vars are available at runtime on Render)
+# Cache configuration (env vars are available at runtime on Railway)
 php artisan config:cache
 php artisan route:cache || true
 php artisan view:cache || true
@@ -23,6 +23,9 @@ USER_COUNT=$(php artisan tinker --execute='echo \App\Models\User::count();' 2>/d
 if [ "$USER_COUNT" = "0" ]; then
     php artisan db:seed --force || echo "Seeding skipped or already applied"
 fi
+
+# Always make sure the default admin account exists (idempotent)
+php artisan db:seed --class=AdminSeeder --force || echo "Admin seeding skipped or already applied"
 
 # Public storage symlink for uploaded files
 php artisan storage:link --force 2>/dev/null || true
