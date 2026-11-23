@@ -5,11 +5,6 @@ set -o errexit
 echo "=== Installing PHP dependencies ==="
 composer install --no-dev --optimize-autoloader
 
-echo "=== Preparing persistent storage (SQLite) ==="
-mkdir -p /var/data
-touch /var/data/database.sqlite
-chmod -R 775 /var/data
-
 echo "=== Linking storage for public file access ==="
 php artisan storage:link --force 2>/dev/null || true
 
