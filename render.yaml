@@ -8,10 +8,6 @@ services:
     dockerfilePath: backend/Dockerfile
     dockerContext: backend
     healthCheckPath: /up
-    disk:
-      name: royal-delivery-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: APP_NAME
         value: "Royal Myawaddy Delivery"
