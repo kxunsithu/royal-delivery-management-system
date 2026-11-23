@@ -361,7 +361,15 @@ export default function ParcelDetailScreen() {
                   <View style={styles.itemIcon}>
                     <Ionicons name="cube-outline" size={16} color={COLORS.primary} />
                   </View>
-                  <Text style={styles.itemName} numberOfLines={2}>{it.product_name}</Text>
+                  <View style={styles.itemNameWrap}>
+                    <Text style={styles.itemName} numberOfLines={2}>{it.product_name}</Text>
+                    {Number(it.unit_price) > 0 && (
+                      <Text style={styles.itemMeta}>
+                        {Number(it.unit_price).toLocaleString()} × {it.quantity} ={' '}
+                        {Number(it.line_total ?? Number(it.unit_price) * Number(it.quantity)).toLocaleString()}
+                      </Text>
+                    )}
+                  </View>
                   <View style={styles.itemQty}>
                     <Text style={styles.itemQtyText}>×{it.quantity}</Text>
                   </View>
@@ -930,10 +938,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  itemNameWrap: { flex: 1, gap: 2 },
   itemName: {
-    flex: 1,
     fontSize: 14,
     color: COLORS.text,
+    fontFamily: FONTS.regular,
+  },
+  itemMeta: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
     fontFamily: FONTS.regular,
   },
   itemQty: {

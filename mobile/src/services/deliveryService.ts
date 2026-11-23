@@ -20,7 +20,7 @@ export interface Assignment {
     currency?: string;
     cod_currency?: string;
     kg_fee?: number;
-    items?: { id: number; product_name: string; quantity: number }[];
+    items?: { id: number; product_name: string; quantity: number; unit_price?: number; line_total?: number }[];
     status: string;
     condition?: string;
     priority: string;

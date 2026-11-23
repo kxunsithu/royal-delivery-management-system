@@ -11,12 +11,14 @@ class ParcelItem extends Model
         'parcel_id',
         'product_name',
         'quantity',
+        'unit_price',
     ];
 
     protected function casts(): array
     {
         return [
             'quantity' => 'integer',
+            'unit_price' => 'decimal:2',
         ];
     }
 

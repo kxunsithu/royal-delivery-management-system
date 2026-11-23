@@ -49,7 +49,7 @@ export default function EditParcelScreen() {
     delivery_fee: '', cod_amount: '0', is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
     cod_currency: 'MMK' as 'MMK' | 'THB',
-    items: [] as { product_name: string; quantity: string }[],
+    items: [] as { product_name: string; quantity: string; unit_price: string }[],
     priority: 'NORMAL',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -74,7 +74,11 @@ export default function EditParcelScreen() {
         is_cod: parcel.is_cod || false,
         currency: (parcel.currency as 'MMK' | 'THB') || 'MMK',
         cod_currency: (parcel.cod_currency as 'MMK' | 'THB') || (parcel.currency as 'MMK' | 'THB') || 'MMK',
-        items: (parcel.items ?? []).map((it: any) => ({ product_name: it.product_name, quantity: String(it.quantity ?? 1) })),
+        items: (parcel.items ?? []).map((it: any) => ({
+          product_name: it.product_name,
+          quantity: String(it.quantity ?? 1),
+          unit_price: String(it.unit_price ?? 0),
+        })),
         priority: parcel.priority || 'NORMAL',
       });
       setExistingImages(parcel.images ?? []);
@@ -118,6 +122,27 @@ export default function EditParcelScreen() {
   function update(field: string, value: any) {
     setForm(f => ({ ...f, [field]: value }));
     setErrors(e => ({ ...e, [field]: undefined as any }));
+  }
+
+  function recalcItems(nextItems: typeof form.items) {
+    const hasPrice = nextItems.some((item) => item.unit_price.trim() !== '');
+    const total = nextItems.reduce((sum, item) => {
+      const qty = Number(item.quantity) || 0;
+      const price = Number(item.unit_price) || 0;
+      return sum + qty * price;
+    }, 0);
+
+    setForm(f => ({
+      ...f,
+      items: nextItems,
+      ...(hasPrice
+        ? {
+            cod_amount: String(total),
+            is_cod: total > 0,
+          }
+        : {}),
+    }));
+    setErrors(e => ({ ...e, items: undefined as any }));
   }
 
   async function pickImages() {
@@ -184,7 +209,11 @@ export default function EditParcelScreen() {
       cod_currency: form.cod_currency,
       items: form.items
         .filter((it) => it.product_name.trim())
-        .map((it) => ({ product_name: it.product_name.trim(), quantity: Number(it.quantity) || 1 })),
+        .map((it) => ({
+          product_name: it.product_name.trim(),
+          quantity: Number(it.quantity) || 1,
+          unit_price: Number(it.unit_price) || 0,
+        })),
       priority: form.priority,
     });
   }
@@ -194,6 +223,10 @@ export default function EditParcelScreen() {
     { value: 'HIGH', label: 'အရေးကြီး' },
     { value: 'URGENT', label: 'အရေးပေါ်' },
   ];
+
+  const itemsTotal = form.items.reduce((sum, item) => {
+    return sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0);
+  }, 0);
 
   if (isLoading || !canEdit) {
     return (
@@ -235,50 +268,80 @@ export default function EditParcelScreen() {
           <View style={styles.itemsEditor}>
             <Text style={styles.label}>ထုတ်ကုန်များ (အမည် + အရေအတွက်)</Text>
             {form.items.map((item, idx) => (
-              <View key={idx} style={styles.itemEditRow}>
-                <TextInput
-                  style={[styles.textInput, styles.itemNameInput]}
-                  value={item.product_name}
-                  onChangeText={(v) => {
-                    const next = [...form.items];
-                    next[idx] = { ...next[idx], product_name: v };
-                    update('items', next);
-                  }}
-                  placeholder="ထုတ်ကုန်အမည်"
-                  placeholderTextColor={COLORS.textLight}
-                />
-                <TextInput
-                  style={[styles.textInput, styles.itemQtyInput]}
-                  value={item.quantity}
-                  onChangeText={(v) => {
-                    const next = [...form.items];
-                    next[idx] = { ...next[idx], quantity: v };
-                    update('items', next);
-                  }}
-                  placeholder="1"
-                  placeholderTextColor={COLORS.textLight}
-                  keyboardType="numeric"
-                />
-                <TouchableOpacity
-                  onPress={() => {
-                    const next = form.items.filter((_, i) => i !== idx);
-                    update('items', next.length ? next : [{ product_name: '', quantity: '1' }]);
-                  }}
-                  style={styles.itemRemoveBtn}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="close" size={16} color={COLORS.error} />
-                </TouchableOpacity>
+              <View key={idx} style={styles.itemEditCard}>
+                <View style={styles.itemEditTopRow}>
+                  <TextInput
+                    style={[styles.textInput, styles.itemNameInput]}
+                    value={item.product_name}
+                    onChangeText={(v) => {
+                      const next = [...form.items];
+                      next[idx] = { ...next[idx], product_name: v };
+                      recalcItems(next);
+                    }}
+                    placeholder="ထုတ်ကုန်အမည်"
+                    placeholderTextColor={COLORS.textLight}
+                  />
+                  <TouchableOpacity
+                    onPress={() => {
+                      const next = form.items.filter((_, i) => i !== idx);
+                      recalcItems(next.length ? next : [{ product_name: '', quantity: '1', unit_price: '' }]);
+                    }}
+                    style={styles.itemRemoveBtn}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="close" size={16} color={COLORS.error} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.itemEditBottomRow}>
+                  <View style={styles.itemHalfField}>
+                    <Text style={styles.itemFieldLabel}>အရေအတွက်</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={item.quantity}
+                      onChangeText={(v) => {
+                        const next = [...form.items];
+                        next[idx] = { ...next[idx], quantity: v };
+                        recalcItems(next);
+                      }}
+                      placeholder="1"
+                      placeholderTextColor={COLORS.textLight}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.itemHalfField}>
+                    <Text style={styles.itemFieldLabel}>တစ်ခုဈေးနှုန်း ({form.cod_currency})</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={item.unit_price}
+                      onChangeText={(v) => {
+                        const next = [...form.items];
+                        next[idx] = { ...next[idx], unit_price: v };
+                        recalcItems(next);
+                      }}
+                      placeholder="0"
+                      placeholderTextColor={COLORS.textLight}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
               </View>
             ))}
             <TouchableOpacity
-              onPress={() => update('items', [...form.items, { product_name: '', quantity: '1' }])}
+              onPress={() => recalcItems([...form.items, { product_name: '', quantity: '1', unit_price: '' }])}
               style={styles.addItemBtn}
               activeOpacity={0.7}
             >
               <Ionicons name="add" size={16} color={COLORS.primary} />
               <Text style={styles.addItemText}>ထုတ်ကုန် ထပ်ထည့်မည်</Text>
             </TouchableOpacity>
+            {itemsTotal > 0 && (
+              <View style={styles.itemsTotalRow}>
+                <Text style={styles.itemsTotalLabel}>ထုတ်ကုန် စုစုပေါင်း</Text>
+                <Text style={styles.itemsTotalValue}>
+                  {itemsTotal.toLocaleString()} {form.cod_currency}
+                </Text>
+              </View>
+            )}
           </View>
 
           <FormField
@@ -360,6 +423,11 @@ export default function EditParcelScreen() {
           {form.is_cod && (
             <>
               <FormField label={`COD ပမာဏ (${form.cod_currency})`} value={form.cod_amount} onChangeText={v => update('cod_amount', v)} keyboardType="numeric" placeholder="0" />
+              {itemsTotal > 0 && (
+                <Text style={styles.autoCalcHint}>
+                  ထုတ်ကုန် စုစုပေါင်းမှ အလိုအလျောက် တွက်ထားသည်
+                </Text>
+              )}
               <View>
                 <Text style={styles.label}>COD ငွေကြေး</Text>
                 <View style={styles.segmented}>
@@ -513,9 +581,23 @@ const styles = StyleSheet.create({
   },
   formField: {},
   itemsEditor: { gap: 8 },
-  itemEditRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  itemEditCard: {
+    gap: 8,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.background,
+  },
+  itemEditTopRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  itemEditBottomRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+  itemHalfField: { flex: 1, gap: 4 },
+  itemFieldLabel: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.regular,
+  },
   itemNameInput: { flex: 1 },
-  itemQtyInput: { width: 64, textAlign: 'center' },
   itemRemoveBtn: {
     width: 34,
     height: 34,
@@ -523,6 +605,29 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.errorBg,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  itemsTotalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 4,
+  },
+  itemsTotalLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.semiBold,
+  },
+  itemsTotalValue: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
+  },
+  autoCalcHint: {
+    fontSize: 11,
+    color: COLORS.success,
+    marginTop: -4,
+    fontFamily: FONTS.regular,
   },
   addItemBtn: {
     flexDirection: 'row',
