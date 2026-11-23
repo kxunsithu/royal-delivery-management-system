@@ -9,6 +9,7 @@ use App\Models\DeliveryAttempt;
 use App\Models\Parcel;
 use App\Models\ParcelStatusHistory;
 use App\Models\ProofOfDelivery;
+use App\Support\DatabaseDate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -74,11 +75,11 @@ class DeliveryController extends Controller
         // finally fallback to assigned_at for in-transit parcels.
         if ($groupBy === 'month') {
             $periodExpr = "COALESCE(
-                strftime('%Y-%m', parcels.delivered_at),
-                CASE WHEN parcels.status = 'DELIVERED' THEN strftime('%Y-%m', parcels.updated_at) ELSE NULL END,
-                strftime('%Y-%m', parcels.failed_at),
-                CASE WHEN parcels.status = 'FAILED' THEN strftime('%Y-%m', parcels.updated_at) ELSE NULL END,
-                strftime('%Y-%m', delivery_assignments.assigned_at)
+                " . DatabaseDate::month('parcels.delivered_at') . ",
+                CASE WHEN parcels.status = 'DELIVERED' THEN " . DatabaseDate::month('parcels.updated_at') . " ELSE NULL END,
+                " . DatabaseDate::month('parcels.failed_at') . ",
+                CASE WHEN parcels.status = 'FAILED' THEN " . DatabaseDate::month('parcels.updated_at') . " ELSE NULL END,
+                " . DatabaseDate::month('delivery_assignments.assigned_at') . "
             )";
         } else {
             $periodExpr = "COALESCE(
@@ -369,7 +370,7 @@ class DeliveryController extends Controller
             }
         } elseif ($request->hasFile('file')) {
             // Single file fallback
-            $filePath = $request->file('file')->store('proof-of-delivery/' . $delivery->parcel_id, 'public');
+            $filePath = $request->file('file')->store('proof-of-delivery/' . $delivery->parcel_id, config('filesystems.image_disk', 'public'));
             $proof = ProofOfDelivery::create([
                 'delivery_attempt_id' => $validated['delivery_attempt_id'],
                 'parcel_id'           => $delivery->parcel_id,

@@ -8,6 +8,7 @@ use App\Models\Parcel;
 use App\Models\ParcelImage;
 use App\Models\ParcelStatusHistory;
 use App\Models\DeliveryAssignment;
+use App\Support\DatabaseDate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -233,9 +234,11 @@ class ParcelController extends Controller
             return response()->json(['message' => 'Access denied.'], 403);
         }
 
+        $monthExpr = DatabaseDate::month('received_at');
+
         $query = Parcel::query()
             ->select([
-                DB::raw("strftime('%Y-%m', received_at) as month"),
+                DB::raw("{$monthExpr} as month"),
                 DB::raw('COUNT(*) as parcel_count'),
                 DB::raw('COUNT(DISTINCT sender_phone) as sender_count'),
                 DB::raw('COUNT(DISTINCT recipient_phone) as recipient_count'),
@@ -254,7 +257,7 @@ class ParcelController extends Controller
             ->whereNotNull('received_at')
             ->when($request->date_from, fn($q) => $q->whereRaw('DATE(received_at) >= ?', [$request->date_from]))
             ->when($request->date_to,   fn($q) => $q->whereRaw('DATE(received_at) <= ?', [$request->date_to]))
-            ->groupBy(DB::raw("strftime('%Y-%m', received_at)"))
+            ->groupBy(DB::raw($monthExpr))
             ->orderBy('month', 'desc');
 
         $rows = $query->get()->map(fn($row) => [
