@@ -351,20 +351,26 @@ export default function ParcelDetailScreen() {
           />
           {parcel.description && <InfoRow label="ဖော်ပြချက်" value={parcel.description} />}
           {parcel.items && parcel.items.length > 0 && (
-            <View style={{ marginTop: 4 }}>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6, fontFamily: FONTS.semiBold }}>ထုတ်ကုန်များ</Text>
+            <View style={styles.itemsBlock}>
+              <Text style={styles.itemsLabel}>ထုတ်ကုန်များ</Text>
               {parcel.items.map((it: any, idx: number) => (
-                <View key={idx} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6, borderBottomWidth: idx < parcel.items!.length - 1 ? StyleSheet.hairlineWidth : 0, borderBottomColor: COLORS.border }}>
-                  <Text style={{ fontSize: 14, color: COLORS.text, fontFamily: FONTS.regular }}>{it.product_name}</Text>
-                  <View style={{ backgroundColor: COLORS.primaryBg, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 6 }}>
-                    <Text style={{ fontSize: 12, fontWeight: '700', color: COLORS.primary, fontFamily: FONTS.bold }}>x{it.quantity}</Text>
+                <View
+                  key={idx}
+                  style={[styles.itemRow, idx < parcel.items!.length - 1 && styles.itemRowBorder]}
+                >
+                  <View style={styles.itemIcon}>
+                    <Ionicons name="cube-outline" size={16} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.itemName} numberOfLines={2}>{it.product_name}</Text>
+                  <View style={styles.itemQty}>
+                    <Text style={styles.itemQtyText}>×{it.quantity}</Text>
                   </View>
                 </View>
               ))}
             </View>
           )}
           {parcel.weight && <InfoRow label="အလေးချိန်" value={`${parcel.weight} kg`} />}
-          {Number(parcel.kg_fee) > 0 && <InfoRow label="Kg ကြေး" value={`${Number(parcel.kg_fee).toLocaleString()} THB`} />}
+          {Number(parcel.kg_fee) > 0 && <InfoRow label="Kg ဖိုး" value={`${Number(parcel.kg_fee).toLocaleString()} THB`} />}
           {canEditParcel && !isTerminal && (
             <TouchableOpacity
               style={styles.addItemsBtn}
@@ -372,6 +378,7 @@ export default function ParcelDetailScreen() {
               activeOpacity={0.8}
             >
               <Text style={styles.addItemsBtnText}>ပစ္စည်း ထပ်ပေါင်းထည့်မည် / ပြင်ဆင်မည်</Text>
+              <Ionicons name="chevron-forward" size={16} color={COLORS.primary} />
             </TouchableOpacity>
           )}
         </InfoSection>
@@ -890,6 +897,56 @@ const styles = StyleSheet.create({
     gap: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: COLORS.border,
+  },
+  itemsBlock: {
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.border,
+  },
+  itemsLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+    fontFamily: FONTS.semiBold,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 9,
+  },
+  itemRowBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.border,
+  },
+  itemIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: COLORS.primaryBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemName: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.text,
+    fontFamily: FONTS.regular,
+  },
+  itemQty: {
+    backgroundColor: COLORS.primaryBg,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  itemQtyText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
   },
   addItemsBtn: {
     flexDirection: 'row',

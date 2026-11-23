@@ -265,53 +265,52 @@ export default function CreateParcelScreen() {
             placeholder="အပိုဆောင်း မှတ်ချက်"
           />
 
-          <View>
+          <View style={styles.itemsEditor}>
             <Text style={styles.label}>ထုတ်ကုန်များ (အမည် + အရေအတွက်)</Text>
             {form.items.map((item, idx) => (
-              <View key={idx} style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' }}>
-                <View style={{ flex: 2 }}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={item.product_name}
-                    onChangeText={(v) => {
-                      const next = [...form.items];
-                      next[idx] = { ...next[idx], product_name: v };
-                      update('items', next);
-                    }}
-                    placeholder="ထုတ်ကုန်အမည်"
-                    placeholderTextColor={COLORS.textLight}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={item.quantity}
-                    onChangeText={(v) => {
-                      const next = [...form.items];
-                      next[idx] = { ...next[idx], quantity: v };
-                      update('items', next);
-                    }}
-                    placeholder="အရေအတွက်"
-                    placeholderTextColor={COLORS.textLight}
-                    keyboardType="numeric"
-                  />
-                </View>
+              <View key={idx} style={styles.itemEditRow}>
+                <TextInput
+                  style={[styles.textInput, styles.itemNameInput]}
+                  value={item.product_name}
+                  onChangeText={(v) => {
+                    const next = [...form.items];
+                    next[idx] = { ...next[idx], product_name: v };
+                    update('items', next);
+                  }}
+                  placeholder="ထုတ်ကုန်အမည်"
+                  placeholderTextColor={COLORS.textLight}
+                />
+                <TextInput
+                  style={[styles.textInput, styles.itemQtyInput]}
+                  value={item.quantity}
+                  onChangeText={(v) => {
+                    const next = [...form.items];
+                    next[idx] = { ...next[idx], quantity: v };
+                    update('items', next);
+                  }}
+                  placeholder="1"
+                  placeholderTextColor={COLORS.textLight}
+                  keyboardType="numeric"
+                />
                 <TouchableOpacity
                   onPress={() => {
                     const next = form.items.filter((_, i) => i !== idx);
                     update('items', next.length ? next : [{ product_name: '', quantity: '1' }]);
                   }}
-                  style={{ padding: 8 }}
+                  style={styles.itemRemoveBtn}
+                  activeOpacity={0.7}
                 >
-                  <Text style={{ color: COLORS.error, fontWeight: '700' }}>×</Text>
+                  <Ionicons name="close" size={16} color={COLORS.error} />
                 </TouchableOpacity>
               </View>
             ))}
             <TouchableOpacity
               onPress={() => update('items', [...form.items, { product_name: '', quantity: '1' }])}
-              style={{ alignSelf: 'flex-start', paddingVertical: 6 }}
+              style={styles.addItemBtn}
+              activeOpacity={0.7}
             >
-              <Text style={{ color: COLORS.primary, fontWeight: '600' }}>+ ထုတ်ကုန် ထပ်ထည့်မည်</Text>
+              <Ionicons name="add" size={16} color={COLORS.primary} />
+              <Text style={styles.addItemText}>ထုတ်ကုန် ထပ်ထည့်မည်</Text>
             </TouchableOpacity>
           </View>
 
@@ -337,7 +336,7 @@ export default function CreateParcelScreen() {
             </Text>
           )}
           <FormField
-            label="Kg ကြေး (THB)"
+            label="Kg ဖိုး (THB)"
             value={form.kg_fee}
             onChangeText={(v) => update('kg_fee', v)}
             keyboardType="numeric"
@@ -656,6 +655,31 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   formField: {},
+  itemsEditor: { gap: 8 },
+  itemEditRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  itemNameInput: { flex: 1 },
+  itemQtyInput: { width: 64, textAlign: 'center' },
+  itemRemoveBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: COLORS.errorBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addItemBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+  },
+  addItemText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
+    fontFamily: FONTS.semiBold,
+  },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   label: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary, marginBottom: 6, fontFamily: FONTS.semiBold },
   textInput: {

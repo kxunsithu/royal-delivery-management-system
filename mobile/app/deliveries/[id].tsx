@@ -146,7 +146,7 @@ export default function DeliveryDetailScreen() {
           }
           if (Number(parcel.kg_fee) > 0) {
             feeRows.push({
-              label: 'Kg ကြေး',
+              label: 'Kg ဖိုး',
               value: `${Number(parcel.kg_fee).toLocaleString()} THB`,
               color: COLORS.info,
             });
