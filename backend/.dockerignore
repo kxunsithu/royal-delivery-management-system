@@ -11,5 +11,6 @@ storage/framework/sessions/*
 storage/framework/views/*
 database/database.sqlite
 database/database.sqlite-*
+public/storage
 .phpunit.result.cache
 tests

@@ -27,7 +27,8 @@ fi
 # Always make sure the default admin account exists (idempotent)
 php artisan db:seed --class=AdminSeeder --force || echo "Admin seeding skipped or already applied"
 
-# Public storage symlink for uploaded files
+# Public storage symlink for uploaded files (remove any stale/broken symlink first)
+rm -f public/storage
 php artisan storage:link --force 2>/dev/null || true
 
 # Permissions
