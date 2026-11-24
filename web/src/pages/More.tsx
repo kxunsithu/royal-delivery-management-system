@@ -26,7 +26,7 @@ import {
 
 export default function More() {
   const { user, logout } = useAuth();
-  const { mode, toggleTheme } = useTheme();
+  const { mode, toggleTheme, font, setFont } = useTheme();
   const navigate = useNavigate();
 
   const [installPrompt, setInstallPrompt] = useState<any>(null);
@@ -255,6 +255,55 @@ export default function More() {
                   mode === 'dark' ? 'translate-x-6 bg-brand' : 'translate-x-0'
                 }`}
               />
+            </div>
+          </div>
+
+          {/* Myanmar Font Style Switcher */}
+          <div className="px-4 py-3 border-t border-line/60 space-y-2.5">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-brand/10 text-brand flex items-center justify-center font-bold text-xs">
+                မြ
+              </div>
+              <div>
+                <div className="text-sm font-bold text-ink">မြန်မာဖောင့်စတိုင် (Font Style)</div>
+                <div className="text-xs text-ink-3">
+                  {font === 'pyidaungsu' ? 'ပြည်ထောင်စု (Standard Unicode)' : 'နိုတိုဆန်း (Modern Noto Sans)'}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-0.5">
+              <button
+                type="button"
+                onClick={() => setFont('pyidaungsu')}
+                className={`py-2 px-3 rounded-xl border text-left transition flex items-center justify-between ${
+                  font === 'pyidaungsu'
+                    ? 'border-brand bg-brand/10 text-brand font-bold shadow-sm'
+                    : 'border-line hover:bg-muted text-ink'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold">ပြည်ထောင်စု</div>
+                  <div className="text-[10px] text-ink-3">Pyidaungsu</div>
+                </div>
+                {font === 'pyidaungsu' && <Check className="w-4 h-4 text-brand flex-shrink-0" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFont('noto')}
+                className={`py-2 px-3 rounded-xl border text-left transition flex items-center justify-between ${
+                  font === 'noto'
+                    ? 'border-brand bg-brand/10 text-brand font-bold shadow-sm'
+                    : 'border-line hover:bg-muted text-ink'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold">နိုတိုဆန်း</div>
+                  <div className="text-[10px] text-ink-3">Noto Sans</div>
+                </div>
+                {font === 'noto' && <Check className="w-4 h-4 text-brand flex-shrink-0" />}
+              </button>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export type ThemeMode = 'light' | 'dark';
+export type FontStyle = 'pyidaungsu' | 'noto';
 
 export interface ThemeColors {
   primary: string;
@@ -86,19 +87,25 @@ interface ThemeContextType {
   isDark: boolean;
   toggleTheme: () => void;
   setTheme: (mode: ThemeMode) => void;
+  font: FontStyle;
+  setFont: (font: FontStyle) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'app_theme_mode';
+const FONT_STORAGE_KEY = 'app_font_style';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>('light');
+  const [font, setFontState] = useState<FontStyle>('pyidaungsu');
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'light' || stored === 'dark') setMode(stored);
+      const storedFont = localStorage.getItem(FONT_STORAGE_KEY);
+      if (storedFont === 'pyidaungsu' || storedFont === 'noto') setFontState(storedFont);
     } catch {
       // ignore
     }
@@ -109,6 +116,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (mode === 'dark') root.classList.add('dark');
     else root.classList.remove('dark');
   }, [mode]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (font === 'noto') {
+      root.classList.remove('font-pyidaungsu');
+      root.classList.add('font-noto');
+      root.style.setProperty('--font-family', '"Noto Sans Myanmar UI", "Noto Sans Myanmar", sans-serif');
+    } else {
+      root.classList.remove('font-noto');
+      root.classList.add('font-pyidaungsu');
+      root.style.setProperty('--font-family', 'Pyidaungsu, "Noto Sans Myanmar UI", sans-serif');
+    }
+  }, [font]);
 
   const toggleTheme = () => {
     setMode((prev) => {
@@ -131,10 +151,29 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setFont = (f: FontStyle) => {
+    setFontState(f);
+    try {
+      localStorage.setItem(FONT_STORAGE_KEY, f);
+    } catch {
+      // ignore
+    }
+  };
+
   const colors = mode === 'dark' ? DARK_COLORS : LIGHT_COLORS;
 
   return (
-    <ThemeContext.Provider value={{ mode, colors, isDark: mode === 'dark', toggleTheme, setTheme }}>
+    <ThemeContext.Provider
+      value={{
+        mode,
+        colors,
+        isDark: mode === 'dark',
+        toggleTheme,
+        setTheme,
+        font,
+        setFont,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );

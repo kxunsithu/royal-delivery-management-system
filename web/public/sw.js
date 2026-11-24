@@ -1,5 +1,5 @@
 // Service Worker for Royal Myawaddy Delivery PWA
-const CACHE_NAME = 'royal-delivery-pwa-v1';
+const CACHE_NAME = 'royal-delivery-pwa-v2';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

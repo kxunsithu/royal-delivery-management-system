@@ -42,9 +42,10 @@ export default {
       },
       fontFamily: {
         sans: [
+          'var(--font-family)',
+          'Pyidaungsu',
           '"Noto Sans Myanmar UI"',
           '"Noto Sans Myanmar"',
-          'Pyidaungsu',
           'Padauk',
           '"Myanmar Text"',
           'Myanmar3',

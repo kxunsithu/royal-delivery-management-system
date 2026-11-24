@@ -3,9 +3,25 @@
 @tailwind utilities;
 
 /* ============================================================ */
-/* LOCAL BUNDLED MYANMAR WEBFONTS (Noto Sans Myanmar UI)        */
+/* LOCAL BUNDLED MYANMAR WEBFONTS (Pyidaungsu & Noto Sans)      */
 /* Works offline and without Google Fonts connection            */
 /* ============================================================ */
+@font-face {
+  font-family: 'Pyidaungsu';
+  src: url('/fonts/Pyidaungsu-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pyidaungsu';
+  src: url('/fonts/Pyidaungsu-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'Noto Sans Myanmar UI';
   src: url('/fonts/NotoSansMyanmarUI-Regular.ttf') format('truetype');
@@ -72,6 +88,7 @@
 }
 
 :root {
+  --font-family: 'Pyidaungsu', 'Noto Sans Myanmar UI', 'Noto Sans Myanmar', 'Padauk', sans-serif;
   --brand: 249 115 22;
   --brand-dark: 194 65 12;
   --brand-light: 255 237 213;
@@ -139,10 +156,12 @@
     scroll-behavior: smooth;
     line-height: 1.6;
     letter-spacing: normal;
+    font-family: var(--font-family);
   }
 
   body {
-    @apply m-0 min-h-screen bg-app font-sans text-ink antialiased;
+    @apply m-0 min-h-screen bg-app text-ink antialiased;
+    font-family: var(--font-family);
     font-feature-settings: 'kern' 1, 'liga' 1;
     line-height: 1.6;
     letter-spacing: normal;
