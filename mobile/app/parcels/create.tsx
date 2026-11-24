@@ -236,7 +236,7 @@ export default function CreateParcelScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
           <Ionicons name="chevron-back" size={22} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>ပါဆယ်အသစ် မှတ်ပုံတင်မည်</Text>
+        <Text style={styles.headerTitle}>ပါဆယ်ထည့်ရန်</Text>
         <TouchableOpacity
           style={[styles.saveBtn, createMutation.isPending && { opacity: 0.6 }]}
           onPress={handleSubmit}
@@ -578,7 +578,7 @@ export default function CreateParcelScreen() {
           {createMutation.isPending ? (
             <ActivityIndicator color={COLORS.white} />
           ) : (
-            <Text style={styles.submitBtnText}>ပါဆယ် မှတ်ပုံတင်မည်</Text>
+            <Text style={styles.submitBtnText}>ပါဆယ်ထည့်ရန်</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
