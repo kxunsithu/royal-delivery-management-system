@@ -4,6 +4,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { userService, User } from '../services/userService';
 import { ROLE_LABELS_MM } from '../constants';
+import {
+  ArrowLeft,
+  Pencil,
+  Phone,
+  Mail,
+  Shield,
+  Save,
+  X,
+  Check,
+} from 'lucide-react';
 
 const ROLES = [
   { value: 'admin', label: 'အက်ဒ်မင်', color: '#8B5CF6' },
@@ -42,7 +52,7 @@ export default function UserDetail() {
       setRole(data.role);
       return data;
     },
-    enabled: !!userId,
+    enabled: Boolean(userId),
   });
 
   const updateMutation = useMutation({
@@ -70,9 +80,9 @@ export default function UserDetail() {
 
   function validate() {
     const e: Record<string, string> = {};
-    if (!name.trim()) e.name = 'လိုအပ်သည်';
-    if (!phone.trim()) e.phone = 'လိုအပ်သည်';
-    if (password && password.length < 8) e.password = 'စကားဝှက် အနည်းဆုံး ၈ လုံး';
+    if (!name.trim()) e.name = 'အမည် လိုအပ်ပါသည်';
+    if (!phone.trim()) e.phone = 'ဖုန်း လိုအပ်ပါသည်';
+    if (password && password.length < 8) e.password = 'စကားဝှက် အနည်းဆုံး ၈ လုံး ရှိရပါမည်';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -90,110 +100,250 @@ export default function UserDetail() {
     statusMutation.mutate(!user.is_active);
   }
 
-  if (isLoading || !user) return <div className="p-6 text-center text-ink-2">Loading...</div>;
+  if (isLoading || !user) {
+    return (
+      <div className="p-4 sm:p-6 space-y-3 max-w-xl mx-auto">
+        <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+        <div className="h-44 rounded-2xl bg-muted animate-pulse" />
+      </div>
+    );
+  }
 
   const rc = roleColor(user.role);
   const roleLabel = ROLE_LABELS_MM[user.role] || user.role;
 
   return (
-    <div className="p-4 md:p-6 space-y-3 max-w-2xl mx-auto">
+    <div className="p-3.5 sm:p-6 space-y-3.5 max-w-xl mx-auto pb-28 md:pb-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="px-3 py-1.5 rounded border border-line text-sm">← နောက်</button>
-        <h1 className="text-lg font-bold text-ink">{isEditing ? 'ပြင်ဆင်နေဆဲ' : 'အသုံးပြုသူ အချက်အလက်'}</h1>
-        <button onClick={() => { setIsEditing((v) => !v); setErrors({}); }} className="px-3 py-1.5 rounded border border-line text-sm">
-          {isEditing ? 'ပိတ်' : 'ပြင်ဆင်'}
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-xl border border-line bg-surface hover:bg-muted active:scale-95 transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <h1 className="text-base sm:text-lg font-black text-ink">
+          {isEditing ? 'ပြင်ဆင်နေဆဲ' : 'အသုံးပြုသူ အချက်အလက်'}
+        </h1>
+        <button
+          onClick={() => {
+            setIsEditing((v) => !v);
+            setErrors({});
+          }}
+          className="px-3.5 py-1.5 rounded-xl border border-line bg-surface text-xs font-bold hover:bg-muted active:scale-95 transition flex items-center gap-1"
+        >
+          {isEditing ? (
+            <>
+              <X className="w-3.5 h-3.5" />
+              <span>ပိတ်မည်</span>
+            </>
+          ) : (
+            <>
+              <Pencil className="w-3.5 h-3.5" />
+              <span>ပြင်ဆင်</span>
+            </>
+          )}
         </button>
       </div>
 
-      <div className="card p-4 flex flex-col items-center text-center space-y-2">
+      {/* User Avatar Card */}
+      <div className="card p-5 flex flex-col items-center text-center space-y-2.5 bg-gradient-to-b from-surface to-muted/30">
         {user.profile_image_url ? (
-          <img src={user.profile_image_url} alt="" className="w-20 h-20 rounded-full object-cover" />
+          <img
+            src={user.profile_image_url}
+            alt=""
+            className="w-20 h-20 rounded-3xl object-cover border border-line shadow-sm"
+          />
         ) : (
-          <div className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: rc }}>{user.name[0]?.toUpperCase()}</div>
+          <div
+            className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-2xl font-black shadow-sm"
+            style={{ backgroundColor: rc }}
+          >
+            {user.name[0]?.toUpperCase()}
+          </div>
         )}
-        <div className="text-lg font-bold text-ink">{user.name}</div>
-        <div className="text-sm text-ink-2">{user.phone || user.email}</div>
-        <div className="flex gap-2">
-          <span className="text-xs px-2 py-0.5 rounded font-semibold" style={{ color: rc, backgroundColor: rc + '18' }}>{roleLabel}</span>
-          <span className={`text-xs px-2 py-0.5 rounded font-semibold ${user.is_active ? 'bg-ok-bg text-ok' : 'bg-bad-bg text-bad'}`}>{user.is_active ? 'အသက်ဝင်' : 'ပိတ်ထား'}</span>
+        <div>
+          <div className="text-base font-black text-ink">{user.name}</div>
+          <div className="text-xs text-ink-2 font-mono mt-0.5">{user.phone || user.email}</div>
         </div>
+
+        <div className="flex gap-2">
+          <span
+            className="text-xs font-bold px-2.5 py-0.5 rounded-full"
+            style={{ color: rc, backgroundColor: rc + '18' }}
+          >
+            {roleLabel}
+          </span>
+          <span
+            className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+              user.is_active
+                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+                : 'bg-rose-500/15 text-rose-700 dark:text-rose-400'
+            }`}
+          >
+            {user.is_active ? 'အသက်ဝင်' : 'ပိတ်ထား'}
+          </span>
+        </div>
+
         {user.phone && (
-          <a href={`tel:${user.phone}`} className="text-sm text-brand font-semibold">ဖုန်းခေါ်ရန် · {user.phone}</a>
+          <a
+            href={`tel:${user.phone}`}
+            className="inline-flex items-center gap-1 text-xs text-brand font-bold hover:underline pt-1"
+          >
+            <Phone className="w-3 h-3" />
+            <span>ဖုန်းခေါ်မည် ({user.phone})</span>
+          </a>
         )}
       </div>
 
-      {!isEditing && (
-        <>
-          <div className="card p-3 space-y-1">
-            <h3 className="section-label">အကောင့် အချက်အလက်</h3>
+      {!isEditing ? (
+        <div className="space-y-3">
+          <div className="card p-4 space-y-2">
+            <div className="section-label">အကောင့် အချက်အလက်</div>
             <Row label="နာမည်" value={user.name} />
             <Row label="ဖုန်းနံပါတ်" value={user.phone || '—'} />
             <Row label="အီးမေးလ်" value={user.email || '—'} />
             <Row label="အခန်းကဏ္ဍ" value={roleLabel} valueColor={rc} />
           </div>
-          <button onClick={handleToggleStatus} disabled={statusMutation.isPending} className={`w-full py-3 rounded font-bold ${user.is_active ? 'bg-bad-bg text-bad' : 'bg-ok-bg text-ok'}`}>
-            {statusMutation.isPending ? '...' : user.is_active ? 'အကောင့် ပိတ်မည်' : 'အကောင့် ဖွင့်မည်'}
-          </button>
-        </>
-      )}
 
-      {isEditing && (
-        <>
+          <button
+            onClick={handleToggleStatus}
+            disabled={statusMutation.isPending}
+            className={`w-full py-3 rounded-2xl font-bold text-xs shadow-sm active:scale-98 transition ${
+              user.is_active
+                ? 'bg-rose-500/10 text-rose-600 border border-rose-200 dark:border-rose-900/40'
+                : 'bg-emerald-500/10 text-emerald-600 border border-emerald-200 dark:border-emerald-900/40'
+            }`}
+          >
+            {statusMutation.isPending
+              ? 'ပြောင်းလဲနေဆဲ...'
+              : user.is_active
+              ? 'အကောင့် ပိတ်မည်'
+              : 'အကောင့် ဖွင့်မည်'}
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3 animate-fade-in">
           <div className="card p-4 space-y-3">
-            <h3 className="text-sm font-bold text-ink">အချက်အလက် ပြင်ဆင်ရန်</h3>
+            <div className="section-label">အချက်အလက် ပြင်ဆင်ရန်</div>
             <Field label="နာမည် *" value={name} onChange={setName} error={errors.name} />
-            <Field label="ဖုန်းနံပါတ် *" value={phone} onChange={setPhone} error={errors.phone} type="tel" />
-            <Field label="အီးမေးလ် (ရွေးချယ်ရန်)" value={email} onChange={setEmail} type="email" />
+            <Field
+              label="ဖုန်းနံပါတ် *"
+              value={phone}
+              onChange={setPhone}
+              error={errors.phone}
+              type="tel"
+            />
+            <Field
+              label="အီးမေးလ် (ရွေးချယ်ရန်)"
+              value={email}
+              onChange={setEmail}
+              type="email"
+            />
             <div>
               <label className="label">စကားဝှက်အသစ် (မပြောင်းလျှင် ကွက်ချန်)</label>
               <div className="flex gap-2">
-                <input className={`field flex-1 ${errors.password ? 'border-bad' : ''}`} type={showPass ? 'text' : 'password'} value={password} onChange={(e) => { setPassword(e.target.value); setErrors((prev) => { const n = { ...prev }; delete n.password; return n; }); }} placeholder="အနည်းဆုံး ၈ လုံး" />
-                <button onClick={() => setShowPass((v) => !v)} className="px-3 border border-line rounded text-sm">{showPass ? 'ဖျောက်' : 'ပြ'}</button>
+                <input
+                  className={`field flex-1 ${errors.password ? 'border-bad' : ''}`}
+                  type={showPass ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="အနည်းဆုံး ၈ လုံး"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((v) => !v)}
+                  className="px-3 border border-line rounded-xl text-xs font-semibold hover:bg-muted"
+                >
+                  {showPass ? 'ဖျောက်' : 'ပြ'}
+                </button>
               </div>
               {errors.password && <p className="text-xs text-bad mt-1">{errors.password}</p>}
             </div>
           </div>
 
           <div className="card p-4 space-y-3">
-            <h3 className="text-sm font-bold text-ink">အခန်းကဏ္ဍ ရွေးချယ်ရန်</h3>
+            <div className="section-label">အခန်းကဏ္ဍ ရွေးချယ်ရန်</div>
             <div className="space-y-2">
               {ROLES.map((r) => {
                 const selected = role === r.value;
                 return (
-                  <button key={r.value} onClick={() => setRole(r.value)} className={`w-full flex items-center gap-2 px-3 py-2 rounded border ${selected ? 'border-2' : 'border-line'}`} style={selected ? { borderColor: r.color, backgroundColor: r.color + '12' } : {}}>
-                    <span className="w-4 h-4 rounded-full border flex items-center justify-center" style={{ borderColor: r.color }}>
-                      {selected && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: r.color }} />}
-                    </span>
-                    <span className="text-sm font-semibold" style={selected ? { color: r.color } : {}}>{r.label}</span>
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setRole(r.value)}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition active:scale-98 ${
+                      selected
+                        ? 'border-brand bg-brand/10 font-bold'
+                        : 'border-line bg-surface hover:bg-muted'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: r.color }} />
+                      <span className="text-xs font-semibold text-ink">{r.label}</span>
+                    </div>
+                    {selected && <Check className="w-4 h-4 text-brand" />}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <button onClick={handleSave} disabled={updateMutation.isPending} className="w-full bg-brand text-white py-3 rounded font-bold disabled:opacity-60">
-            {updateMutation.isPending ? '...' : 'ပြင်ဆင်မှု သိမ်းမည်'}
+          <button
+            onClick={handleSave}
+            disabled={updateMutation.isPending}
+            className="w-full bg-brand text-white py-3.5 rounded-2xl font-black text-sm shadow-lg shadow-brand/25 flex items-center justify-center gap-2 active:scale-98 transition disabled:opacity-60"
+          >
+            <Save className="w-4 h-4" />
+            <span>{updateMutation.isPending ? 'သိမ်းနေဆဲ...' : 'ပြင်ဆင်မှု သိမ်းမည်'}</span>
           </button>
-        </>
+        </div>
       )}
     </div>
   );
 }
 
-function Row({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
+function Row({
+  label,
+  value,
+  valueColor,
+}: {
+  label: string;
+  value: string;
+  valueColor?: string;
+}) {
   return (
-    <div className="flex justify-between py-1 border-b border-line last:border-0 gap-2">
-      <span className="text-xs text-ink-2 font-semibold">{label}</span>
-      <span className="text-sm text-ink text-right" style={valueColor ? { color: valueColor, fontWeight: 700 } : {}}>{value}</span>
+    <div className="flex justify-between py-1.5 border-b border-line/50 last:border-0 gap-2 text-xs">
+      <span className="text-ink-2 font-medium">{label}</span>
+      <span className="text-ink text-right font-semibold" style={valueColor ? { color: valueColor } : {}}>
+        {value}
+      </span>
     </div>
   );
 }
 
-function Field({ label, value, onChange, type = 'text', error }: { label: string; value: string; onChange: (v: string) => void; type?: string; error?: string }) {
+function Field({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  error,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  error?: string;
+}) {
   return (
     <div>
       <label className="label">{label}</label>
-      <input className={`field ${error ? 'border-bad' : ''}`} type={type} value={value} onChange={(e) => onChange(e.target.value)} />
+      <input
+        className={`field ${error ? 'border-bad' : ''}`}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
       {error && <p className="text-xs text-bad mt-1">{error}</p>}
     </div>
   );

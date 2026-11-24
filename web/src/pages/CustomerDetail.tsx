@@ -5,6 +5,16 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { parcelService, Parcel } from '../services/parcelService';
 import { STATUS_LABELS_MM, STATUS_COLORS } from '../constants';
+import {
+  ArrowLeft,
+  Phone,
+  MapPin,
+  Package,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Banknote,
+} from 'lucide-react';
 
 export default function CustomerDetail() {
   const { phone } = useParams();
@@ -21,19 +31,27 @@ export default function CustomerDetail() {
   const canCreateParcel = user?.role === 'admin' || user?.role === 'manager';
 
   const [page, setPage] = useState(1);
-  const { data, isLoading, isFetching, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['customer-parcels', decodedPhone, page],
     queryFn: () => parcelService.list({ search: decodedPhone, page, per_page: 20 }),
-    enabled: !!decodedPhone,
+    enabled: Boolean(decodedPhone),
   });
 
   const parcels = (data?.data ?? []) as Parcel[];
   const meta = data?.meta;
 
-  const totalMMK = parcels.filter((p) => p.currency === 'MMK').reduce((s, p) => s + Number(p.delivery_fee), 0);
-  const totalTHB = parcels.filter((p) => p.currency === 'THB').reduce((s, p) => s + Number(p.delivery_fee), 0);
-  const codMMK = parcels.filter((p) => (p.cod_currency ?? p.currency) === 'MMK' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
-  const codTHB = parcels.filter((p) => (p.cod_currency ?? p.currency) === 'THB' && p.is_cod).reduce((s, p) => s + Number(p.cod_amount), 0);
+  const totalMMK = parcels
+    .filter((p) => p.currency === 'MMK')
+    .reduce((s, p) => s + Number(p.delivery_fee), 0);
+  const totalTHB = parcels
+    .filter((p) => p.currency === 'THB')
+    .reduce((s, p) => s + Number(p.delivery_fee), 0);
+  const codMMK = parcels
+    .filter((p) => (p.cod_currency ?? p.currency) === 'MMK' && p.is_cod)
+    .reduce((s, p) => s + Number(p.cod_amount), 0);
+  const codTHB = parcels
+    .filter((p) => (p.cod_currency ?? p.currency) === 'THB' && p.is_cod)
+    .reduce((s, p) => s + Number(p.cod_amount), 0);
 
   function handleAddParcel() {
     const params = new URLSearchParams();
@@ -48,73 +66,170 @@ export default function CustomerDetail() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-3">
+    <div className="p-3.5 sm:p-6 space-y-3.5 max-w-3xl mx-auto pb-28 md:pb-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="px-3 py-1.5 rounded border border-line text-sm">← နောက်</button>
-        <div className="text-center flex-1">
-          <h1 className="text-lg font-bold text-ink">{decodedName}</h1>
-          <p className="text-xs text-ink-2">{decodedPhone} · {isRecipient ? 'လက်ခံသူ' : 'ပို့သူ'}</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-xl border border-line bg-surface hover:bg-muted active:scale-95 transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <div className="text-center flex-1 min-w-0 px-2">
+          <h1 className="text-base sm:text-lg font-black text-ink truncate">{decodedName}</h1>
+          <p className="text-xs text-ink-2 font-mono">
+            {decodedPhone} · {isRecipient ? 'လက်ခံသူ' : 'ပေးပို့သူ'}
+          </p>
         </div>
         {canCreateParcel && (
-          <button onClick={handleAddParcel} className="px-3 py-1.5 rounded bg-brand text-white text-sm font-bold">ထည့်မည်</button>
+          <button
+            onClick={handleAddParcel}
+            className="px-3.5 py-1.5 rounded-xl bg-brand text-white text-xs font-bold shadow-sm shadow-brand/20 active:scale-95 transition flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            <span>ပါဆယ်ထည့်</span>
+          </button>
         )}
       </div>
 
-      <div className="card p-3">
-        <div className="flex justify-around text-center">
+      {/* Customer Contact & Summary */}
+      <div className="card p-4 space-y-3 bg-gradient-to-br from-surface to-muted/30">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="text-xl font-bold text-ink">{meta?.total ?? parcels.length}</div>
-            <div className="text-xs text-ink-2">ပါဆယ်</div>
+            <div className="text-sm font-bold text-ink">{decodedName}</div>
+            {decodedPhone && (
+              <a
+                href={`tel:${decodedPhone}`}
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-brand font-semibold hover:underline mt-0.5"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>{decodedPhone}</span>
+              </a>
+            )}
+          </div>
+          {decodedPhone && (
+            <a
+              href={`tel:${decodedPhone}`}
+              className="px-3 py-1.5 rounded-xl bg-brand text-white text-xs font-bold shadow-sm active:scale-95 transition flex items-center gap-1"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>ခေါ်ဆိုမည်</span>
+            </a>
+          )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-center border-t border-line/60 pt-2.5 text-xs">
+          <div>
+            <div className="text-lg font-black text-ink">{meta?.total ?? parcels.length}</div>
+            <div className="text-[10px] text-ink-3">ပါဆယ် စုစုပေါင်း</div>
           </div>
           <div>
-            <div className="text-xl font-bold text-ink">{totalMMK.toLocaleString()}</div>
-            <div className="text-xs text-ink-2">MMK</div>
+            <div className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+              {totalMMK.toLocaleString()}
+            </div>
+            <div className="text-[10px] text-ink-3">MMK ပို့ဆောင်ခ</div>
           </div>
           <div>
-            <div className="text-xl font-bold text-ink">{totalTHB.toLocaleString()}</div>
-            <div className="text-xs text-ink-2">THB</div>
+            <div className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+              {totalTHB.toLocaleString()}
+            </div>
+            <div className="text-[10px] text-ink-3">THB ပို့ဆောင်ခ</div>
           </div>
         </div>
+
         {(codMMK > 0 || codTHB > 0) && (
-          <div className="flex justify-around text-center mt-2 pt-2 border-t border-line">
-            {codMMK > 0 && <div><div className="text-lg font-bold text-warn">{codMMK.toLocaleString()}</div><div className="text-xs text-ink-2">COD (K)</div></div>}
-            {codTHB > 0 && <div><div className="text-lg font-bold text-warn">{codTHB.toLocaleString()}</div><div className="text-xs text-ink-2">COD (฿)</div></div>}
+          <div className="grid grid-cols-2 gap-2 text-center border-t border-line/40 pt-2 text-xs">
+            {codMMK > 0 && (
+              <div>
+                <div className="text-sm font-black text-amber-600 dark:text-amber-400">
+                  {codMMK.toLocaleString()} K
+                </div>
+                <div className="text-[10px] text-ink-3">COD (MMK)</div>
+              </div>
+            )}
+            {codTHB > 0 && (
+              <div>
+                <div className="text-sm font-black text-amber-600 dark:text-amber-400">
+                  {codTHB.toLocaleString()} ฿
+                </div>
+                <div className="text-[10px] text-ink-3">COD (THB)</div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
+      {/* Parcels List */}
       {isLoading ? (
-        <div className="text-center py-10 text-ink-2">Loading...</div>
+        <div className="space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="card p-4 h-24 bg-muted animate-pulse" />
+          ))}
+        </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {parcels.map((p) => {
             const statusColor = STATUS_COLORS[p.status] || '#6B7280';
             const statusLabel = STATUS_LABELS_MM[p.status] || p.status;
             return (
-              <button key={p.id} onClick={() => navigate(`/parcels/${p.id}`)} className="card w-full p-3 text-left hover:bg-muted">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-bold text-brand">{p.tracking_number}</span>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded" style={{ color: statusColor, backgroundColor: statusColor + '18' }}>{statusLabel}</span>
+              <div
+                key={p.id}
+                onClick={() => navigate(`/parcels/${p.id}`)}
+                className="card p-3.5 space-y-1.5 cursor-pointer hover:border-brand/40 active:scale-[0.99] transition"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold font-mono text-brand">
+                    {p.tracking_number}
+                  </span>
+                  <span
+                    className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ color: statusColor, backgroundColor: statusColor + '18' }}
+                  >
+                    {statusLabel}
+                  </span>
                 </div>
-                <div className="text-sm text-ink">{p.recipient_name}</div>
-                <div className="text-xs text-ink-2">{p.recipient_phone}</div>
-                <div className="text-xs text-ink-3 truncate">{p.delivery_address}</div>
-                <div className="flex justify-between items-center mt-2 pt-2 border-t border-line">
-                  <span className="text-xs text-ink-3">လက်ခံရက်စွဲ: {new Date(p.received_at || p.created_at).toLocaleString()}</span>
-                  <span className="text-sm font-bold text-ink">{Number(p.delivery_fee).toLocaleString()} {p.currency}</span>
+
+                <div className="text-xs font-semibold text-ink">{p.recipient_name}</div>
+                <div className="text-xs text-ink-3 truncate">📍 {p.delivery_address}</div>
+
+                <div className="flex justify-between items-center pt-1 border-t border-line/60 text-xs">
+                  <span className="text-[10px] text-ink-3">
+                    {new Date(p.received_at || p.created_at).toLocaleDateString()}
+                  </span>
+                  <span className="font-black text-ink">
+                    {Number(p.delivery_fee).toLocaleString()} {p.currency}
+                  </span>
                 </div>
-              </button>
+              </div>
             );
           })}
-          {parcels.length === 0 && <div className="text-center py-10 text-ink-3">ပါဆယ် မတွေ့ပါ</div>}
+
+          {parcels.length === 0 && (
+            <div className="card p-8 text-center text-ink-3 text-xs">ပါဆယ် မတွေ့ပါ</div>
+          )}
         </div>
       )}
 
+      {/* Pagination */}
       {meta && meta.last_page > 1 && (
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 rounded border border-line disabled:opacity-40">နှုတ်</button>
-          <span className="text-sm">{page} / {meta.last_page}</span>
-          <button disabled={page >= meta.last_page} onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))} className="px-3 py-1.5 rounded border border-line disabled:opacity-40">နောက်</button>
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="p-2 rounded-xl border border-line bg-surface disabled:opacity-30 active:scale-95 transition"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span className="text-xs font-bold text-ink px-3 py-1.5 rounded-xl bg-surface border border-line">
+            {page} / {meta.last_page}
+          </span>
+          <button
+            disabled={page >= meta.last_page}
+            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+            className="p-2 rounded-xl border border-line bg-surface disabled:opacity-30 active:scale-95 transition"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { parcelService, ParcelImage } from '../services/parcelService';
 import CameraCapture from '../components/CameraCapture';
+import {
+  ArrowLeft,
+  Camera,
+  Image as ImageIcon,
+  Save,
+  X,
+  Plus,
+} from 'lucide-react';
 
 export default function ParcelEdit() {
   const { id } = useParams();
@@ -25,11 +33,18 @@ export default function ParcelEdit() {
   });
 
   const [form, setForm] = useState({
-    sender_name: '', sender_phone: '',
-    recipient_name: '', recipient_phone: '',
+    sender_name: '',
+    sender_phone: '',
+    recipient_name: '',
+    recipient_phone: '',
     delivery_address: '',
-    description: '', weight: '', kg_fee: '', notes: '',
-    delivery_fee: '', cod_amount: '0', is_cod: false,
+    description: '',
+    weight: '',
+    kg_fee: '',
+    notes: '',
+    delivery_fee: '',
+    cod_amount: '0',
+    is_cod: false,
     currency: 'MMK' as 'MMK' | 'THB',
     cod_currency: 'MMK' as 'MMK' | 'THB',
     items: [] as { product_name: string; quantity: string }[],
@@ -39,7 +54,7 @@ export default function ParcelEdit() {
   const [existingImages, setExistingImages] = useState<ParcelImage[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [cameraOpen, setCameraOpen] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (parcel) {
@@ -58,7 +73,10 @@ export default function ParcelEdit() {
         is_cod: parcel.is_cod || false,
         currency: (parcel.currency as 'MMK' | 'THB') || 'MMK',
         cod_currency: (parcel.cod_currency as 'MMK' | 'THB') || (parcel.currency as 'MMK' | 'THB') || 'MMK',
-        items: (parcel.items ?? []).map((it: any) => ({ product_name: it.product_name, quantity: String(it.quantity ?? 1) })),
+        items: (parcel.items ?? []).map((it: any) => ({
+          product_name: it.product_name,
+          quantity: String(it.quantity ?? 1),
+        })),
         priority: parcel.priority || 'NORMAL',
       });
       setExistingImages(parcel.images ?? []);
@@ -92,7 +110,11 @@ export default function ParcelEdit() {
 
   function update(field: string, value: any) {
     setForm((f) => ({ ...f, [field]: value }));
-    setErrors((e) => { const n = { ...e }; delete n[field]; return n; });
+    setErrors((e) => {
+      const n = { ...e };
+      delete n[field];
+      return n;
+    });
   }
 
   async function deleteExistingImage(imageId: number) {
@@ -108,10 +130,10 @@ export default function ParcelEdit() {
 
   function validate() {
     const newErrors: Record<string, string> = {};
-    if (!form.recipient_name.trim()) newErrors.recipient_name = 'လိုအပ်သည်';
-    if (!form.recipient_phone.trim()) newErrors.recipient_phone = 'လိုအပ်သည်';
-    if (!form.delivery_address.trim()) newErrors.delivery_address = 'လိုအပ်သည်';
-    if (!form.delivery_fee.trim()) newErrors.delivery_fee = 'လိုအပ်သည်';
+    if (!form.recipient_name.trim()) newErrors.recipient_name = 'အမည် လိုအပ်ပါသည်';
+    if (!form.recipient_phone.trim()) newErrors.recipient_phone = 'ဖုန်း လိုအပ်ပါသည်';
+    if (!form.delivery_address.trim()) newErrors.delivery_address = 'လိပ်စာ လိုအပ်ပါသည်';
+    if (!form.delivery_fee.trim()) newErrors.delivery_fee = 'ပို့ဆောင်ခ လိုအပ်ပါသည်';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -147,228 +169,320 @@ export default function ParcelEdit() {
   ];
 
   if (isLoading || !canEdit) {
-    return <div className="p-6 text-center text-ink-2">Loading...</div>;
+    return (
+      <div className="p-4 sm:p-6 space-y-3 max-w-2xl mx-auto">
+        <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+        <div className="h-44 rounded-2xl bg-muted animate-pulse" />
+      </div>
+    );
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-4">
+    <div className="p-3.5 sm:p-6 max-w-2xl mx-auto space-y-4 pb-28 md:pb-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="px-3 py-1.5 rounded border border-line text-sm">← နောက်</button>
-        <h1 className="text-xl font-bold text-ink">ပါဆယ် ပြင်ဆင်မည်</h1>
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-xl border border-line bg-surface hover:bg-muted active:scale-95 transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <h1 className="text-base sm:text-lg font-black text-ink">ပါဆယ် ပြင်ဆင်မည်</h1>
         <span />
       </div>
 
-      <Section title="ပါဆယ် အချက်အလက်">
+      {/* Recipient Section */}
+      <div className="card p-4 space-y-3 border-brand/30">
+        <div className="section-label text-brand">လက်ခံသူ အချက်အလက် *</div>
         <div>
-          <label className="label">ဖော်ပြချက် (ပစ္စည်းအမျိုးအမည်များ / ထပ်ပေါင်းပစ္စည်း)</label>
-          <textarea className="field-area" value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="ဥပမာ - အင်္ကျီ ၂ ထည်၊ ဖုန်း ၁ လုံး" />
-        </div>
-        <div>
-          <label className="label">ထုတ်ကုန်များ (အမည် + အရေအတွက်)</label>
-          {form.items.map((item, idx) => (
-            <div key={idx} className="flex gap-2 mb-2">
-              <input className="field flex-1" value={item.product_name} onChange={(e) => { const next = [...form.items]; next[idx] = { ...next[idx], product_name: e.target.value }; update('items', next); }} placeholder="ထုတ်ကုန်အမည်" />
-              <input className="field w-20 text-center" value={item.quantity} onChange={(e) => { const next = [...form.items]; next[idx] = { ...next[idx], quantity: e.target.value }; update('items', next); }} placeholder="1" />
-              <button onClick={() => { const next = form.items.filter((_, i) => i !== idx); update('items', next.length ? next : [{ product_name: '', quantity: '1' }]); }} className="px-2 text-bad">×</button>
-            </div>
-          ))}
-          <button onClick={() => update('items', [...form.items, { product_name: '', quantity: '1' }])} className="text-brand text-sm font-semibold">+ ထုတ်ကုန် ထပ်ထည့်မည်</button>
-        </div>
-        <div>
-          <label className="label">အလေးချိန် (kg)</label>
+          <label className="label">လက်ခံသူ ဖုန်းနံပါတ် *</label>
           <input
-            className="field"
-            type="number"
-            value={form.weight}
-            onChange={(e) => {
-              update('weight', e.target.value);
-              const w = Number(e.target.value);
-              if (w > 0) {
-                const fee = w <= 5 ? 40 : w <= 50 ? 33 : w <= 100 ? 31 : w <= 300 ? 27 : 20;
-                update('kg_fee', String(fee));
-              } else {
-                update('kg_fee', '');
-              }
-            }}
-            placeholder="ချန်ထားနိုင်"
+            className={`field ${errors.recipient_phone ? 'border-bad' : ''}`}
+            value={form.recipient_phone}
+            onChange={(e) => update('recipient_phone', e.target.value)}
+            type="tel"
           />
-          {Number(form.weight) >= 20 && <p className="text-xs text-ok mt-1">20Kg အထက် — အိမ်အရောက် ပို့ဆောင်ပေးပါမည်</p>}
+          {errors.recipient_phone && (
+            <p className="text-xs text-bad mt-1">{errors.recipient_phone}</p>
+          )}
         </div>
-        <Field label="Kg ဖိုး (THB)" value={form.kg_fee} onChange={(v) => update('kg_fee', v)} type="number" />
+
         <div>
-          <label className="label">ဦးစားပေးအဆင့်</label>
-          <div className="flex rounded border border-line overflow-hidden">
-            {priorities.map((p) => (
-              <button key={p.value} onClick={() => update('priority', p.value)} className={`flex-1 py-2 text-sm font-semibold ${form.priority === p.value ? 'bg-brand text-white' : 'bg-surface text-ink-2'}`}>
-                {p.label}
-              </button>
-            ))}
-          </div>
+          <label className="label">လက်ခံသူ နာမည် *</label>
+          <input
+            className={`field ${errors.recipient_name ? 'border-bad' : ''}`}
+            value={form.recipient_name}
+            onChange={(e) => update('recipient_name', e.target.value)}
+          />
+          {errors.recipient_name && (
+            <p className="text-xs text-bad mt-1">{errors.recipient_name}</p>
+          )}
         </div>
-      </Section>
 
-      <Section title="ပေးပို့သူ">
-        <Field label="နာမည်" value={form.sender_name} onChange={(v) => update('sender_name', v)} />
-        <Field label="ဖုန်းနံပါတ်" value={form.sender_phone} onChange={(v) => update('sender_phone', v)} />
-      </Section>
-
-      <Section title="လက်ခံသူ *">
-        <Field label="နာမည် *" value={form.recipient_name} onChange={(v) => update('recipient_name', v)} error={errors.recipient_name} />
-        <Field label="ဖုန်းနံပါတ် *" value={form.recipient_phone} onChange={(v) => update('recipient_phone', v)} error={errors.recipient_phone} />
         <div>
           <label className="label">လိပ်စာ *</label>
-          <textarea className={`field-area ${errors.delivery_address ? 'border-bad' : ''}`} value={form.delivery_address} onChange={(e) => update('delivery_address', e.target.value)} />
-          {errors.delivery_address && <p className="text-xs text-bad mt-1">{errors.delivery_address}</p>}
+          <textarea
+            className={`field-area ${errors.delivery_address ? 'border-bad' : ''}`}
+            value={form.delivery_address}
+            onChange={(e) => update('delivery_address', e.target.value)}
+          />
+          {errors.delivery_address && (
+            <p className="text-xs text-bad mt-1">{errors.delivery_address}</p>
+          )}
         </div>
-      </Section>
+      </div>
 
-      <Section title="ငွေကြေး">
+      {/* Sender Section */}
+      <div className="card p-4 space-y-3">
+        <div className="section-label">ပေးပို့သူ အချက်အလက်</div>
         <div>
-          <label className="label">ပို့ဆောင်ခ ငွေကြေး *</label>
-          <div className="flex rounded border border-line overflow-hidden mb-2">
+          <label className="label">ပေးပို့သူ ဖုန်းနံပါတ်</label>
+          <input
+            className="field"
+            value={form.sender_phone}
+            onChange={(e) => update('sender_phone', e.target.value)}
+            type="tel"
+          />
+        </div>
+        <div>
+          <label className="label">ပေးပို့သူ နာမည်</label>
+          <input
+            className="field"
+            value={form.sender_name}
+            onChange={(e) => update('sender_name', e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Financial Info */}
+      <div className="card p-4 space-y-3">
+        <div className="section-label">ငွေကြေး သတ်မှတ်ချက်</div>
+
+        <div>
+          <label className="label">ငွေကြေးအမျိုးအစား</label>
+          <div className="grid grid-cols-2 rounded-xl border border-line bg-muted/40 p-0.5">
             {(['MMK', 'THB'] as const).map((cur) => (
-              <button key={cur} onClick={() => update('currency', cur)} className={`flex-1 py-2 text-sm font-semibold ${form.currency === cur ? 'bg-brand text-white' : 'bg-surface text-ink-2'}`}>
+              <button
+                key={cur}
+                type="button"
+                onClick={() => update('currency', cur)}
+                className={`py-2 rounded-lg text-xs font-bold transition ${
+                  form.currency === cur
+                    ? 'bg-brand text-white shadow-sm'
+                    : 'text-ink-2 hover:text-ink'
+                }`}
+              >
                 {cur === 'MMK' ? 'ကျပ် (MMK)' : 'ဘတ် (THB)'}
               </button>
             ))}
           </div>
         </div>
-        <Field label={`ပို့ဆောင်ခ (${form.currency}) *`} value={form.delivery_fee} onChange={(v) => update('delivery_fee', v)} type="number" error={errors.delivery_fee} />
-        <div className="flex items-center justify-between py-2">
-          <div>
-            <div className="text-sm font-semibold text-ink">COD (ငွေတောင်းမည်)</div>
-            <div className="text-xs text-ink-2">လက်ခံသူထံမှ ငွေကောက်မည်</div>
-          </div>
-          <input type="checkbox" checked={form.is_cod} onChange={(e) => update('is_cod', e.target.checked)} />
+
+        <div>
+          <label className="label">ပို့ဆောင်ခ ({form.currency}) *</label>
+          <input
+            className={`field ${errors.delivery_fee ? 'border-bad' : ''}`}
+            type="number"
+            value={form.delivery_fee}
+            onChange={(e) => update('delivery_fee', e.target.value)}
+          />
+          {errors.delivery_fee && <p className="text-xs text-bad mt-1">{errors.delivery_fee}</p>}
         </div>
+
+        <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-line">
+          <div>
+            <div className="text-xs font-bold text-ink">COD (ငွေကောက်ခံရန်)</div>
+            <div className="text-[10px] text-ink-3">ပစ္စည်းရောက်မှ လက်ခံသူထံမှ ငွေတောင်းမည်</div>
+          </div>
+          <input
+            type="checkbox"
+            className="w-5 h-5 accent-brand rounded cursor-pointer"
+            checked={form.is_cod}
+            onChange={(e) => update('is_cod', e.target.checked)}
+          />
+        </div>
+
         {form.is_cod && (
-          <>
-            <Field label={`COD ပမာဏ (${form.cod_currency})`} value={form.cod_amount} onChange={(v) => update('cod_amount', v)} type="number" />
+          <div className="space-y-3 p-3 rounded-xl bg-amber-500/10 border border-amber-200 dark:border-amber-900/40 animate-fade-in">
             <div>
-              <label className="label">COD ငွေကြေး</label>
-              <div className="flex rounded border border-line overflow-hidden">
-                {(['MMK', 'THB'] as const).map((cur) => (
-                  <button key={cur} onClick={() => update('cod_currency', cur)} className={`flex-1 py-2 text-sm font-semibold ${form.cod_currency === cur ? 'bg-brand text-white' : 'bg-surface text-ink-2'}`}>
-                    {cur === 'MMK' ? 'ကျပ် (MMK)' : 'ဘတ် (THB)'}
-                  </button>
-                ))}
-              </div>
+              <label className="label text-amber-800 dark:text-amber-300">
+                COD ပမာဏ ({form.cod_currency})
+              </label>
+              <input
+                className="field border-amber-300 dark:border-amber-800"
+                type="number"
+                value={form.cod_amount}
+                onChange={(e) => update('cod_amount', e.target.value)}
+              />
             </div>
-          </>
+          </div>
         )}
-      </Section>
+      </div>
 
-      <Section title="မှတ်ချက်">
-        <textarea className="field-area" value={form.notes} onChange={(e) => update('notes', e.target.value)} placeholder="ချန်ထားနိုင်" />
-      </Section>
+      {/* Parcel Specifics */}
+      <div className="card p-4 space-y-3">
+        <div className="section-label">ပါဆယ် အချက်အလက်များ</div>
 
-      <Section title="ပါဆယ် ဓာတ်ပုံများ">
+        <div>
+          <label className="label">ဖော်ပြချက်</label>
+          <input
+            className="field"
+            value={form.description}
+            onChange={(e) => update('description', e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="label">ဦးစားပေးအဆင့်</label>
+          <div className="grid grid-cols-3 rounded-xl border border-line bg-muted/40 p-0.5">
+            {priorities.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => update('priority', p.value)}
+                className={`py-2 rounded-lg text-xs font-bold transition ${
+                  form.priority === p.value
+                    ? 'bg-brand text-white shadow-sm'
+                    : 'text-ink-2 hover:text-ink'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="label">အလေးချိန် (kg)</label>
+            <input
+              className="field"
+              type="number"
+              value={form.weight}
+              onChange={(e) => update('weight', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="label">Kg ဖိုး (THB)</label>
+            <input
+              className="field"
+              type="number"
+              value={form.kg_fee}
+              onChange={(e) => update('kg_fee', e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Existing and New Photos */}
+      <div className="card p-4 space-y-3">
+        <div className="section-label">ဓာတ်ပုံများ</div>
+
         {existingImages.length > 0 && (
-          <>
-            <div className="text-xs text-ink-2 mb-1">လက်ရှိ ဓာတ်ပုံများ</div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3">
-              {existingImages.map((img, i) => (
+          <div>
+            <div className="text-xs text-ink-3 mb-2">လက်ရှိ ဓာတ်ပုံများ</div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {existingImages.map((img) => (
                 <div key={img.id} className="relative group">
-                  <img src={img.url} alt="" className="w-full aspect-square rounded object-cover border border-line" />
+                  <img
+                    src={img.url}
+                    alt=""
+                    className="w-full aspect-square rounded-xl object-cover border border-line"
+                  />
                   <button
+                    type="button"
                     onClick={() => deleteExistingImage(img.id)}
-                    className="absolute top-1 right-1 bg-white/90 rounded-full w-6 h-6 text-xs text-bad shadow opacity-0 group-hover:opacity-100 transition"
+                    className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
                   >
-                    ✕
+                    <X className="w-3 h-3" />
                   </button>
-                  <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded">{i + 1}</span>
                 </div>
               ))}
             </div>
-          </>
+          </div>
         )}
 
-        <div className="border-2 border-dashed border-line rounded-lg p-4 text-center bg-muted/40">
-          <p className="text-sm text-ink-2 mb-2">ဓာတ်ပုံအသစ်များ ထည့်ရန်</p>
-          <div className="flex gap-2 justify-center">
-            <button onClick={() => document.getElementById('parcel-images-edit')?.click()} className="px-4 py-2 rounded bg-brand text-white text-sm font-bold">
-              ဓာတ်ပုံရွေးရန်
-            </button>
-            <button onClick={() => setCameraOpen(true)} className="px-4 py-2 rounded border border-line text-sm font-bold">
-              ဓာတ်ပုံရိုက်ရန်
-            </button>
-          </div>
-          <input
-            id="parcel-images-edit"
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              const selected = Array.from(e.target.files || []);
-              setNewFiles((prev) => [...prev, ...selected].slice(0, 10));
-              e.target.value = '';
-            }}
-          />
-          <input
-            id="parcel-images-edit-camera"
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              const selected = Array.from(e.target.files || []);
-              setNewFiles((prev) => [...prev, ...selected].slice(0, 10));
-              e.target.value = '';
-            }}
-          />
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="py-2.5 px-3 rounded-xl border border-brand bg-brand/10 text-brand text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition"
+          >
+            <Camera className="w-4 h-4" />
+            <span>ဓာတ်ပုံရိုက်မည်</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => document.getElementById('parcel-images-edit')?.click()}
+            className="py-2.5 px-3 rounded-xl border border-line bg-surface text-ink text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-muted active:scale-95 transition"
+          >
+            <ImageIcon className="w-4 h-4" />
+            <span>ပုံထပ်ရွေးမည်</span>
+          </button>
         </div>
 
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const selected = Array.from(e.target.files || []);
+            setNewFiles((prev) => [...prev, ...selected].slice(0, 10));
+            e.target.value = '';
+          }}
+        />
+        <input
+          id="parcel-images-edit"
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const selected = Array.from(e.target.files || []);
+            setNewFiles((prev) => [...prev, ...selected].slice(0, 10));
+            e.target.value = '';
+          }}
+        />
+
         {newFiles.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-3">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
             {newFiles.map((f, i) => (
               <div key={i} className="relative group">
-                <img src={URL.createObjectURL(f)} alt="" className="w-full aspect-square rounded object-cover border border-line" />
+                <img
+                  src={URL.createObjectURL(f)}
+                  alt=""
+                  className="w-full aspect-square rounded-xl object-cover border border-line"
+                />
                 <button
+                  type="button"
                   onClick={() => setNewFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="absolute top-1 right-1 bg-white/90 rounded-full w-6 h-6 text-xs text-bad shadow opacity-0 group-hover:opacity-100 transition"
+                  className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow"
                 >
-                  ✕
+                  <X className="w-3 h-3" />
                 </button>
-                <span className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded">{existingImages.length + i + 1}</span>
               </div>
             ))}
           </div>
         )}
+      </div>
 
-        {existingImages.length === 0 && newFiles.length === 0 && (
-          <p className="text-xs text-ink-3 text-center mt-2">ဓာတ်ပုံ မရှိသေးပါ</p>
-        )}
-        <p className="text-xs text-ink-3 text-center mt-2">အများဆုံး 10 ပုံ · JPEG, PNG · 5MB အောက်</p>
-      </Section>
-
-      <button onClick={handleSubmit} disabled={updateMutation.isPending || uploadingImages} className="w-full bg-brand text-white py-3 rounded font-bold disabled:opacity-60">
-        {(updateMutation.isPending || uploadingImages) ? '...' : 'ပြင်ဆင်မှု သိမ်းမည်'}
-      </button>
-      <CameraCapture
-        open={cameraOpen}
-        onClose={() => setCameraOpen(false)}
-        onCapture={(file) => setNewFiles((prev) => [...prev, file].slice(0, 10))}
-      />
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="card p-4 space-y-3">
-      <h3 className="text-sm font-bold text-ink">{title}</h3>
-      {children}
-    </div>
-  );
-}
-
-function Field({ label, value, onChange, type = 'text', error }: { label: string; value: string; onChange: (v: string) => void; type?: string; error?: string }) {
-  return (
-    <div>
-      <label className="label">{label}</label>
-      <input className={`field ${error ? 'border-bad' : ''}`} type={type} value={value} onChange={(e) => onChange(e.target.value)} />
-      {error && <p className="text-xs text-bad mt-1">{error}</p>}
+      {/* Sticky Bottom Submit Button */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 p-3 bg-surface/95 backdrop-blur-md border-t border-line pb-safe md:static md:p-0 md:bg-transparent md:border-0">
+        <button
+          onClick={handleSubmit}
+          disabled={updateMutation.isPending || uploadingImages}
+          className="w-full bg-brand hover:bg-brand-dark text-white py-3.5 rounded-2xl font-black text-sm shadow-lg shadow-brand/25 flex items-center justify-center gap-2 active:scale-98 transition disabled:opacity-60 touch-press"
+        >
+          <Save className="w-5 h-5" />
+          <span>
+            {updateMutation.isPending || uploadingImages
+              ? 'ပြင်ဆင်မှု သိမ်းနေဆဲ...'
+              : 'ပြင်ဆင်မှု သိမ်းမည်'}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

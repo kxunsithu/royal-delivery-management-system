@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Camera, X, RotateCcw } from 'lucide-react';
 
 interface Props {
   open: boolean;
@@ -15,13 +16,17 @@ export default function CameraCapture({ open, onClose, onCapture }: Props) {
   useEffect(() => {
     if (!open) return;
     let mounted = true;
+
     async function start() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' } },
           audio: false,
         });
-        if (!mounted) { stream.getTracks().forEach((t) => t.stop()); return; }
+        if (!mounted) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -33,6 +38,7 @@ export default function CameraCapture({ open, onClose, onCapture }: Props) {
       }
     }
     start();
+
     return () => {
       mounted = false;
       if (streamRef.current) {
@@ -53,32 +59,63 @@ export default function CameraCapture({ open, onClose, onCapture }: Props) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
-      onCapture(file);
-      onClose();
-    }, 'image/jpeg', 0.9);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `camera_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        onCapture(file);
+        onClose();
+      },
+      'image/jpeg',
+      0.9
+    );
   }
 
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-surface rounded border border-line w-full max-w-lg p-3 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-ink">ကင်မရာ</h3>
-          <button onClick={onClose} className="px-2 py-1 border border-line rounded text-sm">✕</button>
-        </div>
-        {error ? (
-          <div className="text-center text-bad text-sm py-6">{error}</div>
-        ) : (
-          <video ref={videoRef} className="w-full rounded bg-black" playsInline muted />
-        )}
-        <div className="flex gap-2">
-          <button onClick={capture} disabled={!ready} className="flex-1 bg-brand text-white py-2 rounded font-bold disabled:opacity-50">
-            ဓာတ်ပုံရိုက်မည်
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="bg-surface rounded-3xl border border-line w-full max-w-md p-4 space-y-3.5 shadow-float">
+        <div className="flex items-center justify-between pb-1 border-b border-line">
+          <div className="flex items-center gap-2">
+            <Camera className="w-5 h-5 text-brand" />
+            <h3 className="font-bold text-sm text-ink">ကင်မရာ ရိုက်ကူးမည်</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-xl text-ink-3 hover:text-ink hover:bg-muted"
+          >
+            <X className="w-4 h-4" />
           </button>
-          <button onClick={onClose} className="px-4 border border-line rounded text-sm">ပိတ်မည်</button>
+        </div>
+
+        {error ? (
+          <div className="text-center text-rose-600 text-xs py-8 bg-rose-50 dark:bg-rose-950/20 rounded-2xl">
+            {error}
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-2xl bg-black aspect-video flex items-center justify-center">
+            <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <button
+            type="button"
+            onClick={onClose}
+            className="py-2.5 px-3 rounded-2xl border border-line text-xs font-bold text-ink hover:bg-muted active:scale-95 transition"
+          >
+            ပိတ်မည်
+          </button>
+          <button
+            type="button"
+            onClick={capture}
+            disabled={!ready}
+            className="py-2.5 px-3 rounded-2xl bg-brand text-white text-xs font-bold shadow-sm shadow-brand/25 disabled:opacity-50 active:scale-95 transition flex items-center justify-center gap-1.5"
+          >
+            <Camera className="w-4 h-4" />
+            <span>ဓာတ်ပုံရိုက်မည်</span>
+          </button>
         </div>
       </div>
     </div>

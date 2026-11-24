@@ -73,6 +73,7 @@
   body {
     @apply m-0 min-h-screen bg-app font-sans text-ink antialiased;
     font-feature-settings: 'kern' 1;
+    -webkit-touch-callout: none;
   }
 
   button,
@@ -85,6 +86,7 @@
   button,
   a {
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   ::selection {
@@ -97,13 +99,13 @@
   }
 
   *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   *::-webkit-scrollbar-thumb {
     background-color: rgb(var(--line-strong));
-    border-radius: 4px;
+    border-radius: 9999px;
   }
 
   *::-webkit-scrollbar-track {
@@ -112,16 +114,22 @@
 }
 
 @layer components {
+  /* Cards */
   .card {
-    @apply rounded border border-line bg-surface shadow-card;
+    @apply rounded-2xl border border-line bg-surface shadow-card transition duration-150;
   }
 
+  .card-interactive {
+    @apply card cursor-pointer active:scale-[0.99] active:bg-muted/50 hover:border-brand/40;
+  }
+
+  /* Form controls with thumb-friendly touch targets */
   .field {
-    @apply h-11 w-full rounded border border-line bg-surface px-3 text-sm text-ink outline-none transition placeholder:text-ink-3 focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply h-11 sm:h-12 w-full rounded-xl border border-line bg-surface px-3.5 text-sm text-ink outline-none transition placeholder:text-ink-3 focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .field-area {
-    @apply min-h-[92px] w-full resize-y rounded border border-line bg-surface px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-3 focus:border-brand focus:ring-2 focus:ring-brand/15;
+    @apply min-h-[96px] w-full resize-y rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-ink outline-none transition placeholder:text-ink-3 focus:border-brand focus:ring-2 focus:ring-brand/20;
   }
 
   .label {
@@ -132,12 +140,32 @@
     @apply mb-2 text-[11px] font-bold uppercase tracking-[0.09em] text-ink-2;
   }
 
+  /* Button touch response */
+  .touch-press {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+
+  /* Scrollbar hiding for horizontal chip bars */
   .scrollbar-none {
     scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   .scrollbar-none::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Safe area helpers for iPhone Notch and Android navigation bar */
+  .pt-safe {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 12px);
+  }
+
+  .mb-safe {
+    margin-bottom: max(env(safe-area-inset-bottom), 12px);
   }
 }
 
