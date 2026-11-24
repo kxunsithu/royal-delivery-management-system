@@ -70,7 +70,7 @@ export default function Dashboard() {
               </span>
               <span className="text-xs text-white/80">{formattedToday}</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight pt-1">
+            <h1 className="text-xl sm:text-2xl font-black leading-snug pt-1">
               မင်္ဂလာပါ၊ {user?.name ?? 'ဝန်ထမ်း'}
             </h1>
             <p className="text-xs sm:text-sm text-white/90">
@@ -318,7 +318,7 @@ function AdminDashboard({
       {/* Key Status Grid */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-ink-2 uppercase tracking-wider">
+          <span className="text-xs font-bold text-ink-2">
             ပါဆယ် အခြေအနေ
           </span>
           <button
@@ -363,7 +363,7 @@ function AdminDashboard({
 
       {/* Quick Action Tiles */}
       <div>
-        <div className="text-xs font-bold text-ink-2 uppercase tracking-wider mb-2">
+        <div className="text-xs font-bold text-ink-2 mb-2">
           အမြန်သွားရောက်ရန်
         </div>
 

@@ -2,6 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================ */
+/* LOCAL BUNDLED MYANMAR WEBFONTS (Noto Sans Myanmar UI)        */
+/* Works offline and without Google Fonts connection            */
+/* ============================================================ */
+@font-face {
+  font-family: 'Noto Sans Myanmar UI';
+  src: url('/fonts/NotoSansMyanmarUI-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Myanmar UI';
+  src: url('/fonts/NotoSansMyanmarUI-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Myanmar UI';
+  src: url('/fonts/NotoSansMyanmarUI-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Myanmar UI';
+  src: url('/fonts/NotoSansMyanmarUI-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Also alias 'Noto Sans Myanmar' to the UI variant to prevent tall vertical clippings */
+@font-face {
+  font-family: 'Noto Sans Myanmar';
+  src: url('/fonts/NotoSansMyanmarUI-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Myanmar';
+  src: url('/fonts/NotoSansMyanmarUI-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Myanmar';
+  src: url('/fonts/NotoSansMyanmarUI-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Myanmar';
+  src: url('/fonts/NotoSansMyanmarUI-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --brand: 249 115 22;
   --brand-dark: 194 65 12;
@@ -68,12 +137,23 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    line-height: 1.6;
+    letter-spacing: normal;
   }
 
   body {
     @apply m-0 min-h-screen bg-app font-sans text-ink antialiased;
-    font-feature-settings: 'kern' 1;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    line-height: 1.6;
+    letter-spacing: normal;
     -webkit-touch-callout: none;
+  }
+
+  /* Prevent vertical clipping of Myanmar Unicode subjoined consonants and vowel signs */
+  .truncate {
+    padding-top: 0.1em;
+    padding-bottom: 0.15em;
+    line-height: 1.5;
   }
 
   button,
@@ -137,7 +217,7 @@
   }
 
   .section-label {
-    @apply mb-2 text-[11px] font-bold uppercase tracking-[0.09em] text-ink-2;
+    @apply mb-2 text-xs font-bold text-ink-2;
   }
 
   /* Button touch response */

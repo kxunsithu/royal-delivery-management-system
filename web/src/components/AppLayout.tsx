@@ -252,7 +252,7 @@ export default function AppLayout() {
                   >
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className={`text-[10px] mt-0.5 tracking-tight ${isItemActive ? 'font-bold' : ''}`}>
+                  <span className={`text-[11px] mt-0.5 leading-tight ${isItemActive ? 'font-bold text-brand' : ''}`}>
                     {item.label}
                   </span>
                 </NavLink>

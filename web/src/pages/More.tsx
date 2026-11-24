@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -17,14 +17,49 @@ import {
   Moon,
   LogOut,
   ChevronRight,
-  Shield,
-  HelpCircle,
+  Smartphone,
+  Share2,
+  Download,
+  X,
+  Check,
 } from 'lucide-react';
 
 export default function More() {
   const { user, logout } = useAuth();
   const { mode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installGuideOpen, setInstallGuideOpen] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    // Check if app is already running in standalone (no browser bar) mode
+    const isStandaloneMode =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+    setIsStandalone(isStandaloneMode);
+
+    // Listen for beforeinstallprompt on Chromium browsers
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  async function handleInstallClick() {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setInstallPrompt(null);
+      }
+    } else {
+      setInstallGuideOpen(true);
+    }
+  }
 
   const canSeeParcels = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'accountant';
   const canAssign = user?.role === 'admin' || user?.role === 'accountant';
@@ -82,6 +117,30 @@ export default function More() {
         </div>
         <ChevronRight className="w-5 h-5 text-ink-3" />
       </button>
+
+      {/* PWA Install Banner (If not yet in standalone mode) */}
+      {!isStandalone && (
+        <div className="card p-4 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-brand/10 border-brand/30 space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-brand text-white flex items-center justify-center shadow-sm flex-shrink-0">
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold text-ink">မိုဘိုင်း App အဖြစ် သွင်းယူရန်</div>
+              <div className="text-xs text-ink-2">
+                Browser ရှာဖွေရေးဘားမပါဘဲ Fullscreen သုံးနိုင်ပါသည်
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleInstallClick}
+            className="w-full mt-2 py-2.5 px-3 rounded-xl bg-brand text-white text-xs font-bold shadow-sm shadow-brand/20 active:scale-98 transition flex items-center justify-center gap-1.5"
+          >
+            <Download className="w-4 h-4" />
+            <span>{installPrompt ? 'အက်ပ်ကို ချက်ချင်းသွင်းမည်' : 'အက်ပ်သွင်းယူနည်း ကြည့်မည်'}</span>
+          </button>
+        </div>
+      )}
 
       {/* Operations Group */}
       <div className="space-y-1.5">
@@ -213,6 +272,61 @@ export default function More() {
       <div className="text-center text-[11px] text-ink-3 pt-2">
         Royal Myawaddy Delivery Management System · v1.0.0
       </div>
+
+      {/* PWA INSTALL INSTRUCTION MODAL */}
+      {installGuideOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface rounded-3xl border border-line w-full max-w-sm p-5 space-y-4 shadow-float animate-scale-in">
+            <div className="flex items-center justify-between pb-2 border-b border-line">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-brand" />
+                <h3 className="font-black text-sm text-ink">မိုဘိုင်း App အဖြစ် သွင်းနည်း</h3>
+              </div>
+              <button
+                onClick={() => setInstallGuideOpen(false)}
+                className="p-1 rounded-lg text-ink-3 hover:text-ink"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-ink-2 leading-relaxed">
+              ဖုန်းမျက်နှာပြင်တွင် App အဖြစ်သွင်းထားပါက <strong>Browser Search Bar မပေါ်တော့ဘဲ Fullscreen</strong> ဖြင့် တကယ့် Application အစစ်ကဲ့သို့ အသုံးပြုနိုင်ပါသည်။
+            </p>
+
+            {/* Android Instructions */}
+            <div className="p-3 rounded-2xl bg-muted/40 space-y-1.5 border border-line/60">
+              <div className="text-xs font-bold text-ink flex items-center gap-1.5">
+                <span>🤖 Android (Chrome Browser ဖြင့်)</span>
+              </div>
+              <ol className="text-xs text-ink-2 list-decimal list-inside space-y-1">
+                <li>ညာဘက်အပေါ်ရှိ အစက် ၃ စက် (⋮) ကို နှိပ်ပါ</li>
+                <li><strong>"Install app"</strong> သို့မဟုတ် <strong>"Add to Home screen"</strong> ကို ရွေးပါ</li>
+                <li><strong>"Install" (သို့) "Add"</strong> ကို နှိပ်ပါ</li>
+              </ol>
+            </div>
+
+            {/* iPhone Instructions */}
+            <div className="p-3 rounded-2xl bg-muted/40 space-y-1.5 border border-line/60">
+              <div className="text-xs font-bold text-ink flex items-center gap-1.5">
+                <span>🍎 iPhone (Safari Browser ဖြင့်)</span>
+              </div>
+              <ol className="text-xs text-ink-2 list-decimal list-inside space-y-1">
+                <li>အောက်ဘက်ရှိ Share ခလုတ် (⎋) ကို နှိပ်ပါ</li>
+                <li>အောက်သို့ဆွဲပြီး <strong>"Add to Home Screen"</strong> ကို နှိပ်ပါ</li>
+                <li>ညာဘက်အပေါ်မှ <strong>"Add"</strong> ကို နှိပ်ပါ</li>
+              </ol>
+            </div>
+
+            <button
+              onClick={() => setInstallGuideOpen(false)}
+              className="w-full bg-brand text-white py-3 rounded-2xl font-bold text-xs shadow-sm active:scale-98 transition"
+            >
+              နားလည်ပါပြီ
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -233,21 +347,27 @@ function MenuItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full px-4 py-3 text-left flex items-center justify-between hover:bg-muted active:scale-[0.99] transition ${
+      className={`w-full px-4 py-3.5 text-left flex items-center justify-between hover:bg-muted active:scale-[0.99] transition ${
         highlight ? 'bg-brand/5' : ''
       }`}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-          highlight ? 'bg-brand text-white shadow-sm' : 'bg-muted text-ink-2'
-        }`}>
+        <div
+          className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+            highlight ? 'bg-brand text-white shadow-sm' : 'bg-muted text-ink-2'
+          }`}
+        >
           <Icon className="w-4 h-4" />
         </div>
-        <div className="min-w-0">
-          <div className={`text-sm font-bold truncate ${highlight ? 'text-brand' : 'text-ink'}`}>
+        <div className="min-w-0 py-0.5">
+          <div className={`text-sm font-bold leading-normal truncate ${highlight ? 'text-brand' : 'text-ink'}`}>
             {label}
           </div>
-          {subtitle && <div className="text-xs text-ink-3 truncate">{subtitle}</div>}
+          {subtitle && (
+            <div className="text-xs text-ink-3 leading-relaxed truncate pt-0.5 pb-0.5">
+              {subtitle}
+            </div>
+          )}
         </div>
       </div>
       <ChevronRight className="w-4 h-4 text-ink-3 flex-shrink-0 ml-2" />
