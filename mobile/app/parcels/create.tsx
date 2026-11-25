@@ -72,39 +72,29 @@ export default function CreateParcelScreen() {
   const senderDebounce = useRef<any>(null);
   const recipientDebounce = useRef<any>(null);
 
-  const createMutation = useMutation({
-    mutationFn: (data: any) => parcelService.create(data),
-    onSuccess: async (createdParcel) => {
-      if (localImages.length > 0) {
-        try {
-          const chunkSize = 10;
-          for (let i = 0; i < localImages.length; i += chunkSize) {
-            const chunk = localImages.slice(i, i + chunkSize);
-            const formData = new FormData();
-            chunk.forEach((img) => {
-              formData.append('images[]', {
-                uri: img.uri,
-                name: img.fileName ?? `parcel_${Date.now()}.jpg`,
-                type: img.mimeType ?? 'image/jpeg',
-              } as any);
-            });
-            await parcelService.uploadImages(createdParcel.id, formData);
-          }
-        } catch {
-          // ignore
-        }
-      }
-      queryClient.invalidateQueries({ queryKey: ['parcels'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      Alert.alert('အောင်မြင်သည်', 'ပါဆယ် မှတ်ပုံတင်ပြီးပါပြီ', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    },
-    onError: (error: any) => {
-      const msg = error?.response?.data?.message || 'ပါဆယ် မှတ်ပုံတင်မှု မအောင်မြင်ပါ';
-      Alert.alert('အမှားဖြစ်ပွားသည်', msg);
-    },
+  const [progressState, setProgressState] = useState<{
+    isOpen: boolean;
+    step: 'saving_parcel' | 'uploading_images' | 'completed' | 'error';
+    percent: number;
+    currentChunk: number;
+    totalChunks: number;
+    uploadedCount: number;
+    totalImages: number;
+    errorMessage?: string;
+  }>({
+    isOpen: false,
+    step: 'saving_parcel',
+    percent: 0,
+    currentChunk: 0,
+    totalChunks: 0,
+    uploadedCount: 0,
+    totalImages: 0,
   });
+  const [lastCreatedParcelId, setLastCreatedParcelId] = useState<number | null>(null);
+  const [failedChunkIndex, setFailedChunkIndex] = useState<number>(0);
+
+  const isSubmitting =
+    progressState.isOpen && progressState.step !== 'error' && progressState.step !== 'completed';
 
   function update(field: string, value: any) {
     setForm(f => ({ ...f, [field]: value }));
@@ -201,9 +191,86 @@ export default function CreateParcelScreen() {
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit() {
-    if (!validate()) return;
-    createMutation.mutate({
+  async function uploadRemainingImages(parcelId: number, startChunkIndex = 0) {
+    const chunkSize = 10;
+    const totalChunks = Math.ceil(localImages.length / chunkSize);
+
+    setProgressState((prev) => ({
+      ...prev,
+      isOpen: true,
+      step: 'uploading_images',
+      currentChunk: startChunkIndex + 1,
+      totalChunks,
+      totalImages: localImages.length,
+    }));
+
+    try {
+      for (let c = startChunkIndex; c < totalChunks; c++) {
+        setFailedChunkIndex(c);
+        const chunk = localImages.slice(c * chunkSize, (c + 1) * chunkSize);
+        const formData = new FormData();
+        chunk.forEach((img) => {
+          formData.append('images[]', {
+            uri: img.uri,
+            name: img.fileName ?? `parcel_${Date.now()}.jpg`,
+            type: img.mimeType ?? 'image/jpeg',
+          } as any);
+        });
+
+        const basePercent = 15 + Math.round((c / totalChunks) * 80);
+        const chunkWeight = 80 / totalChunks;
+
+        await parcelService.uploadImages(parcelId, formData, (percent) => {
+          const overall = Math.min(96, Math.round(basePercent + (percent / 100) * chunkWeight));
+          const currentUploaded = Math.min(
+            localImages.length,
+            c * chunkSize + Math.round((chunk.length * percent) / 100)
+          );
+          setProgressState((prev) => ({
+            ...prev,
+            percent: overall,
+            currentChunk: c + 1,
+            uploadedCount: currentUploaded,
+          }));
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['parcels'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['parcel', String(parcelId)] });
+
+      setProgressState((prev) => ({
+        ...prev,
+        step: 'completed',
+        percent: 100,
+        uploadedCount: localImages.length,
+      }));
+
+      setTimeout(() => {
+        router.back();
+      }, 1200);
+    } catch (uploadErr: any) {
+      const msg =
+        uploadErr?.response?.data?.message ||
+        uploadErr?.message ||
+        'ဓာတ်ပုံ အချို့ တင်ရာတွင် အမှားဖြစ်ပွားခဲ့ပါသည်။';
+      setProgressState((prev) => ({
+        ...prev,
+        step: 'error',
+        errorMessage: msg,
+      }));
+    }
+  }
+
+  function handleRetryImages() {
+    if (!lastCreatedParcelId) return;
+    uploadRemainingImages(lastCreatedParcelId, failedChunkIndex);
+  }
+
+  async function handleSubmit() {
+    if (!validate() || isSubmitting) return;
+
+    const payload = {
       tracking_number: form.tracking_number || undefined,
       sender_name: form.sender_name || undefined,
       sender_phone: form.sender_phone || undefined,
@@ -224,7 +291,52 @@ export default function CreateParcelScreen() {
       cod_currency: form.cod_currency,
       priority: form.priority,
       condition: form.condition,
+    };
+
+    const chunkSize = 10;
+    const totalChunks = Math.ceil(localImages.length / chunkSize) || 1;
+
+    setProgressState({
+      isOpen: true,
+      step: 'saving_parcel',
+      percent: localImages.length > 0 ? 10 : 35,
+      currentChunk: 0,
+      totalChunks,
+      uploadedCount: 0,
+      totalImages: localImages.length,
     });
+
+    try {
+      const createdParcel = await parcelService.create(payload as any);
+      setLastCreatedParcelId(createdParcel.id);
+
+      if (localImages.length === 0) {
+        setProgressState({
+          isOpen: true,
+          step: 'completed',
+          percent: 100,
+          currentChunk: 1,
+          totalChunks: 1,
+          uploadedCount: 0,
+          totalImages: 0,
+        });
+        queryClient.invalidateQueries({ queryKey: ['parcels'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        setTimeout(() => {
+          router.back();
+        }, 1000);
+        return;
+      }
+
+      await uploadRemainingImages(createdParcel.id, 0);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'ပါဆယ် မှတ်ပုံတင်မှု မအောင်မြင်ပါ';
+      setProgressState((prev) => ({
+        ...prev,
+        step: 'error',
+        errorMessage: msg,
+      }));
+    }
   }
 
   const priorities = [
@@ -243,11 +355,11 @@ export default function CreateParcelScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>ပါဆယ်ထည့်ရန်</Text>
         <TouchableOpacity
-          style={[styles.saveBtn, createMutation.isPending && { opacity: 0.6 }]}
+          style={[styles.saveBtn, isSubmitting && { opacity: 0.6 }]}
           onPress={handleSubmit}
-          disabled={createMutation.isPending}
+          disabled={isSubmitting}
         >
-          {createMutation.isPending ? (
+          {isSubmitting ? (
             <ActivityIndicator size="small" color={COLORS.white} />
           ) : (
             <Ionicons name="save-outline" size={20} color={COLORS.white} />
@@ -576,17 +688,84 @@ export default function CreateParcelScreen() {
         </FormSection>
 
         <TouchableOpacity
-          style={[styles.submitBtn, createMutation.isPending && { opacity: 0.6 }]}
+          style={[styles.submitBtn, isSubmitting && { opacity: 0.6 }]}
           onPress={handleSubmit}
-          disabled={createMutation.isPending}
+          disabled={isSubmitting}
         >
-          {createMutation.isPending ? (
-            <ActivityIndicator color={COLORS.white} />
+          {isSubmitting ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <ActivityIndicator color={COLORS.white} size="small" />
+              <Text style={styles.submitBtnText}>
+                {progressState.step === 'saving_parcel'
+                  ? 'အချက်အလက် သိမ်းနေဆဲ...'
+                  : `ဓာတ်ပုံ တင်နေသည် (${progressState.uploadedCount}/${progressState.totalImages})...`}
+              </Text>
+            </View>
           ) : (
             <Text style={styles.submitBtnText}>ပါဆယ်ထည့်ရန်</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Upload Progress Modal */}
+      <Modal visible={progressState.isOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIconWrap}>
+              {progressState.step === 'completed' ? (
+                <Ionicons name="checkmark-circle" size={48} color={COLORS.success || '#10b981'} />
+              ) : progressState.step === 'error' ? (
+                <Ionicons name="alert-circle" size={48} color={COLORS.error || '#ef4444'} />
+              ) : (
+                <ActivityIndicator size="large" color={COLORS.primary || '#ff7a00'} />
+              )}
+            </View>
+
+            <Text style={styles.modalTitle}>
+              {progressState.step === 'saving_parcel' && 'ပါဆယ် သိမ်းဆည်းနေပါသည်...'}
+              {progressState.step === 'uploading_images' && 'ဓာတ်ပုံများ တင်နေပါသည်...'}
+              {progressState.step === 'completed' && 'မှတ်ပုံတင်ခြင်း အောင်မြင်ပါသည်!'}
+              {progressState.step === 'error' && 'လုပ်ဆောင်မှု မအောင်မြင်ပါ'}
+            </Text>
+
+            <Text style={styles.modalSubtitle}>
+              {progressState.step === 'saving_parcel' && 'ပါဆယ် အချက်အလက်များကို ထည့်သွင်းနေပါသည်'}
+              {progressState.step === 'uploading_images' &&
+                `ဓာတ်ပုံ ${progressState.uploadedCount} / ${progressState.totalImages} ပုံ တင်ပြီးပါပြီ (${progressState.percent}%)`}
+              {progressState.step === 'completed' && 'ပါဆယ်နှင့် ဓာတ်ပုံများ အားလုံး အောင်မြင်စွာ တင်ပြီးပါပြီ'}
+              {progressState.step === 'error' && (progressState.errorMessage || 'အမှားတစ်ခု ဖြစ်ပွားခဲ့ပါသည်')}
+            </Text>
+
+            {progressState.step !== 'error' && (
+              <View style={styles.progressBarWrap}>
+                <View style={[styles.progressBarFill, { width: `${progressState.percent}%` }]} />
+              </View>
+            )}
+
+            {progressState.step === 'error' && (
+              <View style={styles.modalBtnRow}>
+                {lastCreatedParcelId ? (
+                  <>
+                    <TouchableOpacity style={[styles.modalBtn, styles.modalBtnPrimary]} onPress={handleRetryImages}>
+                      <Text style={styles.modalBtnPrimaryText}>ပြန်လည်ကြိုးစားမည်</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.modalBtn, styles.modalBtnOutline]} onPress={() => router.back()}>
+                      <Text style={styles.modalBtnOutlineText}>ထွက်မည်</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.modalBtn, styles.modalBtnOutline]}
+                    onPress={() => setProgressState(p => ({ ...p, isOpen: false }))}
+                  >
+                    <Text style={styles.modalBtnOutlineText}>ပိတ်မည်</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -853,4 +1032,81 @@ const styles = StyleSheet.create({
   suggestionName: { fontSize: 14, fontWeight: '600', color: COLORS.text, fontFamily: FONTS.semiBold },
   suggestionPhone: { fontSize: 12, color: COLORS.textSecondary, marginTop: 1, fontFamily: FONTS.regular },
   suggestionAddr: { fontSize: 11, color: COLORS.textLight, marginTop: 1, fontFamily: FONTS.regular },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  modalIconWrap: {
+    marginBottom: 12,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    fontFamily: FONTS.bold,
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.regular,
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 18,
+  },
+  progressBarWrap: {
+    width: '100%',
+    height: 8,
+    backgroundColor: COLORS.border,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: COLORS.primary,
+    borderRadius: 4,
+  },
+  modalBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 16,
+    width: '100%',
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBtnPrimary: {
+    backgroundColor: COLORS.primary,
+  },
+  modalBtnPrimaryText: {
+    color: COLORS.white,
+    fontFamily: FONTS.bold,
+    fontSize: 13,
+  },
+  modalBtnOutline: {
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  modalBtnOutlineText: {
+    color: COLORS.text,
+    fontFamily: FONTS.semiBold,
+    fontSize: 13,
+  },
 });

@@ -421,8 +421,11 @@ function ParcelCard({ parcel, canChangeStatus, queryClient }: {
                 <Text style={styles.codText}>COD {Number(parcel.cod_amount).toLocaleString()} {(parcel.cod_currency ?? parcel.currency) === 'THB' ? 'THB' : 'MMK'}</Text>
               </View>
             )}
-            {firstImage && (
-              <Text style={styles.imgCountText}>{parcel.images!.length}</Text>
+            {parcel.images && parcel.images.length > 1 && (
+              <View style={styles.imgCountBadge}>
+                <Ionicons name="images-outline" size={11} color={COLORS.textSecondary} />
+                <Text style={styles.imgCountText}>+{parcel.images.length - 1} ပုံ</Text>
+              </View>
             )}
           </View>
           <Text style={styles.feeText}>{Number(parcel.delivery_fee).toLocaleString()} {parcel.currency === 'THB' ? 'THB' : 'MMK'}</Text>
@@ -738,7 +741,21 @@ const styles = StyleSheet.create({
   codText: { fontSize: 11, fontWeight: '700', color: COLORS.info,
     fontFamily: FONTS.bold,
   },
-  imgCountText: { fontSize: 11, fontWeight: '600', color: COLORS.textSecondary,
+  imgCountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  imgCountText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
     fontFamily: FONTS.semiBold,
   },
   verifyBtn: {
