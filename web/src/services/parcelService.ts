@@ -82,9 +82,19 @@ export const parcelService = {
     await apiClient.post(`/parcels/${id}/assignments`, { staff_id: staffId, notes });
   },
 
-  async uploadImages(id: number, formData: FormData): Promise<ParcelImage[]> {
+  async uploadImages(
+    id: number,
+    formData: FormData,
+    onProgress?: (percent: number, loaded: number, total: number) => void
+  ): Promise<ParcelImage[]> {
     const response = await apiClient.post(`/parcels/${id}/images`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent.loaded, progressEvent.total);
+        }
+      },
     });
     return response.data.data;
   },

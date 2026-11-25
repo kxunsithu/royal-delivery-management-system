@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { parcelService, ContactSuggestion } from '../services/parcelService';
@@ -14,7 +14,24 @@ import {
   X,
   Check,
   Save,
+  Package,
+  UploadCloud,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
 } from 'lucide-react';
+
+interface UploadProgressState {
+  isOpen: boolean;
+  step: 'saving_parcel' | 'uploading_images' | 'completed' | 'error';
+  percent: number;
+  currentChunk: number;
+  totalChunks: number;
+  uploadedCount: number;
+  totalImages: number;
+  errorMessage?: string;
+  createdParcelId?: number;
+}
 
 export default function ParcelCreate() {
   const { user } = useAuth();
@@ -60,27 +77,29 @@ export default function ParcelCreate() {
   const senderTimer = useRef<any>(null);
   const recipientTimer = useRef<any>(null);
 
-  const createMutation = useMutation({
-    mutationFn: (data: any) => parcelService.create(data),
-    onSuccess: async (createdParcel) => {
-      if (files.length > 0) {
-        try {
-          const formData = new FormData();
-          files.forEach((f) => formData.append('images[]', f, f.name));
-          await parcelService.uploadImages(createdParcel.id, formData);
-        } catch {
-          // ignore
-        }
-      }
-      queryClient.invalidateQueries({ queryKey: ['parcels'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      window.alert('ပါဆယ် မှတ်ပုံတင်ပြီးပါပြီ');
-      navigate('/parcels');
-    },
-    onError: (error: any) => {
-      window.alert(error?.response?.data?.message || 'ပါဆယ် မှတ်ပုံတင်မှု မအောင်မြင်ပါ');
-    },
+  const [progressState, setProgressState] = useState<UploadProgressState>({
+    isOpen: false,
+    step: 'saving_parcel',
+    percent: 0,
+    currentChunk: 0,
+    totalChunks: 0,
+    uploadedCount: 0,
+    totalImages: 0,
   });
+  const [lastCreatedParcelId, setLastCreatedParcelId] = useState<number | null>(null);
+  const [failedChunkIndex, setFailedChunkIndex] = useState<number>(0);
+
+  const isSubmitting =
+    progressState.isOpen && progressState.step !== 'error' && progressState.step !== 'completed';
+
+  const requiredFields = [
+    Boolean(form.recipient_phone.trim()),
+    Boolean(form.recipient_name.trim()),
+    Boolean(form.delivery_address.trim()),
+    Boolean(form.delivery_fee.trim()),
+  ];
+  const completedFieldsCount = requiredFields.filter(Boolean).length;
+  const formCompletionPercent = Math.round((completedFieldsCount / requiredFields.length) * 100);
 
   function update(field: string, value: any) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -156,9 +175,81 @@ export default function ParcelCreate() {
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit() {
-    if (!validate()) return;
-    createMutation.mutate({
+  async function uploadRemainingImages(parcelId: number, startChunkIndex = 0) {
+    const chunkSize = 10;
+    const totalChunks = Math.ceil(files.length / chunkSize);
+
+    setProgressState((prev) => ({
+      ...prev,
+      isOpen: true,
+      step: 'uploading_images',
+      createdParcelId: parcelId,
+      currentChunk: startChunkIndex + 1,
+      totalChunks,
+      totalImages: files.length,
+    }));
+
+    try {
+      for (let c = startChunkIndex; c < totalChunks; c++) {
+        setFailedChunkIndex(c);
+        const chunk = files.slice(c * chunkSize, (c + 1) * chunkSize);
+        const formData = new FormData();
+        chunk.forEach((f) => formData.append('images[]', f, f.name));
+
+        const basePercent = 15 + Math.round((c / totalChunks) * 80);
+        const chunkWeight = 80 / totalChunks;
+
+        await parcelService.uploadImages(parcelId, formData, (percent) => {
+          const overall = Math.min(96, Math.round(basePercent + (percent / 100) * chunkWeight));
+          const currentUploaded = Math.min(
+            files.length,
+            c * chunkSize + Math.round((chunk.length * percent) / 100)
+          );
+          setProgressState((prev) => ({
+            ...prev,
+            percent: overall,
+            currentChunk: c + 1,
+            uploadedCount: currentUploaded,
+          }));
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['parcels'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['parcel', String(parcelId)] });
+
+      setProgressState((prev) => ({
+        ...prev,
+        step: 'completed',
+        percent: 100,
+        uploadedCount: files.length,
+      }));
+
+      setTimeout(() => {
+        navigate(`/parcels/${parcelId}`);
+      }, 1200);
+    } catch (uploadErr: any) {
+      const msg =
+        uploadErr?.response?.data?.message ||
+        uploadErr?.message ||
+        'ဓာတ်ပုံ အချို့ တင်ရာတွင် အမှားဖြစ်ပွားခဲ့ပါသည်။';
+      setProgressState((prev) => ({
+        ...prev,
+        step: 'error',
+        errorMessage: msg,
+      }));
+    }
+  }
+
+  function handleRetryImages() {
+    if (!lastCreatedParcelId) return;
+    uploadRemainingImages(lastCreatedParcelId, failedChunkIndex);
+  }
+
+  async function handleSubmit() {
+    if (!validate() || isSubmitting) return;
+
+    const payload = {
       tracking_number: form.tracking_number || undefined,
       sender_name: form.sender_name || undefined,
       sender_phone: form.sender_phone || undefined,
@@ -179,7 +270,53 @@ export default function ParcelCreate() {
       cod_currency: form.cod_currency,
       priority: form.priority,
       condition: form.condition,
+    };
+
+    const chunkSize = 10;
+    const totalChunks = Math.ceil(files.length / chunkSize) || 1;
+
+    setProgressState({
+      isOpen: true,
+      step: 'saving_parcel',
+      percent: files.length > 0 ? 10 : 35,
+      currentChunk: 0,
+      totalChunks,
+      uploadedCount: 0,
+      totalImages: files.length,
     });
+
+    try {
+      const createdParcel = await parcelService.create(payload);
+      setLastCreatedParcelId(createdParcel.id);
+
+      if (files.length === 0) {
+        setProgressState({
+          isOpen: true,
+          step: 'completed',
+          percent: 100,
+          currentChunk: 1,
+          totalChunks: 1,
+          uploadedCount: 0,
+          totalImages: 0,
+          createdParcelId: createdParcel.id,
+        });
+        queryClient.invalidateQueries({ queryKey: ['parcels'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        setTimeout(() => {
+          navigate(`/parcels/${createdParcel.id}`);
+        }, 1000);
+        return;
+      }
+
+      await uploadRemainingImages(createdParcel.id, 0);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'ပါဆယ် မှတ်ပုံတင်မှု မအောင်မြင်ပါ';
+      setProgressState((prev) => ({
+        ...prev,
+        step: 'error',
+        errorMessage: msg,
+      }));
+    }
   }
 
   const priorities = [
@@ -202,6 +339,68 @@ export default function ParcelCreate() {
         </button>
         <h1 className="text-base sm:text-lg font-black text-ink">ပါဆယ်အသစ် ထည့်သွင်းမည်</h1>
         <span />
+      </div>
+
+      {/* Form Completion Progress Bar */}
+      <div className="card p-3 sm:p-4 space-y-2 border-line bg-surface/60 backdrop-blur-sm">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-bold text-ink flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
+            ဖြည့်သွင်းမှု တိုးတက်မှု (Form Progress)
+          </span>
+          <span className="font-extrabold text-brand">
+            {formCompletionPercent}% ({completedFieldsCount}/4 အချက်အလက်)
+          </span>
+        </div>
+        <div className="w-full bg-muted/60 h-2 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-brand transition-all duration-300 ease-out rounded-full"
+            style={{ width: `${formCompletionPercent}%` }}
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5 pt-1 text-[11px]">
+          <span
+            className={`px-2 py-0.5 rounded-full border transition flex items-center gap-1 ${
+              form.recipient_phone.trim()
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                : 'bg-muted/40 text-ink-3 border-line'
+            }`}
+          >
+            <Check className="w-3 h-3" /> ဖုန်းနံပါတ်
+          </span>
+          <span
+            className={`px-2 py-0.5 rounded-full border transition flex items-center gap-1 ${
+              form.recipient_name.trim()
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                : 'bg-muted/40 text-ink-3 border-line'
+            }`}
+          >
+            <Check className="w-3 h-3" /> နာမည်
+          </span>
+          <span
+            className={`px-2 py-0.5 rounded-full border transition flex items-center gap-1 ${
+              form.delivery_address.trim()
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                : 'bg-muted/40 text-ink-3 border-line'
+            }`}
+          >
+            <Check className="w-3 h-3" /> လိပ်စာ
+          </span>
+          <span
+            className={`px-2 py-0.5 rounded-full border transition flex items-center gap-1 ${
+              form.delivery_fee.trim()
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                : 'bg-muted/40 text-ink-3 border-line'
+            }`}
+          >
+            <Check className="w-3 h-3" /> ပို့ဆောင်ခ
+          </span>
+          {files.length > 0 && (
+            <span className="px-2 py-0.5 rounded-full border bg-brand/10 text-brand border-brand/20 font-bold flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" /> {files.length}/30 ပုံ
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Recipient Section (PRIMARY) */}
@@ -455,7 +654,10 @@ export default function ParcelCreate() {
 
       {/* Parcel Photos */}
       <div className="card p-4 space-y-3">
-        <div className="section-label">ပါဆယ် ဓာတ်ပုံများ</div>
+        <div className="flex items-center justify-between">
+          <div className="section-label">ပါဆယ် ဓာတ်ပုံများ</div>
+          <span className="text-xs text-ink-3">အများဆုံး ၃၀ ပုံ</span>
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           <button
@@ -485,7 +687,7 @@ export default function ParcelCreate() {
           className="hidden"
           onChange={(e) => {
             const selected = Array.from(e.target.files || []);
-            setFiles((prev) => [...prev, ...selected].slice(0, 10));
+            setFiles((prev) => [...prev, ...selected].slice(0, 30));
             e.target.value = '';
           }}
         />
@@ -497,7 +699,7 @@ export default function ParcelCreate() {
           className="hidden"
           onChange={(e) => {
             const selected = Array.from(e.target.files || []);
-            setFiles((prev) => [...prev, ...selected].slice(0, 10));
+            setFiles((prev) => [...prev, ...selected].slice(0, 30));
             e.target.value = '';
           }}
         />
@@ -528,19 +730,197 @@ export default function ParcelCreate() {
       <div className="fixed bottom-0 left-0 right-0 z-30 p-3 bg-surface/95 backdrop-blur-md border-t border-line pb-safe md:static md:p-0 md:bg-transparent md:border-0">
         <button
           onClick={handleSubmit}
-          disabled={createMutation.isPending}
+          disabled={isSubmitting}
           className="w-full bg-brand hover:bg-brand-dark text-white py-3.5 rounded-2xl font-black text-sm shadow-lg shadow-brand/25 flex items-center justify-center gap-2 active:scale-98 transition disabled:opacity-60 touch-press"
         >
-          <Save className="w-5 h-5" />
-          <span>{createMutation.isPending ? 'သိမ်းဆည်းနေဆဲ...' : 'ပါဆယ် စာရင်းသွင်းမည်'}</span>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>
+                {progressState.step === 'saving_parcel' && 'အချက်အလက် သိမ်းနေဆဲ...'}
+                {progressState.step === 'uploading_images' &&
+                  `ဓာတ်ပုံ တင်နေသည် (${progressState.uploadedCount}/${progressState.totalImages})...`}
+              </span>
+            </>
+          ) : (
+            <>
+              <Save className="w-5 h-5" />
+              <span>ပါဆယ် စာရင်းသွင်းမည်</span>
+            </>
+          )}
         </button>
       </div>
 
       <CameraCapture
         open={cameraOpen}
         onClose={() => setCameraOpen(false)}
-        onCapture={(file) => setFiles((prev) => [...prev, file].slice(0, 10))}
+        onCapture={(file) => setFiles((prev) => [...prev, file].slice(0, 30))}
       />
+
+      {/* Upload & Submission Progress Modal */}
+      {progressState.isOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="card w-full max-w-md p-6 space-y-5 bg-surface border-line shadow-2xl rounded-3xl">
+            {/* Header Icon & Title */}
+            <div className="text-center space-y-2">
+              <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center transition-all duration-300">
+                {progressState.step === 'saving_parcel' && (
+                  <div className="w-16 h-16 rounded-2xl bg-brand/10 text-brand flex items-center justify-center animate-pulse">
+                    <Package className="w-8 h-8 animate-bounce" />
+                  </div>
+                )}
+                {progressState.step === 'uploading_images' && (
+                  <div className="w-16 h-16 rounded-2xl bg-brand/10 text-brand flex items-center justify-center relative">
+                    <UploadCloud className="w-8 h-8 animate-pulse" />
+                    <Loader2 className="w-12 h-12 absolute text-brand/30 animate-spin" />
+                  </div>
+                )}
+                {progressState.step === 'completed' && (
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center scale-110 transition-transform">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                )}
+                {progressState.step === 'error' && (
+                  <div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                    <AlertCircle className="w-10 h-10" />
+                  </div>
+                )}
+              </div>
+
+              <h2 className="text-lg font-black text-ink">
+                {progressState.step === 'saving_parcel' && 'ပါဆယ် အချက်အလက် သိမ်းဆည်းနေပါသည်...'}
+                {progressState.step === 'uploading_images' && 'ဓာတ်ပုံများ တင်ပို့နေပါသည်...'}
+                {progressState.step === 'completed' && 'ပါဆယ် မှတ်ပုံတင်ခြင်း အောင်မြင်ပါသည်!'}
+                {progressState.step === 'error' && 'လုပ်ဆောင်မှု မအောင်မြင်ပါ'}
+              </h2>
+
+              <p className="text-xs text-ink-3 leading-relaxed">
+                {progressState.step === 'saving_parcel' && 'ဆာဗာပေါ်တွင် ပါဆယ်စာရင်းကို ထည့်သွင်းနေပါသည်'}
+                {progressState.step === 'uploading_images' && (
+                  <span>
+                    ဓာတ်ပုံ <strong>{progressState.uploadedCount} / {progressState.totalImages}</strong> ပုံ တင်ပြီးပါပြီ • အတွဲ ({progressState.currentChunk} / {progressState.totalChunks})
+                  </span>
+                )}
+                {progressState.step === 'completed' && (
+                  <span>
+                    ပါဆယ်နှင့် ဓာတ်ပုံ ({progressState.totalImages} ပုံ) အားလုံးကို အောင်မြင်စွာ မှတ်ပုံတင်ပြီးပါပြီ။
+                  </span>
+                )}
+                {progressState.step === 'error' && (progressState.errorMessage || 'အမှားတစ်ခု ဖြစ်ပွားခဲ့ပါသည်')}
+              </p>
+            </div>
+
+            {/* Progress Bar & Percentage */}
+            {progressState.step !== 'error' && (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs font-bold">
+                  <span className="text-ink-2">တိုးတက်မှု (Progress)</span>
+                  <span className="text-brand font-mono text-sm">{progressState.percent}%</span>
+                </div>
+                <div className="w-full bg-muted/60 h-3 rounded-full overflow-hidden p-0.5 border border-line">
+                  <div
+                    className={`h-full rounded-full transition-all duration-200 ease-out ${
+                      progressState.step === 'completed' ? 'bg-emerald-500' : 'bg-brand'
+                    }`}
+                    style={{ width: `${progressState.percent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Steps Visual Checklist */}
+            <div className="p-3.5 rounded-2xl bg-muted/30 border border-line space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-ink">
+                  {progressState.step === 'saving_parcel' ? (
+                    <Loader2 className="w-3.5 h-3.5 text-brand animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  )}
+                  ၁။ ပါဆယ် အချက်အလက် မှတ်ပုံတင်ခြင်း
+                </span>
+                <span className="font-bold text-[10px] text-ink-3">
+                  {progressState.step === 'saving_parcel' ? 'ဆောင်ရွက်ဆဲ' : 'ပြီးပါပြီ'}
+                </span>
+              </div>
+
+              {progressState.totalImages > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-ink">
+                    {progressState.step === 'saving_parcel' ? (
+                      <span className="w-3.5 h-3.5 rounded-full border border-ink-3/40 inline-block" />
+                    ) : progressState.step === 'uploading_images' ? (
+                      <Loader2 className="w-3.5 h-3.5 text-brand animate-spin" />
+                    ) : progressState.step === 'completed' ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    ) : (
+                      <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+                    )}
+                    ၂။ ဓာတ်ပုံများ အပ်လုဒ်တင်ခြင်း ({progressState.totalImages} ပုံ)
+                  </span>
+                  <span className="font-bold text-[10px] text-ink-3">
+                    {progressState.step === 'saving_parcel'
+                      ? 'စောင့်ဆိုင်းဆဲ'
+                      : progressState.step === 'uploading_images'
+                      ? `${progressState.uploadedCount}/${progressState.totalImages}`
+                      : progressState.step === 'completed'
+                      ? 'ပြီးပါပြီ'
+                      : 'မအောင်မြင်ပါ'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Actions for completed or error state */}
+            {progressState.step === 'completed' && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (progressState.createdParcelId) {
+                    navigate(`/parcels/${progressState.createdParcelId}`);
+                  } else {
+                    navigate('/parcels');
+                  }
+                }}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl active:scale-98 transition flex items-center justify-center gap-2"
+              >
+                <span>ပါဆယ် အသေးစိတ် ကြည့်မည်</span>
+              </button>
+            )}
+
+            {progressState.step === 'error' && (
+              <div className="flex gap-2 pt-2">
+                {progressState.createdParcelId ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryImages()}
+                      className="flex-1 bg-brand text-white font-bold py-2.5 rounded-xl hover:bg-brand-dark transition"
+                    >
+                      ပြန်လည်ကြိုးစားမည်
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/parcels/${progressState.createdParcelId}`)}
+                      className="flex-1 bg-surface border border-line text-ink font-bold py-2.5 rounded-xl hover:bg-muted transition"
+                    >
+                      ပါဆယ်သို့ သွားမည်
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setProgressState((p) => ({ ...p, isOpen: false }))}
+                    className="w-full bg-muted text-ink font-bold py-2.5 rounded-xl hover:bg-muted/80 transition"
+                  >
+                    ပိတ်မည်
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

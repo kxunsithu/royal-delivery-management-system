@@ -670,16 +670,26 @@ class ParcelController extends Controller
     }
 
     /**
-     * Upload one or more images for a parcel (max 10 per request, max 5 MB each).
+     * Upload one or more images for a parcel (max 30 per request, max 5 MB each).
      */
     public function uploadImages(Request $request, Parcel $parcel): JsonResponse
     {
         $this->authorize('update', $parcel);
 
         $request->validate([
-            'images'   => ['required', 'array', 'min:1', 'max:10'],
+            'images'   => ['required', 'array', 'min:1', 'max:30'],
             'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
+
+        $currentCount = $parcel->images()->count();
+        if ($currentCount + count($request->file('images')) > 30) {
+            return response()->json([
+                'message' => 'ပါဆယ်တစ်ခုလျှင် ဓာတ်ပုံ အများဆုံး ၃၀ ပုံသာ တင်ခွင့်ရှိပါသည်။',
+                'errors'  => [
+                    'images' => ['ပါဆယ်တစ်ခုလျှင် ဓာတ်ပုံ အများဆုံး ၃၀ ပုံသာ တင်ခွင့်ရှိပါသည်။'],
+                ],
+            ], 422);
+        }
 
         $nextOrder = $parcel->images()->max('sort_order') ?? -1;
         $uploaded  = [];

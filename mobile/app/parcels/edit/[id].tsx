@@ -88,15 +88,19 @@ export default function EditParcelScreen() {
       if (newImages.length > 0) {
         setUploadingImages(true);
         try {
-          const formData = new FormData();
-          newImages.forEach((img) => {
-            formData.append('images[]', {
-              uri: img.uri,
-              name: img.fileName ?? `parcel_${Date.now()}.jpg`,
-              type: img.mimeType ?? 'image/jpeg',
-            } as any);
-          });
-          await parcelService.uploadImages(Number(id), formData);
+          const chunkSize = 10;
+          for (let i = 0; i < newImages.length; i += chunkSize) {
+            const chunk = newImages.slice(i, i + chunkSize);
+            const formData = new FormData();
+            chunk.forEach((img) => {
+              formData.append('images[]', {
+                uri: img.uri,
+                name: img.fileName ?? `parcel_${Date.now()}.jpg`,
+                type: img.mimeType ?? 'image/jpeg',
+              } as any);
+            });
+            await parcelService.uploadImages(Number(id), formData);
+          }
         } catch {
           // ignore upload error
         } finally {
@@ -123,18 +127,21 @@ export default function EditParcelScreen() {
   async function pickImages() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') { Alert.alert('ခွင့်မပြု', 'ဓာတ်ပုံ တင်ရန် ခွင့်ပြုချက် လိုအပ်သည်'); return; }
+    const maxAllowed = Math.max(0, 30 - existingImages.length);
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: true, quality: 0.8, selectionLimit: 10,
+      allowsMultipleSelection: true, quality: 0.8, selectionLimit: maxAllowed,
     });
-    if (!result.canceled) setNewImages(prev => [...prev, ...result.assets].slice(0, 10));
+    if (!result.canceled) setNewImages(prev => [...prev, ...result.assets].slice(0, maxAllowed));
   }
 
   async function takePhoto() {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') { Alert.alert('ခွင့်မပြု', 'ကင်မရာ သုံးရန် ခွင့်ပြုချက် လိုအပ်သည်'); return; }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
-    if (!result.canceled) setNewImages(prev => [...prev, result.assets[0]]);
+    if (!result.canceled && (existingImages.length + newImages.length) < 30) {
+      setNewImages(prev => [...prev, result.assets[0]]);
+    }
   }
 
   async function deleteExistingImage(imageId: number) {
@@ -429,7 +436,7 @@ export default function EditParcelScreen() {
           {existingImages.length === 0 && newImages.length === 0 && (
             <Text style={styles.imageHint}>ဓာတ်ပုံ မရှိသေးပါ</Text>
           )}
-          <Text style={styles.imageHint}>အများဆုံး 10 ပုံ • JPEG, PNG • 5MB အောက်</Text>
+          <Text style={styles.imageHint}>အများဆုံး 30 ပုံ • JPEG, PNG • 5MB အောက်</Text>
         </FormSection>
 
         <TouchableOpacity style={[styles.submitBtn, (updateMutation.isPending || uploadingImages) && { opacity: 0.6 }]} onPress={handleSubmit} disabled={updateMutation.isPending || uploadingImages}>

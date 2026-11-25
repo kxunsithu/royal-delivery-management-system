@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -76,15 +77,19 @@ export default function CreateParcelScreen() {
     onSuccess: async (createdParcel) => {
       if (localImages.length > 0) {
         try {
-          const formData = new FormData();
-          localImages.forEach((img) => {
-            formData.append('images[]', {
-              uri: img.uri,
-              name: img.fileName ?? `parcel_${Date.now()}.jpg`,
-              type: img.mimeType ?? 'image/jpeg',
-            } as any);
-          });
-          await parcelService.uploadImages(createdParcel.id, formData);
+          const chunkSize = 10;
+          for (let i = 0; i < localImages.length; i += chunkSize) {
+            const chunk = localImages.slice(i, i + chunkSize);
+            const formData = new FormData();
+            chunk.forEach((img) => {
+              formData.append('images[]', {
+                uri: img.uri,
+                name: img.fileName ?? `parcel_${Date.now()}.jpg`,
+                type: img.mimeType ?? 'image/jpeg',
+              } as any);
+            });
+            await parcelService.uploadImages(createdParcel.id, formData);
+          }
         } catch {
           // ignore
         }
@@ -161,10 +166,10 @@ export default function CreateParcelScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       quality: 0.8,
-      selectionLimit: 10,
+      selectionLimit: 30,
     });
     if (!result.canceled) {
-      setLocalImages(prev => [...prev, ...result.assets].slice(0, 10));
+      setLocalImages(prev => [...prev, ...result.assets].slice(0, 30));
     }
   }
 
@@ -177,7 +182,7 @@ export default function CreateParcelScreen() {
     const result = await ImagePicker.launchCameraAsync({
       quality: 0.8,
     });
-    if (!result.canceled && localImages.length < 10) {
+    if (!result.canceled && localImages.length < 30) {
       setLocalImages(prev => [...prev, result.assets[0]]);
     }
   }
@@ -567,7 +572,7 @@ export default function CreateParcelScreen() {
               ))}
             </View>
           )}
-          <Text style={styles.imageHint}>အများဆုံး 10 ပုံ</Text>
+          <Text style={styles.imageHint}>အများဆုံး 30 ပုံ</Text>
         </FormSection>
 
         <TouchableOpacity

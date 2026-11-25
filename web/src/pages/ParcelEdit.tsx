@@ -89,9 +89,13 @@ export default function ParcelEdit() {
       if (newFiles.length > 0) {
         setUploadingImages(true);
         try {
-          const formData = new FormData();
-          newFiles.forEach((f) => formData.append('images[]', f, f.name));
-          await parcelService.uploadImages(numId, formData);
+          const chunkSize = 10;
+          for (let i = 0; i < newFiles.length; i += chunkSize) {
+            const chunk = newFiles.slice(i, i + chunkSize);
+            const formData = new FormData();
+            chunk.forEach((f) => formData.append('images[]', f, f.name));
+            await parcelService.uploadImages(numId, formData);
+          }
         } catch {
           // ignore
         } finally {
@@ -376,7 +380,10 @@ export default function ParcelEdit() {
 
       {/* Existing and New Photos */}
       <div className="card p-4 space-y-3">
-        <div className="section-label">ဓာတ်ပုံများ</div>
+        <div className="flex items-center justify-between">
+          <div className="section-label">ဓာတ်ပုံများ</div>
+          <span className="text-xs text-ink-3">အများဆုံး ၃၀ ပုံ</span>
+        </div>
 
         {existingImages.length > 0 && (
           <div>
@@ -429,7 +436,8 @@ export default function ParcelEdit() {
           className="hidden"
           onChange={(e) => {
             const selected = Array.from(e.target.files || []);
-            setNewFiles((prev) => [...prev, ...selected].slice(0, 10));
+            const maxAllowed = Math.max(0, 30 - existingImages.length);
+            setNewFiles((prev) => [...prev, ...selected].slice(0, maxAllowed));
             e.target.value = '';
           }}
         />
@@ -441,7 +449,8 @@ export default function ParcelEdit() {
           className="hidden"
           onChange={(e) => {
             const selected = Array.from(e.target.files || []);
-            setNewFiles((prev) => [...prev, ...selected].slice(0, 10));
+            const maxAllowed = Math.max(0, 30 - existingImages.length);
+            setNewFiles((prev) => [...prev, ...selected].slice(0, maxAllowed));
             e.target.value = '';
           }}
         />
